@@ -50,6 +50,29 @@
       font-family: 'Big Shoulders Display', 'Inter', sans-serif;
     }
 
+    /* ── TARJA ──────────────────────────────────────── */
+    .tarja {
+      background: var(--gold);
+      color: #000;
+      text-align: center;
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .tarja-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.35);
+      flex-shrink: 0;
+    }
+
     /* ── LAYOUT WRAPPER ─────────────────────────────── */
     .wrap {
       width: 100%;
@@ -687,6 +710,13 @@
   </style>
 </head>
 <body>
+
+  <!-- ── TARJA ─────────────────────────────────────── -->
+  <div class="tarja">
+    <span class="tarja-dot"></span>
+    Exclusivo para empresários que faturam acima de R$50 mil por mês
+    <span class="tarja-dot"></span>
+  </div>
 
   <!-- ── HERO ─────────────────────────────────────── -->
   <section class="hero">
