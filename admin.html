@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Leads | Ventture</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0b0b0b;
+      --surface: #131313;
+      --raise:   #1a1a1a;
+      --border:  rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --gold:    #E8A000;
+      --gold-dim:rgba(232,160,0,0.10);
+      --gold-bd: rgba(232,160,0,0.22);
+      --red:     #D94040;
+      --green:   #3DAA6A;
+      --white:   #f0f0f0;
+      --mid:     #999;
+      --dim:     #555;
+      --radius:  10px;
+    }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Big Shoulders Display', 'Inter', sans-serif;
+    }
+
+    /* ── TOPBAR ──────────────────────────────────────── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .logo svg { width: 24px; height: 24px; }
+
+    .logo-name {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      color: var(--white);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tag-admin {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: var(--gold-dim);
+      border: 1px solid var(--gold-bd);
+      border-radius: 5px;
+      padding: 3px 8px;
+    }
+
+    /* ── PAGE ────────────────────────────────────────── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 36px 24px 64px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+      line-height: 1;
+    }
+
+    .page-title span { color: var(--gold); }
+
+    .page-sub {
+      color: var(--mid);
+      font-size: 0.82rem;
+      margin-top: 4px;
+    }
+
+    /* ── ACTIONS ─────────────────────────────────────── */
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 8px 16px;
+      color: var(--mid);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-outline:hover { border-color: var(--gold-bd); color: var(--gold); }
+    .btn-outline svg   { width: 14px; height: 14px; stroke: currentColor; }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid rgba(217,64,64,0.25);
+      border-radius: 7px;
+      padding: 8px 16px;
+      color: #888;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-danger:hover { border-color: var(--red); color: var(--red); }
+    .btn-danger svg   { width: 14px; height: 14px; stroke: currentColor; }
+
+    /* ── STATS CARDS ─────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+    }
+
+    .stat-card .label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--white);
+    }
+
+    .stat-card .value.gold { color: var(--gold); }
+    .stat-card .sub {
+      font-size: 0.75rem;
+      color: var(--dim);
+      margin-top: 4px;
+    }
+
+    /* ── FILTER BAR ──────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 9px 14px;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .filter-bar input:focus { border-color: var(--gold-bd); }
+    .filter-bar input::placeholder { color: var(--dim); }
+
+    .filter-bar select {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 9px 14px;
+      color: var(--mid);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .filter-bar select:focus { border-color: var(--gold-bd); }
+
+    /* ── TABLE ───────────────────────────────────────── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 12px 18px;
+      text-align: left;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--raise); }
+
+    tbody td {
+      padding: 13px 18px;
+      font-size: 0.85rem;
+      color: #c0c0c0;
+      vertical-align: middle;
+    }
+
+    .td-name {
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .td-phone { font-variant-numeric: tabular-nums; }
+
+    .badge-fat {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .fat-1 { background: rgba(100,180,100,0.1); color: #6db86d; border: 1px solid rgba(100,180,100,0.2); }
+    .fat-2 { background: rgba(232,160,0,0.10);  color: #c89000; border: 1px solid rgba(232,160,0,0.2);  }
+    .fat-3 { background: rgba(100,140,220,0.1); color: #7eaadd; border: 1px solid rgba(100,140,220,0.2);}
+    .fat-4 { background: rgba(180,100,220,0.1); color: #c07ad8; border: 1px solid rgba(180,100,220,0.2);}
+    .fat-5 { background: rgba(220,120,60,0.10); color: #e07840; border: 1px solid rgba(220,120,60,0.20);}
+
+    .td-time {
+      color: var(--dim);
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .td-idx {
+      color: var(--dim);
+      font-size: 0.75rem;
+      width: 40px;
+    }
+
+    /* ── EMPTY STATE ─────────────────────────────────── */
+    .empty {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--dim);
+    }
+
+    .empty svg {
+      width: 40px;
+      height: 40px;
+      stroke: var(--dim);
+      margin-bottom: 14px;
+      opacity: 0.5;
+    }
+
+    .empty p { font-size: 0.9rem; }
+    .empty a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* ── CHART BAR ───────────────────────────────────── */
+    .chart-section {
+      margin-bottom: 28px;
+    }
+
+    .chart-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 12px;
+    }
+
+    .chart-bars {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 36px;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bar-lbl { font-size: 0.78rem; color: var(--mid); }
+    .bar-track { height: 6px; background: var(--raise); border-radius: 99px; overflow: hidden; }
+    .bar-fill  { height: 100%; background: var(--gold); border-radius: 99px; transition: width 0.6s ease; min-width: 2px; }
+    .bar-count { font-size: 0.75rem; color: var(--dim); text-align: right; }
+
+    /* ── CONFIRM DIALOG ──────────────────────────────── */
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .confirm-overlay.active { opacity: 1; pointer-events: all; }
+
+    .confirm-box {
+      background: var(--surface);
+      border: 1px solid rgba(217,64,64,0.3);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      max-width: 360px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .confirm-box h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .confirm-box p  { font-size: 0.85rem; color: var(--mid); margin-bottom: 22px; }
+
+    .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+
+    .cbtn-cancel {
+      background: var(--raise);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 9px 22px;
+      color: var(--mid);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .cbtn-confirm {
+      background: var(--red);
+      border: none;
+      border-radius: 7px;
+      padding: 9px 22px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width: 860px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .topbar { padding: 0 16px; }
+      .page { padding: 24px 16px 48px; }
+      .stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      thead th:nth-child(3),
+      tbody td:nth-child(3) { display: none; }
+      .bar-row { grid-template-columns: 110px 1fr 30px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- topbar -->
+  <header class="topbar">
+    <a href="index.html" class="logo">
+      <svg viewBox="0 0 32 32" fill="none">
+        <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" stroke="#E8A000" stroke-width="1.5"/>
+        <path d="M16 8L11 17H15L13 24L21 14H17L19 8H16Z" fill="#E8A000"/>
+      </svg>
+      <span class="logo-name">VENTTURE</span>
+    </a>
+    <div class="topbar-right">
+      <span class="tag-admin">Painel Admin</span>
+    </div>
+  </header>
+
+  <div class="page">
+
+    <!-- header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Leads <span>Capturados</span></h1>
+        <p class="page-sub" id="lastUpdate">—</p>
+      </div>
+      <div class="actions">
+        <button class="btn-outline" onclick="exportCSV()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Exportar CSV
+        </button>
+        <button class="btn-danger" onclick="showConfirm()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6"/><path d="M14 11v6"/>
+          </svg>
+          Limpar tudo
+        </button>
+      </div>
+    </div>
+
+    <!-- summary cards -->
+    <div class="stats" id="statsCards">
+      <div class="stat-card">
+        <div class="label">Total de leads</div>
+        <div class="value gold" id="statTotal">0</div>
+        <div class="sub">cadastros realizados</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Leads hoje</div>
+        <div class="value" id="statHoje">0</div>
+        <div class="sub" id="statHojeDate">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Faturamento predominante</div>
+        <div class="value gold" id="statTop" style="font-size:1.1rem;padding-top:6px;">—</div>
+        <div class="sub" id="statTopPct">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Com e-mail</div>
+        <div class="value" id="statEmail">0</div>
+        <div class="sub">leads com e-mail informado</div>
+      </div>
+    </div>
+
+    <!-- faturamento chart -->
+    <div class="chart-section">
+      <div class="chart-title">Distribuição por faixa de faturamento</div>
+      <div class="chart-bars" id="chartBars">
+        <p style="color:var(--dim);font-size:0.82rem;">Sem dados ainda.</p>
+      </div>
+    </div>
+
+    <!-- filters -->
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="Buscar por nome, WhatsApp ou e-mail…" oninput="renderTable()" />
+      <select id="filterFat" onchange="renderTable()">
+        <option value="">Todas as faixas</option>
+        <option value="Até R$20 mil">Até R$20 mil</option>
+        <option value="R$50 mil">R$50 mil</option>
+        <option value="R$100 mil">R$100 mil</option>
+        <option value="R$200 mil">R$200 mil</option>
+        <option value="Mais de R$200 mil">Mais de R$200 mil</option>
+      </select>
+    </div>
+
+    <!-- table -->
+    <div class="table-wrap">
+      <table id="leadsTable">
+        <thead>
+          <tr>
+            <th class="td-idx">#</th>
+            <th>Nome</th>
+            <th>WhatsApp</th>
+            <th>E-mail</th>
+            <th>Faturamento</th>
+            <th>Data / Hora</th>
+          </tr>
+        </thead>
+        <tbody id="leadsBody"></tbody>
+      </table>
+      <div class="empty" id="emptyState" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <p>Nenhum lead encontrado.<br /><a href="index.html">Voltar à página de captura →</a></p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- confirm clear dialog -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <h3>Apagar todos os leads?</h3>
+      <p>Essa ação não pode ser desfeita. Todos os dados serão removidos permanentemente.</p>
+      <div class="confirm-btns">
+        <button class="cbtn-cancel" onclick="hideConfirm()">Cancelar</button>
+        <button class="cbtn-confirm" onclick="clearAll()">Sim, apagar tudo</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var FAT_ORDER = [
+      'Até R$20 mil',
+      'R$50 mil',
+      'R$100 mil',
+      'R$200 mil',
+      'Mais de R$200 mil'
+    ];
+
+    var FAT_CLASS = ['fat-1','fat-2','fat-3','fat-4','fat-5'];
+
+    function getLeads() {
+      return JSON.parse(localStorage.getItem('vt_leads') || '[]');
+    }
+
+    function fmtDate(iso) {
+      var d = new Date(iso);
+      var dd   = String(d.getDate()).padStart(2,'0');
+      var mm   = String(d.getMonth()+1).padStart(2,'0');
+      var yyyy = d.getFullYear();
+      var hh   = String(d.getHours()).padStart(2,'0');
+      var min  = String(d.getMinutes()).padStart(2,'0');
+      return dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + min;
+    }
+
+    function todayStr() {
+      var d = new Date();
+      return String(d.getDate()).padStart(2,'0') + '/' +
+             String(d.getMonth()+1).padStart(2,'0') + '/' +
+             d.getFullYear();
+    }
+
+    function fatIdx(fat) {
+      var i = FAT_ORDER.indexOf(fat);
+      return i >= 0 ? i : 0;
+    }
+
+    function renderStats(leads) {
+      var hoje = leads.filter(function(l) {
+        return fmtDate(l.timestamp).startsWith(todayStr());
+      }).length;
+
+      // faturamento frequency
+      var freq = {};
+      FAT_ORDER.forEach(function(f) { freq[f] = 0; });
+      leads.forEach(function(l) { if (freq[l.faturamento] !== undefined) freq[l.faturamento]++; });
+
+      var topFat = '—', topCount = 0;
+      FAT_ORDER.forEach(function(f) { if (freq[f] > topCount) { topFat = f; topCount = freq[f]; } });
+
+      var withEmail = leads.filter(function(l) { return l.email && l.email !== '—'; }).length;
+
+      document.getElementById('statTotal').textContent = leads.length;
+      document.getElementById('statHoje').textContent  = hoje;
+      document.getElementById('statHojeDate').textContent = todayStr();
+      document.getElementById('statTop').textContent   = topFat;
+      document.getElementById('statTopPct').textContent = leads.length
+        ? Math.round(topCount / leads.length * 100) + '% dos leads'
+        : '—';
+      document.getElementById('statEmail').textContent = withEmail;
+
+      if (leads.length) {
+        var last = leads[leads.length - 1];
+        document.getElementById('lastUpdate').textContent =
+          'Última entrada: ' + fmtDate(last.timestamp);
+      } else {
+        document.getElementById('lastUpdate').textContent = 'Nenhum lead ainda.';
+      }
+
+      // chart
+      var total = leads.length || 1;
+      var html = '';
+      FAT_ORDER.forEach(function(f, i) {
+        var cnt = freq[f] || 0;
+        var pct = Math.round(cnt / total * 100);
+        html += '<div class="bar-row">' +
+          '<span class="bar-lbl">' + f + '</span>' +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>' +
+          '<span class="bar-count">' + cnt + '</span>' +
+          '</div>';
+      });
+      document.getElementById('chartBars').innerHTML = html || '<p style="color:var(--dim);font-size:0.82rem;">Sem dados ainda.</p>';
+    }
+
+    function renderTable() {
+      var leads  = getLeads();
+      var search = document.getElementById('searchInput').value.toLowerCase();
+      var filter = document.getElementById('filterFat').value;
+
+      var filtered = leads.filter(function(l, i) {
+        l._idx = i + 1;
+        var matchSearch = !search ||
+          l.nome.toLowerCase().includes(search) ||
+          l.whatsapp.includes(search) ||
+          (l.email && l.email.toLowerCase().includes(search));
+        var matchFat = !filter || l.faturamento === filter;
+        return matchSearch && matchFat;
+      });
+
+      var tbody = document.getElementById('leadsBody');
+
+      if (!filtered.length) {
+        tbody.innerHTML = '';
+        document.getElementById('emptyState').style.display = 'block';
+        document.querySelector('table').style.display = leads.length ? 'none' : 'table';
+        return;
+      }
+
+      document.getElementById('emptyState').style.display = 'none';
+      document.querySelector('table').style.display = 'table';
+
+      tbody.innerHTML = filtered.map(function(l) {
+        var fi = fatIdx(l.faturamento);
+        return '<tr>' +
+          '<td class="td-idx">' + l._idx + '</td>' +
+          '<td class="td-name">' + esc(l.nome) + '</td>' +
+          '<td class="td-phone">' + esc(l.whatsapp) + '</td>' +
+          '<td>' + esc(l.email) + '</td>' +
+          '<td><span class="badge-fat ' + FAT_CLASS[fi] + '">' + esc(l.faturamento) + '</span></td>' +
+          '<td class="td-time">' + fmtDate(l.timestamp) + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function esc(s) {
+      return String(s)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;');
+    }
+
+    function exportCSV() {
+      var leads = getLeads();
+      if (!leads.length) { alert('Nenhum lead para exportar.'); return; }
+
+      var rows = [['#','Nome','WhatsApp','E-mail','Faturamento','Data/Hora']];
+      leads.forEach(function(l, i) {
+        rows.push([i+1, l.nome, l.whatsapp, l.email, l.faturamento, fmtDate(l.timestamp)]);
+      });
+
+      var csv = rows.map(function(r) {
+        return r.map(function(c) { return '"' + String(c).replace(/"/g,'""') + '"'; }).join(',');
+      }).join('\r\n');
+
+      var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement('a');
+      a.href   = url;
+      a.download = 'leads-ventture-' + new Date().toISOString().slice(0,10) + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function showConfirm() { document.getElementById('confirmOverlay').classList.add('active'); }
+    function hideConfirm() { document.getElementById('confirmOverlay').classList.remove('active'); }
+
+    function clearAll() {
+      localStorage.removeItem('vt_leads');
+      hideConfirm();
+      init();
+    }
+
+    function init() {
+      var leads = getLeads();
+      renderStats(leads);
+      renderTable();
+    }
+
+    init();
+
+    // close confirm on backdrop
+    document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+      if (e.target === this) hideConfirm();
+    });
+
+    // refresh on storage change (other tabs)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'vt_leads') init();
+    });
+  </script>
+
+</body>
+</html>
