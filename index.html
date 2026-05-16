@@ -1010,7 +1010,11 @@
         whatsapp:    leadData.whatsapp,
         email:       leadData.email || '—',
         faturamento: value,
-        timestamp:   new Date().toISOString()
+        timestamp:   new Date().toISOString(),
+        etapa:       'Sem contato',
+        ultContato:  '',
+        proxContato: '',
+        comentarios: ''
       });
       localStorage.setItem('vt_leads', JSON.stringify(leads));
 

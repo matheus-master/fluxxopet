@@ -434,6 +434,365 @@
       cursor: pointer;
     }
 
+    /* ── CRM KANBAN ─────────────────────────────────── */
+    .crm-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .kanban {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 24px;
+      min-height: 58vh;
+      align-items: flex-start;
+    }
+
+    .kanban::-webkit-scrollbar { height: 5px; }
+    .kanban::-webkit-scrollbar-track { background: var(--raise); border-radius: 99px; }
+    .kanban::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+    .kanban-col {
+      flex-shrink: 0;
+      width: 232px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      max-height: 72vh;
+    }
+
+    .kanban-col-header {
+      padding: 11px 13px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .col-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .col-dot.red  { background: var(--red); }
+    .col-dot.gray { background: var(--dim); }
+    .col-dot.green{ background: #3DAA6A; }
+
+    .col-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--mid);
+      flex: 1;
+    }
+
+    .col-count {
+      background: var(--raise);
+      border-radius: 20px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--dim);
+      padding: 1px 7px;
+    }
+
+    .col-del {
+      background: none;
+      border: none;
+      color: var(--dim);
+      cursor: pointer;
+      font-size: 0.65rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+      line-height: 1;
+    }
+    .col-del:hover { color: var(--red); }
+
+    .kanban-col-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .col-empty {
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.72rem;
+      padding: 24px 0;
+      border: 1px dashed var(--border);
+      border-radius: 7px;
+      margin: 4px 0;
+    }
+
+    .lead-card {
+      background: var(--raise);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 11px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .lead-card:hover {
+      border-color: var(--gold-bd);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    .card-name {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-meta {
+      font-size: 0.7rem;
+      color: var(--dim);
+      margin-top: 5px;
+    }
+
+    .card-date {
+      font-size: 0.68rem;
+      color: var(--gold);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-comment {
+      font-size: 0.7rem;
+      color: var(--mid);
+      margin-top: 5px;
+      font-style: italic;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      border-top: 1px solid var(--border);
+      padding-top: 5px;
+    }
+
+    .kanban-add-col {
+      flex-shrink: 0;
+      width: 180px;
+      border: 1px dashed var(--border2);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--dim);
+      font-size: 0.78rem;
+      font-weight: 600;
+      gap: 6px;
+      transition: border-color 0.15s, color 0.15s;
+      min-height: 80px;
+    }
+
+    .kanban-add-col:hover { border-color: var(--gold-bd); color: var(--gold); }
+
+    /* ── DRAWER ──────────────────────────────────────── */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .drawer-overlay.active { opacity: 1; pointer-events: all; }
+
+    .drawer {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 390px;
+      max-width: 100vw;
+      background: var(--surface);
+      border-left: 1px solid var(--border2);
+      z-index: 301;
+      transform: translateX(100%);
+      transition: transform 0.26s cubic-bezier(.22,.68,0,1.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .drawer.active { transform: translateX(0); }
+
+    .drawer-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 22px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .drawer-name {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+      margin-bottom: 6px;
+    }
+
+    .drawer-close {
+      background: var(--raise);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--mid);
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-left: 10px;
+    }
+    .drawer-close:hover { color: var(--white); border-color: var(--border2); }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .drawer-info {
+      background: var(--raise);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .dfield {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dfield label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+      flex-shrink: 0;
+    }
+
+    .dfield span {
+      font-size: 0.8rem;
+      color: var(--mid);
+      text-align: right;
+    }
+
+    .field-lbl {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 7px;
+    }
+
+    .drawer-row { display: flex; gap: 10px; }
+    .drawer-row .half { flex: 1; min-width: 0; }
+
+    .d-select, .d-input {
+      width: 100%;
+      background: var(--raise);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 9px 11px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.84rem;
+      outline: none;
+    }
+    .d-select:focus, .d-input:focus { border-color: var(--gold-bd); }
+
+    .d-textarea {
+      width: 100%;
+      background: var(--raise);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 10px 11px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.84rem;
+      outline: none;
+      resize: vertical;
+      min-height: 90px;
+      line-height: 1.5;
+    }
+    .d-textarea:focus { border-color: var(--gold-bd); }
+
+    .drawer-save {
+      width: 100%;
+      background: var(--gold);
+      color: #000;
+      border: none;
+      border-radius: 7px;
+      padding: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .drawer-save:hover { background: #d49100; }
+
+    .drawer-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    /* btn CRM */
+    .btn-crm {
+      background: var(--gold-dim);
+      border: 1px solid var(--gold-bd);
+      border-radius: 7px;
+      padding: 8px 16px;
+      color: var(--gold);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.15s;
+    }
+    .btn-crm:hover { background: rgba(232,160,0,0.18); }
+    .btn-crm svg   { width: 14px; height: 14px; stroke: var(--gold); }
+
     /* ── RESPONSIVE ──────────────────────────────────── */
     @media (max-width: 860px) {
       .stats { grid-template-columns: 1fr 1fr; }
@@ -475,6 +834,12 @@
         <p class="page-sub" id="lastUpdate">—</p>
       </div>
       <div class="actions">
+        <button class="btn-crm" onclick="toggleCRM(true)">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="18"/><rect x="14" y="3" width="7" height="10"/><rect x="14" y="17" width="7" height="4"/>
+          </svg>
+          CRM
+        </button>
         <button class="btn-outline" onclick="exportCSV()">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -526,6 +891,9 @@
       </div>
     </div>
 
+    <!-- ── TABLE VIEW ─────────────────────────────────── -->
+    <div id="tableSection">
+
     <!-- filters -->
     <div class="filter-bar">
       <input type="text" id="searchInput" placeholder="Buscar por nome, WhatsApp ou e-mail…" oninput="renderTable()" />
@@ -549,6 +917,7 @@
             <th>WhatsApp</th>
             <th>E-mail</th>
             <th>Faturamento</th>
+            <th>Etapa CRM</th>
             <th>Data / Hora</th>
           </tr>
         </thead>
@@ -564,7 +933,28 @@
       </div>
     </div>
 
+    </div><!-- /tableSection -->
+
+    <!-- ── CRM VIEW ──────────────────────────────────── -->
+    <div id="crmView" style="display:none;">
+      <div class="crm-toolbar">
+        <button class="btn-outline" onclick="toggleCRM(false)">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;stroke:currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+          Voltar para tabela
+        </button>
+        <button class="btn-outline" onclick="addStage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;stroke:currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nova etapa
+        </button>
+      </div>
+      <div class="kanban" id="kanban"></div>
+    </div>
+
   </div>
+
+  <!-- drawer overlay + panel -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+  <div class="drawer" id="drawer"></div>
 
   <!-- confirm clear dialog -->
   <div class="confirm-overlay" id="confirmOverlay">
@@ -579,19 +969,32 @@
   </div>
 
   <script>
-    var FAT_ORDER = [
-      'Até R$20 mil',
-      'R$50 mil',
-      'R$100 mil',
-      'R$200 mil',
-      'Mais de R$200 mil'
-    ];
-
+    var FAT_ORDER = ['Até R$20 mil','R$50 mil','R$100 mil','R$200 mil','Mais de R$200 mil'];
     var FAT_CLASS = ['fat-1','fat-2','fat-3','fat-4','fat-5'];
 
+    var DEFAULT_STAGES = [
+      'Sem contato','Automação','Interesse','Qualificado',
+      'Call','Venda','Sem interesse','Fora do perfil'
+    ];
+
+    var COL_DOT = {
+      'Sem contato':'gray','Automação':'','Interesse':'','Qualificado':'green',
+      'Call':'','Venda':'green','Sem interesse':'red','Fora do perfil':'red'
+    };
+
+    /* ── DATA HELPERS ─────────────────────────────────── */
     function getLeads() {
-      return JSON.parse(localStorage.getItem('vt_leads') || '[]');
+      var leads = JSON.parse(localStorage.getItem('vt_leads') || '[]');
+      return leads.map(function(l) {
+        if (!l.etapa)       l.etapa       = 'Sem contato';
+        if (!l.ultContato)  l.ultContato  = '';
+        if (!l.proxContato) l.proxContato = '';
+        if (!l.comentarios) l.comentarios = '';
+        return l;
+      });
     }
+
+    function saveLeads(leads) { localStorage.setItem('vt_leads', JSON.stringify(leads)); }
 
     function fmtDate(iso) {
       var d = new Date(iso);
@@ -693,50 +1096,206 @@
         var fi = fatIdx(l.faturamento);
         return '<tr>' +
           '<td class="td-idx">' + l._idx + '</td>' +
-          '<td class="td-name">' + esc(l.nome) + '</td>' +
+          '<td class="td-name" style="cursor:pointer" onclick="openDrawerByIdx(' + (l._idx-1) + ')">' + esc(l.nome) + '</td>' +
           '<td class="td-phone">' + esc(l.whatsapp) + '</td>' +
           '<td>' + esc(l.email) + '</td>' +
           '<td><span class="badge-fat ' + FAT_CLASS[fi] + '">' + esc(l.faturamento) + '</span></td>' +
+          '<td><span style="font-size:0.72rem;color:var(--dim)">' + esc(l.etapa || 'Sem contato') + '</span></td>' +
           '<td class="td-time">' + fmtDate(l.timestamp) + '</td>' +
           '</tr>';
       }).join('');
     }
 
     function esc(s) {
-      return String(s)
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;');
+      return String(s||'')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function fmtDateShort(iso) {
+      if (!iso) return '';
+      var p = iso.split('-');
+      return p.length >= 3 ? p[2]+'/'+p[1] : iso;
     }
 
     function exportCSV() {
       var leads = getLeads();
       if (!leads.length) { alert('Nenhum lead para exportar.'); return; }
-
-      var rows = [['#','Nome','WhatsApp','E-mail','Faturamento','Data/Hora']];
+      var rows = [['#','Nome','WhatsApp','E-mail','Faturamento','Etapa CRM','Últ. Contato','Próx. Contato','Comentários','Data/Hora']];
       leads.forEach(function(l, i) {
-        rows.push([i+1, l.nome, l.whatsapp, l.email, l.faturamento, fmtDate(l.timestamp)]);
+        rows.push([i+1, l.nome, l.whatsapp, l.email, l.faturamento,
+          l.etapa||'', l.ultContato||'', l.proxContato||'',
+          (l.comentarios||'').replace(/\n/g,' '), fmtDate(l.timestamp)]);
       });
-
       var csv = rows.map(function(r) {
-        return r.map(function(c) { return '"' + String(c).replace(/"/g,'""') + '"'; }).join(',');
+        return r.map(function(c) { return '"'+String(c).replace(/"/g,'""')+'"'; }).join(',');
       }).join('\r\n');
-
-      var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-      var url  = URL.createObjectURL(blob);
-      var a    = document.createElement('a');
-      a.href   = url;
-      a.download = 'leads-ventture-' + new Date().toISOString().slice(0,10) + '.csv';
-      a.click();
-      URL.revokeObjectURL(url);
+      var blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'leads-ventture-'+new Date().toISOString().slice(0,10)+'.csv';
+      a.click(); URL.revokeObjectURL(url);
     }
 
+    /* ── CRM ─────────────────────────────────────────── */
+    function getStages() {
+      var saved = localStorage.getItem('vt_stages');
+      return saved ? JSON.parse(saved) : DEFAULT_STAGES.slice();
+    }
+
+    function saveStages(s) { localStorage.setItem('vt_stages', JSON.stringify(s)); }
+
+    var currentLeadIdx = null;
+
+    function toggleCRM(show) {
+      document.getElementById('crmView').style.display       = show ? 'block' : 'none';
+      document.getElementById('tableSection').style.display  = show ? 'none'  : 'block';
+      document.getElementById('statsCards').style.display    = show ? 'none'  : 'grid';
+      document.getElementById('chartBars').parentElement.style.display = show ? 'none' : 'block';
+      if (show) renderKanban();
+    }
+
+    function renderKanban() {
+      var leads  = getLeads();
+      var stages = getStages();
+      var html   = '';
+
+      stages.forEach(function(stage, si) {
+        var sl  = leads.filter(function(l){ return l.etapa === stage; });
+        var dot = COL_DOT[stage] || '';
+        var isDefault = DEFAULT_STAGES.indexOf(stage) >= 0;
+
+        html += '<div class="kanban-col">';
+        html += '<div class="kanban-col-header">';
+        html +=   '<span class="col-dot ' + dot + '"></span>';
+        html +=   '<span class="col-name">' + esc(stage) + '</span>';
+        html +=   '<span class="col-count">' + sl.length + '</span>';
+        if (!isDefault) html += '<button class="col-del" onclick="removeStage('+si+')" title="Remover">✕</button>';
+        html += '</div>';
+        html += '<div class="kanban-col-body">';
+
+        if (!sl.length) {
+          html += '<div class="col-empty">Sem leads</div>';
+        } else {
+          sl.forEach(function(lead) {
+            var idx = leads.indexOf(lead);
+            var fi  = FAT_ORDER.indexOf(lead.faturamento); if (fi<0) fi=0;
+            html += '<div class="lead-card" onclick="openDrawerByIdx('+idx+')">';
+            html +=   '<div class="card-name">' + esc(lead.nome) + '</div>';
+            html +=   '<span class="badge-fat '+FAT_CLASS[fi]+'" style="font-size:0.65rem;padding:2px 7px">' + esc(lead.faturamento) + '</span>';
+            html +=   '<div class="card-meta">' + esc(lead.whatsapp) + '</div>';
+            if (lead.proxContato) html += '<div class="card-date">📅 Próx: '+fmtDateShort(lead.proxContato)+'</div>';
+            if (lead.comentarios) {
+              var preview = lead.comentarios.split('\n')[0].slice(0,50);
+              html += '<div class="card-comment">' + esc(preview) + '</div>';
+            }
+            html += '</div>';
+          });
+        }
+        html += '</div></div>';
+      });
+
+      document.getElementById('kanban').innerHTML = html;
+    }
+
+    function openDrawerByIdx(idx) {
+      currentLeadIdx = idx;
+      var leads  = getLeads();
+      var lead   = leads[idx];
+      var stages = getStages();
+      var fi     = FAT_ORDER.indexOf(lead.faturamento); if (fi<0) fi=0;
+
+      var stageOpts = stages.map(function(s) {
+        return '<option value="'+esc(s)+'"'+(s===lead.etapa?' selected':'')+'>'+esc(s)+'</option>';
+      }).join('');
+
+      document.getElementById('drawer').innerHTML =
+        '<div class="drawer-header">' +
+          '<div>' +
+            '<div class="drawer-name">'+esc(lead.nome)+'</div>' +
+            '<span class="badge-fat '+FAT_CLASS[fi]+'">'+esc(lead.faturamento)+'</span>' +
+          '</div>' +
+          '<button class="drawer-close" onclick="closeDrawer()">✕</button>' +
+        '</div>' +
+        '<div class="drawer-body">' +
+          '<div class="drawer-info">' +
+            '<div class="dfield"><label>WhatsApp</label><span>'+esc(lead.whatsapp)+'</span></div>' +
+            '<div class="dfield"><label>E-mail</label><span>'+esc(lead.email)+'</span></div>' +
+            '<div class="dfield"><label>Cadastro</label><span>'+fmtDate(lead.timestamp)+'</span></div>' +
+          '</div>' +
+          '<div>' +
+            '<label class="field-lbl">Etapa CRM</label>' +
+            '<select id="dEtapa" class="d-select">'+stageOpts+'</select>' +
+          '</div>' +
+          '<div class="drawer-row">' +
+            '<div class="half"><label class="field-lbl">Último contato</label><input type="date" id="dUlt" class="d-input" value="'+(lead.ultContato||'')+'" /></div>' +
+            '<div class="half"><label class="field-lbl">Próximo contato</label><input type="date" id="dProx" class="d-input" value="'+(lead.proxContato||'')+'" /></div>' +
+          '</div>' +
+          '<div>' +
+            '<label class="field-lbl">Comentários</label>' +
+            '<textarea id="dComent" class="d-textarea" placeholder="Notas sobre este lead…">'+esc(lead.comentarios||'')+'</textarea>' +
+          '</div>' +
+        '</div>' +
+        '<div class="drawer-footer">' +
+          '<button class="drawer-save" onclick="saveDrawer()">Salvar alterações</button>' +
+        '</div>';
+
+      document.getElementById('drawerOverlay').classList.add('active');
+      document.getElementById('drawer').classList.add('active');
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawerOverlay').classList.remove('active');
+      document.getElementById('drawer').classList.remove('active');
+      currentLeadIdx = null;
+    }
+
+    function saveDrawer() {
+      if (currentLeadIdx === null) return;
+      var leads = getLeads();
+      leads[currentLeadIdx].etapa       = document.getElementById('dEtapa').value;
+      leads[currentLeadIdx].ultContato  = document.getElementById('dUlt').value;
+      leads[currentLeadIdx].proxContato = document.getElementById('dProx').value;
+      leads[currentLeadIdx].comentarios = document.getElementById('dComent').value;
+      saveLeads(leads);
+      closeDrawer();
+      var inCRM = document.getElementById('crmView').style.display !== 'none';
+      if (inCRM) renderKanban(); else { renderStats(leads); renderTable(); }
+    }
+
+    function addStage() {
+      var name = prompt('Nome da nova etapa:');
+      if (!name || !name.trim()) return;
+      var stages = getStages();
+      if (stages.indexOf(name.trim()) >= 0) { alert('Essa etapa já existe.'); return; }
+      stages.push(name.trim());
+      saveStages(stages);
+      renderKanban();
+    }
+
+    function removeStage(si) {
+      var stages = getStages();
+      var name   = stages[si];
+      var leads  = getLeads();
+      var count  = leads.filter(function(l){ return l.etapa === name; }).length;
+      var msg    = count > 0
+        ? 'A etapa "'+name+'" tem '+count+' lead(s). Eles voltarão para "Sem contato". Confirmar?'
+        : 'Remover a etapa "'+name+'"?';
+      if (!confirm(msg)) return;
+      leads.forEach(function(l){ if (l.etapa === name) l.etapa = 'Sem contato'; });
+      saveLeads(leads);
+      stages.splice(si, 1);
+      saveStages(stages);
+      renderKanban();
+    }
+
+    /* ── GENERAL ─────────────────────────────────────── */
     function showConfirm() { document.getElementById('confirmOverlay').classList.add('active'); }
     function hideConfirm() { document.getElementById('confirmOverlay').classList.remove('active'); }
 
     function clearAll() {
       localStorage.removeItem('vt_leads');
+      localStorage.removeItem('vt_stages');
       hideConfirm();
       init();
     }
@@ -749,12 +1308,10 @@
 
     init();
 
-    // close confirm on backdrop
     document.getElementById('confirmOverlay').addEventListener('click', function(e) {
       if (e.target === this) hideConfirm();
     });
 
-    // refresh on storage change (other tabs)
     window.addEventListener('storage', function(e) {
       if (e.key === 'vt_leads') init();
     });
