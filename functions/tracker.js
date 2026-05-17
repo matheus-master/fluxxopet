@@ -68,6 +68,7 @@ export async function onRequestPost(context) {
 
     // ── META CAPI ─────────────────────────────────────────────────────────────
     const metaPayload = {
+      ...(env.META_TEST_EVENT_CODE && { test_event_code: env.META_TEST_EVENT_CODE }),
       data: [{
         event_name,
         event_time:       Math.floor(Date.now() / 1000),
