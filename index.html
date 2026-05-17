@@ -708,6 +708,25 @@
       max-width: 320px;
     }
   </style>
+
+  <!-- Meta Pixel (init only — PageView dispara via track() no final da página com eventID para dedup CAPI) -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init','1290709392346372');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1290709392346372&ev=PageView&noscript=1"/></noscript>
+
+  <!-- GA4 — gtag.js sets _ga cookie e tracked PageView client-side -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KK9GFR6KW4"></script>
+  <script>
+  window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+  gtag('js',new Date());gtag('config','G-KK9GFR6KW4');
+  </script>
 </head>
 <body>
 
@@ -1003,17 +1022,75 @@
   <script>
     var leadData = {};
 
+    /* ── TRACKING ──────────────────────────────────────────────────────────── */
+
+    var REVENUE_EVENTS = {
+      'Até R$20 mil':      'Lead20k',
+      'R$50 mil':          'Lead50k',
+      'R$100 mil':         'Lead100k',
+      'R$200 mil':         'Lead200k',
+      'Mais de R$200 mil': 'Lead200kMais',
+    };
+
+    function genEventId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    }
+
+    function getCookie(name) {
+      var m = document.cookie.match(new RegExp('(?:^|;)\\s*' + name + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    function track(eventName, userData, customData) {
+      var eventId    = genEventId();
+      var isStandard = ['PageView', 'Lead'].indexOf(eventName) !== -1;
+
+      if (typeof fbq !== 'undefined') {
+        if (isStandard) {
+          fbq('track', eventName, customData || {}, { eventID: eventId });
+        } else {
+          fbq('trackCustom', eventName, customData || {}, { eventID: eventId });
+        }
+      }
+
+      fetch('/tracker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_name:  eventName,
+          event_id:    eventId,
+          user_data:   userData   || {},
+          custom_data: customData || {},
+          source_url:  window.location.href,
+          fbp:         getCookie('_fbp'),
+          fbc:         getCookie('_fbc'),
+          session_id:  getCookie('_krob_sid'),
+        }),
+      }).catch(function() {});
+    }
+
+    // PageView — client Pixel recebe o eventID para deduplicação com CAPI
+    track('PageView', {}, {});
+
+    /* ── FORM ──────────────────────────────────────────────────────────────── */
+
     function handleSubmit(e) {
       e.preventDefault();
       leadData.nome     = document.getElementById('nome').value.trim();
       leadData.whatsapp = document.getElementById('whatsapp').value.trim();
       leadData.email    = document.getElementById('email').value.trim();
+
+      track('Lead', {
+        em: leadData.email,
+        ph: leadData.whatsapp,
+        fn: leadData.nome,
+      }, { currency: 'BRL' });
+
       openModal();
     }
 
     function openModal() {
       var overlay = document.getElementById('overlay');
-      // reset state
       document.getElementById('progressFill').style.width = '90%';
       document.getElementById('progressPct').textContent = '90%';
       document.getElementById('modalQuestion').style.display = 'block';
@@ -1024,16 +1101,26 @@
     }
 
     function selectOption(btn, value) {
-      // mark selected
       document.querySelectorAll('.opt').forEach(function(b) { b.classList.remove('selected'); });
       btn.classList.add('selected');
-
-      // disable all options
       document.querySelectorAll('.opt').forEach(function(b) { b.disabled = true; });
 
       leadData.faturamento = value;
 
-      // persist to localStorage
+      // Dispara o evento de faixa de faturamento selecionada
+      var revenueEvent = REVENUE_EVENTS[value];
+      if (revenueEvent) {
+        track(revenueEvent, {
+          em: leadData.email,
+          ph: leadData.whatsapp,
+          fn: leadData.nome,
+        }, {
+          faturamento: value,
+          currency:    'BRL',
+        });
+      }
+
+      // Persiste no localStorage para o painel admin
       var leads = JSON.parse(localStorage.getItem('vt_leads') || '[]');
       leads.push({
         nome:        leadData.nome,
@@ -1048,23 +1135,21 @@
       });
       localStorage.setItem('vt_leads', JSON.stringify(leads));
 
-      // animate progress to 100%
       setTimeout(function() {
         document.getElementById('progressFill').style.width = '100%';
         document.getElementById('progressPct').textContent = '100%';
       }, 120);
 
-      // show success
       setTimeout(function() {
         document.getElementById('successName').textContent = leadData.nome;
         document.getElementById('modalQuestion').style.display = 'none';
         document.getElementById('modalSuccess').style.display = 'block';
       }, 700);
 
-      // close modal after success
+      // Redireciona para a página de obrigado após a animação de sucesso
       setTimeout(function() {
-        closeModal();
-      }, 3200);
+        window.location.href = '/obrigado';
+      }, 3000);
     }
 
     function closeModal() {
@@ -1072,12 +1157,10 @@
       document.body.style.overflow = '';
     }
 
-    // close on backdrop click
     document.getElementById('overlay').addEventListener('click', function(e) {
       if (e.target === this) closeModal();
     });
 
-    // close on Esc
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeModal();
     });
