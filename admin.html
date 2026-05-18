@@ -380,6 +380,41 @@
       font-weight: 600;
     }
 
+    /* ── DAILY CHART ─────────────────────────────────── */
+    .daily-chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px 16px;
+      margin-bottom: 16px;
+    }
+
+    .daily-chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .period-btns { display: flex; gap: 4px; }
+
+    .period-btn {
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      color: var(--dim);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      transition: all 0.15s;
+    }
+    .period-btn:hover  { border-color: var(--gold-bd); color: var(--gold); }
+    .period-btn.active { background: var(--gold-dim); border-color: var(--gold-bd); color: var(--gold); }
+
+    #dailyCanvas { display: block; width: 100%; }
+
     /* ── CHART BAR ───────────────────────────────────── */
     .chart-section {
       margin-bottom: 28px;
@@ -1186,6 +1221,19 @@
       </div>
     </div>
 
+    <!-- leads por dia -->
+    <div class="daily-chart-wrap" id="dailyChartSection">
+      <div class="daily-chart-header">
+        <div class="chart-title" style="margin-bottom:0">Leads por dia</div>
+        <div class="period-btns">
+          <button class="period-btn" onclick="setChartPeriod(7,this)">7D</button>
+          <button class="period-btn active" onclick="setChartPeriod(30,this)">30D</button>
+          <button class="period-btn" onclick="setChartPeriod(90,this)">90D</button>
+        </div>
+      </div>
+      <canvas id="dailyCanvas" height="160"></canvas>
+    </div>
+
     <!-- faturamento chart -->
     <div class="chart-section">
       <div class="chart-title">Distribuição por faixa de faturamento</div>
@@ -1415,6 +1463,7 @@
       var isLight = theme === 'light';
       document.getElementById('themeIcon').innerHTML = isLight ? SUN_SVG : MOON_SVG;
       document.getElementById('themeLabel').textContent = isLight ? 'Escuro' : 'Claro';
+      if (typeof renderDailyChart === 'function' && _leads.length) renderDailyChart(_leads);
     }
 
     function toggleTheme() {
@@ -1502,6 +1551,125 @@
       return i >= 0 ? i : 0;
     }
 
+    /* ── GRÁFICO DIÁRIO ──────────────────────────────── */
+    var _chartDays = 30;
+
+    function setChartPeriod(days, btn) {
+      _chartDays = days;
+      document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      renderDailyChart(_leads);
+    }
+
+    function renderDailyChart(leads) {
+      var canvas = document.getElementById('dailyCanvas');
+      if (!canvas) return;
+
+      var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      var gold     = isLight ? '#c87f00'               : '#E8A000';
+      var goldDim  = isLight ? 'rgba(200,127,0,0.15)'  : 'rgba(232,160,0,0.15)';
+      var gridClr  = isLight ? 'rgba(0,0,0,0.07)'      : 'rgba(255,255,255,0.06)';
+      var textClr  = isLight ? '#aaa'                  : '#444';
+
+      var W = canvas.parentElement.clientWidth - 48;
+      var H = 160;
+      canvas.width  = Math.max(W, 100);
+      canvas.height = H;
+
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, H);
+
+      // Gera datas do período
+      var today = new Date(); today.setHours(0,0,0,0);
+      var days  = [];
+      for (var i = _chartDays - 1; i >= 0; i--) {
+        var d = new Date(today); d.setDate(d.getDate() - i);
+        days.push(d);
+      }
+
+      // Conta leads por dia
+      var counts = days.map(function(d) {
+        var ds = d.toISOString().slice(0, 10);
+        return leads.filter(function(l) { return (l.timestamp || '').slice(0, 10) === ds; }).length;
+      });
+
+      var maxCount = Math.max.apply(null, counts) || 1;
+
+      var padL = 28, padR = 8, padT = 16, padB = 26;
+      var chartW = canvas.width - padL - padR;
+      var chartH = H - padT - padB;
+      var n      = days.length;
+      var barW   = Math.max(2, Math.floor(chartW / n * 0.6));
+      var step   = chartW / n;
+
+      // Grid
+      ctx.strokeStyle = gridClr;
+      ctx.lineWidth   = 1;
+      for (var g = 0; g <= 3; g++) {
+        var gy = padT + (chartH / 3) * g;
+        ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(canvas.width - padR, gy); ctx.stroke();
+      }
+
+      // Barras
+      days.forEach(function(d, i) {
+        var count = counts[i];
+        var barH  = count > 0 ? Math.max(3, Math.round(count / maxCount * chartH)) : 0;
+        var x     = padL + i * step + (step - barW) / 2;
+        var y     = padT + chartH - barH;
+
+        if (barH > 0) {
+          ctx.fillStyle = gold;
+          roundRect(ctx, Math.round(x), Math.round(y), Math.round(barW), barH, Math.min(3, barW/2));
+          ctx.fill();
+        } else {
+          ctx.fillStyle = goldDim;
+          roundRect(ctx, Math.round(x), padT + chartH - 2, Math.round(barW), 2, 1);
+          ctx.fill();
+        }
+
+        // Valor acima da barra
+        if (count > 0) {
+          ctx.fillStyle  = gold;
+          ctx.font       = 'bold 9px Inter,system-ui,sans-serif';
+          ctx.textAlign  = 'center';
+          ctx.fillText(count, Math.round(x + barW / 2), Math.max(padT + 10, Math.round(y - 3)));
+        }
+
+        // Label X
+        var showLabel = n <= 14 ? true : n <= 30 ? i % 5 === 0 : i % 15 === 0;
+        if (showLabel || i === n - 1) {
+          ctx.fillStyle = textClr;
+          ctx.font      = '9px Inter,system-ui,sans-serif';
+          ctx.textAlign = 'center';
+          var lbl = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
+          ctx.fillText(lbl, Math.round(x + barW / 2), H - 8);
+        }
+      });
+
+      // Label Y máx
+      ctx.fillStyle = textClr;
+      ctx.font      = '9px Inter,system-ui,sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(maxCount, padL - 4, padT + 4);
+      ctx.fillText('0',      padL - 4, padT + chartH + 4);
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      if (h <= 0 || w <= 0) return;
+      r = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h);
+      ctx.lineTo(x, y + h);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    window.addEventListener('resize', function() { renderDailyChart(_leads); });
+
     function renderStats(leads) {
       var hoje = leads.filter(function(l) {
         return fmtDate(l.timestamp).startsWith(todayStr());
@@ -1547,6 +1715,8 @@
           '</div>';
       });
       document.getElementById('chartBars').innerHTML = html || '<p style="color:var(--dim);font-size:0.82rem;">Sem dados ainda.</p>';
+
+      renderDailyChart(leads);
     }
 
     function renderTable() {
@@ -1645,6 +1815,7 @@
       document.getElementById('tableSection').style.display  = show ? 'none'  : 'block';
       document.getElementById('statsCards').style.display    = show ? 'none'  : 'grid';
       document.getElementById('chartBars').parentElement.style.display = show ? 'none' : 'block';
+      document.getElementById('dailyChartSection').style.display       = show ? 'none' : 'block';
       if (show) renderKanban();
     }
 
