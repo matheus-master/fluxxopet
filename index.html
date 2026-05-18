@@ -1120,20 +1120,17 @@
         });
       }
 
-      // Persiste no localStorage para o painel admin
-      var leads = JSON.parse(localStorage.getItem('vt_leads') || '[]');
-      leads.push({
-        nome:        leadData.nome,
-        whatsapp:    leadData.whatsapp,
-        email:       leadData.email || '—',
-        faturamento: value,
-        timestamp:   new Date().toISOString(),
-        etapa:       'Sem contato',
-        ultContato:  '',
-        proxContato: '',
-        comentarios: ''
-      });
-      localStorage.setItem('vt_leads', JSON.stringify(leads));
+      // Persiste no D1 via API
+      fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome:        leadData.nome,
+          whatsapp:    leadData.whatsapp,
+          email:       leadData.email || '',
+          faturamento: value,
+        }),
+      }).catch(function(){});
 
       setTimeout(function() {
         document.getElementById('progressFill').style.width = '100%';

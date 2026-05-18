@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin – Login | Ventture</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" /></noscript>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0b0b0b;
+      --surface: #131313;
+      --raise:   #1a1a1a;
+      --border:  rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --gold:    #E8A000;
+      --gold-dim:rgba(232,160,0,0.12);
+      --gold-bd: rgba(232,160,0,0.22);
+      --red:     #D94040;
+      --white:   #f0f0f0;
+      --mid:     #999;
+      --dim:     #666;
+    }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-bottom: 28px;
+      text-decoration: none;
+    }
+
+    .logo svg { width: 26px; height: 26px; }
+
+    .logo-name {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      color: var(--white);
+    }
+
+    .title {
+      font-family: 'Big Shoulders Display', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+    }
+
+    .sub {
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.8rem;
+      margin-bottom: 28px;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 7px;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--raise);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .field input:focus { border-color: var(--gold-bd); }
+    .field input::placeholder { color: var(--dim); }
+
+    .btn {
+      width: 100%;
+      background: var(--gold);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 13px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover    { background: #d49100; }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+
+    .error {
+      color: var(--red);
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: 12px;
+      min-height: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+
+    <a href="/" class="logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" stroke="#E8A000" stroke-width="1.5"/>
+        <path d="M16 8L11 17H15L13 24L21 14H17L19 8H16Z" fill="#E8A000"/>
+      </svg>
+      <span class="logo-name">VENTTURE</span>
+    </a>
+
+    <h1 class="title">Painel Admin</h1>
+    <p class="sub">Digite a senha para acessar</p>
+
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="pwd" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+
+    <button class="btn" id="btnLogin" onclick="login()">
+      Entrar no painel
+    </button>
+
+    <p class="error" id="errMsg"></p>
+
+  </div>
+
+  <script>
+    // Se já tem token válido, vai direto pro admin
+    if (sessionStorage.getItem('vt_token')) {
+      window.location.href = '/admin';
+    }
+
+    document.getElementById('pwd').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') login();
+    });
+
+    async function login() {
+      var pwd = document.getElementById('pwd').value;
+      if (!pwd) return;
+
+      var btn = document.getElementById('btnLogin');
+      btn.disabled = true;
+      btn.textContent = 'Verificando…';
+      document.getElementById('errMsg').textContent = '';
+
+      try {
+        var resp = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pwd }),
+        });
+        var data = await resp.json();
+
+        if (data.ok && data.token) {
+          sessionStorage.setItem('vt_token', data.token);
+          window.location.href = '/admin';
+        } else {
+          document.getElementById('errMsg').textContent = data.error || 'Senha incorreta.';
+          btn.disabled = false;
+          btn.textContent = 'Entrar no painel';
+        }
+      } catch {
+        document.getElementById('errMsg').textContent = 'Erro de conexão. Tente novamente.';
+        btn.disabled = false;
+        btn.textContent = 'Entrar no painel';
+      }
+    }
+  </script>
+
+</body>
+</html>
