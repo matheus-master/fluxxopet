@@ -1755,9 +1755,36 @@
       currentLeadIdx = null;
     }
 
+    var REVENUE_EVENTS = {
+      'Até R$20 mil':      'Lead20k',
+      'R$50 mil':          'Lead50k',
+      'R$100 mil':         'Lead100k',
+      'R$200 mil':         'Lead200k',
+      'Mais de R$200 mil': 'Lead200kMais',
+    };
+
+    async function fireRevenueEvent(eventName, lead, faturamento) {
+      try {
+        await fetch('/tracker', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            eventName:   eventName,
+            email:       lead.email !== '—' ? lead.email : '',
+            phone:       lead.whatsapp || '',
+            name:        lead.nome    !== '—' ? lead.nome : '',
+            faturamento: faturamento,
+            currency:    'BRL',
+            source_url:  window.location.origin + '/admin',
+          }),
+        });
+      } catch(e) {}
+    }
+
     async function saveDrawer() {
       if (currentLeadIdx === null) return;
-      var lead = _leads[currentLeadIdx];
+      var lead        = _leads[currentLeadIdx];
+      var oldFat      = lead.faturamento || '';
       var tags = Array.from(document.querySelectorAll('#tagsSection input[type=checkbox]:checked')).map(function(cb) { return cb.value; });
       var update = {
         etapa:        document.getElementById('dEtapa').value,
@@ -1775,6 +1802,12 @@
       _leads[currentLeadIdx].proxContato = update.prox_contato;
       _leads[currentLeadIdx].comentarios = update.comentarios;
       _leads[currentLeadIdx].tags        = tags;
+
+      // Dispara evento de faturamento apenas na primeira vez que é definido
+      var newFat = update.faturamento;
+      if (!oldFat && newFat && REVENUE_EVENTS[newFat]) {
+        fireRevenueEvent(REVENUE_EVENTS[newFat], lead, newFat);
+      }
       closeDrawer();
       var inCRM = document.getElementById('crmView').style.display !== 'none';
       if (inCRM) renderKanban(); else { renderStats(_leads); renderTable(); }
