@@ -21,69 +21,83 @@ export async function onRequestPost(context) {
     const {
       event_name,
       event_id,
-      user_data   = {},
-      custom_data = {},
+      action_source = 'website',
+      user_data     = {},
+      custom_data   = {},
       source_url,
-      session_id,
+      session_id: bodySid,
       fbp: bodyFbp,
       fbc: bodyFbc,
     } = body;
 
-    const ip        = request.headers.get('CF-Connecting-IP') || '';
-    const userAgent = request.headers.get('User-Agent')       || '';
+    const isCRM = action_source === 'crm';
 
-    if (isBot(userAgent)) {
+    const requestIp        = request.headers.get('CF-Connecting-IP') || '';
+    const requestUserAgent = request.headers.get('User-Agent')       || '';
+
+    // Eventos CRM não passam por bot detection (vêm do painel admin)
+    if (!isCRM && isBot(requestUserAgent)) {
       return json({ ok: true });
     }
 
     const cookieHeader = request.headers.get('Cookie') || '';
     const cookies      = parseCookies(cookieHeader);
 
-    // Resolve session data from D1
+    // Resolve sessão: para CRM usa session_id do lead; para website usa cookie
     let sessionData = {};
     if (env.DB) {
-      const sid = session_id || cookies['_krob_sid'] || '';
+      const sid = bodySid || cookies['_krob_sid'] || '';
       if (sid) {
         const row = await env.DB.prepare('SELECT * FROM sessions WHERE sid = ?').bind(sid).first();
         if (row) sessionData = row;
       }
     }
 
-    // fbp/fbc fallback chain: body → cookie → session
-    const fbp       = bodyFbp || cookies['_fbp'] || sessionData.fbp || '';
-    const fbc       = bodyFbc || cookies['_fbc'] || sessionData.fbc || '';
-    const fbpSource = bodyFbp ? 'body' : cookies['_fbp'] ? 'cookie' : sessionData.fbp ? 'session' : '';
-    const fbcSource = bodyFbc ? 'body' : cookies['_fbc'] ? 'cookie' : sessionData.fbc ? 'session' : '';
+    // fbp/fbc: para CRM prioriza sessão original do lead (não cookie do admin)
+    const fbp = isCRM
+      ? (sessionData.fbp || bodyFbp || '')
+      : (bodyFbp || cookies['_fbp'] || sessionData.fbp || '');
+    const fbc = isCRM
+      ? (sessionData.fbc || bodyFbc || '')
+      : (bodyFbc || cookies['_fbc'] || sessionData.fbc || '');
 
-    // GA4 client ID from _ga cookie set by gtag.js
-    const gaRaw      = cookies['_ga'] || '';
+    const fbpSource = fbp ? (sessionData.fbp ? 'session' : 'body') : '';
+    const fbcSource = fbc ? (sessionData.fbc ? 'session' : 'body') : '';
+
+    // IP e User-Agent: para CRM não usa dados do admin — usa sessão original se disponível
+    const ip        = isCRM ? '' : requestIp;
+    const userAgent = isCRM ? (sessionData.ua || '') : requestUserAgent;
+
+    // GA4 client_id: para CRM usa sessão original do lead
+    const gaRaw      = isCRM ? '' : (cookies['_ga'] || '');
     const gaClientId = gaRaw.startsWith('GA1.')
       ? gaRaw.split('.').slice(2).join('.')
       : (sessionData.ga_client_id || `${Date.now()}.${Math.random().toString(36).slice(2, 9)}`);
 
-    // Hash PII per Meta Advanced Matching spec
+    // Hash PII
     const hashedEmail = user_data.em ? await sha256(user_data.em.trim().toLowerCase()) : '';
     const hashedPhone = user_data.ph ? await sha256(normalizePhone(user_data.ph))      : '';
     const hashedName  = user_data.fn ? await sha256(user_data.fn.trim().toLowerCase().normalize('NFC')) : '';
 
     // ── META CAPI ─────────────────────────────────────────────────────────────
+    const userData = {
+      em: hashedEmail ? [hashedEmail] : [],
+      ph: hashedPhone ? [hashedPhone] : [],
+      fn: hashedName  ? [hashedName]  : [],
+      ...(ip        && { client_ip_address: ip }),
+      ...(userAgent && { client_user_agent: userAgent }),
+      ...(fbp       && { fbp }),
+      ...(fbc       && { fbc }),
+    };
+
     const metaPayload = {
-      ...(env.META_TEST_EVENT_CODE && { test_event_code: env.META_TEST_EVENT_CODE }),
       data: [{
         event_name,
         event_time:       Math.floor(Date.now() / 1000),
         event_id,
         event_source_url: source_url || '',
-        action_source:    'website',
-        user_data: {
-          em: hashedEmail ? [hashedEmail] : [],
-          ph: hashedPhone ? [hashedPhone] : [],
-          fn: hashedName  ? [hashedName]  : [],
-          client_ip_address: ip,
-          client_user_agent: userAgent,
-          ...(fbp && { fbp }),
-          ...(fbc && { fbc }),
-        },
+        action_source,
+        user_data: userData,
       }],
     };
 
@@ -98,7 +112,6 @@ export async function onRequestPost(context) {
     } catch (e) { metaBody = e.message; }
 
     // ── GA4 MEASUREMENT PROTOCOL ──────────────────────────────────────────────
-    // PageView is skipped here — handled client-side by gtag.js
     let ga4Status = 0, ga4Body = '';
     if (event_name !== 'PageView' && env.GA4_MEASUREMENT_ID && env.GA4_API_SECRET) {
       const ga4Payload = {
@@ -120,7 +133,7 @@ export async function onRequestPost(context) {
 
     // ── D1 LOGGING ────────────────────────────────────────────────────────────
     if (env.DB && event_name !== 'PageView') {
-      const sid = session_id || cookies['_krob_sid'] || '';
+      const sid = bodySid || cookies['_krob_sid'] || '';
       context.waitUntil(
         env.DB.prepare(`
           INSERT INTO events
@@ -129,7 +142,7 @@ export async function onRequestPost(context) {
              meta_status, meta_response, ga4_status, ga4_response)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(
-          event_name, event_id, sid,
+          event_name, event_id || '', sid,
           hashedEmail, hashedPhone, hashedName,
           custom_data.faturamento || '',
           source_url || '',

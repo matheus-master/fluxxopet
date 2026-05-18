@@ -1423,6 +1423,7 @@
         proxContato: l.prox_contato || '',
         comentarios: l.comentarios  || '',
         tags:        Array.isArray(tags) ? tags : [],
+        sessionId:   l.session_id || '',
         timestamp:   (l.created_at || '').replace(' ', 'T') + (l.created_at && !l.created_at.includes('Z') ? 'Z' : ''),
       };
     }
@@ -1764,18 +1765,26 @@
     };
 
     async function fireRevenueEvent(eventName, lead, faturamento) {
+      var eventId = 'crm-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
       try {
         await fetch('/tracker', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            eventName:   eventName,
-            email:       lead.email !== '—' ? lead.email : '',
-            phone:       lead.whatsapp || '',
-            name:        lead.nome    !== '—' ? lead.nome : '',
-            faturamento: faturamento,
-            currency:    'BRL',
-            source_url:  window.location.origin + '/admin',
+            event_name:    eventName,
+            event_id:      eventId,
+            action_source: 'crm',
+            session_id:    lead.sessionId || '',
+            user_data: {
+              em: lead.email    !== '—' ? lead.email    : '',
+              ph: lead.whatsapp || '',
+              fn: lead.nome     !== '—' ? lead.nome     : '',
+            },
+            custom_data: {
+              faturamento: faturamento,
+              currency:    'BRL',
+            },
+            source_url: window.location.origin,
           }),
         });
       } catch(e) {}
