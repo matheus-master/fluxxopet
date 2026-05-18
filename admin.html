@@ -1587,10 +1587,19 @@
         days.push(d);
       }
 
-      // Conta leads por dia
+      // Conta leads por dia em horário local (evita erro de fuso UTC vs Brasil)
+      function localDateStr(date) {
+        return date.getFullYear() + '-' +
+          String(date.getMonth() + 1).padStart(2, '0') + '-' +
+          String(date.getDate()).padStart(2, '0');
+      }
+
       var counts = days.map(function(d) {
-        var ds = d.toISOString().slice(0, 10);
-        return leads.filter(function(l) { return (l.timestamp || '').slice(0, 10) === ds; }).length;
+        var ds = localDateStr(d);
+        return leads.filter(function(l) {
+          if (!l.timestamp) return false;
+          return localDateStr(new Date(l.timestamp)) === ds;
+        }).length;
       });
 
       var maxCount = Math.max.apply(null, counts) || 1;
