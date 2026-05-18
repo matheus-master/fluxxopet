@@ -613,6 +613,31 @@
     .drawer-section-sep { border-top: 1px solid var(--border); margin: 4px 0; }
     .field-hint { font-size: 0.72rem; color: var(--dim); margin-top: 2px; margin-bottom: 8px; }
 
+    .tag-check-row { display: flex; align-items: center; gap: 6px; }
+    .tag-del-btn {
+      background: none; border: none; color: var(--dim); cursor: pointer;
+      font-size: 0.7rem; padding: 2px 4px; border-radius: 4px; line-height: 1;
+      transition: color 0.12s;
+    }
+    .tag-del-btn:hover { color: var(--red); }
+
+    .tag-add-row { display: flex; gap: 6px; margin-top: 8px; }
+    .tag-add-input {
+      flex: 1; background: var(--raise); border: 1px solid var(--border2);
+      border-radius: 6px; padding: 6px 10px; color: var(--white);
+      font-family: inherit; font-size: 0.8rem; outline: none;
+      transition: border-color 0.15s;
+    }
+    .tag-add-input:focus { border-color: var(--gold-bd); }
+    .tag-add-input::placeholder { color: var(--dim); }
+    .tag-add-btn {
+      background: var(--gold-dim); border: 1px solid var(--gold-bd); border-radius: 6px;
+      color: var(--gold); cursor: pointer; font-family: inherit; font-size: 0.78rem;
+      font-weight: 700; padding: 6px 12px; white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .tag-add-btn:hover { background: rgba(232,160,0,0.18); }
+
     .tag-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
     .tag-check {
       display: flex;
@@ -1282,7 +1307,53 @@
       'Follow up 1','Follow up 2','Lead desqualificado/não respondeu'
     ];
 
-    var PREDEFINED_TAGS = ['Lead LTDA','Lead MEI','Qualificado','Desqualificado'];
+    var DEFAULT_TAGS = ['Lead LTDA','Lead MEI','Qualificado','Desqualificado'];
+
+    function getTags() {
+      var saved = localStorage.getItem('vt_tags');
+      return saved ? JSON.parse(saved) : DEFAULT_TAGS.slice();
+    }
+
+    function saveTags(tags) { localStorage.setItem('vt_tags', JSON.stringify(tags)); }
+
+    function deleteTag(name) {
+      var tags = getTags().filter(function(t) { return t !== name; });
+      saveTags(tags);
+      refreshTagsSection();
+    }
+
+    function addTag() {
+      var input = document.getElementById('newTagInput');
+      var name  = (input.value || '').trim();
+      if (!name) return;
+      var tags = getTags();
+      if (tags.indexOf(name) >= 0) { input.value = ''; return; }
+      tags.push(name);
+      saveTags(tags);
+      input.value = '';
+      refreshTagsSection();
+    }
+
+    function refreshTagsSection() {
+      var lead = _leads[currentLeadIdx];
+      var tags = getTags();
+      document.getElementById('tagsSection').innerHTML = buildTagsHTML(lead, tags);
+    }
+
+    function buildTagsHTML(lead, tags) {
+      var checks = tags.map(function(t) {
+        var checked = (lead.tags || []).indexOf(t) >= 0 ? ' checked' : '';
+        return '<div class="tag-check-row">' +
+          '<label class="tag-check"><input type="checkbox" value="'+esc(t)+'"'+checked+' /> '+esc(t)+'</label>' +
+          '<button class="tag-del-btn" onclick="deleteTag(\''+esc(t)+'\')" title="Excluir tag">✕</button>' +
+        '</div>';
+      }).join('');
+      return checks +
+        '<div class="tag-add-row">' +
+          '<input id="newTagInput" class="tag-add-input" placeholder="Nova tag…" onkeydown="if(event.key===\'Enter\')addTag()" />' +
+          '<button class="tag-add-btn" onclick="addTag()">+ Adicionar</button>' +
+        '</div>';
+    }
 
     var COL_DOT = {
       'Contato inicial':'','Em conversa':'','Call agendada':'green',
@@ -1663,12 +1734,7 @@
           '<div>' +
             '<label class="field-lbl">Tags</label>' +
             '<p class="field-hint">Rótulos adicionais independentes da etapa</p>' +
-            '<div class="tag-checks">' +
-              PREDEFINED_TAGS.map(function(t) {
-                var checked = (lead.tags || []).indexOf(t) >= 0 ? ' checked' : '';
-                return '<label class="tag-check"><input type="checkbox" value="'+esc(t)+'"'+checked+' /> '+esc(t)+'</label>';
-              }).join('') +
-            '</div>' +
+            '<div id="tagsSection">' + buildTagsHTML(lead, getTags()) + '</div>' +
           '</div>' +
           '<div>' +
             '<label class="field-lbl">Comentários</label>' +
@@ -1692,7 +1758,7 @@
     async function saveDrawer() {
       if (currentLeadIdx === null) return;
       var lead = _leads[currentLeadIdx];
-      var tags = Array.from(document.querySelectorAll('.tag-checks input:checked')).map(function(cb) { return cb.value; });
+      var tags = Array.from(document.querySelectorAll('#tagsSection input[type=checkbox]:checked')).map(function(cb) { return cb.value; });
       var update = {
         etapa:        document.getElementById('dEtapa').value,
         faturamento:  document.getElementById('dFat').value,
