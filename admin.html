@@ -1463,7 +1463,7 @@
       var isLight = theme === 'light';
       document.getElementById('themeIcon').innerHTML = isLight ? SUN_SVG : MOON_SVG;
       document.getElementById('themeLabel').textContent = isLight ? 'Escuro' : 'Claro';
-      if (typeof renderDailyChart === 'function' && _leads.length) renderDailyChart(_leads);
+      if (typeof renderDailyChart === 'function' && Array.isArray(_leads) && _leads.length) renderDailyChart(_leads);
     }
 
     function toggleTheme() {
