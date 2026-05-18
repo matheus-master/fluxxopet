@@ -1,0 +1,1 @@
+ALTER TABLE leads ADD COLUMN tags TEXT DEFAULT '[]';

@@ -564,6 +564,34 @@
       text-overflow: ellipsis;
     }
 
+    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+    .card-tag {
+      font-size: 0.62rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(232,160,0,0.12);
+      color: var(--gold);
+      border: 1px solid rgba(232,160,0,0.22);
+    }
+
+    .tag-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .tag-check {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: var(--mid);
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border2);
+      background: var(--raise);
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .tag-check:has(input:checked) { border-color: var(--gold-bd); color: var(--gold); background: var(--gold-dim); }
+    .tag-check input { accent-color: var(--gold); }
+
     .card-meta {
       font-size: 0.7rem;
       color: var(--dim);
@@ -1202,13 +1230,15 @@
     var FAT_CLASS = ['fat-1','fat-2','fat-3','fat-4','fat-5'];
 
     var DEFAULT_STAGES = [
-      'Sem contato','Automação','Interesse','Qualificado',
-      'Call','Venda','Sem interesse','Fora do perfil'
+      'Contato inicial','Em conversa','Call agendada',
+      'Follow up 1','Follow up 2','Lead desqualificado/não respondeu'
     ];
 
+    var PREDEFINED_TAGS = ['Lead LTDA','Lead MEI','Qualificado','Desqualificado'];
+
     var COL_DOT = {
-      'Sem contato':'gray','Automação':'','Interesse':'','Qualificado':'green',
-      'Call':'','Venda':'green','Sem interesse':'red','Fora do perfil':'red'
+      'Contato inicial':'','Em conversa':'','Call agendada':'green',
+      'Follow up 1':'','Follow up 2':'','Lead desqualificado/não respondeu':'red'
     };
 
     /* ── AUTH ─────────────────────────────────────────── */
@@ -1238,16 +1268,19 @@
     function getLeads() { return _leads; }
 
     function mapLead(l) {
+      var tags = [];
+      try { tags = JSON.parse(l.tags || '[]'); } catch(e) {}
       return {
         id:          l.id,
         nome:        l.nome        || '—',
         whatsapp:    l.whatsapp    || '',
         email:       l.email       || '—',
         faturamento: l.faturamento || '',
-        etapa:       l.etapa       || 'Sem contato',
+        etapa:       l.etapa       || 'Contato inicial',
         ultContato:  l.ult_contato  || '',
         proxContato: l.prox_contato || '',
         comentarios: l.comentarios  || '',
+        tags:        Array.isArray(tags) ? tags : [],
         timestamp:   (l.created_at || '').replace(' ', 'T') + (l.created_at && !l.created_at.includes('Z') ? 'Z' : ''),
       };
     }
@@ -1475,7 +1508,7 @@
         html +=   '<span class="col-dot ' + dot + '"></span>';
         html +=   '<span class="col-name">' + esc(stage) + '</span>';
         html +=   '<span class="col-count">' + sl.length + '</span>';
-        if (!isDefault) html += '<button class="col-del" onclick="removeStage('+si+')" title="Remover">✕</button>';
+        html += '<button class="col-del" onclick="removeStage('+si+')" title="Remover etapa">✕</button>';
         html += '</div>';
         html += '<div class="kanban-col-body" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOn(event,'+si+')">';
 
@@ -1487,7 +1520,12 @@
             var fi  = FAT_ORDER.indexOf(lead.faturamento); if (fi<0) fi=0;
             html += '<div class="lead-card" draggable="true" data-id="'+lead.id+'" ondragstart="dragStart(event,'+lead.id+')" ondragend="dragEnd(event)" onclick="openDrawerByIdx('+idx+')">';
             html +=   '<div class="card-name">' + esc(lead.nome) + '</div>';
-            html +=   '<span class="badge-fat '+FAT_CLASS[fi]+'" style="font-size:0.65rem;padding:2px 7px">' + esc(lead.faturamento) + '</span>';
+            if (lead.faturamento) html += '<span class="badge-fat '+FAT_CLASS[fi]+'" style="font-size:0.65rem;padding:2px 7px">' + esc(lead.faturamento) + '</span>';
+            if (lead.tags && lead.tags.length) {
+              html += '<div class="card-tags">';
+              lead.tags.forEach(function(t) { html += '<span class="card-tag">'+esc(t)+'</span>'; });
+              html += '</div>';
+            }
             html +=   '<div class="card-meta">' + esc(lead.whatsapp) + '</div>';
             if (lead.proxContato) html += '<div class="card-date">📅 Próx: '+fmtDateShort(lead.proxContato)+'</div>';
             if (lead.comentarios) {
@@ -1537,6 +1575,15 @@
             '<div class="half"><label class="field-lbl">Próximo contato</label><input type="date" id="dProx" class="d-input" value="'+(lead.proxContato||'')+'" /></div>' +
           '</div>' +
           '<div>' +
+            '<label class="field-lbl">Tags</label>' +
+            '<div class="tag-checks">' +
+              PREDEFINED_TAGS.map(function(t) {
+                var checked = (lead.tags || []).indexOf(t) >= 0 ? ' checked' : '';
+                return '<label class="tag-check"><input type="checkbox" value="'+esc(t)+'"'+checked+' /> '+esc(t)+'</label>';
+              }).join('') +
+            '</div>' +
+          '</div>' +
+          '<div>' +
             '<label class="field-lbl">Comentários</label>' +
             '<textarea id="dComent" class="d-textarea" placeholder="Notas sobre este lead…">'+esc(lead.comentarios||'')+'</textarea>' +
           '</div>' +
@@ -1557,12 +1604,14 @@
 
     async function saveDrawer() {
       if (currentLeadIdx === null) return;
-      var lead   = _leads[currentLeadIdx];
+      var lead = _leads[currentLeadIdx];
+      var tags = Array.from(document.querySelectorAll('.tag-checks input:checked')).map(function(cb) { return cb.value; });
       var update = {
         etapa:        document.getElementById('dEtapa').value,
         ult_contato:  document.getElementById('dUlt').value,
         prox_contato: document.getElementById('dProx').value,
         comentarios:  document.getElementById('dComent').value,
+        tags:         tags,
       };
       var result = await api('PATCH', '/api/leads/' + lead.id, update);
       if (!result) return;
@@ -1570,6 +1619,7 @@
       _leads[currentLeadIdx].ultContato  = update.ult_contato;
       _leads[currentLeadIdx].proxContato = update.prox_contato;
       _leads[currentLeadIdx].comentarios = update.comentarios;
+      _leads[currentLeadIdx].tags        = tags;
       closeDrawer();
       var inCRM = document.getElementById('crmView').style.display !== 'none';
       if (inCRM) renderKanban(); else { renderStats(_leads); renderTable(); }
@@ -1585,17 +1635,22 @@
       renderKanban();
     }
 
-    function removeStage(si) {
+    async function removeStage(si) {
       var stages = getStages();
       var name   = stages[si];
-      var leads  = getLeads();
-      var count  = leads.filter(function(l){ return l.etapa === name; }).length;
-      var msg    = count > 0
-        ? 'A etapa "'+name+'" tem '+count+' lead(s). Eles voltarão para "Sem contato". Confirmar?'
+      if (stages.length <= 1) { alert('É necessário ter ao menos uma etapa.'); return; }
+      var affected = _leads.filter(function(l){ return l.etapa === name; });
+      var fallback = stages[si === 0 ? 1 : 0];
+      var msg = affected.length > 0
+        ? 'A etapa "'+name+'" tem '+affected.length+' lead(s). Eles serão movidos para "'+fallback+'". Confirmar?'
         : 'Remover a etapa "'+name+'"?';
       if (!confirm(msg)) return;
-      leads.forEach(function(l){ if (l.etapa === name) l.etapa = 'Sem contato'; });
-      saveLeads(leads);
+      if (affected.length) {
+        await Promise.all(affected.map(function(l) {
+          l.etapa = fallback;
+          return api('PATCH', '/api/leads/' + l.id, { etapa: fallback });
+        }));
+      }
       stages.splice(si, 1);
       saveStages(stages);
       renderKanban();

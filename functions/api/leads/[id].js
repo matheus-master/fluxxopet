@@ -11,6 +11,7 @@ export async function onRequestPatch(context) {
   if (body.prox_contato !== undefined) { fields.push('prox_contato = ?'); values.push(body.prox_contato); }
   if (body.comentarios  !== undefined) { fields.push('comentarios = ?');  values.push(body.comentarios); }
   if (body.faturamento  !== undefined) { fields.push('faturamento = ?');  values.push(body.faturamento); }
+  if (body.tags         !== undefined) { fields.push('tags = ?');         values.push(JSON.stringify(body.tags)); }
 
   if (fields.length) {
     fields.push("updated_at = datetime('now')");
