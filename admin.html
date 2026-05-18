@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" />
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -793,6 +794,176 @@
     .btn-crm:hover { background: rgba(232,160,0,0.18); }
     .btn-crm svg   { width: 14px; height: 14px; stroke: var(--gold); }
 
+    /* ── IMPORT MODAL ───────────────────────────────── */
+    .import-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 400;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .import-overlay.active { opacity: 1; pointer-events: all; }
+
+    .import-box {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 620px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .import-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .import-head h3 {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .import-head button {
+      background: var(--raise);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--mid);
+      width: 26px;
+      height: 26px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .import-head button:hover { color: var(--white); }
+
+    .import-summary {
+      display: flex;
+      gap: 20px;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .import-summary .chip {
+      font-size: 0.78rem;
+      color: var(--mid);
+    }
+
+    .import-summary .chip strong { color: var(--white); }
+    .import-summary .chip.green strong { color: #3DAA6A; }
+    .import-summary .chip.gold  strong { color: var(--gold); }
+
+    .import-preview-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 22px;
+    }
+
+    .import-preview-lbl {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 10px;
+    }
+
+    .import-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    .import-table th {
+      text-align: left;
+      padding: 7px 10px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .import-table td {
+      padding: 7px 10px;
+      color: #c0c0c0;
+      border-bottom: 1px solid var(--border);
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .import-table tr:last-child td { border-bottom: none; }
+
+    .import-table .dup-row td { color: var(--dim); }
+    .import-table .dup-badge {
+      font-size: 0.62rem;
+      background: rgba(217,64,64,0.12);
+      color: #c07070;
+      border: 1px solid rgba(217,64,64,0.2);
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-left: 5px;
+    }
+
+    .import-foot {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 22px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .import-dup-opt {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.8rem;
+      color: var(--mid);
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .import-dup-opt input { cursor: pointer; accent-color: var(--gold); }
+
+    .cbtn-import {
+      background: var(--gold);
+      border: none;
+      border-radius: 7px;
+      padding: 9px 22px;
+      color: #000;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .cbtn-import:hover { background: #d49100; }
+    .cbtn-import:disabled { opacity: 0.4; cursor: default; }
+
     /* ── RESPONSIVE ──────────────────────────────────── */
     @media (max-width: 860px) {
       .stats { grid-template-columns: 1fr 1fr; }
@@ -840,6 +1011,15 @@
           </svg>
           CRM
         </button>
+        <button class="btn-outline" onclick="importXLSX()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          Importar XLSX
+        </button>
+        <input type="file" id="xlsxInput" accept=".xlsx,.xls" style="display:none" onchange="handleXLSX(event)" />
         <button class="btn-outline" onclick="exportCSV()">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -955,6 +1135,43 @@
   <!-- drawer overlay + panel -->
   <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
   <div class="drawer" id="drawer"></div>
+
+  <!-- import xlsx modal -->
+  <div class="import-overlay" id="importOverlay">
+    <div class="import-box">
+      <div class="import-head">
+        <h3>Importar Leads da Planilha</h3>
+        <button onclick="closeImport()">✕</button>
+      </div>
+      <div class="import-summary">
+        <div class="chip gold">Encontrados: <strong id="impTotal">0</strong></div>
+        <div class="chip green">Novos: <strong id="impNew">0</strong></div>
+        <div class="chip">Duplicados: <strong id="impDup">0</strong></div>
+      </div>
+      <div class="import-preview-wrap">
+        <div class="import-preview-lbl">Pré-visualização</div>
+        <table class="import-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>WhatsApp</th>
+              <th>E-mail</th>
+              <th>Data/Hora</th>
+            </tr>
+          </thead>
+          <tbody id="impPreviewBody"></tbody>
+        </table>
+      </div>
+      <div class="import-foot">
+        <label class="import-dup-opt">
+          <input type="checkbox" id="impSkipDup" checked />
+          Ignorar duplicados (mesmo WhatsApp)
+        </label>
+        <button class="cbtn-cancel" onclick="closeImport()">Cancelar</button>
+        <button class="cbtn-import" id="impConfirmBtn" onclick="confirmImport()">Importar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- confirm clear dialog -->
   <div class="confirm-overlay" id="confirmOverlay">
@@ -1287,6 +1504,116 @@
       stages.splice(si, 1);
       saveStages(stages);
       renderKanban();
+    }
+
+    /* ── IMPORT XLSX ─────────────────────────────────── */
+    var _importParsed = [];
+
+    function importXLSX() {
+      document.getElementById('xlsxInput').click();
+    }
+
+    function handleXLSX(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      e.target.value = '';
+
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        var wb   = XLSX.read(new Uint8Array(evt.target.result), { type: 'array', cellDates: false });
+        var ws   = wb.Sheets[wb.SheetNames[0]];
+        var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+
+        var leads = [];
+        for (var i = 1; i < rows.length; i++) {
+          var r    = rows[i];
+          var nome = String(r[2] || '').trim();
+          var wa   = String(r[3] || '').trim();
+          if (!nome && !wa) continue;
+          leads.push({
+            nome:        nome || '—',
+            whatsapp:    wa,
+            email:       String(r[4] || '').trim() || '—',
+            faturamento: '',
+            timestamp:   parseXLSXTimestamp(r[0], r[1]),
+            etapa:       'Sem contato',
+            ultContato:  '',
+            proxContato: '',
+            comentarios: '',
+          });
+        }
+
+        var existingWa = getLeads().map(function(l) { return normalizeWa(l.whatsapp); });
+        leads.forEach(function(l) {
+          l._isDup = existingWa.indexOf(normalizeWa(l.whatsapp)) >= 0;
+        });
+
+        var newCount = leads.filter(function(l){ return !l._isDup; }).length;
+        _importParsed = leads;
+
+        document.getElementById('impTotal').textContent = leads.length;
+        document.getElementById('impNew').textContent   = newCount;
+        document.getElementById('impDup').textContent   = leads.length - newCount;
+        document.getElementById('impConfirmBtn').disabled = leads.length === 0;
+
+        var preview = leads.slice(0, 8);
+        document.getElementById('impPreviewBody').innerHTML = preview.map(function(l) {
+          return '<tr class="' + (l._isDup ? 'dup-row' : '') + '">' +
+            '<td>' + esc(l.nome) + (l._isDup ? '<span class="dup-badge">duplicado</span>' : '') + '</td>' +
+            '<td>' + esc(l.whatsapp) + '</td>' +
+            '<td>' + esc(l.email) + '</td>' +
+            '<td>' + fmtDate(l.timestamp) + '</td>' +
+            '</tr>';
+        }).join('') + (leads.length > 8 ? '<tr><td colspan="4" style="color:var(--dim);font-style:italic">… e mais '+(leads.length-8)+' leads</td></tr>' : '');
+
+        document.getElementById('importOverlay').classList.add('active');
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function parseXLSXTimestamp(dateVal, timeVal) {
+      var dateStr = String(dateVal || '').trim();
+      var timeStr = String(timeVal || '00:00').trim();
+
+      var date = '';
+      var dmyMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (dmyMatch) {
+        date = dmyMatch[3] + '-' + dmyMatch[2].padStart(2,'0') + '-' + dmyMatch[1].padStart(2,'0');
+      } else {
+        date = new Date().toISOString().slice(0, 10);
+      }
+
+      var timeMatch = timeStr.match(/^(\d{1,2}):(\d{2})/);
+      var time = timeMatch
+        ? timeMatch[1].padStart(2,'0') + ':' + timeMatch[2] + ':00'
+        : '00:00:00';
+
+      var d = new Date(date + 'T' + time);
+      return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+    }
+
+    function normalizeWa(phone) {
+      return String(phone || '').replace(/\D/g, '');
+    }
+
+    function confirmImport() {
+      var skipDup = document.getElementById('impSkipDup').checked;
+      var toAdd   = skipDup
+        ? _importParsed.filter(function(l){ return !l._isDup; })
+        : _importParsed;
+
+      toAdd.forEach(function(l){ delete l._isDup; });
+
+      var leads = getLeads();
+      leads = leads.concat(toAdd);
+      saveLeads(leads);
+      closeImport();
+      init();
+    }
+
+    function closeImport() {
+      document.getElementById('importOverlay').classList.remove('active');
+      _importParsed = [];
     }
 
     /* ── GENERAL ─────────────────────────────────────── */
