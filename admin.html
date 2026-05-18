@@ -610,6 +610,10 @@
       border: 1px solid rgba(232,160,0,0.22);
     }
 
+    .nl-field { margin-bottom: 12px; }
+    .nl-row   { display: flex; gap: 10px; margin-bottom: 12px; }
+    .nl-row .half { flex: 1; }
+
     .drawer-section-sep { border-top: 1px solid var(--border); margin: 4px 0; }
     .field-hint { font-size: 0.72rem; color: var(--dim); margin-top: 2px; margin-bottom: 8px; }
 
@@ -1118,6 +1122,12 @@
         <p class="page-sub" id="lastUpdate">—</p>
       </div>
       <div class="actions">
+        <button class="btn-outline" onclick="openNewLead()" style="border-color:var(--gold-bd);color:var(--gold);">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Novo contato
+        </button>
         <button class="btn-crm" onclick="toggleCRM(true)">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="18"/><rect x="14" y="3" width="7" height="10"/><rect x="14" y="17" width="7" height="4"/>
@@ -1282,6 +1292,42 @@
         </label>
         <button class="cbtn-cancel" onclick="closeImport()">Cancelar</button>
         <button class="cbtn-import" id="impConfirmBtn" onclick="confirmImport()">Importar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- new lead modal -->
+  <div class="confirm-overlay" id="newLeadOverlay" onclick="if(event.target===this)closeNewLead()">
+    <div class="confirm-box" style="max-width:420px;text-align:left;">
+      <h3 style="margin-bottom:18px;">Novo contato</h3>
+      <div class="nl-field">
+        <label class="field-lbl">Nome <span style="color:var(--red)">*</span></label>
+        <input type="text" id="nlNome" class="d-input" placeholder="Nome completo" />
+      </div>
+      <div class="nl-field">
+        <label class="field-lbl">WhatsApp <span style="color:var(--red)">*</span></label>
+        <input type="tel" id="nlWa" class="d-input" placeholder="(00) 00000-0000" />
+      </div>
+      <div class="nl-field">
+        <label class="field-lbl">E-mail</label>
+        <input type="email" id="nlEmail" class="d-input" placeholder="email@exemplo.com" />
+      </div>
+      <div class="nl-row">
+        <div class="half">
+          <label class="field-lbl">Faturamento</label>
+          <select id="nlFat" class="d-select">
+            <option value="">— Não informado —</option>
+          </select>
+        </div>
+        <div class="half">
+          <label class="field-lbl">Etapa CRM</label>
+          <select id="nlEtapa" class="d-select"></select>
+        </div>
+      </div>
+      <p id="nlError" style="color:var(--red);font-size:0.8rem;min-height:18px;margin-top:4px;"></p>
+      <div class="confirm-btns" style="margin-top:16px;">
+        <button class="cbtn-cancel" onclick="closeNewLead()">Cancelar</button>
+        <button class="cbtn-import" id="nlSaveBtn" onclick="saveNewLead()">Salvar contato</button>
       </div>
     </div>
   </div>
@@ -1972,6 +2018,61 @@
     async function clearAll() {
       await api('DELETE', '/api/leads');
       hideConfirm();
+      await loadLeads();
+      renderStats(_leads);
+      renderTable();
+    }
+
+    /* ── NOVO CONTATO ────────────────────────────────── */
+    function openNewLead() {
+      var stages = getStages();
+      var fatSel = document.getElementById('nlFat');
+      var etapaSel = document.getElementById('nlEtapa');
+
+      FAT_ORDER.forEach(function(f) {
+        if (!fatSel.querySelector('option[value="'+f+'"]')) {
+          var o = document.createElement('option'); o.value = f; o.textContent = f; fatSel.appendChild(o);
+        }
+      });
+      etapaSel.innerHTML = stages.map(function(s) {
+        return '<option value="'+esc(s)+'">'+esc(s)+'</option>';
+      }).join('');
+
+      document.getElementById('nlNome').value  = '';
+      document.getElementById('nlWa').value    = '';
+      document.getElementById('nlEmail').value = '';
+      document.getElementById('nlFat').value   = '';
+      document.getElementById('nlError').textContent = '';
+      document.getElementById('nlSaveBtn').disabled  = false;
+      document.getElementById('newLeadOverlay').classList.add('active');
+      setTimeout(function() { document.getElementById('nlNome').focus(); }, 50);
+    }
+
+    function closeNewLead() {
+      document.getElementById('newLeadOverlay').classList.remove('active');
+    }
+
+    async function saveNewLead() {
+      var nome  = document.getElementById('nlNome').value.trim();
+      var wa    = document.getElementById('nlWa').value.trim();
+      var email = document.getElementById('nlEmail').value.trim();
+      var fat   = document.getElementById('nlFat').value;
+      var etapa = document.getElementById('nlEtapa').value;
+
+      if (!nome || !wa) {
+        document.getElementById('nlError').textContent = 'Nome e WhatsApp são obrigatórios.';
+        return;
+      }
+
+      document.getElementById('nlSaveBtn').disabled = true;
+      document.getElementById('nlError').textContent = '';
+
+      var result = await api('POST', '/api/leads/import', {
+        leads: [{ nome: nome, whatsapp: wa, email: email, faturamento: fat, etapa: etapa }]
+      });
+
+      if (!result) { document.getElementById('nlSaveBtn').disabled = false; return; }
+      closeNewLead();
       await loadLeads();
       renderStats(_leads);
       renderTable();

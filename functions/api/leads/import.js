@@ -15,7 +15,7 @@ export async function onRequestPost(context) {
     l.whatsapp    || '',
     l.email       || '',
     l.faturamento || '',
-    l.etapa       || 'Sem contato',
+    l.etapa       || 'Contato inicial',
     l.timestamp
       ? new Date(l.timestamp).toISOString().replace('T', ' ').slice(0, 19)
       : new Date().toISOString().replace('T', ' ').slice(0, 19)
