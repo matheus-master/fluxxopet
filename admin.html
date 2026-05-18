@@ -1127,6 +1127,7 @@
     </a>
     <div class="topbar-right">
       <span class="tag-admin">Painel Admin</span>
+      <span style="font-size:0.65rem;color:var(--dim);margin-left:4px;" title="Versão do painel">v2.1</span>
       <button class="btn-theme" id="btnTheme" onclick="toggleTheme()" title="Alternar tema">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIcon">
           <circle cx="12" cy="12" r="5"/>
@@ -1704,7 +1705,7 @@
       document.getElementById('statEmail').textContent = withEmail;
 
       if (leads.length) {
-        var last = leads[leads.length - 1];
+        var last = leads[0];
         document.getElementById('lastUpdate').textContent =
           'Última entrada: ' + fmtDate(last.timestamp);
       } else {

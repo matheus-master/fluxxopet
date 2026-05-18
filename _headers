@@ -1,0 +1,7 @@
+/admin
+  Cache-Control: no-store, no-cache, must-revalidate
+  Pragma: no-cache
+
+/login
+  Cache-Control: no-store, no-cache, must-revalidate
+  Pragma: no-cache
