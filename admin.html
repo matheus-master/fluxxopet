@@ -1572,13 +1572,17 @@
       var gridClr  = isLight ? 'rgba(0,0,0,0.07)'      : 'rgba(255,255,255,0.06)';
       var textClr  = isLight ? '#aaa'                  : '#444';
 
-      var W = canvas.parentElement.clientWidth - 48;
-      var H = 160;
-      canvas.width  = Math.max(W, 100);
-      canvas.height = H;
+      var dpr = window.devicePixelRatio || 1;
+      var W   = canvas.parentElement.clientWidth - 48;
+      var H   = 220;
+      canvas.style.width  = Math.max(W, 100) + 'px';
+      canvas.style.height = H + 'px';
+      canvas.width  = Math.max(W, 100) * dpr;
+      canvas.height = H * dpr;
 
       var ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, H);
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, W, H);
 
       // Gera datas do período
       var today = new Date(); today.setHours(0,0,0,0);
@@ -1605,8 +1609,8 @@
 
       var maxCount = Math.max.apply(null, counts) || 1;
 
-      var padL = 28, padR = 8, padT = 16, padB = 26;
-      var chartW = canvas.width - padL - padR;
+      var padL = 32, padR = 12, padT = 28, padB = 30;
+      var chartW = W - padL - padR;
       var chartH = H - padT - padB;
       var n      = days.length;
       var barW   = Math.max(2, Math.floor(chartW / n * 0.6));
@@ -1617,7 +1621,7 @@
       ctx.lineWidth   = 1;
       for (var g = 0; g <= 3; g++) {
         var gy = padT + (chartH / 3) * g;
-        ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(canvas.width - padR, gy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(W - padR, gy); ctx.stroke();
       }
 
       // Barras
@@ -1640,16 +1644,16 @@
         // Valor acima da barra
         if (count > 0) {
           ctx.fillStyle  = gold;
-          ctx.font       = 'bold 9px Inter,system-ui,sans-serif';
+          ctx.font       = 'bold 11px Inter,system-ui,sans-serif';
           ctx.textAlign  = 'center';
-          ctx.fillText(count, Math.round(x + barW / 2), Math.max(padT + 10, Math.round(y - 3)));
+          ctx.fillText(count, Math.round(x + barW / 2), Math.max(padT + 12, Math.round(y - 5)));
         }
 
         // Label X
         var showLabel = n <= 14 ? true : n <= 30 ? i % 5 === 0 : i % 15 === 0;
         if (showLabel || i === n - 1) {
           ctx.fillStyle = textClr;
-          ctx.font      = '9px Inter,system-ui,sans-serif';
+          ctx.font      = '11px Inter,system-ui,sans-serif';
           ctx.textAlign = 'center';
           var lbl = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
           ctx.fillText(lbl, Math.round(x + barW / 2), H - 8);
@@ -1658,10 +1662,10 @@
 
       // Label Y máx
       ctx.fillStyle = textClr;
-      ctx.font      = '9px Inter,system-ui,sans-serif';
+      ctx.font      = '11px Inter,system-ui,sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText(maxCount, padL - 4, padT + 4);
-      ctx.fillText('0',      padL - 4, padT + chartH + 4);
+      ctx.fillText(maxCount, padL - 4, padT + 6);
+      ctx.fillText('0',      padL - 4, padT + chartH + 6);
     }
 
     function roundRect(ctx, x, y, w, h, r) {
