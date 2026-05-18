@@ -610,6 +610,9 @@
 
     .kanban-add-col:hover { border-color: var(--gold-bd); color: var(--gold); }
 
+    .lead-card.dragging { opacity: 0.4; }
+    .kanban-col-body.drag-over { background: rgba(232,160,0,0.07); outline: 1px dashed var(--gold-bd); border-radius: 6px; }
+
     /* ── DRAWER ──────────────────────────────────────── */
     .drawer-overlay {
       position: fixed;
@@ -1414,6 +1417,49 @@
       if (show) renderKanban();
     }
 
+    /* ── DRAG & DROP ─────────────────────────────────── */
+    var _dragLeadId = null;
+
+    function dragStart(event, leadId) {
+      _dragLeadId = leadId;
+      event.dataTransfer.effectAllowed = 'move';
+      setTimeout(function() {
+        var el = document.querySelector('.lead-card[data-id="' + leadId + '"]');
+        if (el) el.classList.add('dragging');
+      }, 0);
+    }
+
+    function dragEnd(event) {
+      document.querySelectorAll('.lead-card.dragging').forEach(function(el) { el.classList.remove('dragging'); });
+    }
+
+    function dragOver(event) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      event.currentTarget.classList.add('drag-over');
+    }
+
+    function dragLeave(event) {
+      event.currentTarget.classList.remove('drag-over');
+    }
+
+    async function dropOn(event, stageIdx) {
+      event.preventDefault();
+      event.currentTarget.classList.remove('drag-over');
+      if (_dragLeadId === null) return;
+
+      var stages = getStages();
+      var newEtapa = stages[stageIdx];
+      var lead = _leads.find(function(l) { return l.id === _dragLeadId; });
+      if (!lead || lead.etapa === newEtapa) return;
+
+      lead.etapa = newEtapa;
+      renderKanban();
+
+      await api('PATCH', '/api/leads/' + _dragLeadId, { etapa: newEtapa });
+      _dragLeadId = null;
+    }
+
     function renderKanban() {
       var leads  = getLeads();
       var stages = getStages();
@@ -1431,7 +1477,7 @@
         html +=   '<span class="col-count">' + sl.length + '</span>';
         if (!isDefault) html += '<button class="col-del" onclick="removeStage('+si+')" title="Remover">✕</button>';
         html += '</div>';
-        html += '<div class="kanban-col-body">';
+        html += '<div class="kanban-col-body" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOn(event,'+si+')">';
 
         if (!sl.length) {
           html += '<div class="col-empty">Sem leads</div>';
@@ -1439,7 +1485,7 @@
           sl.forEach(function(lead) {
             var idx = leads.indexOf(lead);
             var fi  = FAT_ORDER.indexOf(lead.faturamento); if (fi<0) fi=0;
-            html += '<div class="lead-card" onclick="openDrawerByIdx('+idx+')">';
+            html += '<div class="lead-card" draggable="true" data-id="'+lead.id+'" ondragstart="dragStart(event,'+lead.id+')" ondragend="dragEnd(event)" onclick="openDrawerByIdx('+idx+')">';
             html +=   '<div class="card-name">' + esc(lead.nome) + '</div>';
             html +=   '<span class="badge-fat '+FAT_CLASS[fi]+'" style="font-size:0.65rem;padding:2px 7px">' + esc(lead.faturamento) + '</span>';
             html +=   '<div class="card-meta">' + esc(lead.whatsapp) + '</div>';
