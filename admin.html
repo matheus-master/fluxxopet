@@ -30,6 +30,41 @@
       --radius:  10px;
     }
 
+    [data-theme="light"] {
+      --bg:      #f2f2f2;
+      --surface: #ffffff;
+      --raise:   #f7f7f7;
+      --border:  rgba(0,0,0,0.08);
+      --border2: rgba(0,0,0,0.14);
+      --gold:    #c87f00;
+      --gold-dim:rgba(200,127,0,0.09);
+      --gold-bd: rgba(200,127,0,0.25);
+      --red:     #c0392b;
+      --green:   #27ae60;
+      --white:   #111111;
+      --mid:     #555;
+      --dim:     #999;
+    }
+
+    /* botão tema */
+    .btn-theme {
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      color: var(--mid);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-theme:hover { border-color: var(--gold-bd); color: var(--gold); }
+    .btn-theme svg { width: 15px; height: 15px; stroke: currentColor; flex-shrink: 0; }
+
     html { -webkit-text-size-adjust: 100%; }
 
     body {
@@ -1028,7 +1063,17 @@
     </a>
     <div class="topbar-right">
       <span class="tag-admin">Painel Admin</span>
-      <button class="btn-outline" onclick="logout()" style="margin-left:8px;">
+      <button class="btn-theme" id="btnTheme" onclick="toggleTheme()" title="Alternar tema">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIcon">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <span id="themeLabel">Claro</span>
+      </button>
+      <button class="btn-outline" onclick="logout()" style="margin-left:4px;">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
           <polyline points="16 17 21 12 16 7"/>
@@ -1243,6 +1288,29 @@
       'Contato inicial':'','Em conversa':'','Call agendada':'green',
       'Follow up 1':'','Follow up 2':'','Lead desqualificado/não respondeu':'red'
     };
+
+    /* ── TEMA ─────────────────────────────────────────── */
+    var MOON_SVG = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    var SUN_SVG  = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      var isLight = theme === 'light';
+      document.getElementById('themeIcon').innerHTML = isLight ? SUN_SVG : MOON_SVG;
+      document.getElementById('themeLabel').textContent = isLight ? 'Escuro' : 'Claro';
+    }
+
+    function toggleTheme() {
+      var current = document.documentElement.getAttribute('data-theme') || 'dark';
+      var next = current === 'light' ? 'dark' : 'light';
+      localStorage.setItem('vt_theme', next);
+      applyTheme(next);
+    }
+
+    (function() {
+      var saved = localStorage.getItem('vt_theme') || 'dark';
+      applyTheme(saved);
+    })();
 
     /* ── AUTH ─────────────────────────────────────────── */
     function getToken() { return sessionStorage.getItem('vt_token'); }
