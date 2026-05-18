@@ -1607,7 +1607,8 @@
         }).length;
       });
 
-      var maxCount = Math.max.apply(null, counts) || 1;
+      var maxCount  = Math.max.apply(null, counts) || 1;
+      var scaleMax  = maxCount * 1.25; // teto extra para a barra máxima não encostar no topo
 
       var padL = 32, padR = 12, padT = 28, padB = 30;
       var chartW = W - padL - padR;
@@ -1627,7 +1628,7 @@
       // Barras
       days.forEach(function(d, i) {
         var count = counts[i];
-        var barH  = count > 0 ? Math.max(3, Math.round(count / maxCount * chartH)) : 0;
+        var barH  = count > 0 ? Math.max(3, Math.round(count / scaleMax * chartH)) : 0;
         var x     = padL + i * step + (step - barW) / 2;
         var y     = padT + chartH - barH;
 
