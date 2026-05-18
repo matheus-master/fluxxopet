@@ -1564,6 +1564,11 @@
         return '<option value="'+esc(s)+'"'+(s===lead.etapa?' selected':'')+'>'+esc(s)+'</option>';
       }).join('');
 
+      var fatOpts = '<option value=""'+(lead.faturamento?'':' selected')+'>— Não informado —</option>' +
+        FAT_ORDER.map(function(f) {
+          return '<option value="'+esc(f)+'"'+(f===lead.faturamento?' selected':'')+'>'+esc(f)+'</option>';
+        }).join('');
+
       document.getElementById('drawer').innerHTML =
         '<div class="drawer-header">' +
           '<div>' +
@@ -1578,9 +1583,9 @@
             '<div class="dfield"><label>E-mail</label><span>'+esc(lead.email)+'</span></div>' +
             '<div class="dfield"><label>Cadastro</label><span>'+fmtDate(lead.timestamp)+'</span></div>' +
           '</div>' +
-          '<div>' +
-            '<label class="field-lbl">Etapa CRM</label>' +
-            '<select id="dEtapa" class="d-select">'+stageOpts+'</select>' +
+          '<div class="drawer-row">' +
+            '<div class="half"><label class="field-lbl">Etapa CRM</label><select id="dEtapa" class="d-select">'+stageOpts+'</select></div>' +
+            '<div class="half"><label class="field-lbl">Faturamento</label><select id="dFat" class="d-select">'+fatOpts+'</select></div>' +
           '</div>' +
           '<div class="drawer-row">' +
             '<div class="half"><label class="field-lbl">Último contato</label><input type="date" id="dUlt" class="d-input" value="'+(lead.ultContato||'')+'" /></div>' +
@@ -1622,6 +1627,7 @@
       var tags = Array.from(document.querySelectorAll('.tag-checks input:checked')).map(function(cb) { return cb.value; });
       var update = {
         etapa:        document.getElementById('dEtapa').value,
+        faturamento:  document.getElementById('dFat').value,
         ult_contato:  document.getElementById('dUlt').value,
         prox_contato: document.getElementById('dProx').value,
         comentarios:  document.getElementById('dComent').value,
@@ -1630,6 +1636,7 @@
       var result = await api('PATCH', '/api/leads/' + lead.id, update);
       if (!result) return;
       _leads[currentLeadIdx].etapa       = update.etapa;
+      _leads[currentLeadIdx].faturamento = update.faturamento;
       _leads[currentLeadIdx].ultContato  = update.ult_contato;
       _leads[currentLeadIdx].proxContato = update.prox_contato;
       _leads[currentLeadIdx].comentarios = update.comentarios;
