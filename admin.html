@@ -575,6 +575,9 @@
       border: 1px solid rgba(232,160,0,0.22);
     }
 
+    .drawer-section-sep { border-top: 1px solid var(--border); margin: 4px 0; }
+    .field-hint { font-size: 0.72rem; color: var(--dim); margin-top: 2px; margin-bottom: 8px; }
+
     .tag-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
     .tag-check {
       display: flex;
@@ -1433,12 +1436,21 @@
     }
 
     /* ── CRM ─────────────────────────────────────────── */
+    var STAGES_VERSION = '2';
+
     function getStages() {
+      if (localStorage.getItem('vt_stages_v') !== STAGES_VERSION) {
+        localStorage.removeItem('vt_stages');
+        localStorage.setItem('vt_stages_v', STAGES_VERSION);
+      }
       var saved = localStorage.getItem('vt_stages');
       return saved ? JSON.parse(saved) : DEFAULT_STAGES.slice();
     }
 
-    function saveStages(s) { localStorage.setItem('vt_stages', JSON.stringify(s)); }
+    function saveStages(s) {
+      localStorage.setItem('vt_stages_v', STAGES_VERSION);
+      localStorage.setItem('vt_stages', JSON.stringify(s));
+    }
 
     var currentLeadIdx = null;
 
@@ -1574,8 +1586,10 @@
             '<div class="half"><label class="field-lbl">Último contato</label><input type="date" id="dUlt" class="d-input" value="'+(lead.ultContato||'')+'" /></div>' +
             '<div class="half"><label class="field-lbl">Próximo contato</label><input type="date" id="dProx" class="d-input" value="'+(lead.proxContato||'')+'" /></div>' +
           '</div>' +
+          '<div class="drawer-section-sep"></div>' +
           '<div>' +
             '<label class="field-lbl">Tags</label>' +
+            '<p class="field-hint">Rótulos adicionais independentes da etapa</p>' +
             '<div class="tag-checks">' +
               PREDEFINED_TAGS.map(function(t) {
                 var checked = (lead.tags || []).indexOf(t) >= 0 ? ' checked' : '';
