@@ -1066,6 +1066,31 @@
     // PageView — client Pixel recebe o eventID para deduplicação com CAPI
     track('PageView', {}, {});
 
+    /* ── SCROLL DEPTH ──────────────────────────────────────────────────────── */
+    (function() {
+      var thresholds = [25, 50, 75, 95];
+      var fired = {};
+
+      function onScroll() {
+        var scrollTop  = window.pageYOffset || document.documentElement.scrollTop;
+        var winHeight  = window.innerHeight || document.documentElement.clientHeight;
+        var docHeight  = Math.max(
+          document.body.scrollHeight, document.documentElement.scrollHeight,
+          document.body.offsetHeight, document.documentElement.offsetHeight
+        );
+        var pct = Math.round((scrollTop + winHeight) / docHeight * 100);
+
+        thresholds.forEach(function(t) {
+          if (!fired[t] && pct >= t) {
+            fired[t] = true;
+            track('ScrollDepth' + t, {}, { percent: t });
+          }
+        });
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+
     /* ── FORM ──────────────────────────────────────────────────────────────── */
 
     function handleSubmit(e) {

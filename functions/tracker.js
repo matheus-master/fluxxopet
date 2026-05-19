@@ -1,10 +1,14 @@
 const GA4_EVENT_MAP = {
-  Lead:         'generate_lead',
-  Lead20k:      'lead_20k',
-  Lead50k:      'lead_50k',
-  Lead100k:     'lead_100k',
-  Lead200k:     'lead_200k',
-  Lead200kMais: 'lead_200k_mais',
+  Lead:           'generate_lead',
+  Lead20k:        'lead_20k',
+  Lead50k:        'lead_50k',
+  Lead100k:       'lead_100k',
+  Lead200k:       'lead_200k',
+  Lead200kMais:   'lead_200k_mais',
+  ScrollDepth25:  'scroll_25',
+  ScrollDepth50:  'scroll_50',
+  ScrollDepth75:  'scroll_75',
+  ScrollDepth95:  'scroll_95',
 };
 
 const CORS = {
