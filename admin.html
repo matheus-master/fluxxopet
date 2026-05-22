@@ -1131,6 +1131,16 @@
     .dash-section-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 20px 0 10px; }
     .dash-loading { text-align: center; padding: 60px 0; color: var(--dim); font-size: 0.9rem; }
     .dash-error { text-align: center; padding: 40px; color: #e55; font-size: 0.85rem; }
+    .dash-daterange { display: flex; align-items: center; gap: 6px; }
+    .dash-daterange input[type="date"] {
+      background: var(--surface); border: 1px solid var(--border2);
+      color: var(--text); border-radius: 6px; padding: 4px 8px;
+      font-size: 0.78rem; cursor: pointer;
+    }
+    .dash-chart-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px; margin-bottom: 20px;
+    }
 
     @media (max-width: 560px) {
       .topbar { padding: 0 16px; }
@@ -1330,11 +1340,17 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;stroke:currentColor"><polyline points="15 18 9 12 15 6"/></svg>
           Voltar
         </button>
-        <span style="font-size:0.8rem;color:var(--dim);">Meta Ads · últimos</span>
+        <div class="dash-daterange">
+          <input type="date" id="dashSince" onchange="loadDashCustom()">
+          <span style="color:var(--dim);font-size:0.8rem;">→</span>
+          <input type="date" id="dashUntil" onchange="loadDashCustom()">
+        </div>
         <div class="dash-period">
-          <button onclick="loadDash(7,this)" id="dp7">7D</button>
-          <button onclick="loadDash(30,this)" id="dp30" class="active">30D</button>
-          <button onclick="loadDash(90,this)" id="dp90">90D</button>
+          <button id="dpHoje"  onclick="dashPreset('hoje',this)">Hoje</button>
+          <button id="dpOntem" onclick="dashPreset('ontem',this)">Ontem</button>
+          <button id="dp7"     onclick="dashPreset('7d',this)">7D</button>
+          <button id="dp14"    onclick="dashPreset('14d',this)">14D</button>
+          <button id="dp30"    onclick="dashPreset('30d',this)" class="active">30D</button>
         </div>
       </div>
       <div id="dashContent"><div class="dash-loading">Carregando dados do Meta…</div></div>
@@ -2318,49 +2334,75 @@
     }
 
     /* ── META DASHBOARD ──────────────────────────────── */
-    var _mainView  = null; // elemento que esconder ao abrir dash
-
     function toggleDash(show) {
       var dash  = document.getElementById('dashView');
       var crm   = document.getElementById('crmView');
-      var main  = document.getElementById('mainView');
       var cards = document.getElementById('statsCards');
-
+      var table = document.getElementById('tableSection');
+      var chart = document.getElementById('dailyChartSection');
       if (show) {
         dash.style.display  = 'block';
         crm.style.display   = 'none';
-        if (main)  main.style.display  = 'none';
         if (cards) cards.style.display = 'none';
-        document.getElementById('tableSection') && (document.getElementById('tableSection').style.display = 'none');
-        document.getElementById('dailyChartSection') && (document.getElementById('dailyChartSection').style.display = 'none');
-        loadDash(30, document.getElementById('dp30'));
+        if (table) table.style.display = 'none';
+        if (chart) chart.style.display = 'none';
+        dashPreset('30d', document.getElementById('dp30'));
       } else {
         dash.style.display  = 'none';
-        if (main)  main.style.display  = '';
         if (cards) cards.style.display = '';
-        document.getElementById('tableSection') && (document.getElementById('tableSection').style.display = '');
-        document.getElementById('dailyChartSection') && (document.getElementById('dailyChartSection').style.display = '');
+        if (table) table.style.display = '';
+        if (chart) chart.style.display = '';
       }
     }
 
-    async function loadDash(days, btn) {
-      document.querySelectorAll('.dash-period button').forEach(function(b) { b.classList.remove('active'); });
-      if (btn) btn.classList.add('active');
-      document.getElementById('dashContent').innerHTML = '<div class="dash-loading">Carregando dados do Meta…</div>';
+    function dashLocalStr(d) {
+      return d.getFullYear() + '-' +
+        String(d.getMonth()+1).padStart(2,'0') + '-' +
+        String(d.getDate()).padStart(2,'0');
+    }
 
-      var preset = days === 7 ? 'last_7d' : days === 90 ? 'last_90d' : 'last_30d';
-      var data   = await api('GET', '/api/meta-dashboard?preset=' + preset);
+    function dashPreset(key, btn) {
+      var today = new Date();
+      var since, until;
+      if (key === 'hoje')  { since = until = dashLocalStr(today); }
+      else if (key === 'ontem') {
+        var y = new Date(today); y.setDate(y.getDate()-1);
+        since = until = dashLocalStr(y);
+      } else {
+        var days = key === '7d' ? 7 : key === '14d' ? 14 : 30;
+        var s = new Date(today); s.setDate(s.getDate() - days + 1);
+        since = dashLocalStr(s); until = dashLocalStr(today);
+      }
+      document.getElementById('dashSince').value = since;
+      document.getElementById('dashUntil').value  = until;
+      document.querySelectorAll('.dash-period button').forEach(function(b){ b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      loadDashWithDates(since, until);
+    }
+
+    function loadDashCustom() {
+      var since = document.getElementById('dashSince').value;
+      var until = document.getElementById('dashUntil').value;
+      if (!since || !until) return;
+      document.querySelectorAll('.dash-period button').forEach(function(b){ b.classList.remove('active'); });
+      loadDashWithDates(since, until);
+    }
+
+    async function loadDashWithDates(since, until) {
+      document.getElementById('dashContent').innerHTML = '<div class="dash-loading">Carregando dados do Meta…</div>';
+      var data = await api('GET', '/api/meta-dashboard?since=' + since + '&until=' + until);
       if (!data || !data.ok) {
-        document.getElementById('dashContent').innerHTML = '<div class="dash-error">Erro ao carregar dados: ' + ((data && data.error) || 'verifique o token') + '</div>';
+        document.getElementById('dashContent').innerHTML =
+          '<div class="dash-error">Erro ao carregar dados: ' + ((data && data.error) || 'verifique o token') + '</div>';
         return;
       }
-      renderDash(data.metrics, days);
+      renderDash(data.metrics, data.daily || [], data.crmDaily || [], since, until);
     }
 
-    function fmtBRL(v)  { return 'R$ ' + parseFloat(v).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
-    function fmtPct(v)  { return parseFloat(v).toFixed(2).replace('.',',') + '%'; }
-    function fmtNum(v)  { return parseInt(v).toLocaleString('pt-BR'); }
-    function fmtDec(v)  { return parseFloat(v).toFixed(2).replace('.',','); }
+    function fmtBRL(v) { return 'R$ ' + parseFloat(v).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+    function fmtPct(v) { return parseFloat(v).toFixed(2).replace('.',',') + '%'; }
+    function fmtNum(v) { return parseInt(v).toLocaleString('pt-BR'); }
+    function fmtDec(v) { return parseFloat(v).toFixed(2).replace('.',','); }
 
     function dashCard(label, value, sub, gold) {
       return '<div class="dash-card">' +
@@ -2370,20 +2412,25 @@
         '</div>';
     }
 
-    function renderDash(m, days) {
+    function renderDash(m, daily, crmDaily, since, until) {
       var html = '';
 
-      html += '<div class="dash-section-title">Resultados</div>';
-      html += '<div class="dash-kpis">';
+      // Chart
+      html += '<div class="dash-chart-wrap">';
+      html += '<div class="dash-section-title" style="margin-top:0">Leads por dia (CRM)</div>';
+      html += '<canvas id="dashCanvas" style="display:block;width:100%;"></canvas>';
+      html += '</div>';
+
+      // KPIs
+      html += '<div class="dash-section-title">Resultados</div><div class="dash-kpis">';
       html += dashCard('Leads no CRM', fmtNum(m.crmLeads), 'cadastros no período', true);
       html += dashCard('Custo por lead', fmtBRL(m.cpl), 'gasto / leads CRM', true);
-      html += dashCard('Valor gasto', fmtBRL(m.spend), 'últimos ' + days + ' dias');
+      html += dashCard('Valor gasto', fmtBRL(m.spend), since + ' → ' + until);
       html += dashCard('Alcance', fmtNum(m.reach), 'pessoas únicas');
       html += dashCard('Frequência', fmtDec(m.frequency), 'impressões por pessoa');
       html += '</div>';
 
-      html += '<div class="dash-section-title">Distribuição do Tráfego</div>';
-      html += '<div class="dash-kpis">';
+      html += '<div class="dash-section-title">Distribuição do Tráfego</div><div class="dash-kpis">';
       html += dashCard('Impressões', fmtNum(m.impressions), '');
       html += dashCard('CPM', fmtBRL(m.cpm), 'custo por 1.000 imp.');
       html += dashCard('Cliques no link', fmtNum(m.linkClicks), '');
@@ -2391,24 +2438,127 @@
       html += dashCard('CTR', fmtPct(m.ctrLink), 'cliques / impressões');
       html += '</div>';
 
-      html += '<div class="dash-section-title">Qualidade do Funil</div>';
-      html += '<div class="dash-kpis">';
+      html += '<div class="dash-section-title">Qualidade do Funil</div><div class="dash-kpis">';
       html += dashCard('Vis. da página', fmtNum(m.lpv), 'landing page views');
       html += dashCard('Custo por LPV', fmtBRL(m.costLpv), '');
       html += dashCard('Connect Rate', fmtPct(m.connectRate), 'LPV / cliques no link');
-      html += dashCard('Taxa de cadastro', fmtPct(m.regRate), 'leads / LPV');
+      html += dashCard('Taxa de cadastro', fmtPct(m.regRate), 'leads CRM / LPV');
       html += '</div>';
 
-      html += '<div class="dash-section-title">Qualidade do Criativo (Vídeo)</div>';
-      html += '<div class="dash-kpis">';
+      html += '<div class="dash-section-title">Qualidade do Criativo (Vídeo)</div><div class="dash-kpis">';
       html += dashCard('Hook Rate', fmtPct(m.hookRate), '25% assistido / impressões');
       html += dashCard('Hold Rate', fmtPct(m.holdRate), '75% assistido / impressões');
       html += dashCard('Video plays', fmtNum(m.videoPlays), 'reproduções iniciadas');
       html += dashCard('ThruPlays', fmtNum(m.thruPlays), 'assistidos até o fim');
       html += '</div>';
 
+      window._lastCrmDaily = crmDaily;
       document.getElementById('dashContent').innerHTML = html;
+
+      // Render chart after DOM update
+      setTimeout(function() { renderDashChart(since, until, crmDaily); }, 0);
     }
+
+    function renderDashChart(since, until, crmDaily) {
+      var canvas = document.getElementById('dashCanvas');
+      if (!canvas) return;
+
+      // Gera todos os dias do período
+      var days = [], d = new Date(since + 'T00:00:00');
+      var end  = new Date(until + 'T00:00:00');
+      while (d <= end) {
+        days.push(dashLocalStr(d));
+        var next = new Date(d); next.setDate(next.getDate()+1); d = next;
+      }
+
+      // Mapa CRM por dia
+      var crmMap = {};
+      (crmDaily || []).forEach(function(r){ crmMap[r.day] = r.total; });
+      var counts = days.map(function(day){ return crmMap[day] || 0; });
+
+      var dpr  = window.devicePixelRatio || 1;
+      var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      var gold    = isLight ? '#c87f00' : '#E8A000';
+      var goldDim = isLight ? 'rgba(200,127,0,0.15)' : 'rgba(232,160,0,0.15)';
+      var gridClr = isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.06)';
+      var textClr = isLight ? '#aaa' : '#888';
+
+      var W = canvas.parentElement.clientWidth - 48;
+      var H = 200;
+      canvas.style.width  = Math.max(W, 100) + 'px';
+      canvas.style.height = H + 'px';
+      canvas.width  = Math.max(W, 100) * dpr;
+      canvas.height = H * dpr;
+
+      var ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, W, H);
+
+      var maxCount = Math.max.apply(null, counts) || 1;
+      var scaleMax = maxCount * 1.25;
+      var padL = 32, padR = 12, padT = 28, padB = 30;
+      var chartW = W - padL - padR;
+      var chartH = H - padT - padB;
+      var n      = days.length;
+      var barW   = Math.max(2, Math.floor(chartW / n * 0.6));
+      var step   = chartW / n;
+
+      // Grid
+      ctx.strokeStyle = gridClr; ctx.lineWidth = 1;
+      for (var g = 0; g <= 3; g++) {
+        var gy = padT + (chartH / 3) * g;
+        ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(W - padR, gy); ctx.stroke();
+      }
+
+      // Barras
+      days.forEach(function(day, i) {
+        var count = counts[i];
+        var barH  = count > 0 ? Math.max(3, Math.round(count / scaleMax * chartH)) : 0;
+        var x     = padL + i * step + (step - barW) / 2;
+        var y     = padT + chartH - barH;
+
+        if (barH > 0) {
+          ctx.fillStyle = gold;
+          roundRect(ctx, Math.round(x), Math.round(y), Math.round(barW), barH, Math.min(3, barW/2));
+          ctx.fill();
+          ctx.fillStyle = gold;
+          ctx.font = 'bold 11px Inter,system-ui,sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(count, Math.round(x + barW/2), Math.max(padT+12, Math.round(y-5)));
+        } else {
+          ctx.fillStyle = goldDim;
+          roundRect(ctx, Math.round(x), padT + chartH - 2, Math.round(barW), 2, 1);
+          ctx.fill();
+        }
+
+        // Label X — mostra a cada N dias para não sobrepor
+        var step5 = n <= 7 ? 1 : n <= 14 ? 2 : n <= 30 ? 5 : 7;
+        if (i % step5 === 0 || i === n - 1) {
+          ctx.fillStyle = textClr;
+          ctx.font = '10px Inter,system-ui,sans-serif';
+          ctx.textAlign = 'center';
+          var parts = day.split('-');
+          ctx.fillText(parts[2] + '/' + parts[1], Math.round(x + barW/2), H - 8);
+        }
+      });
+
+      // Label Y
+      ctx.fillStyle = textClr;
+      ctx.font = '10px Inter,system-ui,sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(maxCount, padL - 4, padT + 6);
+      ctx.fillText('0', padL - 4, padT + chartH + 6);
+    }
+
+    window.addEventListener('resize', function() {
+      var s = document.getElementById('dashSince').value;
+      var u = document.getElementById('dashUntil').value;
+      if (s && u && document.getElementById('dashView').style.display !== 'none') {
+        // só re-renderiza o gráfico sem rebuscar dados
+        var cd = window._lastCrmDaily || [];
+        renderDashChart(s, u, cd);
+      }
+    });
 
     async function init() {
       if (!getToken()) { window.location.href = '/login'; return; }

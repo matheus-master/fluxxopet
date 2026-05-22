@@ -6,8 +6,11 @@ export async function onRequestGet(context) {
 
   if (!token) return json({ ok: false, error: 'META_ADS_TOKEN não configurado' }, 500);
 
-  const url    = new URL(request.url);
-  const preset = url.searchParams.get('preset') || 'last_30d';
+  const url   = new URL(request.url);
+  const since = url.searchParams.get('since');
+  const until = url.searchParams.get('until');
+
+  if (!since || !until) return json({ ok: false, error: 'Parâmetros since/until obrigatórios' }, 400);
 
   const fields = [
     'reach', 'frequency', 'spend', 'impressions', 'cpm',
@@ -16,76 +19,94 @@ export async function onRequestGet(context) {
     'video_p75_watched_actions', 'video_thruplay_watched_actions',
   ].join(',');
 
-  const apiUrl = `https://graph.facebook.com/v21.0/act_${accountId}/insights` +
-    `?fields=${fields}&date_preset=${preset}&level=account&access_token=${token}`;
+  const timeRange = encodeURIComponent(JSON.stringify({ since, until }));
 
-  let raw;
-  try {
-    const r = await fetch(apiUrl);
-    raw = await r.json();
-  } catch (e) {
-    return json({ ok: false, error: e.message }, 500);
-  }
+  // Busca dados diários (time_increment=1) e totais ao mesmo tempo
+  const [rawDaily, rawTotal] = await Promise.all([
+    fetchMeta(`https://graph.facebook.com/v21.0/act_${accountId}/insights?fields=${fields}&time_range=${timeRange}&time_increment=1&level=account&access_token=${token}`),
+    fetchMeta(`https://graph.facebook.com/v21.0/act_${accountId}/insights?fields=${fields}&time_range=${timeRange}&level=account&access_token=${token}`),
+  ]);
 
-  if (raw.error) return json({ ok: false, error: raw.error.message }, 400);
+  if (rawDaily.error) return json({ ok: false, error: rawDaily.error.message }, 400);
+  if (rawTotal.error) return json({ ok: false, error: rawTotal.error.message }, 400);
 
-  const d = (raw.data || [])[0];
-  if (!d)  return json({ ok: true, metrics: null });
+  const d = (rawTotal.data || [])[0];
+  if (!d) return json({ ok: true, metrics: null, daily: [], crmDaily: [] });
 
-  // Leads no CRM pelo mesmo período
-  const daysMap  = { last_7d: 7, last_30d: 30, last_90d: 90 };
-  const days     = daysMap[preset] || 30;
-  let crmLeads   = 0;
-  if (env.DB) {
-    const row = await env.DB.prepare(
-      `SELECT COUNT(*) as total FROM leads WHERE created_at >= datetime('now', '-${days} days')`
-    ).first();
-    crmLeads = row?.total || 0;
-  }
+  // Helpers
+  const act   = (row, key) => parseFloat((row.actions || []).find(a => a.action_type === key)?.value || 0);
+  const video = (arr)      => parseFloat((arr         || []).find(a => a.action_type === 'video_view')?.value || 0);
 
-  const act   = (key) => parseFloat((d.actions || []).find(a => a.action_type === key)?.value || 0);
-  const video = (arr) => parseFloat((arr        || []).find(a => a.action_type === 'video_view')?.value || 0);
-
+  // Totais agregados
   const impressions = parseFloat(d.impressions || 0);
-  const linkClicks  = act('link_click');
-  const lpv         = act('landing_page_view');
+  const linkClicks  = act(d, 'link_click');
+  const lpv         = act(d, 'landing_page_view');
   const spend       = parseFloat(d.spend || 0);
-  const videoPlays  = video(d.video_play_actions);
   const p25         = video(d.video_p25_watched_actions);
   const p75         = video(d.video_p75_watched_actions);
-  const thruPlays   = video(d.video_thruplay_watched_actions);
+
+  // Leads no CRM pelo período
+  let crmLeads = 0;
+  let crmDailyRows = [];
+  if (env.DB) {
+    const [crmRow, crmDailyResult] = await Promise.all([
+      env.DB.prepare(
+        `SELECT COUNT(*) as total FROM leads WHERE created_at >= ? AND created_at < datetime(?, '+1 day')`
+      ).bind(since, until).first(),
+      env.DB.prepare(
+        `SELECT DATE(created_at) as day, COUNT(*) as total FROM leads WHERE created_at >= ? AND created_at < datetime(?, '+1 day') GROUP BY day ORDER BY day`
+      ).bind(since, until).all(),
+    ]);
+    crmLeads = crmRow?.total || 0;
+    crmDailyRows = crmDailyResult?.results || [];
+  }
+
+  // Dados diários do Meta para o gráfico
+  const daily = (rawDaily.data || []).map(row => ({
+    date:       row.date_start,
+    spend:      parseFloat(row.spend || 0),
+    metaLeads:  act(row, 'lead'),
+    linkClicks: act(row, 'link_click'),
+    lpv:        act(row, 'landing_page_view'),
+  }));
 
   const metrics = {
     reach:       parseFloat(d.reach     || 0),
     frequency:   parseFloat(d.frequency || 0),
     spend,
     impressions,
-    cpm:         parseFloat(d.cpm || 0),
+    cpm:         parseFloat(d.cpm   || 0),
     clicks:      parseFloat(d.clicks || 0),
-    cpcLink:     linkClicks  ? spend / linkClicks       : 0,
+    cpcLink:     linkClicks  ? spend / linkClicks            : 0,
     ctrLink:     impressions ? linkClicks / impressions * 100 : 0,
     linkClicks,
     lpv,
-    costLpv:     lpv         ? spend / lpv              : 0,
+    costLpv:     lpv         ? spend / lpv                   : 0,
     crmLeads,
-    cpl:         crmLeads    ? spend / crmLeads         : 0,  // CPL = gasto / leads CRM
-    connectRate: linkClicks  ? lpv / linkClicks * 100   : 0,
-    regRate:     lpv         ? crmLeads / lpv * 100     : 0,  // taxa de cadastro também usa CRM
-    videoPlays,
-    thruPlays,
-    hookRate:    impressions ? p25 / impressions * 100  : 0,
-    holdRate:    impressions ? p75 / impressions * 100  : 0,
+    cpl:         crmLeads    ? spend / crmLeads              : 0,
+    connectRate: linkClicks  ? lpv / linkClicks * 100        : 0,
+    regRate:     lpv         ? crmLeads / lpv * 100          : 0,
+    hookRate:    impressions ? p25 / impressions * 100       : 0,
+    holdRate:    impressions ? p75 / impressions * 100       : 0,
+    videoPlays:  video(d.video_play_actions),
+    thruPlays:   video(d.video_thruplay_watched_actions),
   };
 
-  return json({ ok: true, metrics });
+  return json({ ok: true, metrics, daily, crmDaily: crmDailyRows });
+}
+
+async function fetchMeta(url) {
+  try {
+    const r = await fetch(url);
+    return r.json();
+  } catch (e) {
+    return { error: { message: e.message } };
+  }
 }
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store',
-    },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   });
 }
