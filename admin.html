@@ -1103,6 +1103,35 @@
       .stats { grid-template-columns: 1fr 1fr; }
     }
 
+    /* ── META DASHBOARD ─────────────────────────────── */
+    .dash-toolbar {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .dash-period { display: flex; gap: 4px; margin-left: auto; }
+    .dash-period button {
+      background: transparent; border: 1px solid var(--border2);
+      color: var(--dim); border-radius: 6px; padding: 4px 12px;
+      font-size: 0.78rem; cursor: pointer;
+    }
+    .dash-period button.active { border-color: var(--gold-bd); color: var(--gold); font-weight: 700; }
+    .dash-kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .dash-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 18px;
+    }
+    .dash-card .dk-label { font-size: 0.68rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .dash-card .dk-value { font-size: 1.45rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .dash-card .dk-value.gold { color: var(--gold); }
+    .dash-card .dk-sub { font-size: 0.7rem; color: var(--dim); margin-top: 4px; }
+    .dash-section-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin: 20px 0 10px; }
+    .dash-loading { text-align: center; padding: 60px 0; color: var(--dim); font-size: 0.9rem; }
+    .dash-error { text-align: center; padding: 40px; color: #e55; font-size: 0.85rem; }
+
     @media (max-width: 560px) {
       .topbar { padding: 0 16px; }
       .page { padding: 24px 16px 48px; }
@@ -1163,6 +1192,13 @@
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
           Novo contato
+        </button>
+        <button class="btn-outline" onclick="toggleDash(true)" id="btnDash">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="9" height="9" rx="1"/><rect x="13" y="3" width="9" height="9" rx="1"/>
+            <rect x="2" y="14" width="9" height="7" rx="1"/><rect x="13" y="14" width="9" height="7" rx="1"/>
+          </svg>
+          Dashboard
         </button>
         <button class="btn-crm" onclick="toggleCRM(true)">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1286,6 +1322,23 @@
     </div>
 
     </div><!-- /tableSection -->
+
+    <!-- ── DASHBOARD VIEW ───────────────────────────── -->
+    <div id="dashView" style="display:none;">
+      <div class="dash-toolbar">
+        <button class="btn-outline" onclick="toggleDash(false)">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;stroke:currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+          Voltar
+        </button>
+        <span style="font-size:0.8rem;color:var(--dim);">Meta Ads · últimos</span>
+        <div class="dash-period">
+          <button onclick="loadDash(7,this)" id="dp7">7D</button>
+          <button onclick="loadDash(30,this)" id="dp30" class="active">30D</button>
+          <button onclick="loadDash(90,this)" id="dp90">90D</button>
+        </div>
+      </div>
+      <div id="dashContent"><div class="dash-loading">Carregando dados do Meta…</div></div>
+    </div>
 
     <!-- ── CRM VIEW ──────────────────────────────────── -->
     <div id="crmView" style="display:none;">
@@ -2262,6 +2315,99 @@
       await loadLeads();
       renderStats(_leads);
       renderTable();
+    }
+
+    /* ── META DASHBOARD ──────────────────────────────── */
+    var _mainView  = null; // elemento que esconder ao abrir dash
+
+    function toggleDash(show) {
+      var dash  = document.getElementById('dashView');
+      var crm   = document.getElementById('crmView');
+      var main  = document.getElementById('mainView');
+      var cards = document.getElementById('statsCards');
+
+      if (show) {
+        dash.style.display  = 'block';
+        crm.style.display   = 'none';
+        if (main)  main.style.display  = 'none';
+        if (cards) cards.style.display = 'none';
+        document.getElementById('tableSection') && (document.getElementById('tableSection').style.display = 'none');
+        document.getElementById('dailyChartSection') && (document.getElementById('dailyChartSection').style.display = 'none');
+        loadDash(30, document.getElementById('dp30'));
+      } else {
+        dash.style.display  = 'none';
+        if (main)  main.style.display  = '';
+        if (cards) cards.style.display = '';
+        document.getElementById('tableSection') && (document.getElementById('tableSection').style.display = '');
+        document.getElementById('dailyChartSection') && (document.getElementById('dailyChartSection').style.display = '');
+      }
+    }
+
+    async function loadDash(days, btn) {
+      document.querySelectorAll('.dash-period button').forEach(function(b) { b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      document.getElementById('dashContent').innerHTML = '<div class="dash-loading">Carregando dados do Meta…</div>';
+
+      var preset = days === 7 ? 'last_7d' : days === 90 ? 'last_90d' : 'last_30d';
+      var data   = await api('GET', '/api/meta-dashboard?preset=' + preset);
+      if (!data || !data.ok) {
+        document.getElementById('dashContent').innerHTML = '<div class="dash-error">Erro ao carregar dados: ' + ((data && data.error) || 'verifique o token') + '</div>';
+        return;
+      }
+      renderDash(data.metrics, days);
+    }
+
+    function fmtBRL(v)  { return 'R$ ' + parseFloat(v).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+    function fmtPct(v)  { return parseFloat(v).toFixed(2).replace('.',',') + '%'; }
+    function fmtNum(v)  { return parseInt(v).toLocaleString('pt-BR'); }
+    function fmtDec(v)  { return parseFloat(v).toFixed(2).replace('.',','); }
+
+    function dashCard(label, value, sub, gold) {
+      return '<div class="dash-card">' +
+        '<div class="dk-label">' + label + '</div>' +
+        '<div class="dk-value' + (gold ? ' gold' : '') + '">' + value + '</div>' +
+        (sub ? '<div class="dk-sub">' + sub + '</div>' : '') +
+        '</div>';
+    }
+
+    function renderDash(m, days) {
+      var html = '';
+
+      html += '<div class="dash-section-title">Resultados</div>';
+      html += '<div class="dash-kpis">';
+      html += dashCard('Leads', fmtNum(m.leads), 'cadastros via pixel', true);
+      html += dashCard('Custo por lead', fmtBRL(m.cpl), 'CPL', true);
+      html += dashCard('Valor gasto', fmtBRL(m.spend), 'últimos ' + days + ' dias');
+      html += dashCard('Alcance', fmtNum(m.reach), 'pessoas únicas');
+      html += dashCard('Frequência', fmtDec(m.frequency), 'impressões por pessoa');
+      html += '</div>';
+
+      html += '<div class="dash-section-title">Distribuição do Tráfego</div>';
+      html += '<div class="dash-kpis">';
+      html += dashCard('Impressões', fmtNum(m.impressions), '');
+      html += dashCard('CPM', fmtBRL(m.cpm), 'custo por 1.000 imp.');
+      html += dashCard('Cliques no link', fmtNum(m.linkClicks), '');
+      html += dashCard('CPC', fmtBRL(m.cpcLink), 'custo por clique no link');
+      html += dashCard('CTR', fmtPct(m.ctrLink), 'cliques / impressões');
+      html += '</div>';
+
+      html += '<div class="dash-section-title">Qualidade do Funil</div>';
+      html += '<div class="dash-kpis">';
+      html += dashCard('Vis. da página', fmtNum(m.lpv), 'landing page views');
+      html += dashCard('Custo por LPV', fmtBRL(m.costLpv), '');
+      html += dashCard('Connect Rate', fmtPct(m.connectRate), 'LPV / cliques no link');
+      html += dashCard('Taxa de cadastro', fmtPct(m.regRate), 'leads / LPV');
+      html += '</div>';
+
+      html += '<div class="dash-section-title">Qualidade do Criativo (Vídeo)</div>';
+      html += '<div class="dash-kpis">';
+      html += dashCard('Hook Rate', fmtPct(m.hookRate), '25% assistido / impressões');
+      html += dashCard('Hold Rate', fmtPct(m.holdRate), '75% assistido / impressões');
+      html += dashCard('Video plays', fmtNum(m.videoPlays), 'reproduções iniciadas');
+      html += dashCard('ThruPlays', fmtNum(m.thruPlays), 'assistidos até o fim');
+      html += '</div>';
+
+      document.getElementById('dashContent').innerHTML = html;
     }
 
     async function init() {
