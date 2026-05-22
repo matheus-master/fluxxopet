@@ -2375,8 +2375,8 @@
 
       html += '<div class="dash-section-title">Resultados</div>';
       html += '<div class="dash-kpis">';
-      html += dashCard('Leads', fmtNum(m.leads), 'cadastros via pixel', true);
-      html += dashCard('Custo por lead', fmtBRL(m.cpl), 'CPL', true);
+      html += dashCard('Leads no CRM', fmtNum(m.crmLeads), 'cadastros no período', true);
+      html += dashCard('Custo por lead', fmtBRL(m.cpl), 'gasto / leads CRM', true);
       html += dashCard('Valor gasto', fmtBRL(m.spend), 'últimos ' + days + ' dias');
       html += dashCard('Alcance', fmtNum(m.reach), 'pessoas únicas');
       html += dashCard('Frequência', fmtDec(m.frequency), 'impressões por pessoa');
