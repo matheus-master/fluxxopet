@@ -39,17 +39,17 @@
     /* ── GRID BG ── */
     .grid-bg {
       background-image:
-        linear-gradient(to right,  rgba(18,50,200,0.055) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(18,50,200,0.055) 1px, transparent 1px);
+        linear-gradient(to right,  rgba(18,50,200,0.09) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(18,50,200,0.09) 1px, transparent 1px);
       background-size: 40px 40px;
     }
 
     /* ── HIGHLIGHT BAR ── */
-    .hl { position: relative; display: inline; white-space: nowrap; }
+    .hl { position: relative; display: inline-block; white-space: nowrap; }
     .hl::before {
       content: '';
       position: absolute;
-      inset: 2px -4px;
+      inset: 0px -8px;
       background: var(--red);
       transform: rotate(-1.2deg) skewX(-1deg);
       z-index: 0;
@@ -86,7 +86,7 @@
     .nav-right { display: flex; align-items: center; gap: 18px; }
     .nav-login { font-size: 0.87rem; font-weight: 500; color: rgba(9,16,64,0.55); text-decoration: none; }
     .nav-cta {
-      background: var(--dark); color: var(--white);
+      background: var(--blue); color: var(--white);
       font-family: 'Satoshi', sans-serif; font-size: 0.84rem; font-weight: 700;
       padding: 9px 20px; border-radius: 999px; border: none; cursor: pointer;
       text-decoration: none; transition: background 0.2s, transform 0.15s;
@@ -119,8 +119,8 @@
     .hero-title {
       font-family: 'Anton', sans-serif;
       font-size: clamp(3rem, 6vw, 5.4rem);
-      line-height: 0.93; letter-spacing: 0.01em;
-      text-transform: uppercase; color: var(--dark);
+      line-height: 1.0; letter-spacing: 0.01em;
+      text-transform: uppercase; color: var(--blue);
       margin-bottom: 28px;
     }
     .hero-sub {
@@ -131,7 +131,7 @@
     .hero-stats { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
     .h-stat strong {
       display: block; font-family: 'Anton', sans-serif;
-      font-size: 1.5rem; color: var(--dark); line-height: 1;
+      font-size: 1.5rem; color: var(--blue); line-height: 1;
     }
     .h-stat span { font-size: 0.76rem; color: var(--sage); font-weight: 500; }
     .vd { width: 1px; height: 36px; background: rgba(9,16,64,0.12); }
@@ -139,9 +139,10 @@
     /* ── CARD ── */
     .card {
       background: var(--white);
-      border: 1px solid rgba(9,16,64,0.10);
+      border: 1px solid rgba(18,50,200,0.18);
+      border-top: 4px solid var(--blue);
       border-radius: 20px; padding: 38px 34px;
-      box-shadow: 0 28px 72px rgba(9,16,64,0.13);
+      box-shadow: 0 28px 72px rgba(18,50,200,0.18);
     }
     .card-title {
       font-family: 'Anton', sans-serif;
@@ -182,7 +183,7 @@
     .trust svg { width: 11px; height: 11px; stroke: var(--sage); }
 
     /* ── PROOF BAR ── */
-    .proof-bar { background: var(--dark); padding: 26px 32px; }
+    .proof-bar { background: var(--blue); padding: 26px 32px; }
     .proof-bar-in {
       max-width: 1200px; margin: 0 auto;
       display: flex; align-items: center; justify-content: center;
