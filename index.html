@@ -3,484 +3,435 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Descubra quanto seu Pet Shop está pagando de imposto indevido. Diagnóstico fiscal gratuito para pet shops." />
+  <meta name="description" content="Descubra quanto seu Pet Shop está pagando de imposto indevido. Diagnóstico fiscal gratuito." />
   <title>Diagnóstico Fiscal Gratuito – Fluxxo Pet</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap" /></noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap" />
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --blue:    #1232C8;
-      --blue-dk: #091040;
-      --blue-lt: rgba(255,255,255,0.10);
-      --blue-bd: rgba(255,255,255,0.20);
-      --red:     #E53030;
-      --red-dim: rgba(229,48,48,0.12);
-      --red-bd:  rgba(229,48,48,0.32);
-      --white:   #ffffff;
-      --off:     rgba(255,255,255,0.80);
-      --dim:     rgba(255,255,255,0.52);
-
-      /* tokens para seções brancas */
-      --w-bg:  #ffffff;
-      --w-s:   #EEF1FD;
-      --w-bd:  #CDD4F5;
-      --w-txt: #0D1C6E;
-      --w-mid: #3D4E8C;
-      --w-dim: #7A87B8;
-
-      --radius:    10px;
-      --radius-lg: 14px;
+      --red:   #E53030;
+      --blue:  #1232C8;
+      --dark:  #091040;
+      --mid:   #0D1B6B;
+      --sage:  #7A87B8;
+      --white: #ffffff;
+      --light: #f0f3ff;
     }
 
     html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
     body {
-      background: var(--w-bg);
-      color: var(--w-txt);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--white);
+      color: var(--dark);
+      font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
       font-size: 16px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    h1, h2, h3,
-    .hero-title, .section-head, .cta-title, .card-title, .modal-question, .logo-name {
-      font-family: 'Big Shoulders Display', 'Inter', sans-serif;
+    /* ── GRID BG ── */
+    .grid-bg {
+      background-image:
+        linear-gradient(to right,  rgba(18,50,200,0.055) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(18,50,200,0.055) 1px, transparent 1px);
+      background-size: 40px 40px;
     }
 
-    /* ── TARJA ── */
-    .tarja {
+    /* ── HIGHLIGHT BAR ── */
+    .hl { position: relative; display: inline; white-space: nowrap; }
+    .hl::before {
+      content: '';
+      position: absolute;
+      inset: 2px -4px;
       background: var(--red);
-      color: var(--white);
-      text-align: center;
-      padding: 10px 20px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      transform: rotate(-1.2deg) skewX(-1deg);
+      z-index: 0;
+      border-radius: 3px;
     }
-    .tarja-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.4); flex-shrink: 0; }
+    .hl > * { position: relative; z-index: 1; color: var(--white); }
 
-    /* ── LAYOUT ── */
-    .sec-blue  { background: var(--blue);    color: var(--white); }
-    .sec-dark  { background: var(--blue-dk); color: var(--white); }
-    .sec-white { background: var(--w-bg);    color: var(--w-txt); }
+    /* ── NAV ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 70px;
+      background: rgba(255,255,255,0.93);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(9,16,64,0.08);
+      z-index: 100;
+      display: flex; align-items: center;
+      padding: 0 32px;
+    }
+    .nav-in {
+      width: 100%; max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.3rem; letter-spacing: 0.06em;
+      color: var(--dark); text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .nav-logo .dot { color: var(--red); }
+    .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 0.87rem; font-weight: 500; color: rgba(9,16,64,0.6); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--dark); }
+    .nav-right { display: flex; align-items: center; gap: 18px; }
+    .nav-login { font-size: 0.87rem; font-weight: 500; color: rgba(9,16,64,0.55); text-decoration: none; }
+    .nav-cta {
+      background: var(--dark); color: var(--white);
+      font-family: 'Satoshi', sans-serif; font-size: 0.84rem; font-weight: 700;
+      padding: 9px 20px; border-radius: 999px; border: none; cursor: pointer;
+      text-decoration: none; transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: var(--red); transform: translateY(-1px); }
 
     /* ── HERO ── */
+    .hero-wrap { padding-top: 70px; }
     .hero {
-      min-height: 100svh;
-      display: grid;
-      grid-template-columns: 1fr 420px;
-      gap: 64px;
-      align-items: center;
-      padding: 80px 24px;
-      max-width: 1160px;
-      margin: 0 auto;
+      min-height: calc(100svh - 70px);
+      display: grid; grid-template-columns: 1fr 420px;
+      gap: 64px; align-items: center;
+      padding: 80px 32px;
+      max-width: 1200px; margin: 0 auto;
     }
-
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: rgba(255,255,255,0.80);
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      margin-bottom: 22px;
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 24px;
     }
-    .badge::before { content: ''; display: block; width: 18px; height: 1px; background: rgba(255,255,255,0.6); }
-
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--red); flex-shrink: 0;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.5; transform:scale(1.4); }
+    }
     .hero-title {
-      font-size: clamp(2.8rem, 5.5vw, 4.4rem);
-      font-weight: 900;
-      line-height: 1.0;
-      letter-spacing: 0.01em;
-      margin-bottom: 20px;
-      color: var(--white);
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(3rem, 6vw, 5.4rem);
+      line-height: 0.93; letter-spacing: 0.01em;
+      text-transform: uppercase; color: var(--dark);
+      margin-bottom: 28px;
     }
-    .hero-title .red-txt { font-style: italic; color: var(--red); }
+    .hero-sub {
+      font-size: 1.02rem; font-weight: 400;
+      color: rgba(9,16,64,0.62); max-width: 500px;
+      line-height: 1.72; margin-bottom: 44px;
+    }
+    .hero-stats { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
+    .h-stat strong {
+      display: block; font-family: 'Anton', sans-serif;
+      font-size: 1.5rem; color: var(--dark); line-height: 1;
+    }
+    .h-stat span { font-size: 0.76rem; color: var(--sage); font-weight: 500; }
+    .vd { width: 1px; height: 36px; background: rgba(9,16,64,0.12); }
 
-    .hero-desc {
-      color: var(--off);
-      font-size: 1rem;
-      line-height: 1.7;
-      max-width: 480px;
-      margin-bottom: 40px;
-    }
-
-    /* stats */
-    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
-
-    .stat {
-      background: rgba(255,255,255,0.96);
-      border-radius: var(--radius);
-      padding: 20px 22px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-      box-shadow: 0 6px 28px rgba(0,0,0,0.18);
-    }
-    .stat-ico {
-      width: 38px; height: 38px;
-      border-radius: 8px;
-      background: var(--red-dim);
-      border: 1px solid var(--red-bd);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .stat-ico svg { width: 16px; height: 16px; stroke: var(--red); }
-    .stat strong {
-      display: block;
-      font-family: 'Big Shoulders Display', sans-serif;
-      font-size: 1.8rem;
-      font-weight: 900;
-      line-height: 1;
-      color: #0D1C6E;
-    }
-    .stat span { font-size: 0.78rem; color: #7A87B8; margin-top: -4px; }
-
-    .proof {
-      font-size: 0.78rem;
-      color: var(--dim);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .proof::before { content: '—'; color: rgba(255,255,255,0.4); }
-
-    /* ── FORM CARD ── */
+    /* ── CARD ── */
     .card {
       background: var(--white);
-      border-radius: var(--radius-lg);
-      padding: 36px 32px;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+      border: 1px solid rgba(9,16,64,0.10);
+      border-radius: 20px; padding: 38px 34px;
+      box-shadow: 0 28px 72px rgba(9,16,64,0.13);
     }
     .card-title {
-      font-size: 1.55rem;
-      font-weight: 900;
-      text-align: center;
-      letter-spacing: 0.01em;
-      line-height: 1.1;
-      margin-bottom: 4px;
-      color: var(--w-txt);
+      font-family: 'Anton', sans-serif;
+      font-size: 1.65rem; line-height: 1.05;
+      text-transform: uppercase; color: var(--dark); margin-bottom: 4px;
     }
-    .card-title span { color: var(--red); }
-    .card-sub { text-align: center; color: var(--w-dim); font-size: 0.82rem; margin-bottom: 26px; }
+    .card-title .red { color: var(--red); }
+    .card-sub { font-size: 0.81rem; color: var(--sage); margin-bottom: 26px; }
 
-    .field { margin-bottom: 14px; }
+    .field { margin-bottom: 12px; }
     .field input {
-      width: 100%;
-      background: var(--w-s);
-      border: 1px solid var(--w-bd);
-      border-radius: 8px;
-      padding: 13px 15px;
-      color: var(--w-txt);
-      font-family: inherit;
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.18s;
+      width: 100%; background: var(--light);
+      border: 1px solid rgba(9,16,64,0.11); border-radius: 10px;
+      padding: 13px 16px; font-family: 'Satoshi', sans-serif;
+      font-size: 0.9rem; color: var(--dark); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .field input:focus { border-color: var(--blue); }
-    .field input::placeholder { color: var(--w-dim); }
-    .hint { font-size: 0.7rem; color: var(--w-dim); margin-top: 5px; padding-left: 2px; }
+    .field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(18,50,200,0.09); }
+    .field input::placeholder { color: var(--sage); }
+    .hint { font-size: 0.69rem; color: var(--sage); margin-top: 4px; padding-left: 2px; }
 
-    .btn {
-      width: 100%;
-      background: var(--red);
-      color: var(--white);
-      border: none;
-      border-radius: 8px;
-      padding: 15px 20px;
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 800;
-      letter-spacing: 0.01em;
-      cursor: pointer;
-      margin-top: 6px;
+    .btn-sub {
+      width: 100%; background: var(--red); color: var(--white);
+      font-family: 'Anton', sans-serif; font-size: 1rem;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      border: none; border-radius: 10px; padding: 15px 20px;
+      cursor: pointer; margin-top: 8px;
       display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: background 0.18s, transform 0.1s;
+      transition: background 0.2s, transform 0.15s;
     }
-    .btn:hover  { background: #c82828; transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
+    .btn-sub:hover  { background: #c42020; transform: translateY(-2px); }
+    .btn-sub:active { transform: translateY(0); }
 
     .trust {
-      text-align: center;
-      color: var(--w-dim);
-      font-size: 0.72rem;
-      margin-top: 14px;
       display: flex; align-items: center; justify-content: center; gap: 5px;
+      font-size: 0.71rem; color: var(--sage); margin-top: 14px;
     }
-    .trust svg { width: 11px; height: 11px; stroke: var(--w-dim); flex-shrink: 0; }
+    .trust svg { width: 11px; height: 11px; stroke: var(--sage); }
 
-    /* ── SECTION WRAPPER ── */
-    .section { padding: 96px 24px; max-width: 1160px; margin: 0 auto; }
-
-    .section-head {
-      text-align: center;
-      font-size: clamp(1.9rem, 3.5vw, 2.6rem);
-      font-weight: 900;
-      letter-spacing: 0.01em;
-      line-height: 1.1;
-      margin-bottom: 10px;
-    }
-    .sec-blue .section-head  { color: var(--white); }
-    .sec-white .section-head { color: var(--w-txt); }
-    .sec-dark .section-head  { color: var(--white); }
-
-    .section-head .rd   { color: var(--red); }
-    .section-head .soft { color: rgba(255,255,255,0.72); }
-
-    .section-sub {
-      text-align: center;
-      font-size: 0.88rem;
-      margin-bottom: 52px;
-    }
-    .sec-blue .section-sub  { color: var(--dim); }
-    .sec-white .section-sub { color: var(--w-dim); }
-
-    /* ── DIVIDERS ── */
-    .divider       { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 0; }
-    .divider-light { border: none; border-top: 1px solid var(--w-bd); margin: 0; }
-
-    /* ── PAIN ── */
-    .pains { max-width: 600px; margin: 0 auto 36px; display: flex; flex-direction: column; gap: 10px; }
-
-    .pain {
-      background: var(--w-s);
-      border: 1px solid var(--w-bd);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      display: flex; align-items: center; gap: 16px;
-      font-size: 0.9rem;
-      color: var(--w-mid);
-      line-height: 1.4;
-    }
-    .pain-x {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      border: 1px solid rgba(229,48,48,0.4);
-      background: rgba(229,48,48,0.08);
+    /* ── PROOF BAR ── */
+    .proof-bar { background: var(--dark); padding: 26px 32px; }
+    .proof-bar-in {
+      max-width: 1200px; margin: 0 auto;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      gap: 48px; flex-wrap: wrap;
     }
-    .pain-x svg { width: 10px; height: 10px; stroke: var(--red); }
+    .proof-item { display: flex; align-items: center; gap: 12px; }
+    .proof-item strong { font-family: 'Anton', sans-serif; font-size: 1.45rem; color: var(--white); line-height: 1; }
+    .proof-item span { font-size: 0.76rem; color: rgba(255,255,255,0.45); font-weight: 500; max-width: 80px; line-height: 1.35; }
+    .pv { width: 1px; height: 36px; background: rgba(255,255,255,0.1); }
 
-    .pain-footer { text-align: center; color: var(--w-mid); font-size: 0.85rem; }
-    .pain-footer strong { color: var(--w-txt); font-weight: 600; }
-
-    /* ── BENEFITS ── */
-    .benefits {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      max-width: 900px;
-      margin: 0 auto;
+    /* ── SPLIT ── */
+    .split { display: grid; grid-template-columns: 1fr 1fr; }
+    .split-l { background: var(--dark); padding: 80px 60px; }
+    .split-r { background: var(--blue); padding: 80px 60px; border-left: 4px solid var(--red); }
+    .split-lbl {
+      font-family: 'Anton', sans-serif; font-size: 0.72rem;
+      letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 28px;
     }
-    .benefit {
-      background: rgba(255,255,255,0.96);
-      border-radius: var(--radius-lg);
-      padding: 36px 28px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    .split-l .split-lbl { color: rgba(255,255,255,0.35); }
+    .split-r .split-lbl { color: rgba(255,255,255,0.65); }
+    .split-h {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(2.2rem, 3.5vw, 3.2rem);
+      text-transform: uppercase; line-height: 0.95; margin-bottom: 36px;
     }
+    .split-l .split-h { color: rgba(255,255,255,0.3); }
+    .split-r .split-h { color: var(--white); }
+    .split-items { display: flex; flex-direction: column; gap: 16px; }
+    .split-item { display: flex; align-items: flex-start; gap: 13px; font-size: 0.9rem; line-height: 1.55; }
+    .split-l .split-item { color: rgba(255,255,255,0.5); }
+    .split-r .split-item { color: rgba(255,255,255,0.88); }
+    .ico-x, .ico-ck {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    .ico-x  { background: rgba(229,48,48,0.18); }
+    .ico-x  svg { width: 10px; height: 10px; stroke: #E53030; }
+    .ico-ck { background: rgba(255,255,255,0.15); }
+    .ico-ck svg { width: 10px; height: 10px; stroke: white; }
 
-    .ben-ico {
-      width: 52px; height: 52px;
-      border-radius: 12px;
-      background: var(--red-dim);
-      border: 1px solid var(--red-bd);
+    /* ── BENTO ── */
+    .bento-wrap { padding: 96px 32px; max-width: 1200px; margin: 0 auto; }
+    .sec-lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+    .sec-title {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(2.4rem, 4vw, 3.8rem);
+      text-transform: uppercase; line-height: 0.95;
+      color: var(--dark); margin-bottom: 48px;
+    }
+    .sec-title .red { color: var(--red); }
+
+    .bento { display: grid; grid-template-columns: repeat(3,1fr); grid-auto-rows: 280px; gap: 14px; }
+    .bc {
+      border-radius: 16px; padding: 34px 30px; overflow: hidden;
+      position: relative;
+      transition: transform 300ms cubic-bezier(0.4,0,0.2,1), box-shadow 300ms cubic-bezier(0.4,0,0.2,1);
+    }
+    .bc:hover { transform: translateY(-4px); box-shadow: 0 22px 52px rgba(9,16,64,0.14); }
+    .bc.lt { background: var(--light); border: 1px solid rgba(9,16,64,0.08); }
+    .bc.dk { background: var(--dark); }
+    .bc.bl { background: var(--blue); }
+    .bc.s2 { grid-column: span 2; }
+
+    .b-ico { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+    .lt .b-ico { background: rgba(18,50,200,0.10); }
+    .dk .b-ico { background: rgba(255,255,255,0.10); }
+    .bl .b-ico { background: rgba(255,255,255,0.15); }
+    .b-ico svg { width: 20px; height: 20px; }
+    .lt .b-ico svg { stroke: var(--blue); }
+    .dk .b-ico svg, .bl .b-ico svg { stroke: white; }
+
+    .bc h3 { font-family: 'Anton', sans-serif; font-size: 1.5rem; text-transform: uppercase; line-height: 1; margin-bottom: 10px; }
+    .lt h3 { color: var(--dark); }
+    .dk h3, .bl h3 { color: var(--white); }
+    .bc p { font-size: 0.84rem; line-height: 1.6; }
+    .lt p { color: rgba(9,16,64,0.58); }
+    .dk p { color: rgba(255,255,255,0.48); }
+    .bl p { color: rgba(255,255,255,0.72); }
+
+    .b-tag {
+      position: absolute; top: 26px; right: 26px;
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 999px;
+    }
+    .lt .b-tag { background: rgba(229,48,48,0.10); color: var(--red); border: 1px solid rgba(229,48,48,0.22); }
+    .dk .b-tag, .bl .b-tag { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15); }
+
+    /* mockup inside bento */
+    .b-mockup {
+      position: absolute; bottom: -16px; right: -8px;
+      width: 52%; background: white;
+      border-radius: 12px 12px 0 0;
+      border: 1px solid rgba(9,16,64,0.09);
+      box-shadow: 0 -8px 36px rgba(9,16,64,0.09);
+      overflow: hidden;
+    }
+    .m-bar { background: #f0f3ff; padding: 8px 12px; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid rgba(9,16,64,0.06); }
+    .m-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .m-body { padding: 12px; }
+    .m-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; margin-bottom: 5px; font-size: 0.71rem; }
+    .m-row.g { background: rgba(34,197,94,0.10); color: #15803d; font-weight: 600; }
+    .m-row.b { background: rgba(18,50,200,0.07); color: var(--blue); font-weight: 500; }
+    .m-row.s { background: rgba(9,16,64,0.04); color: var(--sage); }
+
+    /* ── HOW IT WORKS ── */
+    .how-wrap { background: var(--dark); padding: 96px 32px; }
+    .how-in { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 80px; align-items: start; }
+    .how-sticky { position: sticky; top: 90px; }
+    .how-lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
+    .how-title { font-family: 'Anton', sans-serif; font-size: clamp(3rem, 5vw, 4.8rem); text-transform: uppercase; line-height: 0.9; color: var(--white); }
+    .how-title .red { color: var(--red); }
+
+    .steps { display: flex; flex-direction: column; }
+    .step { padding: 36px 0; border-top: 1px solid rgba(255,255,255,0.07); display: grid; grid-template-columns: 72px 1fr; gap: 28px; align-items: start; }
+    .step:last-child { border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .step-n { font-family: 'Anton', sans-serif; font-size: 4.5rem; line-height: 1; color: rgba(229,48,48,0.18); transition: color 0.3s; text-align: center; }
+    .step:hover .step-n { color: var(--red); }
+    .step-t { font-family: 'Anton', sans-serif; font-size: 1.5rem; text-transform: uppercase; color: var(--white); margin-bottom: 8px; line-height: 1.1; }
+    .step-d { font-size: 0.88rem; color: rgba(255,255,255,0.48); line-height: 1.65; }
+
+    /* ── TESTIMONIALS ── */
+    .testi-wrap { padding: 96px 32px; max-width: 1200px; margin: 0 auto; }
+    .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; align-items: center; }
+    .tc {
+      border-radius: 16px; padding: 30px 26px;
+      transition: transform 300ms cubic-bezier(0.4,0,0.2,1), box-shadow 300ms cubic-bezier(0.4,0,0.2,1);
+    }
+    .tc:hover { transform: translateY(-4px); box-shadow: 0 18px 44px rgba(9,16,64,0.12); }
+    .tc.lite { background: white; border: 1px solid rgba(9,16,64,0.08); }
+    .tc.dark { background: var(--dark); transform: translateY(14px); }
+    .tc.dark:hover { transform: translateY(10px); }
+    .stars { display: flex; gap: 2px; margin-bottom: 16px; }
+    .stars svg { width: 15px; height: 15px; fill: var(--red); }
+    .t-body { font-size: 0.9rem; line-height: 1.72; margin-bottom: 22px; font-weight: 500; }
+    .lite .t-body { color: rgba(9,16,64,0.72); }
+    .dark .t-body { color: rgba(255,255,255,0.78); }
+    .t-author { display: flex; align-items: center; gap: 12px; }
+    .t-av {
+      width: 42px; height: 42px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
+      font-family: 'Anton', sans-serif; font-size: 0.82rem; flex-shrink: 0;
     }
-    .ben-ico svg { width: 22px; height: 22px; stroke: var(--red); }
-    .benefit h3 { font-size: 1rem; font-weight: 800; margin-bottom: 10px; color: #0D1C6E; }
-    .benefit p  { color: #7A87B8; font-size: 0.84rem; line-height: 1.65; }
+    .lite .t-av { background: var(--light); color: var(--blue); }
+    .dark .t-av { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
+    .t-name { font-family: 'Anton', sans-serif; font-size: 0.92rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .lite .t-name { color: var(--dark); }
+    .dark .t-name { color: var(--white); }
+    .t-role { font-size: 0.73rem; color: var(--sage); }
 
-    /* ── LOSS ── */
-    .loss { text-align: center; }
-    .loss-stat { color: var(--w-mid); max-width: 560px; margin: 0 auto 10px; font-size: 0.92rem; }
-    .loss-stat strong { color: var(--w-txt); font-weight: 700; }
-    .loss-note { color: var(--w-dim); font-size: 0.85rem; margin-bottom: 40px; }
-    .loss-note strong { color: var(--blue); font-weight: 600; }
-
-    .quote {
-      max-width: 580px;
-      margin: 0 auto;
-      background: var(--w-s);
-      border: 1px solid var(--w-bd);
-      border-left: 3px solid var(--blue);
-      border-radius: var(--radius);
-      padding: 28px 32px;
-      font-size: 0.95rem;
-      line-height: 1.75;
-      color: var(--w-mid);
-      text-align: left;
+    /* ── FINAL CTA ── */
+    .cta-sec { background: var(--red); padding: 100px 32px; position: relative; overflow: hidden; }
+    .cta-deco {
+      position: absolute; font-family: 'Anton', sans-serif;
+      font-size: 22vw; text-transform: uppercase;
+      color: rgba(255,255,255,0.07); line-height: 0.85;
+      pointer-events: none; user-select: none; white-space: nowrap;
     }
-    .quote strong { color: var(--blue); font-weight: 600; }
-
-    /* ── CTA FINAL ── */
-    .cta-wrap { text-align: center; }
-
-    .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 32px;
+    .cta-deco.t { top: -10px; left: -10px; }
+    .cta-deco.b { bottom: -10px; right: -10px; }
+    .cta-in { max-width: 680px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
+    .cta-title { font-family: 'Anton', sans-serif; font-size: clamp(2.8rem, 6vw, 4.8rem); text-transform: uppercase; line-height: 0.92; color: var(--white); margin-bottom: 18px; }
+    .cta-sub { font-size: 1.05rem; color: rgba(255,255,255,0.78); max-width: 460px; margin: 0 auto 44px; line-height: 1.65; }
+    .cta-card { background: white; border-radius: 20px; padding: 36px 32px; box-shadow: 0 28px 72px rgba(0,0,0,0.22); text-align: left; }
+    .cta-card-title { font-family: 'Anton', sans-serif; font-size: 1.25rem; text-transform: uppercase; color: var(--dark); margin-bottom: 20px; }
+    .btn-dark {
+      width: 100%; background: var(--dark); color: var(--white);
+      font-family: 'Anton', sans-serif; font-size: 1rem; letter-spacing: 0.04em;
+      text-transform: uppercase; border: none; border-radius: 10px; padding: 15px 20px;
+      cursor: pointer; margin-top: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s, transform 0.15s;
     }
-    .logo-name { font-size: 1rem; font-weight: 900; letter-spacing: 0.1em; color: var(--white); }
-    .logo-tag  { font-size: 0.62rem; letter-spacing: 0.08em; color: var(--dim); display: block; text-transform: uppercase; margin-top: 1px; }
-
-    .cta-title {
-      font-size: clamp(2.2rem, 4vw, 3.2rem);
-      font-weight: 900;
-      letter-spacing: 0.01em;
-      line-height: 1.08;
-      margin-bottom: 12px;
-      color: var(--white);
-    }
-    .cta-title span { color: var(--red); }
-    .cta-sub { color: var(--dim); font-size: 0.9rem; margin-bottom: 36px; }
-
-    .btn-lg {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--red);
-      color: var(--white);
-      border: none;
-      border-radius: 8px;
-      padding: 16px 36px;
-      font-family: inherit;
-      font-size: 0.95rem;
-      font-weight: 800;
-      letter-spacing: 0.01em;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.18s, transform 0.1s;
-    }
-    .btn-lg:hover  { background: #c82828; transform: translateY(-2px); }
-    .btn-lg:active { transform: translateY(0); }
-
-    .cta-proof { color: var(--dim); font-size: 0.75rem; margin-top: 16px; }
-    .cta-proof::before { content: '— '; color: rgba(255,255,255,0.35); }
+    .btn-dark:hover { background: var(--mid); transform: translateY(-2px) scale(1.02); }
 
     /* ── FOOTER ── */
-    .footer {
-      background: var(--blue-dk);
-      padding: 24px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .footer-copy { font-size: 0.78rem; color: rgba(255,255,255,0.30); }
+    .footer { background: var(--dark); padding: 26px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-logo { font-family: 'Anton', sans-serif; font-size: 0.95rem; letter-spacing: 0.08em; color: rgba(255,255,255,0.38); display: flex; align-items: center; gap: 8px; }
+    .footer-copy { font-size: 0.77rem; color: rgba(255,255,255,0.26); }
 
     /* ── MOBILE ── */
-    @media (max-width: 860px) {
-      .hero { grid-template-columns: 1fr; gap: 48px; padding: 60px 20px; min-height: unset; }
-      .hero-title { font-size: clamp(2rem, 7vw, 2.8rem); }
-      .benefits { grid-template-columns: 1fr; max-width: 480px; }
-      .section { padding: 72px 20px; }
-      .footer { flex-direction: column; gap: 12px; text-align: center; }
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; gap: 44px; padding: 56px 20px; min-height: unset; }
+      .split { grid-template-columns: 1fr; }
+      .split-l, .split-r { padding: 56px 28px; }
+      .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
+      .bc.s2 { grid-column: span 2; }
+      .bc { min-height: 220px; }
+      .b-mockup { display: none; }
+      .how-in { grid-template-columns: 1fr; gap: 44px; }
+      .how-sticky { position: static; }
+      .testi-grid { grid-template-columns: 1fr; }
+      .tc.dark { transform: translateY(0); }
+      .tc.dark:hover { transform: translateY(-4px); }
     }
-    @media (max-width: 480px) {
-      .stats  { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .card   { padding: 28px 20px; }
-      .quote  { padding: 22px 20px; }
-      .btn-lg { width: 100%; justify-content: center; }
-    }
-    @media (max-width: 360px) {
-      .stats { grid-template-columns: 1fr; }
+    @media (max-width: 560px) {
+      .nav { padding: 0 18px; }
+      .bento { grid-template-columns: 1fr; }
+      .bc.s2 { grid-column: span 1; }
+      .proof-bar-in { gap: 20px; }
+      .pv { display: none; }
+      .card, .cta-card { padding: 26px 18px; }
     }
 
     /* ── MODAL ── */
     .overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
       display: flex; align-items: center; justify-content: center;
-      padding: 20px;
-      z-index: 1000;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.25s ease;
+      padding: 20px; z-index: 1000;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
     }
     .overlay.active { opacity: 1; pointer-events: all; }
-
     .modal {
-      background: var(--white);
-      border: 1px solid var(--w-bd);
-      border-radius: var(--radius-lg);
-      width: 100%; max-width: 460px;
-      overflow: hidden;
+      background: var(--white); border: 1px solid rgba(9,16,64,0.10);
+      border-radius: 20px; width: 100%; max-width: 460px; overflow: hidden;
       transform: translateY(16px) scale(0.98);
       transition: transform 0.28s cubic-bezier(.22,.68,0,1.2);
     }
     .overlay.active .modal { transform: translateY(0) scale(1); }
-
     .modal-progress { padding: 20px 28px 0; }
-    .progress-meta  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .progress-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--w-dim); }
-    .progress-pct   { font-family: 'Big Shoulders Display', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--blue); }
-    .progress-track { width: 100%; height: 4px; background: var(--w-s); border-radius: 99px; overflow: hidden; }
-    .progress-fill  { height: 100%; width: 90%; background: var(--blue); border-radius: 99px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
-
-    .modal-body     { padding: 24px 28px 28px; }
-    .modal-eyebrow  { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--w-dim); margin-bottom: 6px; }
-    .modal-question { font-size: 1.45rem; font-weight: 900; letter-spacing: 0.01em; line-height: 1.15; color: var(--w-txt); margin-bottom: 20px; }
-
+    .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .progress-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); }
+    .progress-pct { font-family: 'Anton', sans-serif; font-size: 0.9rem; color: var(--blue); }
+    .progress-track { width: 100%; height: 4px; background: var(--light); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 90%; background: var(--blue); border-radius: 99px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+    .modal-body { padding: 22px 28px 28px; }
+    .modal-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); margin-bottom: 6px; }
+    .modal-question { font-family: 'Anton', sans-serif; font-size: 1.45rem; text-transform: uppercase; line-height: 1.1; color: var(--dark); margin-bottom: 18px; }
     .options { display: flex; flex-direction: column; gap: 8px; }
-
     .opt {
-      background: var(--w-s);
-      border: 1px solid var(--w-bd);
-      border-radius: 8px;
-      padding: 13px 18px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.9rem; font-weight: 500;
-      color: var(--w-mid);
-      text-align: left; cursor: pointer;
+      background: var(--light); border: 1px solid rgba(9,16,64,0.10); border-radius: 10px;
+      padding: 12px 16px; font-family: 'Satoshi', sans-serif; font-size: 0.9rem; font-weight: 500;
+      color: rgba(9,16,64,0.68); text-align: left; cursor: pointer;
       display: flex; align-items: center; gap: 12px;
       transition: border-color 0.15s, background 0.15s, color 0.15s;
     }
-    .opt::before {
-      content: '';
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      border: 1.5px solid var(--w-dim);
-      flex-shrink: 0;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .opt:hover { border-color: rgba(18,50,200,0.4); background: rgba(18,50,200,0.05); color: var(--w-txt); }
+    .opt::before { content: ''; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--sage); flex-shrink: 0; transition: border-color 0.15s, background 0.15s; }
+    .opt:hover { border-color: rgba(18,50,200,0.35); background: rgba(18,50,200,0.05); color: var(--dark); }
     .opt:hover::before { border-color: var(--blue); }
-    .opt.selected { border-color: var(--blue); background: rgba(18,50,200,0.08); color: var(--w-txt); }
-    .opt.selected::before { border-color: var(--blue); background: var(--blue); box-shadow: inset 0 0 0 3px var(--w-s); }
-
-    .modal-success  { display: none; flex-direction: column; align-items: center; text-align: center; padding: 8px 0 4px; gap: 12px; }
-    .success-ico {
-      width: 52px; height: 52px;
-      border-radius: 50%;
-      background: rgba(18,50,200,0.10);
-      border: 1px solid rgba(18,50,200,0.25);
-      display: flex; align-items: center; justify-content: center;
-    }
+    .opt.selected { border-color: var(--blue); background: rgba(18,50,200,0.08); color: var(--dark); }
+    .opt.selected::before { border-color: var(--blue); background: var(--blue); box-shadow: inset 0 0 0 3px var(--light); }
+    .modal-success { display: none; flex-direction: column; align-items: center; text-align: center; padding: 8px 0 4px; gap: 12px; }
+    .success-ico { width: 52px; height: 52px; border-radius: 50%; background: rgba(18,50,200,0.09); border: 1px solid rgba(18,50,200,0.2); display: flex; align-items: center; justify-content: center; }
     .success-ico svg { width: 24px; height: 24px; stroke: var(--blue); }
-    .success-title { font-family: 'Big Shoulders Display', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--w-txt); }
-    .success-desc  { color: var(--w-dim); font-size: 0.85rem; line-height: 1.6; max-width: 320px; }
+    .success-title { font-family: 'Anton', sans-serif; font-size: 1.45rem; text-transform: uppercase; color: var(--dark); }
+    .success-desc { color: var(--sage); font-size: 0.84rem; line-height: 1.6; max-width: 320px; }
   </style>
 
-  <!-- Meta Pixel (init only — PageView dispara via track() com eventID para dedup CAPI) -->
   <script>
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
   n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
@@ -492,7 +443,6 @@
   <noscript><img height="1" width="1" style="display:none"
   src="https://www.facebook.com/tr?id=1338198531534558&ev=PageView&noscript=1"/></noscript>
 
-  <!-- GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=GA4_ID_AQUI"></script>
   <script>
   window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
@@ -501,495 +451,343 @@
 </head>
 <body>
 
-  <!-- ── TARJA ────────────────────────────────────────── -->
-  <div class="tarja">
-    <span class="tarja-dot"></span>
-    Ração, medicamentos e higiene para pets têm isenção fiscal — você está aproveitando?
-    <span class="tarja-dot"></span>
-  </div>
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-in">
+      <a href="#" class="nav-logo">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <ellipse cx="8" cy="6" rx="2.3" ry="2.9" opacity=".9"/>
+          <ellipse cx="13" cy="5" rx="2.3" ry="2.9" opacity=".9"/>
+          <ellipse cx="18" cy="7" rx="2.1" ry="2.6" opacity=".9"/>
+          <ellipse cx="5.2" cy="11.5" rx="1.9" ry="2.4" opacity=".9"/>
+          <path d="M8.5 13 C6 17 7 21.5 12.5 22 C18 21.5 19 17 16.5 13 C14.8 10 10.2 10 8.5 13Z" opacity=".9"/>
+        </svg>
+        FLUXXO PET<span class="dot">.</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#how">Como Funciona</a></li>
+        <li><a href="#benefits">Benefícios</a></li>
+        <li><a href="#leadForm">Diagnóstico</a></li>
+      </ul>
+      <div class="nav-right">
+        <a href="/admin" class="nav-login">Admin</a>
+        <a href="#leadForm" class="nav-cta">Fazer diagnóstico</a>
+      </div>
+    </div>
+  </nav>
 
-  <!-- ── HERO ─────────────────────────────────────────── -->
-  <div class="sec-blue">
-    <section class="hero">
-
+  <!-- HERO -->
+  <div class="hero-wrap grid-bg">
+    <div class="hero">
       <div>
-        <span class="badge">Diagnóstico Fiscal Gratuito para Pet Shops</span>
-
+        <div class="badge"><span class="badge-dot"></span>Contabilidade especializada para pets</div>
         <h1 class="hero-title">
-          Descubra quanto<br>seu Pet Shop paga de<br>
-          <span class="red-txt">imposto indevido</span>
+          SEU PET SHOP<br>PAGA IMPOSTO<br>
+          <span class="hl"><span>QUE NÃO DEVE</span></span>
         </h1>
-
-        <p class="hero-desc">
+        <p class="hero-sub">
           Ração, medicamentos e produtos de higiene para pets têm isenção fiscal.
-          A maioria dos pet shops paga tributos que não deveria — e nunca descobriu.
+          A maioria dos pet shops nunca aproveitou — e perde dinheiro todo mês.
         </p>
-
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-ico">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                <polyline points="17 6 23 6 23 12"/>
-              </svg>
-            </div>
-            <div>
-              <strong>R$2.400/mês</strong>
-              <span>em média recuperados</span>
-            </div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-ico">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </div>
-            <div>
-              <strong>+800</strong>
-              <span>pet shops atendidos</span>
-            </div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-ico">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            </div>
-            <div>
-              <strong>0 risco</strong>
-              <span>diagnóstico gratuito</span>
-            </div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-ico">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-            </div>
-            <div>
-              <strong>30 segundos</strong>
-              <span>para ter clareza</span>
-            </div>
-          </div>
+        <div class="hero-stats">
+          <div class="h-stat"><strong>R$2.400</strong><span>em média por mês recuperados</span></div>
+          <div class="vd"></div>
+          <div class="h-stat"><strong>800+</strong><span>pet shops diagnosticados</span></div>
+          <div class="vd"></div>
+          <div class="h-stat"><strong>0</strong><span>risco — gratuito</span></div>
         </div>
-
-        <p class="proof">Mais de 800 pet shops já descobriram quanto perdiam por mês</p>
       </div>
 
-      <!-- form card -->
       <div class="card">
-        <h2 class="card-title">Faça seu diagnóstico <span>gratuito</span></h2>
+        <h2 class="card-title">Diagnóstico <span class="red">Gratuito</span></h2>
         <p class="card-sub">Leva menos de 30 segundos</p>
-
         <form id="leadForm" onsubmit="handleSubmit(event)">
+          <div class="field"><input type="text" id="nome" placeholder="Seu nome completo" autocomplete="given-name" required /></div>
+          <div class="field"><input type="text" id="petshop" placeholder="Nome do seu Pet Shop" required /></div>
           <div class="field">
-            <input type="text" id="nome" name="nome" placeholder="Seu nome completo" autocomplete="given-name" required />
-          </div>
-          <div class="field">
-            <input type="text" id="petshop" name="petshop" placeholder="Nome do seu Pet Shop" required />
-          </div>
-          <div class="field">
-            <input type="tel" id="whatsapp" name="whatsapp" placeholder="WhatsApp com DDD" autocomplete="tel" inputmode="numeric" required />
+            <input type="tel" id="whatsapp" placeholder="WhatsApp com DDD" autocomplete="tel" inputmode="numeric" required />
             <p class="hint">Enviaremos o diagnóstico por lá</p>
           </div>
-          <div class="field">
-            <input type="email" id="email" name="email" placeholder="E-mail" autocomplete="email" required />
-          </div>
-          <button type="submit" class="btn">
-            Continuar para o diagnóstico &nbsp;→
-          </button>
+          <div class="field"><input type="email" id="email" placeholder="E-mail" autocomplete="email" required /></div>
+          <button type="submit" class="btn-sub">Continuar para o diagnóstico →</button>
         </form>
-
         <p class="trust">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           100% gratuito &bull; Sem spam &bull; Dados protegidos
         </p>
       </div>
-
-    </section>
-  </div>
-
-  <hr class="divider" />
-
-  <!-- ── PAIN POINTS ──────────────────────────────────── -->
-  <div class="sec-white">
-    <div class="section">
-      <h2 class="section-head">
-        Se você tem um Pet Shop, provavelmente está
-        <span class="rd">perdendo dinheiro</span> agora.
-      </h2>
-      <p class="section-sub">E quanto mais você vende, mais paga de imposto que não deveria.</p>
-
-      <div class="pains">
-        <div class="pain">
-          <div class="pain-x">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </div>
-          "Pago muito imposto, mas nunca soube se estou pagando o correto"
-        </div>
-        <div class="pain">
-          <div class="pain-x">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </div>
-          "Meu contador nunca me falou sobre isenção fiscal para pet shops"
-        </div>
-        <div class="pain">
-          <div class="pain-x">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </div>
-          "Sei que ração e medicamentos têm benefício fiscal, mas não sei como aproveitar"
-        </div>
-        <div class="pain">
-          <div class="pain-x">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </div>
-          "O dinheiro sai todo mês e não sei quanto posso recuperar"
-        </div>
-        <div class="pain">
-          <div class="pain-x">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </div>
-          "Não tenho tempo para entender de tributação — tenho um negócio para tocar"
-        </div>
-      </div>
-
-      <p class="pain-footer">Isso não é falta de atenção. <strong>É falta de uma contabilidade especializada.</strong></p>
     </div>
   </div>
 
-  <!-- ── BENEFITS ──────────────────────────────────────── -->
-  <div class="sec-blue">
-    <div class="section">
-      <h2 class="section-head" style="margin-bottom:40px;">
-        O que acontece quando você <span class="soft">descobre a verdade</span>
-      </h2>
+  <!-- PROOF BAR -->
+  <div class="proof-bar">
+    <div class="proof-bar-in">
+      <div class="proof-item"><strong>R$2.400/mês</strong><span>em média recuperados</span></div>
+      <div class="pv"></div>
+      <div class="proof-item"><strong>800+</strong><span>pet shops atendidos</span></div>
+      <div class="pv"></div>
+      <div class="proof-item"><strong>100%</strong><span>diagnóstico gratuito</span></div>
+      <div class="pv"></div>
+      <div class="proof-item"><strong>30s</strong><span>para descobrir</span></div>
+    </div>
+  </div>
 
-      <div class="benefits">
-          <div class="benefit">
-            <div class="ben-ico">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-            </div>
-            <h3>Clareza Total</h3>
-            <p>Você descobre exatamente quanto paga de imposto indevido — por produto, por mês. Sem achismo.</p>
-          </div>
-
-          <div class="benefit">
-            <div class="ben-ico">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-              </svg>
-            </div>
-            <h3>Recuperação Imediata</h3>
-            <p>Para de pagar o que não deve e começa a recuperar o que foi pago a mais nos meses anteriores.</p>
-          </div>
-
-          <div class="benefit">
-            <div class="ben-ico">
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="20" x2="12" y2="10"/>
-                <line x1="18" y1="20" x2="18" y2="4"/>
-                <line x1="6"  y1="20" x2="6"  y2="16"/>
-              </svg>
-            </div>
-            <h3>Caixa Mais Saudável</h3>
-            <p>Cada mês com a tributação correta é dinheiro que volta para o seu caixa — não para o governo.</p>
-          </div>
+  <!-- SPLIT -->
+  <div class="split">
+    <div class="split-l">
+      <p class="split-lbl">O jeito antigo</p>
+      <h2 class="split-h">SEU CONTADOR<br>GENÉRICO</h2>
+      <div class="split-items">
+        <div class="split-item"><div class="ico-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Usa regime tributário genérico sem olhar isenções do setor pet</div>
+        <div class="split-item"><div class="ico-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Nunca falou que ração e medicamentos têm isenção fiscal</div>
+        <div class="split-item"><div class="ico-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Você paga tributos que não deveria pagar todo mês</div>
+        <div class="split-item"><div class="ico-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Não recupera os valores pagos indevidamente nos meses anteriores</div>
+      </div>
+    </div>
+    <div class="split-r">
+      <p class="split-lbl">O jeito Fluxxo Pet</p>
+      <h2 class="split-h">CONTABILIDADE<br>ESPECIALIZADA</h2>
+      <div class="split-items">
+        <div class="split-item"><div class="ico-ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Especializado 100% em pet shops — conhece cada isenção do setor</div>
+        <div class="split-item"><div class="ico-ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Identifica todos os produtos com benefício fiscal no seu estoque</div>
+        <div class="split-item"><div class="ico-ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Você para de pagar o que não deve a partir do primeiro mês</div>
+        <div class="split-item"><div class="ico-ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Recupera os impostos pagos a mais nos últimos meses</div>
       </div>
     </div>
   </div>
 
-  <!-- ── LOSS ──────────────────────────────────────────── -->
-
-  <div class="sec-white">
-    <div class="section loss">
-      <h2 class="section-head">
-        Cada mês com tributação errada é <span class="rd">dinheiro saindo do seu caixa.</span>
-      </h2>
-      <p class="section-sub" style="margin-bottom:20px;"></p>
-
-      <p class="loss-stat">
-        Se você fatura R$50 mil por mês, pode estar pagando até
-        <strong>R$2.400 em impostos que não deveria.</strong>
-      </p>
-      <p class="loss-note">O problema não é o imposto. <strong>É pagar o que você não precisa pagar.</strong></p>
-
-      <div class="quote">
-        "É como ter uma torneira pingando no seu negócio.<br>
-        Parece pouco a cada mês… mas em 12 meses são
-        <strong>mais de R$28.000 que foram embora sem precisar.</strong>"
-      </div>
-    </div>
-  </div>
-
-  <!-- ── CTA FINAL ─────────────────────────────────────── -->
-  <div class="sec-dark cta-wrap">
-    <div class="section">
-
-      <div class="logo">
-        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="36" height="36">
-          <ellipse cx="13"  cy="10"   rx="4"   ry="4.8" fill="white" opacity="0.88"/>
-          <ellipse cx="21"  cy="8"    rx="4"   ry="4.8" fill="white" opacity="0.88"/>
-          <ellipse cx="29"  cy="11"   rx="3.6" ry="4.4" fill="white" opacity="0.88"/>
-          <ellipse cx="8.5" cy="18.5" rx="3.2" ry="3.8" fill="white" opacity="0.88"/>
-          <path d="M14 20 C10 27 11 34 20.5 35 C30 34 31 27 27 20 C24.5 15.5 16.5 15.5 14 20Z" fill="white" opacity="0.88"/>
-        </svg>
-        <div>
-          <span class="logo-name">FLUXXO PET</span>
-          <span class="logo-tag">Contabilidade para pets</span>
+  <!-- BENTO -->
+  <div class="bento-wrap" id="benefits">
+    <p class="sec-lbl">Por que a Fluxxo Pet</p>
+    <h2 class="sec-title">TUDO QUE SEU PET SHOP <span class="red">PRECISA</span></h2>
+    <div class="bento">
+      <div class="bc lt s2">
+        <span class="b-tag">Diagnóstico</span>
+        <div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <h3>Diagnóstico Fiscal Completo</h3>
+        <p>Mapeamos todos os produtos do seu estoque e identificamos quais têm isenção fiscal garantida por lei.</p>
+        <div class="b-mockup">
+          <div class="m-bar"><div class="m-dot" style="background:#ff5f57"></div><div class="m-dot" style="background:#ffbd2e"></div><div class="m-dot" style="background:#28c840"></div></div>
+          <div class="m-body">
+            <div class="m-row g"><span>✓ Ração para cães e gatos</span><span>Isento</span></div>
+            <div class="m-row g"><span>✓ Medicamentos veterinários</span><span>Isento</span></div>
+            <div class="m-row b"><span>~ Produtos de higiene</span><span>Verificar</span></div>
+            <div class="m-row s"><span>Acessórios pet</span><span>Tributado</span></div>
+          </div>
         </div>
       </div>
-
-      <h2 class="cta-title">Descubra quanto seu Pet Shop <span>pode recuperar</span></h2>
-      <p class="cta-sub">É grátis. Leva 30 segundos. Pode mudar o caixa do seu negócio.</p>
-
-      <a href="#leadForm" class="btn-lg">
-        Descobrir quanto estou perdendo &nbsp;→
-      </a>
-
-      <p class="cta-proof">Mais de 800 pet shops diagnosticados em todo o Brasil</p>
+      <div class="bc dk">
+        <div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <h3>Recuperação Retroativa</h3>
+        <p>Recuperamos os impostos pagos a mais nos últimos 5 anos. Seu dinheiro de volta.</p>
+      </div>
+      <div class="bc lt">
+        <span class="b-tag">Mensal</span>
+        <div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <h3>Relatórios Claros</h3>
+        <p>Todo mês você recebe um relatório simples mostrando quanto economizou e o que foi recuperado.</p>
+      </div>
+      <div class="bc bl">
+        <div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Contador Dedicado</h3>
+        <p>Um especialista em pet shops cuida do seu negócio exclusivamente — sem fila, sem robôs.</p>
+      </div>
+      <div class="bc dk s2">
+        <span class="b-tag">Garantia</span>
+        <div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Economia Garantida</h3>
+        <p>Se não identificarmos nenhuma isenção no seu negócio, o diagnóstico é 100% gratuito. Sem risco.</p>
+      </div>
     </div>
   </div>
 
-  <!-- ── FOOTER ─────────────────────────────────────────── -->
+  <!-- HOW IT WORKS -->
+  <div class="how-wrap" id="how">
+    <div class="how-in">
+      <div class="how-sticky">
+        <p class="how-lbl">Simples assim</p>
+        <h2 class="how-title">COMO<br>FUN<span class="red">CIONA</span></h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">01</div>
+          <div><p class="step-t">Faça o Diagnóstico</p><p class="step-d">Preencha o formulário em 30 segundos com os dados básicos do seu pet shop. Sem burocracia.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-n">02</div>
+          <div><p class="step-t">Receba o Relatório</p><p class="step-d">Nosso especialista analisa seu caso e envia pelo WhatsApp um relatório completo em até 24h.</p></div>
+        </div>
+        <div class="step">
+          <div class="step-n">03</div>
+          <div><p class="step-t">Recupere Seu Dinheiro</p><p class="step-d">Começamos a trabalhar para você imediatamente — para de pagar o que não deve e recupera o histórico.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="testi-wrap">
+    <p class="sec-lbl">O que dizem nossos clientes</p>
+    <h2 class="sec-title" style="margin-bottom:44px;">QUEM JÁ <span class="red">RECUPEROU</span></h2>
+    <div class="testi-grid">
+      <div class="tc lite">
+        <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+        <p class="t-body">"Meu contador de 10 anos nunca me falou sobre isso. Em 2 semanas a Fluxxo Pet identificou R$1.800 que eu pagava todo mês sem precisar."</p>
+        <div class="t-author"><div class="t-av">MF</div><div><p class="t-name">Marcos Ferreira</p><p class="t-role">Pet Shop Amigos do Bicho — SP</p></div></div>
+      </div>
+      <div class="tc dark">
+        <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+        <p class="t-body">"O diagnóstico foi em 30 segundos mesmo. Resultado: R$3.200 por mês que eu jogava fora. Recuperei também os últimos 18 meses. Inacreditável."</p>
+        <div class="t-author"><div class="t-av">AC</div><div><p class="t-name">Ana Costa</p><p class="t-role">VetShop Premium — RJ</p></div></div>
+      </div>
+      <div class="tc lite">
+        <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+        <p class="t-body">"Faturamento de R$85 mil por mês e pagava R$2.100 de imposto indevido. A Fluxxo Pet resolveu em uma semana. Recomendo demais."</p>
+        <div class="t-author"><div class="t-av">RL</div><div><p class="t-name">Ricardo Lima</p><p class="t-role">Casa dos Animais — MG</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINAL CTA -->
+  <div class="cta-sec">
+    <div class="cta-deco t">FLUXXO</div>
+    <div class="cta-deco b">PET</div>
+    <div class="cta-in">
+      <h2 class="cta-title">DESCUBRA QUANTO<br>VOCÊ PODE<br>RECUPERAR</h2>
+      <p class="cta-sub">É grátis. Leva 30 segundos. Pode mudar o caixa do seu negócio para sempre.</p>
+      <div class="cta-card">
+        <p class="cta-card-title">Fazer diagnóstico gratuito</p>
+        <form id="leadFormB" onsubmit="handleSubmitB(event)">
+          <div class="field"><input type="text" id="nomeB" placeholder="Seu nome completo" autocomplete="given-name" required /></div>
+          <div class="field"><input type="text" id="petshopB" placeholder="Nome do seu Pet Shop" required /></div>
+          <div class="field"><input type="tel" id="whatsappB" placeholder="WhatsApp com DDD" inputmode="numeric" required /></div>
+          <div class="field"><input type="email" id="emailB" placeholder="E-mail" required /></div>
+          <button type="submit" class="btn-dark">Continuar para o diagnóstico →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
   <div class="footer">
-    <div style="display:inline-flex; align-items:center; gap:8px;">
-      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-        <ellipse cx="13"  cy="10"   rx="4"   ry="4.8" fill="white" opacity="0.5"/>
-        <ellipse cx="21"  cy="8"    rx="4"   ry="4.8" fill="white" opacity="0.5"/>
-        <ellipse cx="29"  cy="11"   rx="3.6" ry="4.4" fill="white" opacity="0.5"/>
-        <ellipse cx="8.5" cy="18.5" rx="3.2" ry="3.8" fill="white" opacity="0.5"/>
-        <path d="M14 20 C10 27 11 34 20.5 35 C30 34 31 27 27 20 C24.5 15.5 16.5 15.5 14 20Z" fill="white" opacity="0.5"/>
+    <div class="footer-logo">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="rgba(255,255,255,0.38)">
+        <ellipse cx="8" cy="6" rx="2.3" ry="2.9"/><ellipse cx="13" cy="5" rx="2.3" ry="2.9"/>
+        <ellipse cx="18" cy="7" rx="2.1" ry="2.6"/><ellipse cx="5.2" cy="11.5" rx="1.9" ry="2.4"/>
+        <path d="M8.5 13 C6 17 7 21.5 12.5 22 C18 21.5 19 17 16.5 13 C14.8 10 10.2 10 8.5 13Z"/>
       </svg>
-      <span style="font-size:0.82rem; font-weight:800; letter-spacing:0.08em; color:rgba(255,255,255,0.4);">FLUXXO PET</span>
+      FLUXXO PET
     </div>
     <span class="footer-copy">© 2025 Fluxxo Pet — Contabilidade para pets</span>
   </div>
 
-  <!-- ── MODAL ─────────────────────────────────────────── -->
-  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-q">
+  <!-- MODAL -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
     <div class="modal">
-
       <div class="modal-progress">
         <div class="progress-meta">
           <span class="progress-label">Diagnóstico em andamento</span>
           <span class="progress-pct" id="progressPct">90%</span>
         </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       </div>
-
       <div class="modal-body" id="modalQuestion">
-        <p class="modal-eyebrow">Para finalizar o diagnóstico, responda</p>
-        <h3 class="modal-question" id="modal-q">Qual o faturamento mensal do seu Pet Shop?</h3>
-
+        <p class="modal-eyebrow">Para finalizar, responda</p>
+        <h3 class="modal-question">Qual o faturamento mensal do seu Pet Shop?</h3>
         <div class="options">
-          <button class="opt" onclick="selectOption(this, 'Até R$30 mil')">Até R$30 mil</button>
-          <button class="opt" onclick="selectOption(this, 'R$50 mil')">R$50 mil</button>
-          <button class="opt" onclick="selectOption(this, 'R$100 mil')">R$100 mil</button>
-          <button class="opt" onclick="selectOption(this, 'R$200 mil')">R$200 mil</button>
-          <button class="opt" onclick="selectOption(this, 'Mais de R$200 mil')">Mais de R$200 mil</button>
+          <button class="opt" onclick="selectOption(this,'Até R$30 mil')">Até R$30 mil</button>
+          <button class="opt" onclick="selectOption(this,'R$50 mil')">R$50 mil</button>
+          <button class="opt" onclick="selectOption(this,'R$100 mil')">R$100 mil</button>
+          <button class="opt" onclick="selectOption(this,'R$200 mil')">R$200 mil</button>
+          <button class="opt" onclick="selectOption(this,'Mais de R$200 mil')">Mais de R$200 mil</button>
         </div>
       </div>
-
       <div class="modal-body" id="modalSuccess" style="display:none;">
         <div class="modal-success" style="display:flex;">
-          <div class="success-ico">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-          </div>
-          <p class="success-title">Diagnóstico confirmado!</p>
-          <p class="success-desc">Recebemos suas informações, <strong id="successName"></strong>. Enviaremos o resultado do seu diagnóstico pelo WhatsApp em instantes.</p>
+          <div class="success-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="success-title">Diagnóstico Confirmado!</p>
+          <p class="success-desc">Recebemos suas informações, <strong id="successName"></strong>. Enviaremos o resultado pelo WhatsApp em instantes.</p>
         </div>
       </div>
-
     </div>
   </div>
 
   <script>
     var leadData = {};
+    var REVENUE_EVENTS = { 'Até R$30 mil':'Lead30k','R$50 mil':'Lead50k','R$100 mil':'Lead100k','R$200 mil':'Lead200k','Mais de R$200 mil':'Lead200kMais' };
 
-    /* ── TRACKING ──────────────────────────────────────────────────────────── */
-
-    var REVENUE_EVENTS = {
-      'Até R$30 mil':      'Lead30k',
-      'R$50 mil':          'Lead50k',
-      'R$100 mil':         'Lead100k',
-      'R$200 mil':         'Lead200k',
-      'Mais de R$200 mil': 'Lead200kMais',
-    };
-
-    function genEventId() {
-      return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-    }
-
-    function getCookie(name) {
-      var m = document.cookie.match(new RegExp('(?:^|;)\\s*' + name + '=([^;]*)'));
-      return m ? decodeURIComponent(m[1]) : '';
-    }
+    function genEventId() { return Date.now().toString(36) + Math.random().toString(36).substr(2,9); }
+    function getCookie(n) { var m=document.cookie.match(new RegExp('(?:^|;)\\s*'+n+'=([^;]*)')); return m?decodeURIComponent(m[1]):''; }
 
     function track(eventName, userData, customData) {
-      var eventId    = genEventId();
-      var isStandard = ['PageView', 'Lead'].indexOf(eventName) !== -1;
-
-      if (typeof fbq !== 'undefined') {
-        if (isStandard) {
-          fbq('track', eventName, customData || {}, { eventID: eventId });
-        } else {
-          fbq('trackCustom', eventName, customData || {}, { eventID: eventId });
-        }
-      }
-
-      fetch('/tracker', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event_name:  eventName,
-          event_id:    eventId,
-          user_data:   userData   || {},
-          custom_data: customData || {},
-          source_url:  window.location.href,
-          fbp:         getCookie('_fbp'),
-          fbc:         getCookie('_fbc'),
-          session_id:  getCookie('_krob_sid'),
-        }),
-      }).catch(function() {});
+      var eid = genEventId();
+      var std = ['PageView','Lead'].indexOf(eventName) !== -1;
+      if (typeof fbq !== 'undefined') { std ? fbq('track',eventName,customData||{},{eventID:eid}) : fbq('trackCustom',eventName,customData||{},{eventID:eid}); }
+      fetch('/tracker',{ method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ event_name:eventName, event_id:eid, user_data:userData||{}, custom_data:customData||{},
+          source_url:window.location.href, fbp:getCookie('_fbp'), fbc:getCookie('_fbc'), session_id:getCookie('_krob_sid') })
+      }).catch(function(){});
     }
 
-    track('PageView', {}, {});
+    track('PageView',{},{});
 
-    /* ── SCROLL DEPTH ──────────────────────────────────────────────────────── */
-    (function() {
-      var thresholds = [25, 50, 75, 95];
-      var fired = {};
-
-      function onScroll() {
-        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        var winHeight = window.innerHeight || document.documentElement.clientHeight;
-        var docHeight = Math.max(
-          document.body.scrollHeight, document.documentElement.scrollHeight,
-          document.body.offsetHeight, document.documentElement.offsetHeight
-        );
-        var pct = Math.round((scrollTop + winHeight) / docHeight * 100);
-
-        thresholds.forEach(function(t) {
-          if (!fired[t] && pct >= t) {
-            fired[t] = true;
-            track('ScrollDepth' + t, {}, { percent: t });
-          }
-        });
+    (function(){
+      var th=[25,50,75,95], fired={};
+      function sc(){
+        var st=window.pageYOffset||document.documentElement.scrollTop;
+        var wh=window.innerHeight||document.documentElement.clientHeight;
+        var dh=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,document.body.offsetHeight,document.documentElement.offsetHeight);
+        var p=Math.round((st+wh)/dh*100);
+        th.forEach(function(t){ if(!fired[t]&&p>=t){fired[t]=true;track('ScrollDepth'+t,{},{percent:t});} });
       }
-
-      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('scroll',sc,{passive:true});
     })();
 
-    /* ── FORM ──────────────────────────────────────────────────────────────── */
+    function openModal() {
+      document.getElementById('progressFill').style.width='90%';
+      document.getElementById('progressPct').textContent='90%';
+      document.getElementById('modalQuestion').style.display='block';
+      document.getElementById('modalSuccess').style.display='none';
+      document.querySelectorAll('.opt').forEach(function(b){b.classList.remove('selected');b.disabled=false;});
+      document.getElementById('overlay').classList.add('active');
+      document.body.style.overflow='hidden';
+    }
 
     function handleSubmit(e) {
       e.preventDefault();
-      leadData.nome     = document.getElementById('nome').value.trim();
-      leadData.petshop  = document.getElementById('petshop').value.trim();
-      leadData.whatsapp = document.getElementById('whatsapp').value.trim();
-      leadData.email    = document.getElementById('email').value.trim();
-
-      track('Lead', {
-        em: leadData.email,
-        ph: leadData.whatsapp,
-        fn: leadData.nome,
-      }, { currency: 'BRL' });
-
+      leadData = { nome:document.getElementById('nome').value.trim(), petshop:document.getElementById('petshop').value.trim(), whatsapp:document.getElementById('whatsapp').value.trim(), email:document.getElementById('email').value.trim() };
+      track('Lead',{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{currency:'BRL'});
       openModal();
     }
 
-    function openModal() {
-      var overlay = document.getElementById('overlay');
-      document.getElementById('progressFill').style.width = '90%';
-      document.getElementById('progressPct').textContent = '90%';
-      document.getElementById('modalQuestion').style.display = 'block';
-      document.getElementById('modalSuccess').style.display = 'none';
-      document.querySelectorAll('.opt').forEach(function(b) { b.classList.remove('selected'); b.disabled = false; });
-      overlay.classList.add('active');
-      document.body.style.overflow = 'hidden';
+    function handleSubmitB(e) {
+      e.preventDefault();
+      leadData = { nome:document.getElementById('nomeB').value.trim(), petshop:document.getElementById('petshopB').value.trim(), whatsapp:document.getElementById('whatsappB').value.trim(), email:document.getElementById('emailB').value.trim() };
+      track('Lead',{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{currency:'BRL'});
+      openModal();
     }
 
     function selectOption(btn, value) {
-      document.querySelectorAll('.opt').forEach(function(b) { b.classList.remove('selected'); });
+      document.querySelectorAll('.opt').forEach(function(b){b.classList.remove('selected');});
       btn.classList.add('selected');
-      document.querySelectorAll('.opt').forEach(function(b) { b.disabled = true; });
-
+      document.querySelectorAll('.opt').forEach(function(b){b.disabled=true;});
       leadData.faturamento = value;
-
-      var revenueEvent = REVENUE_EVENTS[value];
-      if (revenueEvent) {
-        track(revenueEvent, {
-          em: leadData.email,
-          ph: leadData.whatsapp,
-          fn: leadData.nome,
-        }, {
-          faturamento: value,
-          currency:    'BRL',
-        });
-      }
-
-      fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome:        leadData.nome,
-          petshop:     leadData.petshop,
-          whatsapp:    leadData.whatsapp,
-          email:       leadData.email || '',
-          faturamento: value,
-        }),
+      var rev = REVENUE_EVENTS[value];
+      if (rev) track(rev,{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{faturamento:value,currency:'BRL'});
+      fetch('/api/submit',{ method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({nome:leadData.nome,petshop:leadData.petshop,whatsapp:leadData.whatsapp,email:leadData.email||'',faturamento:value})
       }).catch(function(){});
-
-      setTimeout(function() {
-        document.getElementById('progressFill').style.width = '100%';
-        document.getElementById('progressPct').textContent = '100%';
-      }, 120);
-
-      setTimeout(function() {
-        document.getElementById('successName').textContent = leadData.nome;
-        document.getElementById('modalQuestion').style.display = 'none';
-        document.getElementById('modalSuccess').style.display = 'block';
-      }, 700);
-
-      setTimeout(function() {
-        window.location.href = '/obrigado';
-      }, 3000);
+      setTimeout(function(){document.getElementById('progressFill').style.width='100%';document.getElementById('progressPct').textContent='100%';},120);
+      setTimeout(function(){document.getElementById('successName').textContent=leadData.nome;document.getElementById('modalQuestion').style.display='none';document.getElementById('modalSuccess').style.display='block';},700);
+      setTimeout(function(){window.location.href='/obrigado';},3000);
     }
 
-    function closeModal() {
-      document.getElementById('overlay').classList.remove('active');
-      document.body.style.overflow = '';
-    }
-
-    document.getElementById('overlay').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
-    });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeModal();
-    });
-
-    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
-      a.addEventListener('click', function(e) {
-        var el = document.querySelector(a.getAttribute('href'));
-        if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
-      });
+    function closeModal() { document.getElementById('overlay').classList.remove('active'); document.body.style.overflow=''; }
+    document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      a.addEventListener('click',function(e){ var el=document.querySelector(a.getAttribute('href')); if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth'});} });
     });
   </script>
-
 </body>
 </html>
