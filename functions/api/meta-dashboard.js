@@ -51,11 +51,11 @@ export async function onRequestGet(context) {
   if (env.DB) {
     const [crmRow, crmDailyResult] = await Promise.all([
       env.DB.prepare(
-        `SELECT COUNT(*) as total FROM leads WHERE created_at >= ? AND created_at < datetime(?, '+1 day')`
+        `SELECT COUNT(*) as total FROM leads WHERE DATE(datetime(created_at, '-3 hours')) >= ? AND DATE(datetime(created_at, '-3 hours')) <= ?`
       ).bind(since, until).first(),
       env.DB.prepare(
-        `SELECT DATE(created_at) as day, COUNT(*) as total FROM leads WHERE created_at >= ? AND created_at < datetime(?, '+1 day') GROUP BY day ORDER BY day`
-      ).bind(since, until).all(),
+        `SELECT DATE(datetime(created_at, '-3 hours')) as day, COUNT(*) as total FROM leads WHERE DATE(datetime(created_at, '-3 hours')) >= ? AND DATE(datetime(created_at, '-3 hours')) <= ? GROUP BY day ORDER BY day`
+      ).bind(since, until, since, until).all(),
     ]);
     crmLeads = crmRow?.total || 0;
     crmDailyRows = crmDailyResult?.results || [];
