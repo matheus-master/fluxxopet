@@ -1,15 +1,15 @@
-name                  = "ventture-capturaleads-preco"
+name                  = "fluxxo-pet"
 pages_build_output_dir = "."
 compatibility_date    = "2025-01-01"
 
 [[d1_databases]]
 binding       = "DB"
-database_name = "ventture-leads-tracking"
-database_id   = "388bd128-75ec-4680-ba03-da5326d2082a"
+database_name = "fluxxo-pet-tracking"
+database_id   = "23a4f327-5231-40df-9835-c45905a755cf"
 
 [vars]
-META_PIXEL_ID      = "1290709392346372"
-GA4_MEASUREMENT_ID = "G-KK9GFR6KW4"
+META_PIXEL_ID      = "1338198531534558"
+GA4_MEASUREMENT_ID = "GA4_ID_AQUI"
 
 # Secrets — set via Cloudflare Pages dashboard (Settings > Environment Variables)
 # or via: npx wrangler pages secret put META_CAPI_TOKEN
