@@ -46,16 +46,21 @@ export async function onRequestGet(context) {
   const p75         = video(d.video_p75_watched_actions);
 
   // Leads no CRM pelo período
+  // Converte datas locais (Brasília UTC-3) para UTC antes de filtrar
+  // Ex: since='2026-05-25' → utcSince='2026-05-25 03:00:00', utcUntil='2026-05-26 03:00:00'
+  const utcSince = since + ' 03:00:00';
+  const utcUntil = until + ' 03:00:00';
+
   let crmLeads = 0;
   let crmDailyRows = [];
   if (env.DB) {
     const [crmRow, crmDailyResult] = await Promise.all([
       env.DB.prepare(
-        `SELECT COUNT(*) as total FROM leads WHERE DATE(datetime(created_at, '-3 hours')) >= ? AND DATE(datetime(created_at, '-3 hours')) <= ?`
-      ).bind(since, until).first(),
+        `SELECT COUNT(*) as total FROM leads WHERE created_at >= ? AND created_at < datetime(?, '+1 day')`
+      ).bind(utcSince, utcUntil).first(),
       env.DB.prepare(
-        `SELECT DATE(datetime(created_at, '-3 hours')) as day, COUNT(*) as total FROM leads WHERE DATE(datetime(created_at, '-3 hours')) >= ? AND DATE(datetime(created_at, '-3 hours')) <= ? GROUP BY day ORDER BY day`
-      ).bind(since, until, since, until).all(),
+        `SELECT DATE(created_at, '-3 hours') as day, COUNT(*) as total FROM leads WHERE created_at >= ? AND created_at < datetime(?, '+1 day') GROUP BY day ORDER BY day`
+      ).bind(utcSince, utcUntil).all(),
     ]);
     crmLeads = crmRow?.total || 0;
     crmDailyRows = crmDailyResult?.results || [];
