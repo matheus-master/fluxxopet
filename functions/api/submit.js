@@ -4,7 +4,7 @@ export async function onRequestPost(context) {
   let body = {};
   try { body = await request.json(); } catch {}
 
-  const { nome, whatsapp, email, faturamento } = body;
+  const { nome, petshop, whatsapp, email, faturamento } = body;
   if (!nome && !whatsapp) return json({ ok: false, error: 'Dados insuficientes' }, 400);
 
   // Captura session_id do cookie para vincular o lead à sessão original (fbp, fbc, ga_client_id)
@@ -13,8 +13,8 @@ export async function onRequestPost(context) {
   const session_id   = sidMatch ? decodeURIComponent(sidMatch[1]) : '';
 
   await env.DB.prepare(
-    'INSERT INTO leads (nome, whatsapp, email, faturamento, session_id) VALUES (?, ?, ?, ?, ?)'
-  ).bind(nome || '', whatsapp || '', email || '', faturamento || '', session_id).run();
+    'INSERT INTO leads (nome, petshop, whatsapp, email, faturamento, session_id) VALUES (?, ?, ?, ?, ?, ?)'
+  ).bind(nome || '', petshop || '', whatsapp || '', email || '', faturamento || '', session_id).run();
 
   return json({ ok: true });
 }
