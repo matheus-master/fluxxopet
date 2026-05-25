@@ -366,26 +366,42 @@
     /* ── MOBILE ── */
     @media (max-width: 900px) {
       .nav-links { display: none; }
-      .hero { grid-template-columns: 1fr; gap: 44px; padding: 56px 20px; min-height: unset; }
+      .hero { grid-template-columns: 1fr; gap: 40px; padding: 52px 20px; min-height: unset; }
+      .bento-wrap { padding: 64px 20px; }
+      .how-wrap { padding: 64px 20px; }
+      .how-in { grid-template-columns: 1fr; gap: 40px; }
+      .how-sticky { position: static; }
+      .testi-wrap { padding: 64px 20px; }
+      .cta-sec { padding: 64px 20px; }
       .split { grid-template-columns: 1fr; }
-      .split-l, .split-r { padding: 56px 28px; }
+      .split-l, .split-r { padding: 52px 28px; }
       .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
       .bc.s2 { grid-column: span 2; }
-      .bc { min-height: 220px; }
+      .bc { min-height: 200px; }
       .b-mockup { display: none; }
-      .how-in { grid-template-columns: 1fr; gap: 44px; }
-      .how-sticky { position: static; }
       .testi-grid { grid-template-columns: 1fr; }
       .tc.dark { transform: translateY(0); }
       .tc.dark:hover { transform: translateY(-4px); }
+      .vd { display: none; }
+      .hero-stats { gap: 20px; flex-wrap: wrap; }
     }
     @media (max-width: 560px) {
       .nav { padding: 0 18px; }
+      .hero { padding: 44px 18px; }
+      .hero-title { font-size: clamp(2.5rem, 11vw, 3.2rem); }
       .bento { grid-template-columns: 1fr; }
       .bc.s2 { grid-column: span 1; }
-      .proof-bar-in { gap: 20px; }
+      .split-l, .split-r { padding: 44px 18px; }
+      .proof-bar { padding: 22px 18px; }
+      .proof-bar-in { gap: 16px; flex-direction: column; align-items: flex-start; }
       .pv { display: none; }
       .card, .cta-card { padding: 26px 18px; }
+      .bento-wrap, .testi-wrap { padding: 52px 18px; }
+      .how-wrap { padding: 52px 18px; }
+      .cta-sec { padding: 52px 18px; }
+      .cta-title { font-size: clamp(2.2rem, 10vw, 3rem); }
+      .cta-deco { display: none; }
+      .footer { padding: 20px 18px; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
     }
 
     /* ── MODAL ── */
