@@ -1,4 +1,4 @@
-const SKIP_AUTH = ['/api/auth', '/api/submit'];
+const SKIP_AUTH = ['/api/auth', '/api/submit', '/api/botconversa'];
 
 export async function onRequest(context) {
   const url  = new URL(context.request.url);

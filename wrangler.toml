@@ -5,7 +5,7 @@ compatibility_date    = "2025-01-01"
 [[d1_databases]]
 binding       = "DB"
 database_name = "fluxxo-pet-tracking"
-database_id   = "23a4f327-5231-40df-9835-c45905a755cf"
+database_id   = "b1dfad2f-6637-43ea-bfb9-8289f4405466"
 
 [vars]
 META_PIXEL_ID      = "1338198531534558"
