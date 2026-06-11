@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Seu Resultado – Fluxxo Pet</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" /></noscript>
+
+  <!-- Meta Pixel -->
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init','1338198531534558');
+  fbq('track','PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1338198531534558&ev=PageView&noscript=1"/></noscript>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:    #0D1117;
+      --blue:   #1232C8;
+      --blue2:  #0a21a0;
+      --red:    #DC2626;
+      --white:  #ffffff;
+      --off:    #F7F8FC;
+      --border: #E5E7EB;
+      --muted:  #6B7280;
+      --subtle: #9CA3AF;
+      --green:  #16A34A;
+      --green2: #15803d;
+      --amber:  #D97706;
+      --gold:   #F59E0B;
+    }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--off);
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: var(--ink);
+    }
+
+    /* ═══════════════════════════════
+       TOP BAR
+    ═══════════════════════════════ */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(13,17,23,0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+    .logo svg { width: 26px; height: 26px; }
+    .logo-name {
+      font-family: 'Anton', sans-serif;
+      font-size: 0.92rem;
+      letter-spacing: 0.1em;
+      color: #fff;
+    }
+    .topbar-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* ═══════════════════════════════
+       HERO
+    ═══════════════════════════════ */
+    .hero {
+      background: var(--ink);
+      padding: 40px 20px 72px;
+      position: relative;
+    }
+
+    .hero-inner {
+      max-width: 440px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(220,38,38,0.14);
+      border: 1px solid rgba(220,38,38,0.28);
+      border-radius: 99px;
+      padding: 5px 13px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #f87171;
+      margin-bottom: 20px;
+    }
+    .chip-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #f87171;
+      animation: blink 1.6s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .hero-headline {
+      font-size: clamp(1.05rem, 3.8vw, 1.25rem);
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+    .hero-headline strong { color: rgba(255,255,255,0.85); font-weight: 700; }
+
+    .hero-amount {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(2.8rem, 11vw, 4.2rem);
+      line-height: 1;
+      letter-spacing: 0.01em;
+      color: #fff;
+      margin: 16px 0 8px;
+    }
+    .hero-amount-sub {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.38);
+      letter-spacing: 0.02em;
+    }
+
+    .hero-pills {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 99px;
+      padding: 5px 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ═══════════════════════════════
+       CONTENT
+    ═══════════════════════════════ */
+    .content {
+      max-width: 440px;
+      margin: -40px auto 0;
+      padding: 0 16px 52px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* section label */
+    .sec-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--subtle);
+      margin: 28px 0 10px;
+    }
+
+    /* ─ card base ─ */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(13,17,23,0.12);
+    }
+    .card-header {
+      padding: 14px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-header-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--subtle);
+    }
+
+    /* loss rows */
+    .loss-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+    }
+    .loss-row + .loss-row {
+      border-top: 1px solid var(--border);
+    }
+    .loss-left {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      flex: 1;
+      min-width: 0;
+    }
+    .loss-ico {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .loss-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+    .loss-hint {
+      font-size: 0.68rem;
+      color: var(--subtle);
+      margin-top: 1px;
+    }
+    .loss-amount {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.1rem;
+      color: var(--red);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* mensal total */
+    .mensal-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--off);
+    }
+    .mensal-lbl {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .mensal-hint {
+      font-size: 0.67rem;
+      color: var(--subtle);
+      margin-top: 2px;
+    }
+    .mensal-amount {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.3rem;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    /* ─ annual card ─ */
+    .annual-card {
+      background: var(--ink);
+      border-radius: 16px;
+      padding: 22px 20px;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border: 1px solid rgba(245,158,11,0.15);
+    }
+    .annual-left {}
+    .annual-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(245,158,11,0.12);
+      border: 1px solid rgba(245,158,11,0.22);
+      border-radius: 99px;
+      padding: 3px 10px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .annual-lbl {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.4;
+    }
+    .annual-sub {
+      font-size: 0.67rem;
+      color: rgba(255,255,255,0.3);
+      margin-top: 3px;
+    }
+    .annual-val {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(1.5rem, 5.5vw, 1.85rem);
+      color: var(--gold);
+      white-space: nowrap;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ─ why box ─ */
+    .why-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-top: 10px;
+    }
+    .why-box p {
+      font-size: 0.82rem;
+      line-height: 1.75;
+      color: #374151;
+    }
+    .why-box strong { color: var(--ink); font-weight: 700; }
+
+    /* ─ social proof ─ */
+    .proof-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .proof-item {
+      flex: 1;
+      text-align: center;
+      padding: 14px 10px;
+    }
+    .proof-item + .proof-item {
+      border-left: 1px solid var(--border);
+    }
+    .proof-num {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.1rem;
+      color: var(--blue);
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+    .proof-desc {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--subtle);
+      letter-spacing: 0.03em;
+      line-height: 1.3;
+    }
+
+    /* ═══════════════════════════════
+       CTA
+    ═══════════════════════════════ */
+    .cta-section {
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 0 16px 40px;
+    }
+
+    .cta-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 22px 22px;
+      text-align: center;
+    }
+    .cta-overline {
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+    .cta-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.45rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--ink);
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .cta-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 22px;
+    }
+
+    /* WA button */
+    .btn-wa {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      background: var(--green);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 13px;
+      padding: 15px 20px;
+      transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+      box-shadow: 0 4px 18px rgba(22,163,74,0.32);
+    }
+    .btn-wa:hover  { background: var(--green2); transform: translateY(-2px); box-shadow: 0 8px 26px rgba(22,163,74,0.38); }
+    .btn-wa:active { transform: translateY(0); box-shadow: none; }
+
+    .wa-icon-wrap {
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .wa-icon-wrap svg { width: 20px; height: 20px; }
+
+    .wa-text { text-align: left; flex: 1; }
+    .wa-line1 {
+      font-family: 'Anton', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+    .wa-line2 {
+      font-size: 0.67rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      margin-top: 2px;
+    }
+    .wa-arrow {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.6);
+      flex-shrink: 0;
+    }
+
+    .cta-trust {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .trust-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+    .trust-it {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--subtle);
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      font-size: 0.73rem;
+      color: var(--subtle);
+      text-decoration: none;
+      margin: 12px 0 0;
+      padding-bottom: 40px;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--ink); }
+
+    /* fade-up animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fadeup { animation: fadeUp 0.45s cubic-bezier(.22,.68,0,1.2) both; }
+    .fadeup-1 { animation-delay: 0.05s; }
+    .fadeup-2 { animation-delay: 0.12s; }
+    .fadeup-3 { animation-delay: 0.19s; }
+    .fadeup-4 { animation-delay: 0.26s; }
+    .fadeup-5 { animation-delay: 0.33s; }
+
+    @media (max-width: 360px) {
+      .hero-amount { font-size: 2.5rem; }
+      .annual-val  { font-size: 1.35rem; }
+      .cta-trust   { flex-wrap: wrap; gap: 8px; }
+      .trust-dot   { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <a href="/" class="logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="28" height="28" rx="7" fill="#1232C8"/>
+        <path d="M10 20 Q10 16 14 16 Q16 16 16 14 Q16 12 18 12 Q22 12 22 16 Q22 20 18 20 Z" fill="white" opacity="0.9"/>
+        <circle cx="11" cy="11" r="2" fill="white" opacity="0.7"/>
+        <circle cx="21" cy="11" r="2" fill="white" opacity="0.7"/>
+      </svg>
+      <span class="logo-name">FLUXXO PET</span>
+    </a>
+    <span class="topbar-badge">Resultado · Confidencial</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-inner fadeup fadeup-1">
+      <div class="hero-chip">
+        <span class="chip-dot"></span>
+        Simulação concluída
+      </div>
+
+      <p class="hero-headline" id="heroHeadline">
+        Identificamos uma oportunidade para<br><strong>seu pet shop</strong>
+      </p>
+
+      <div class="hero-amount" id="heroAmount">R$ 0,00</div>
+      <p class="hero-amount-sub">em impostos indevidos por <strong style="color:rgba(255,255,255,.55)">ano</strong></p>
+
+      <div class="hero-pills">
+        <span class="pill">📊 Simples Nacional</span>
+        <span class="pill">⚡ Recuperável agora</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div class="card fadeup fadeup-2">
+      <div class="card-header">
+        <span class="card-header-label">Detalhamento da perda mensal</span>
+      </div>
+      <div class="loss-row">
+        <div class="loss-left">
+          <div class="loss-ico">🐾</div>
+          <div>
+            <div class="loss-name">ICMS sobre Ração</div>
+            <div class="loss-hint">Ração pet tem isenção — você paga indevidamente</div>
+          </div>
+        </div>
+        <span class="loss-amount" id="resIcms">R$ 0,00</span>
+      </div>
+
+      <div class="loss-row">
+        <div class="loss-left">
+          <div class="loss-ico">💊</div>
+          <div>
+            <div class="loss-name">PIS/COFINS sobre Med. e Higiene</div>
+            <div class="loss-hint">Alíquota zero — mas cobrada normalmente</div>
+          </div>
+        </div>
+        <span class="loss-amount" id="resPis">R$ 0,00</span>
+      </div>
+
+      <div class="mensal-strip">
+        <div>
+          <div class="mensal-lbl">Total perdido por mês</div>
+          <div class="mensal-hint">Estimativa base Simples Nacional</div>
+        </div>
+        <span class="mensal-amount" id="resMensal">R$ 0,00</span>
+      </div>
+    </div>
+
+    <div class="annual-card fadeup fadeup-3">
+      <div class="annual-left">
+        <div class="annual-tag">🔥 Projeção anual</div>
+        <div class="annual-lbl">Perda em 12 meses<br>sem recuperação</div>
+        <div class="annual-sub">Valor cumulativo estimado</div>
+      </div>
+      <div class="annual-val" id="resAnual">R$ 0,00</div>
+    </div>
+
+    <div class="why-box fadeup fadeup-4">
+      <p>
+        Ração, medicamentos e produtos de higiene para pets têm
+        <strong>isenção fiscal garantida por lei</strong>. A maioria
+        dos contadores generalistas não aplica — e seu pet shop
+        continua pagando o que não deve, todo mês.
+      </p>
+    </div>
+
+    <div class="proof-strip fadeup fadeup-4">
+      <div class="proof-item">
+        <div class="proof-num">800+</div>
+        <div class="proof-desc">pet shops<br>diagnosticados</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-num">R$2.400</div>
+        <div class="proof-desc">recuperados<br>por mês em média</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-num">100%</div>
+        <div class="proof-desc">diagnóstico<br>gratuito</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-card fadeup fadeup-5">
+      <p class="cta-overline">Próximo passo</p>
+      <h2 class="cta-title">Fale com um<br>especialista agora</h2>
+      <p class="cta-desc">
+        Apresente o resultado e nosso time analisa<br>como recuperar esses valores para o seu negócio.
+      </p>
+
+      <a id="btnWA" href="#" class="btn-wa" target="_blank" rel="noopener">
+        <div class="wa-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+        </div>
+        <div class="wa-text">
+          <div class="wa-line1">Quero recuperar meus impostos</div>
+          <div class="wa-line2">Resposta em até 5 minutos · Gratuito</div>
+        </div>
+        <span class="wa-arrow">→</span>
+      </a>
+
+      <div class="cta-trust">
+        <span class="trust-it">✓ Sem compromisso</span>
+        <span class="trust-dot"></span>
+        <span class="trust-it">✓ 100% gratuito</span>
+        <span class="trust-dot"></span>
+        <span class="trust-it">✓ Dados protegidos</span>
+      </div>
+    </div>
+
+    <a href="/" class="back-link">← Voltar para a página inicial</a>
+  </div>
+
+  <script>
+    function fmtBRL(v) {
+      return 'R$ ' + parseFloat(v).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    var data = {};
+    try { data = JSON.parse(sessionStorage.getItem('sim_result') || '{}'); } catch(e) {}
+
+    if (!data.mensal) {
+      window.location.href = '/';
+    } else {
+      document.getElementById('heroAmount').textContent    = fmtBRL(data.anual);
+      document.getElementById('resIcms').textContent       = fmtBRL(data.icms);
+      document.getElementById('resPis').textContent        = fmtBRL(data.pis);
+      document.getElementById('resMensal').textContent     = fmtBRL(data.mensal);
+      document.getElementById('resAnual').textContent      = fmtBRL(data.anual);
+
+      if (data.nome) {
+        var fn = data.nome.split(' ')[0];
+        document.getElementById('heroHeadline').innerHTML =
+          'Identificamos uma oportunidade para<br><strong>' + fn + '</strong>';
+      }
+
+      var msg = encodeURIComponent(
+        'Olá! Sou ' + (data.nome||'') + ' do ' + (data.petshop||'meu pet shop') +
+        '. Fiz o simulador da Fluxxo Pet e minha estimativa de perda é de ' +
+        fmtBRL(data.mensal) + '/mês (' + fmtBRL(data.anual) + '/ano). Quero saber como recuperar!'
+      );
+      document.getElementById('btnWA').href = 'https://wa.me/5571982346881?text=' + msg;
+
+      // ViewContent — evento de alta intenção (viu resultado do simulador)
+      (function(){
+        function getCookie(n){var m=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)');return m?m.pop():'';}
+        function genEventId(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+        var eid = genEventId();
+        if(typeof fbq!=='undefined'){
+          fbq('track','ViewContent',{
+            value: parseFloat(data.anual).toFixed(2),
+            currency:'BRL',
+            content_name:'Simulador Resultado'
+          },{eventID:eid});
+        }
+        fetch('/tracker',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            event_name:'ViewContent',
+            event_id: eid,
+            user_data:{ em:data.email||'', ph:data.whatsapp||'', fn:data.nome||'' },
+            custom_data:{
+              value: parseFloat(data.anual).toFixed(2),
+              currency:'BRL',
+              content_name:'Simulador Resultado',
+              mensal: parseFloat(data.mensal).toFixed(2)
+            },
+            source_url: window.location.href,
+            fbp: getCookie('_fbp'),
+            fbc: getCookie('_fbc')
+          })
+        }).catch(function(){});
+      })();
+    }
+  </script>
+
+</body>
+</html>

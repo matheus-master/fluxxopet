@@ -358,6 +358,33 @@
     }
     .btn-dark:hover { background: var(--mid); transform: translateY(-2px) scale(1.02); }
 
+    /* ── SIMULATOR / RESULT ── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .sim-panel, .result-panel { animation: fadeUp 0.35s ease; }
+    .sim-title { font-family:'Anton',sans-serif; font-size:1.25rem; text-transform:uppercase; color:var(--dark); text-align:center; margin-bottom:4px; letter-spacing:0.02em; }
+    .sim-greeting { font-size:0.8rem; color:var(--sage); text-align:center; margin-bottom:20px; line-height:1.5; }
+    .sim-lbl { font-size:0.77rem; font-weight:600; color:var(--dark); margin-bottom:6px; display:flex; align-items:center; gap:5px; }
+    .diag-card { background:var(--red); border-radius:14px; padding:22px 18px; margin-bottom:12px; }
+    .diag-title { font-family:'Anton',sans-serif; font-size:0.95rem; text-transform:uppercase; color:var(--white); margin-bottom:14px; display:flex; align-items:center; gap:8px; letter-spacing:0.03em; line-height:1.2; }
+    .diag-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.15); font-size:0.8rem; }
+    .diag-row:last-of-type { border-bottom:none; }
+    .dlbl { color:rgba(255,255,255,0.9); display:flex; align-items:center; gap:5px; }
+    .dval { font-weight:700; color:var(--white); white-space:nowrap; font-variant-numeric:tabular-nums; flex-shrink:0; }
+    .diag-total { display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.22); border-radius:8px; padding:11px 14px; margin-top:10px; gap:8px; }
+    .diag-total .dlbl { font-size:0.84rem; color:rgba(255,255,255,0.9); font-weight:600; }
+    .diag-total .dval { font-family:'Anton',sans-serif; font-size:1.1rem; }
+    .diag-anual { display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.32); border:1.5px solid rgba(255,208,0,0.45); border-radius:9px; padding:12px 14px; margin-top:8px; gap:8px; }
+    .diag-anual .dlbl { font-size:0.84rem; color:rgba(255,255,255,0.95); font-weight:700; }
+    .diag-anual .dval { font-family:'Anton',sans-serif; font-size:1.3rem; color:#FFD000; }
+    .diag-msg { text-align:center; margin-top:14px; }
+    .diag-msg p { font-size:0.79rem; color:rgba(255,255,255,0.92); font-weight:600; line-height:1.55; }
+    .diag-msg .hl-gold { color:#FFD000; margin-top:3px; }
+    .wa-card { background:var(--light); border:1px solid rgba(9,16,64,0.08); border-radius:14px; padding:18px 16px; text-align:center; }
+    .wa-card-title { font-family:'Anton',sans-serif; font-size:1rem; text-transform:uppercase; color:var(--dark); margin-bottom:5px; line-height:1.2; }
+    .wa-card-sub { font-size:0.76rem; color:var(--sage); margin-bottom:14px; line-height:1.5; }
+    .btn-wa { width:100%; background:#25D366; color:var(--white); font-family:'Anton',sans-serif; font-size:0.88rem; letter-spacing:0.04em; text-transform:uppercase; border:none; border-radius:10px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.2s,transform 0.15s; text-decoration:none; }
+    .btn-wa:hover { background:#1ebe5c; transform:translateY(-2px); }
+
     /* ── FOOTER ── */
     .footer { background: var(--dark); padding: 26px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     .footer-logo { font-family: 'Anton', sans-serif; font-size: 0.95rem; letter-spacing: 0.08em; color: rgba(255,255,255,0.38); display: flex; align-items: center; gap: 8px; }
@@ -528,10 +555,31 @@
           <div class="field"><input type="email" id="email" placeholder="E-mail" autocomplete="email" required /></div>
           <button type="submit" class="btn-sub">Continuar para o diagnóstico →</button>
         </form>
-        <p class="trust">
+        <p class="trust" id="heroTrust">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           100% gratuito &bull; Sem spam &bull; Dados protegidos
         </p>
+
+        <!-- SIMULATOR PANEL -->
+        <div id="simPanel" style="display:none;">
+          <p class="sim-title">Simulador de Impostos</p>
+          <p class="sim-greeting" id="simGreeting">Preencha os dados — leva menos de 1 minuto</p>
+          <div class="field">
+            <p class="sim-lbl">💰 Faturamento Mensal Total (R$)</p>
+            <input type="tel" id="simFat" placeholder="Ex: 50000" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <p class="sim-lbl">🐾 Valor vendas de Ração (R$)</p>
+            <input type="tel" id="simRacao" placeholder="Ex: 20000" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <p class="sim-lbl">💊 Valor Medicamentos e Higiene (R$)</p>
+            <input type="tel" id="simMed" placeholder="Ex: 10000" inputmode="numeric" />
+          </div>
+          <button class="btn-sub" onclick="calcSimulator()">Calcular minha perda agora →</button>
+        </div>
+
+
       </div>
     </div>
   </div>
@@ -770,16 +818,59 @@
       document.body.style.overflow='hidden';
     }
 
+    var TAX_RATES = [
+      {ate:180000,   pisCofins:0.0062, icms:0.0136},
+      {ate:360000,   pisCofins:0.0113, icms:0.0248},
+      {ate:720000,   pisCofins:0.0147, icms:0.0318},
+      {ate:1800000,  pisCofins:0.0166, icms:0.0358},
+      {ate:3600000,  pisCofins:0.0222, icms:0.0479},
+      {ate:Infinity, pisCofins:0.0654, icms:0}
+    ];
+
+    function fmtBRL(v) {
+      return 'R$ ' + v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+    }
+
+    function showSimulator() {
+      closeModal();
+      document.getElementById('leadForm').style.display = 'none';
+      document.getElementById('heroTrust').style.display = 'none';
+      document.querySelector('.card-title').style.display = 'none';
+      document.querySelector('.card-sub').style.display = 'none';
+      document.getElementById('simGreeting').textContent = 'Olá, ' + leadData.nome + '! Preencha os dados — leva menos de 1 minuto';
+      document.getElementById('simPanel').style.display = 'block';
+      setTimeout(function(){ document.querySelector('.card').scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
+    }
+
+    function calcSimulator() {
+      var fat = parseFloat((document.getElementById('simFat').value||'').replace(/\D/g,''))||0;
+      var racao = parseFloat((document.getElementById('simRacao').value||'').replace(/\D/g,''))||0;
+      var med = parseFloat((document.getElementById('simMed').value||'').replace(/\D/g,''))||0;
+      if (!fat) { document.getElementById('simFat').focus(); return; }
+      var fatAnual = fat * 12;
+      var bracket = TAX_RATES.find(function(b){ return fatAnual <= b.ate; }) || TAX_RATES[TAX_RATES.length-1];
+      var perdaICMS = racao * bracket.icms;
+      var perdaPIS = med * bracket.pisCofins;
+      var mensal = perdaICMS + perdaPIS;
+      var anual = mensal * 12;
+      sessionStorage.setItem('sim_result', JSON.stringify({
+        nome: leadData.nome, petshop: leadData.petshop,
+        email: leadData.email||'', whatsapp: leadData.whatsapp||'',
+        icms: perdaICMS, pis: perdaPIS, mensal: mensal, anual: anual
+      }));
+      window.location.href = '/resultado';
+    }
+
     function handleSubmit(e) {
       e.preventDefault();
-      leadData = { nome:document.getElementById('nome').value.trim(), petshop:document.getElementById('petshop').value.trim(), whatsapp:document.getElementById('whatsapp').value.trim(), email:document.getElementById('email').value.trim() };
+      leadData = { nome:document.getElementById('nome').value.trim(), petshop:document.getElementById('petshop').value.trim(), whatsapp:document.getElementById('whatsapp').value.trim(), email:document.getElementById('email').value.trim(), _formSource:'hero' };
       track('Lead',{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{currency:'BRL'});
       openModal();
     }
 
     function handleSubmitB(e) {
       e.preventDefault();
-      leadData = { nome:document.getElementById('nomeB').value.trim(), petshop:document.getElementById('petshopB').value.trim(), whatsapp:document.getElementById('whatsappB').value.trim(), email:document.getElementById('emailB').value.trim() };
+      leadData = { nome:document.getElementById('nomeB').value.trim(), petshop:document.getElementById('petshopB').value.trim(), whatsapp:document.getElementById('whatsappB').value.trim(), email:document.getElementById('emailB').value.trim(), _formSource:'cta' };
       track('Lead',{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{currency:'BRL'});
       openModal();
     }
@@ -796,7 +887,15 @@
       }).catch(function(){});
       setTimeout(function(){document.getElementById('progressFill').style.width='100%';document.getElementById('progressPct').textContent='100%';},120);
       setTimeout(function(){document.getElementById('successName').textContent=leadData.nome;document.getElementById('modalQuestion').style.display='none';document.getElementById('modalSuccess').style.display='block';},700);
-      setTimeout(function(){window.location.href='/obrigado';},3000);
+      if (leadData._formSource === 'hero') {
+        setTimeout(function(){ showSimulator(); }, 2200);
+      } else {
+        sessionStorage.setItem('lead_data', JSON.stringify({
+          nome:leadData.nome, petshop:leadData.petshop,
+          whatsapp:leadData.whatsapp, email:leadData.email||'', faturamento:value
+        }));
+        setTimeout(function(){window.location.href='/obrigado';},3000);
+      }
     }
 
     function closeModal() { document.getElementById('overlay').classList.remove('active'); document.body.style.overflow=''; }

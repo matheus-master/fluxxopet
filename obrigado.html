@@ -24,6 +24,34 @@
   <noscript><img height="1" width="1" style="display:none"
   src="https://www.facebook.com/tr?id=1338198531534558&ev=PageView&noscript=1"/></noscript>
 
+  <script>
+  (function(){
+    function getCookie(n){var m=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)');return m?m.pop():'';}
+    function genEventId(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+
+    var ld = {};
+    try { ld = JSON.parse(sessionStorage.getItem('lead_data')||'{}'); } catch(e){}
+
+    var eid = genEventId();
+    if(typeof fbq!=='undefined'){
+      fbq('track','CompleteRegistration',{currency:'BRL',status:'lead'},{eventID:eid});
+    }
+    fetch('/tracker',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        event_name:'CompleteRegistration',
+        event_id: eid,
+        user_data:{ em:ld.email||'', ph:ld.whatsapp||'', fn:ld.nome||'' },
+        custom_data:{ currency:'BRL', status:'lead', faturamento:ld.faturamento||'' },
+        source_url: window.location.href,
+        fbp: getCookie('_fbp'),
+        fbc: getCookie('_fbc')
+      })
+    }).catch(function(){});
+  })();
+  </script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
