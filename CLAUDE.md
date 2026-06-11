@@ -1,19 +1,23 @@
 # CLAUDE.md — Fluxxo Pet Captura de Leads
 
 ## Cloudflare
-- **Perfil deste projeto:** `fluxxo-pet-novo`
 - Conta: `Contato@fluxxopet.com.br's Account` (account_id `f16ea8ca4078c392b4d2474aee275842`)
-- Antes de qualquer deploy ou comando wrangler: `cf-on fluxxo-pet-novo`
-- Após terminar: `cf-off`
-- Listar todos os perfis: `cf-list`
-- Banco D1: `fluxxo-pet-tracking` (id `b1dfad2f-6637-43ea-bfb9-8289f4405466`)
+- **Projeto de produção:** `fluxxopet` (Pages **conectado ao GitHub** — auto-deploy).
+- **Deploy:** automático a cada `git push origin main` (NÃO usar mais `wrangler pages deploy`).
+- Banco D1: `fluxxo-pet-tracking` (id `b1dfad2f-6637-43ea-bfb9-8289f4405466`) — binding `DB`
+  vem do `wrangler.toml`, aplicado no build do git automaticamente.
+- Perfil cf p/ comandos manuais (d1, secrets): `cf-on fluxxo-pet-novo` … `cf-off`.
 
-> Migrado em 2026-06-11 da conta antiga (`e4a039cf…`, perfil `fluxxo-pet`) para a conta nova acima.
+> Migrado em 2026-06-11: conta antiga (`e4a039cf…`) → conta nova acima; git antigo
+> (`matheusercolani/fluxxo-pet`) → novo (`matheus-master/fluxxopet`, remote `origin`;
+> o antigo ficou como remote `backup-ercolani`).
+> O projeto direct-upload `fluxxo-pet` (`fluxxo-pet-288.pages.dev`) criado durante a
+> migração é redundante e pode ser apagado.
 
 ## Projeto
-- Repositório GitHub: https://github.com/matheusercolani/fluxxo-pet
-- Hospedagem: Cloudflare Pages (projeto `fluxxo-pet`, conta nova)
-- URL Pages: https://fluxxo-pet-288.pages.dev
+- Repositório GitHub: https://github.com/matheus-master/fluxxopet
+- Hospedagem: Cloudflare Pages (projeto `fluxxopet`, git-connected)
+- URL Pages: https://fluxxopet.pages.dev
 - Página principal: `index.html`
 - Painel admin: `admin.html` → rota `/admin`
 
