@@ -1,6 +1,6 @@
 // Ponte BotConversa -> ActiveCampaign
 // Recebe um webhook do BotConversa (quando o lead deixa o e-mail no bot),
-// cria/atualiza o contato no ActiveCampaign e abre um negocio na etapa "LEAD".
+// cria/atualiza o contato no ActiveCampaign e abre um negocio na etapa "Lead".
 //
 // Variaveis de ambiente necessarias (Cloudflare Pages > Settings > Environment variables / secrets):
 //   AC_API_URL        ex: https://suaconta.api-us1.com   (sem barra no fim)
@@ -15,21 +15,36 @@
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  // 1. Autenticacao do webhook (segredo via query ?token= ou header X-Webhook-Secret)
-  const url        = new URL(request.url);
-  const givenToken = url.searchParams.get('token') || request.headers.get('X-Webhook-Secret') || '';
-  if (!env.BC_WEBHOOK_SECRET || givenToken !== env.BC_WEBHOOK_SECRET) {
-    return json({ ok: false, error: 'Unauthorized' }, 401);
-  }
-
-  // 2. Le o corpo (JSON ou form-urlencoded)
-  const body = await readBody(request);
+  // Le o corpo bruto (uma vez) e tambem parseado
+  const rawText = await request.text();
+  const body    = parseBody(request, rawText);
 
   const email = pick(body, ['email', 'Email', 'e-mail', 'mail']);
   const nome  = pick(body, ['nome', 'name', 'full_name', 'fullName', 'first_name', 'firstName']);
   const phone = pick(body, ['telefone', 'whatsapp', 'phone', 'celular', 'fone']);
 
-  if (!email) return json({ ok: false, error: 'E-mail ausente no payload' }, 400);
+  // Logger de diagnostico (best-effort, nao bloqueia a resposta)
+  const log = (result) => {
+    if (!env.DB) return;
+    context.waitUntil(
+      env.DB.prepare(
+        'INSERT INTO webhook_log (raw, email, nome, telefone, result) VALUES (?, ?, ?, ?, ?)'
+      ).bind(rawText.slice(0, 2000), email, nome, phone, result).run().catch(() => {})
+    );
+  };
+
+  // 1. Autenticacao do webhook (segredo via query ?token= ou header X-Webhook-Secret)
+  const url        = new URL(request.url);
+  const givenToken = url.searchParams.get('token') || request.headers.get('X-Webhook-Secret') || '';
+  if (!env.BC_WEBHOOK_SECRET || givenToken !== env.BC_WEBHOOK_SECRET) {
+    log('401 unauthorized');
+    return json({ ok: false, error: 'Unauthorized' }, 401);
+  }
+
+  if (!email) {
+    log('400 email ausente');
+    return json({ ok: false, error: 'E-mail ausente no payload' }, 400);
+  }
 
   // Config do ActiveCampaign
   const cfg = {
@@ -42,6 +57,7 @@ export async function onRequestPost(context) {
     currency: env.AC_DEAL_CURRENCY || 'brl',
   };
   if (!cfg.apiUrl || !cfg.token || !cfg.pipeline || !cfg.stage || !cfg.owner) {
+    log('500 config ausente');
     return json({ ok: false, error: 'Integracao ActiveCampaign nao configurada (faltam variaveis de ambiente)' }, 500);
   }
 
@@ -54,10 +70,12 @@ export async function onRequestPost(context) {
       contact: { email, firstName, lastName, phone: phone || '' },
     });
     if (!syncRes.ok) {
+      log('502 contact/sync ' + JSON.stringify(syncRes.data).slice(0, 300));
       return json({ ok: false, step: 'contact/sync', status: syncRes.status, error: syncRes.data }, 502);
     }
     const contactId = syncRes.data?.contact?.id;
     if (!contactId) {
+      log('502 contact/sync sem id');
       return json({ ok: false, step: 'contact/sync', error: 'contactId ausente na resposta' }, 502);
     }
 
@@ -66,6 +84,7 @@ export async function onRequestPost(context) {
     if (existing.ok && Array.isArray(existing.data?.deals)) {
       const dup = existing.data.deals.find(d => String(d.group) === String(cfg.pipeline));
       if (dup) {
+        log('200 deduped deal ' + dup.id);
         return json({ ok: true, contactId, dealId: dup.id, deduped: true });
       }
     }
@@ -83,11 +102,14 @@ export async function onRequestPost(context) {
       },
     });
     if (!dealRes.ok) {
+      log('502 deals ' + JSON.stringify(dealRes.data).slice(0, 300));
       return json({ ok: false, step: 'deals', status: dealRes.status, error: dealRes.data }, 502);
     }
 
+    log('200 ok deal ' + dealRes.data?.deal?.id);
     return json({ ok: true, contactId, dealId: dealRes.data?.deal?.id });
   } catch (err) {
+    log('500 ' + String(err && err.message || err));
     return json({ ok: false, error: String(err && err.message || err) }, 500);
   }
 }
@@ -109,16 +131,14 @@ async function acFetch(cfg, path, method, payload) {
   return { ok: res.ok, status: res.status, data };
 }
 
-async function readBody(request) {
+function parseBody(request, rawText) {
   const ct = request.headers.get('Content-Type') || '';
   try {
-    if (ct.includes('application/json')) return await request.json();
-    if (ct.includes('application/x-www-form-urlencoded') || ct.includes('multipart/form-data')) {
-      const form = await request.formData();
-      return Object.fromEntries(form.entries());
+    if (ct.includes('application/x-www-form-urlencoded')) {
+      return Object.fromEntries(new URLSearchParams(rawText).entries());
     }
-    // fallback: tenta JSON
-    return JSON.parse(await request.text());
+    // JSON (ou tenta como JSON por padrao)
+    return JSON.parse(rawText);
   } catch {
     return {};
   }
