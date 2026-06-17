@@ -18,6 +18,12 @@
 - Repositório GitHub: https://github.com/matheus-master/fluxxopet
 - Hospedagem: Cloudflare Pages (projeto `fluxxopet`, git-connected)
 - URL Pages: https://fluxxopet.pages.dev
+- **Domínio de produção:** https://diagnostico.fluxxopet.com.br (custom domain do Pages;
+  CNAME `diagnostico` -> `fluxxopet.pages.dev`, proxied). É o link que o bot manda aos leads.
+- Zona Cloudflare `fluxxopet.com.br` (id `14bec166115f98ea5c3ac266ccfbb362`). O apex e o `www`
+  continuam apontando pro site/e-mail da Hostinger — NÃO mexer.
+- DKIM do ActiveCampaign (`acdkim1/acdkim2._domainkey`) ajustado para DNS-only (proxy off)
+  para a autenticação de envio funcionar.
 - Página principal: `index.html`
 - Painel admin: `admin.html` → rota `/admin`
 
