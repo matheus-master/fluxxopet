@@ -442,7 +442,7 @@
     .overlay.active { opacity: 1; pointer-events: all; }
     .modal {
       background: var(--white); border: 1px solid rgba(9,16,64,0.10);
-      border-radius: 20px; width: 100%; max-width: 460px; overflow: hidden;
+      border-radius: 20px; width: 100%; max-width: 460px; overflow: hidden auto; max-height: 92vh;
       transform: translateY(16px) scale(0.98);
       transition: transform 0.28s cubic-bezier(.22,.68,0,1.2);
     }
@@ -560,24 +560,7 @@
           100% gratuito &bull; Sem spam &bull; Dados protegidos
         </p>
 
-        <!-- SIMULATOR PANEL -->
-        <div id="simPanel" style="display:none;">
-          <p class="sim-title">Simulador de Impostos</p>
-          <p class="sim-greeting" id="simGreeting">Preencha os dados — leva menos de 1 minuto</p>
-          <div class="field">
-            <p class="sim-lbl">💰 Faturamento Mensal Total (R$)</p>
-            <input type="tel" id="simFat" placeholder="Ex: 50000" inputmode="numeric" />
-          </div>
-          <div class="field">
-            <p class="sim-lbl">🐾 Valor vendas de Ração (R$)</p>
-            <input type="tel" id="simRacao" placeholder="Ex: 20000" inputmode="numeric" />
-          </div>
-          <div class="field">
-            <p class="sim-lbl">💊 Valor Medicamentos e Higiene (R$)</p>
-            <input type="tel" id="simMed" placeholder="Ex: 10000" inputmode="numeric" />
-          </div>
-          <button class="btn-sub" onclick="calcSimulator()">Calcular minha perda agora →</button>
-        </div>
+        <!-- (simulador agora abre no modal — ver #modalSimulator) -->
 
 
       </div>
@@ -774,6 +757,23 @@
           <p class="success-desc">Recebemos suas informações, <strong id="successName"></strong>. Enviaremos o resultado pelo WhatsApp em instantes.</p>
         </div>
       </div>
+      <div class="modal-body" id="modalSimulator" style="display:none;">
+        <p class="sim-title" style="text-align:center;">Simulador de Impostos</p>
+        <p class="sim-greeting" id="simGreeting" style="text-align:center;">Preencha os dados — leva menos de 1 minuto</p>
+        <div class="field">
+          <p class="sim-lbl">💰 Faturamento Mensal Total (R$)</p>
+          <input type="tel" id="simFat" placeholder="Ex: 50000" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <p class="sim-lbl">🐾 Valor vendas de Ração (R$)</p>
+          <input type="tel" id="simRacao" placeholder="Ex: 20000" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <p class="sim-lbl">💊 Valor Medicamentos e Higiene (R$)</p>
+          <input type="tel" id="simMed" placeholder="Ex: 10000" inputmode="numeric" />
+        </div>
+        <button class="btn-sub" onclick="calcSimulator()">Calcular minha perda agora →</button>
+      </div>
     </div>
   </div>
 
@@ -832,14 +832,14 @@
     }
 
     function showSimulator() {
-      closeModal();
-      document.getElementById('leadForm').style.display = 'none';
-      document.getElementById('heroTrust').style.display = 'none';
-      document.querySelector('.card-title').style.display = 'none';
-      document.querySelector('.card-sub').style.display = 'none';
+      document.getElementById('progressFill').style.width = '95%';
+      document.getElementById('progressPct').textContent = '95%';
+      document.getElementById('modalQuestion').style.display = 'none';
+      document.getElementById('modalSuccess').style.display = 'none';
+      document.getElementById('modalSimulator').style.display = 'block';
       document.getElementById('simGreeting').textContent = 'Olá, ' + leadData.nome + '! Preencha os dados — leva menos de 1 minuto';
-      document.getElementById('simPanel').style.display = 'block';
-      setTimeout(function(){ document.querySelector('.card').scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
+      document.getElementById('overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
 
     function calcSimulator() {
