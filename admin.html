@@ -1593,8 +1593,46 @@
         comentarios: l.comentarios  || '',
         tags:        Array.isArray(tags) ? tags : [],
         sessionId:   l.session_id || '',
+        simFat:      l.sim_fat,
+        simRacao:    l.sim_racao,
+        simMed:      l.sim_med,
+        perdaIcms:   l.perda_icms,
+        perdaPis:    l.perda_pis,
+        perdaMensal: l.perda_mensal,
+        perdaAnual:  l.perda_anual,
         timestamp:   (l.created_at || '').replace(' ', 'T') + (l.created_at && !l.created_at.includes('Z') ? 'Z' : ''),
       };
+    }
+
+    function fmtMoney(v) {
+      if (v === null || v === undefined || v === '') return null;
+      var n = parseFloat(v);
+      if (isNaN(n)) return null;
+      return 'R$ ' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function buildDiagHTML(lead) {
+      var rows = [
+        ['Faturamento mensal informado', fmtMoney(lead.simFat)],
+        ['Vendas de ração',              fmtMoney(lead.simRacao)],
+        ['Medicamentos e higiene',       fmtMoney(lead.simMed)],
+        ['Perda de ICMS (ração)',        fmtMoney(lead.perdaIcms)],
+        ['Perda de PIS/COFINS (med.)',   fmtMoney(lead.perdaPis)],
+      ].filter(function(r){ return r[1] !== null; });
+      var mensal = fmtMoney(lead.perdaMensal), anual = fmtMoney(lead.perdaAnual);
+      if (!rows.length && !mensal && !anual) return '';
+      var rowStyle = 'display:flex;justify-content:space-between;gap:12px;padding:9px 2px;border-bottom:1px solid var(--border);font-size:0.82rem;';
+      var inner = rows.map(function(r) {
+        return '<div style="'+rowStyle+'"><span style="color:var(--mid);">'+r[0]+'</span><span style="font-weight:600;">'+r[1]+'</span></div>';
+      }).join('');
+      if (mensal) inner += '<div style="'+rowStyle+'"><span style="font-weight:700;">Perda mensal total</span><span style="font-weight:700;">'+mensal+'</span></div>';
+      if (anual)  inner += '<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 2px;font-size:0.82rem;"><span style="font-weight:700;">Projeção anual</span><span style="font-weight:700;color:var(--red);">'+anual+'</span></div>';
+      return '<div class="drawer-section-sep"></div>' +
+        '<div>' +
+          '<label class="field-lbl">Respostas do diagnóstico</label>' +
+          '<p class="field-hint">O que a pessoa preencheu no simulador</p>' +
+          '<div style="background:rgba(128,128,128,0.06);border:1px solid var(--border);border-radius:10px;padding:4px 14px;margin-top:6px;">' + inner + '</div>' +
+        '</div>';
     }
 
     async function loadLeads() {
@@ -2047,6 +2085,7 @@
             '<label class="field-lbl">Comentários</label>' +
             '<textarea id="dComent" class="d-textarea" placeholder="Notas sobre este lead…">'+esc(lead.comentarios||'')+'</textarea>' +
           '</div>' +
+          buildDiagHTML(lead) +
         '</div>' +
         '<div class="drawer-footer">' +
           '<button class="drawer-save" onclick="saveDrawer()">Salvar alterações</button>' +

@@ -853,6 +853,11 @@
       var perdaPIS = med * bracket.pisCofins;
       var mensal = perdaICMS + perdaPIS;
       var anual = mensal * 12;
+      if (leadData.id) {
+        fetch('/api/submit',{ method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ id:leadData.id, sim_fat:fat, sim_racao:racao, sim_med:med, perda_icms:perdaICMS, perda_pis:perdaPIS, perda_mensal:mensal, perda_anual:anual })
+        }).catch(function(){});
+      }
       sessionStorage.setItem('sim_result', JSON.stringify({
         nome: leadData.nome, petshop: leadData.petshop,
         email: leadData.email||'', whatsapp: leadData.whatsapp||'',
@@ -884,7 +889,7 @@
       if (rev) track(rev,{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{faturamento:value,currency:'BRL'});
       fetch('/api/submit',{ method:'POST', headers:{'Content-Type':'application/json'},
         body:JSON.stringify({nome:leadData.nome,petshop:leadData.petshop,whatsapp:leadData.whatsapp,email:leadData.email||'',faturamento:value})
-      }).catch(function(){});
+      }).then(function(r){return r.json();}).then(function(res){ if(res&&res.id) leadData.id=res.id; }).catch(function(){});
       setTimeout(function(){document.getElementById('progressFill').style.width='100%';document.getElementById('progressPct').textContent='100%';},120);
       setTimeout(function(){document.getElementById('successName').textContent=leadData.nome;document.getElementById('modalQuestion').style.display='none';document.getElementById('modalSuccess').style.display='block';},700);
       if (leadData._formSource === 'hero') {
