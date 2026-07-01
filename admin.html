@@ -7,43 +7,59 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ── Google AI Studio — TEMA CLARO (padrão) ──────── */
     :root {
-      --bg:      #0b0b0b;
-      --surface: #131313;
-      --raise:   #1a1a1a;
-      --border:  rgba(255,255,255,0.07);
-      --border2: rgba(255,255,255,0.12);
-      --gold:    #1232C8;
-      --gold-dim:rgba(18,50,200,0.10);
-      --gold-bd: rgba(18,50,200,0.22);
-      --red:     #D94040;
-      --green:   #3DAA6A;
-      --white:   #f0f0f0;
-      --mid:     #999;
-      --dim:     #555;
-      --radius:  10px;
+      --bg:       #ffffff;
+      --surface:  #ffffff;
+      --raise:    #f0f4f9;   /* hover / superfície de apoio */
+      --surface2: #f8f9fa;
+      --border:   #e8eaed;
+      --border2:  #dadce0;
+      --gold:     #0b57d0;   /* azul de destaque (Google) */
+      --gold-dim: #e8f0fe;   /* fundo do destaque */
+      --gold-bd:  #aecbfa;   /* borda do destaque */
+      --red:      #d93025;
+      --green:    #1e8e3e;
+      --amber:    #ea8600;
+      --white:    #1f1f1f;   /* texto principal */
+      --mid:      #5f6368;   /* texto secundário */
+      --dim:      #80868b;   /* texto terciário */
+      --text:     #1f1f1f;
+      --red-bg:   #fce8e6;
+      --green-bg: #e6f4ea;
+      --amber-bg: #fef7e0;
+      --radius:   16px;
+      --radius-sm:8px;
     }
 
-    [data-theme="light"] {
-      --bg:      #f2f2f2;
-      --surface: #ffffff;
-      --raise:   #f7f7f7;
-      --border:  rgba(0,0,0,0.08);
-      --border2: rgba(0,0,0,0.14);
-      --gold:    #1232C8;
-      --gold-dim:rgba(18,50,200,0.09);
-      --gold-bd: rgba(18,50,200,0.25);
-      --red:     #c0392b;
-      --green:   #27ae60;
-      --white:   #111111;
-      --mid:     #555;
-      --dim:     #999;
+    /* ── TEMA ESCURO ─────────────────────────────────── */
+    [data-theme="dark"] {
+      --bg:       #131314;
+      --surface:  #1e1f20;
+      --raise:    #2a2b2d;
+      --surface2: #1e1f20;
+      --border:   #2f3133;
+      --border2:  #3c4043;
+      --gold:     #8ab4f8;
+      --gold-dim: #1a3157;
+      --gold-bd:  #3c5a86;
+      --red:      #f28b82;
+      --green:    #81c995;
+      --amber:    #fdd663;
+      --white:    #e3e3e3;
+      --mid:      #9aa0a6;
+      --dim:      #80868b;
+      --text:     #e3e3e3;
+      --red-bg:   #3a2422;
+      --green-bg: #1f3a2a;
+      --amber-bg: #3a3320;
     }
 
     /* botão tema */
@@ -69,17 +85,30 @@
 
     body {
       background: var(--bg);
-      color: var(--white);
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 15px;
+      color: var(--text);
+      font-family: 'Roboto Slab', Georgia, serif;
+      font-size: 14px;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
+      display: flex;
     }
 
-    h1, h2, h3 {
-      font-family: 'Anton', 'Inter', sans-serif;
+    h1, h2, h3 { font-family: 'Roboto Slab', Georgia, serif; font-weight: 600; }
+
+    input, select, textarea, button { font-family: 'Roboto Slab', Georgia, serif; }
+
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined' !important;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-weight: normal; font-style: normal; line-height: 1;
+      letter-spacing: normal; text-transform: none; white-space: nowrap;
+      display: inline-block; vertical-align: middle;
+      -webkit-font-feature-settings: 'liga'; -webkit-font-smoothing: antialiased;
+      font-size: 20px;
     }
+    .ms-sm { font-size: 18px; }
+    .ms-xs { font-size: 16px; }
 
     /* ── TOPBAR ──────────────────────────────────────── */
     .topbar {
@@ -105,7 +134,7 @@
     .logo svg { width: 24px; height: 24px; }
 
     .logo-name {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Big Shoulders Display', sans-serif;
       font-size: 0.95rem;
       font-weight: 900;
       letter-spacing: 0.1em;
@@ -132,9 +161,12 @@
 
     /* ── PAGE ────────────────────────────────────────── */
     .page {
-      max-width: 1100px;
+      padding: 36px 40px 64px;
+    }
+
+    .page-inner {
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 36px 24px 64px;
     }
 
     .page-header {
@@ -227,7 +259,7 @@
     }
 
     .stat-card .value {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Big Shoulders Display', sans-serif;
       font-size: 2rem;
       font-weight: 900;
       line-height: 1;
@@ -292,14 +324,14 @@
 
     table {
       width: 100%;
-      min-width: 700px;
+      min-width: 900px;
       border-collapse: collapse;
     }
 
     thead th {
-      padding: 12px 18px;
+      padding: 11px 16px;
       text-align: left;
-      font-size: 0.68rem;
+      font-size: 0.67rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -317,8 +349,8 @@
     tbody tr:hover { background: var(--raise); }
 
     tbody td {
-      padding: 13px 18px;
-      font-size: 0.85rem;
+      padding: 12px 16px;
+      font-size: 0.84rem;
       color: #c0c0c0;
       vertical-align: middle;
     }
@@ -340,7 +372,7 @@
     }
 
     .fat-1 { background: rgba(100,180,100,0.1); color: #6db86d; border: 1px solid rgba(100,180,100,0.2); }
-    .fat-2 { background: rgba(18,50,200,0.10);  color: #c89000; border: 1px solid rgba(232,160,0,0.2);  }
+    .fat-2 { background: rgba(232,160,0,0.10);  color: #c89000; border: 1px solid rgba(232,160,0,0.2);  }
     .fat-3 { background: rgba(100,140,220,0.1); color: #7eaadd; border: 1px solid rgba(100,140,220,0.2);}
     .fat-4 { background: rgba(180,100,220,0.1); color: #c07ad8; border: 1px solid rgba(180,100,220,0.2);}
     .fat-5 { background: rgba(220,120,60,0.10); color: #e07840; border: 1px solid rgba(220,120,60,0.20);}
@@ -357,6 +389,22 @@
       font-size: 0.75rem;
       width: 40px;
     }
+
+    .td-actions { width: 40px; text-align: center; }
+
+    .btn-row-del {
+      background: none;
+      border: none;
+      color: var(--dim);
+      cursor: pointer;
+      padding: 5px 7px;
+      border-radius: 5px;
+      line-height: 1;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s, background 0.15s;
+    }
+    tbody tr:hover .btn-row-del { opacity: 1; }
+    .btn-row-del:hover { color: var(--red); background: rgba(217,64,64,0.08); }
 
     /* ── EMPTY STATE ─────────────────────────────────── */
     .empty {
@@ -640,9 +688,9 @@
       font-weight: 600;
       padding: 2px 6px;
       border-radius: 4px;
-      background: rgba(18,50,200,0.12);
+      background: rgba(232,160,0,0.12);
       color: var(--gold);
-      border: 1px solid rgba(18,50,200,0.22);
+      border: 1px solid rgba(232,160,0,0.22);
     }
 
     .nl-field { margin-bottom: 12px; }
@@ -675,7 +723,7 @@
       font-weight: 700; padding: 6px 12px; white-space: nowrap;
       transition: background 0.15s;
     }
-    .tag-add-btn:hover { background: rgba(18,50,200,0.18); }
+    .tag-add-btn:hover { background: rgba(232,160,0,0.18); }
 
     .tag-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
     .tag-check {
@@ -741,7 +789,7 @@
     .kanban-add-col:hover { border-color: var(--gold-bd); color: var(--gold); }
 
     .lead-card.dragging { opacity: 0.4; }
-    .kanban-col-body.drag-over { background: rgba(18,50,200,0.07); outline: 1px dashed var(--gold-bd); border-radius: 6px; }
+    .kanban-col-body.drag-over { background: rgba(232,160,0,0.07); outline: 1px dashed var(--gold-bd); border-radius: 6px; }
 
     /* ── DRAWER ──────────────────────────────────────── */
     .drawer-overlay {
@@ -781,7 +829,7 @@
     }
 
     .drawer-name {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Big Shoulders Display', sans-serif;
       font-size: 1.35rem;
       font-weight: 900;
       letter-spacing: 0.01em;
@@ -891,7 +939,7 @@
     .drawer-save {
       width: 100%;
       background: var(--gold);
-      color: #fff;
+      color: #000;
       border: none;
       border-radius: 7px;
       padding: 12px;
@@ -901,7 +949,7 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .drawer-save:hover { background: #0a21a0; }
+    .drawer-save:hover { background: #d49100; }
 
     .drawer-footer {
       padding: 14px 20px;
@@ -925,7 +973,7 @@
       gap: 7px;
       transition: background 0.15s;
     }
-    .btn-crm:hover { background: rgba(18,50,200,0.18); }
+    .btn-crm:hover { background: rgba(232,160,0,0.18); }
     .btn-crm svg   { width: 14px; height: 14px; stroke: var(--gold); }
 
     /* ── IMPORT MODAL ───────────────────────────────── */
@@ -1087,7 +1135,7 @@
       border: none;
       border-radius: 7px;
       padding: 9px 22px;
-      color: #fff;
+      color: #000;
       font-family: inherit;
       font-size: 0.85rem;
       font-weight: 700;
@@ -1095,11 +1143,12 @@
       transition: background 0.15s;
     }
 
-    .cbtn-import:hover { background: #0a21a0; }
+    .cbtn-import:hover { background: #d49100; }
     .cbtn-import:disabled { opacity: 0.4; cursor: default; }
 
     /* ── RESPONSIVE ──────────────────────────────────── */
     @media (max-width: 860px) {
+      .page { padding: 28px 20px 48px; }
       .stats { grid-template-columns: 1fr 1fr; }
     }
 
@@ -1144,127 +1193,256 @@
 
     @media (max-width: 560px) {
       .topbar { padding: 0 16px; }
-      .page { padding: 24px 16px 48px; }
+      .page { padding: 20px 12px 40px; }
       .stats { grid-template-columns: 1fr 1fr; gap: 8px; }
       .page-header { flex-direction: column; align-items: flex-start; }
       thead th:nth-child(3),
       tbody td:nth-child(3) { display: none; }
       .bar-row { grid-template-columns: 110px 1fr 30px; }
     }
+
+    /* ════════════ REDESENHO GOOGLE AI STUDIO ════════════ */
+    .page-title, .stat-card .value, .drawer-name, .logo-name,
+    .dash-card .dk-value, .confirm-box h3, .import-head h3 { font-family: 'Roboto Slab', Georgia, serif; }
+    .d-select, .d-input, .d-textarea, .drawer-save { font-family: 'Roboto Slab', Georgia, serif; }
+
+    /* ── SIDEBAR ─────────────────────────────────────── */
+    .sidebar {
+      position: sticky; top: 0; height: 100vh;
+      width: 260px; flex-shrink: 0;
+      background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 6px; padding: 18px 12px;
+    }
+    .sb-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 8px 10px 16px; }
+    .sb-logo svg { width: 26px; height: 26px; flex-shrink: 0; }
+    .sb-logo .logo-name { font-size: 1rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text); }
+    .sb-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .sb-item {
+      display: flex; align-items: center; gap: 14px; width: 100%;
+      border: none; background: transparent; color: var(--mid);
+      cursor: pointer; text-align: left; padding: 10px 14px;
+      border-radius: 999px; font-size: 0.9rem; font-weight: 500;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sb-item:hover { background: var(--raise); color: var(--text); }
+    .sb-item.active { background: var(--gold-dim); color: var(--gold); font-weight: 600; }
+    .sb-item .material-symbols-outlined { font-size: 22px; }
+    .sb-foot { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--border); padding-top: 8px; }
+    .sb-foot .sb-item { font-size: 0.85rem; }
+
+    /* ── MAIN / HEADER ───────────────────────────────── */
+    .main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
+    .content-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap; padding: 22px 36px; border-bottom: 1px solid var(--border);
+    }
+    .content-header .page-title { font-size: 1.5rem; font-weight: 600; color: var(--text); line-height: 1.2; }
+    .content-header .page-title span { color: var(--gold); }
+    .content-header .page-sub { font-size: 0.85rem; color: var(--mid); margin-top: 2px; }
+    .content { padding: 36px; }
+
+    /* ── BOTÕES (pílula) ─────────────────────────────── */
+    .btn-outline, .btn-danger, .btn-theme { border-radius: 999px; padding: 9px 18px; font-size: 0.82rem; font-weight: 500; }
+    .btn-outline { background: var(--surface); border: 1px solid var(--border2); color: var(--text); }
+    .btn-outline:hover { background: var(--raise); border-color: var(--border2); color: var(--text); }
+    .btn-danger { background: var(--surface); border: 1px solid var(--border2); color: var(--mid); }
+    .btn-danger:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--gold); color: #fff; border: 1px solid var(--gold);
+      border-radius: 999px; padding: 9px 18px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #0a4fbd; }
+    [data-theme="dark"] .btn-primary, [data-theme="dark"] .drawer-save,
+    [data-theme="dark"] .cbtn-import, [data-theme="dark"] .cbtn-confirm { color: #062e6f; }
+    .btn-primary .material-symbols-outlined,
+    .btn-outline .material-symbols-outlined,
+    .btn-danger .material-symbols-outlined { font-size: 18px; }
+
+    /* ── CARDS (16px, sem sombra) ────────────────────── */
+    .stat-card, .table-wrap, .chart-bars, .daily-chart-wrap,
+    .dash-card, .dash-chart-wrap, .confirm-box, .import-box { border-radius: 16px; box-shadow: none; }
+    .stat-card .value { color: var(--text); }
+    .stat-card .value.gold, .dash-card .dk-value.gold { color: var(--gold); }
+    .stat-card .label { color: var(--mid); margin-bottom: 0; }
+    .stat-card { padding: 22px 24px; }
+    .stat-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+    .stat-ico { color: var(--gold); background: var(--gold-dim); border-radius: 10px; padding: 6px; font-size: 20px; }
+    .kpi-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .kpi-3 .stat-card .value { font-size: 2.1rem; }
+    @media (max-width: 760px) { .kpi-3 { grid-template-columns: 1fr; } }
+
+    /* ── MÉTRICAS SECUNDÁRIAS (Anúncios) ─────────────── */
+    .dash-card2 { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; margin-top: 16px; }
+    .dash-card2-title { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+    .sec-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; }
+    .sec-item { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .sec-item:nth-last-child(-n+2) { border-bottom: none; }
+    .sec-ico { color: var(--gold); background: var(--gold-dim); border-radius: 8px; padding: 5px; font-size: 18px; flex-shrink: 0; }
+    .sec-label { flex: 1; font-size: 0.85rem; color: var(--mid); }
+    .sec-val { font-size: 0.98rem; font-weight: 600; color: var(--text); white-space: nowrap; }
+    .chart-legend { display: flex; gap: 20px; margin-bottom: 12px; }
+    .lg-item { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--mid); }
+    .lg-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .lg-dot.leads { background: var(--gold); }
+    .lg-dot.cpl { background: #ea8600; }
+    [data-theme="dark"] .lg-dot.cpl { background: #fdd663; }
+
+    /* ── GRÁFICO MULTI-MÉTRICA (chips + tooltip) ─────── */
+    .dash-chart-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+    .mchips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .mchip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--border2); background: var(--surface); color: var(--mid); font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
+    .mchip:hover { border-color: var(--gold-bd); }
+    .mdot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .mchart-wrap { position: relative; }
+    .mtip { position: absolute; pointer-events: none; background: #202124; color: #fff; border-radius: 10px; padding: 10px 12px; font-size: 0.78rem; box-shadow: 0 6px 20px rgba(0,0,0,0.28); z-index: 6; min-width: 130px; }
+    .mtip-date { font-weight: 700; margin-bottom: 6px; }
+    .mtip-row { display: flex; align-items: center; gap: 7px; padding: 1px 0; white-space: nowrap; }
+    .mtip-sq { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+    .mtip b { font-weight: 700; }
+    @media (max-width: 760px) {
+      .sec-grid { grid-template-columns: 1fr; column-gap: 0; }
+      .sec-item:nth-last-child(-n+2) { border-bottom: 1px solid var(--border); }
+      .sec-item:last-child { border-bottom: none; }
+    }
+    .chart-title, .dash-section-title, .import-preview-lbl { color: var(--mid); }
+    .kanban-col-body.drag-over { background: var(--gold-dim); outline: 1px dashed var(--gold-bd); }
+
+    /* ── CAMPOS ──────────────────────────────────────── */
+    .filter-bar input, .filter-bar select, .d-select, .d-input, .d-textarea,
+    .dash-daterange input[type="date"], .tag-add-input {
+      border-radius: 8px; border: 1px solid var(--border2); background: var(--surface); color: var(--text);
+    }
+    .filter-bar input:focus, .filter-bar select:focus,
+    .d-select:focus, .d-input:focus, .d-textarea:focus, .tag-add-input:focus {
+      border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim);
+    }
+
+    /* ── TABELA ──────────────────────────────────────── */
+    tbody td { color: var(--mid); }
+    .td-name { color: var(--text); }
+    .import-table td { color: var(--mid); }
+
+    /* ── ETIQUETAS DE STATUS ─────────────────────────── */
+    .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+    .status-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .status-pill.green { color: var(--green); background: var(--green-bg); }
+    .status-pill.amber { color: var(--amber); background: var(--amber-bg); }
+    .status-pill.red   { color: var(--red);   background: var(--red-bg); }
+
+    /* ── BLOCO RESPOSTAS DO DIAGNÓSTICO ──────────────── */
+    .resp-block { background: var(--raise); border: 1px solid var(--border); border-radius: 12px; padding: 2px 14px; margin-top: 8px; }
+    .resp-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .resp-row:last-child { border-bottom: none; }
+    .resp-q { flex: 1; font-size: 0.8rem; color: var(--mid); line-height: 1.4; }
+    .resp-a { flex-shrink: 0; font-size: 0.82rem; font-weight: 600; color: var(--text); text-align: right; white-space: nowrap; }
+
+    /* ── PROGRESSO / BADGES / CHIPS ──────────────────── */
+    .bar-track, .bar-fill { border-radius: 999px; }
+    .bar-fill { background: var(--gold); }
+    .badge-fat { border-radius: 999px; }
+    .period-btn, .dash-period button { border-radius: 999px; }
+    .period-btn.active, .dash-period button.active { background: var(--gold-dim); border-color: var(--gold-bd); color: var(--gold); }
+
+    /* ── KANBAN ──────────────────────────────────────── */
+    .kanban-col { border-radius: 16px; }
+    .lead-card { border-radius: 12px; background: var(--surface); }
+    .lead-card:hover { border-color: var(--gold-bd); box-shadow: 0 1px 6px rgba(60,64,67,0.12); }
+    .card-name { color: var(--text); }
+    .card-tag { background: var(--gold-dim); color: var(--gold); border-color: var(--gold-bd); }
+    .card-date { color: var(--mid); }
+
+    /* ── DRAWER / SAVE / CONFIRM (pílula) ────────────── */
+    .drawer-save, .cbtn-confirm, .cbtn-import, .cbtn-cancel, .tag-add-btn { border-radius: 999px; }
+    .drawer-save, .cbtn-import { background: var(--gold); color: #fff; }
+    .drawer-save:hover, .cbtn-import:hover { background: #0a4fbd; }
+    .drawer-close, .import-head button { border-radius: 8px; }
+
+    /* ── CONFIG VIEW ─────────────────────────────────── */
+    .cfg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 16px; max-width: 760px; }
+    .cfg-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+    .cfg-card h3 { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .cfg-card p { font-size: 0.82rem; color: var(--mid); margin-bottom: 16px; }
+    .cfg-card .cfg-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ── RESPONSIVO (sidebar só ícones) ──────────────── */
+    @media (max-width: 1000px) {
+      .sidebar { width: 64px; padding: 16px 8px; }
+      .sb-logo { justify-content: center; padding: 8px 0 16px; }
+      .sb-logo .logo-name, .sb-item .sb-label { display: none; }
+      .sb-item { justify-content: center; padding: 12px; }
+      .content, .content-header { padding-left: 20px; padding-right: 20px; }
+    }
+    @media (max-width: 560px) {
+      .content { padding: 20px 14px; }
+      .content-header { padding: 16px 14px; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- topbar -->
-  <header class="topbar">
-    <a href="index.html" class="logo">
+  <!-- sidebar -->
+  <aside class="sidebar">
+    <a href="index.html" class="sb-logo">
       <svg viewBox="0 0 32 32" fill="none">
-        <rect x="2" y="2" width="28" height="28" rx="7" fill="#1232C8"/>
+        <rect x="2" y="2" width="28" height="28" rx="7" fill="#0b57d0"/>
         <path d="M10 20 Q10 16 14 16 Q16 16 16 14 Q16 12 18 12 Q22 12 22 16 Q22 20 18 20 Z" fill="white" opacity="0.9"/>
         <circle cx="11" cy="11" r="2" fill="white" opacity="0.7"/>
         <circle cx="21" cy="11" r="2" fill="white" opacity="0.7"/>
       </svg>
       <span class="logo-name">FLUXXO PET</span>
     </a>
-    <div class="topbar-right">
-      <span class="tag-admin">Painel Admin</span>
-      <span style="font-size:0.65rem;color:var(--dim);margin-left:4px;" title="Versão do painel">v2.1</span>
-      <button class="btn-theme" id="btnTheme" onclick="toggleTheme()" title="Alternar tema">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIcon">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-        <span id="themeLabel">Claro</span>
-      </button>
-      <button class="btn-outline" onclick="logout()" style="margin-left:4px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        Sair
-      </button>
+    <nav class="sb-nav">
+      <button class="sb-item active" data-view="leads" onclick="setView('leads')"><span class="material-symbols-outlined">groups</span><span class="sb-label">Leads</span></button>
+      <button class="sb-item" data-view="crm" onclick="setView('crm')"><span class="material-symbols-outlined">view_kanban</span><span class="sb-label">CRM</span></button>
+      <button class="sb-item" data-view="anuncios" onclick="setView('anuncios')"><span class="material-symbols-outlined">campaign</span><span class="sb-label">Anúncios</span></button>
+      <button class="sb-item" data-view="config" onclick="setView('config')"><span class="material-symbols-outlined">settings</span><span class="sb-label">Configurações</span></button>
+    </nav>
+    <div class="sb-foot">
+      <button class="sb-item" id="btnTheme" onclick="toggleTheme()"><span class="material-symbols-outlined" id="themeIcon">dark_mode</span><span class="sb-label" id="themeLabel">Tema escuro</span></button>
+      <button class="sb-item" onclick="logout()"><span class="material-symbols-outlined">logout</span><span class="sb-label">Sair</span></button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+  <header class="content-header">
+    <div>
+      <h1 class="page-title" id="viewTitle">Leads</h1>
+      <p class="page-sub"><span id="viewSub">Contatos capturados pelo funil</span> <span id="lastUpdate" style="color:var(--dim)"></span></p>
+    </div>
+    <div class="actions" id="headerActions">
+      <button class="btn-primary" onclick="openNewLead()"><span class="material-symbols-outlined">add</span>Novo contato</button>
+      <button class="btn-outline" onclick="importXLSX()"><span class="material-symbols-outlined">upload</span>Importar</button>
+      <input type="file" id="xlsxInput" accept=".xlsx,.xls" style="display:none" onchange="handleXLSX(event)" />
+      <button class="btn-outline" onclick="exportCSV()"><span class="material-symbols-outlined">download</span>Exportar</button>
+      <button class="btn-danger" onclick="showConfirm()"><span class="material-symbols-outlined">delete</span>Limpar tudo</button>
     </div>
   </header>
 
-  <div class="page">
-
-    <!-- header -->
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Leads <span>Capturados</span></h1>
-        <p class="page-sub" id="lastUpdate">—</p>
-      </div>
-      <div class="actions">
-        <button class="btn-outline" onclick="openNewLead()" style="border-color:var(--gold-bd);color:var(--gold);">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Novo contato
-        </button>
-        <button class="btn-outline" onclick="toggleDash(true)" id="btnDash">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="3" width="9" height="9" rx="1"/><rect x="13" y="3" width="9" height="9" rx="1"/>
-            <rect x="2" y="14" width="9" height="7" rx="1"/><rect x="13" y="14" width="9" height="7" rx="1"/>
-          </svg>
-          Dashboard
-        </button>
-        <button class="btn-crm" onclick="toggleCRM(true)">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="18"/><rect x="14" y="3" width="7" height="10"/><rect x="14" y="17" width="7" height="4"/>
-          </svg>
-          CRM
-        </button>
-        <button class="btn-outline" onclick="importXLSX()">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-          Importar XLSX
-        </button>
-        <input type="file" id="xlsxInput" accept=".xlsx,.xls" style="display:none" onchange="handleXLSX(event)" />
-        <button class="btn-outline" onclick="exportCSV()">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Exportar CSV
-        </button>
-        <button class="btn-danger" onclick="showConfirm()">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-            <path d="M10 11v6"/><path d="M14 11v6"/>
-          </svg>
-          Limpar tudo
-        </button>
-      </div>
-    </div>
+  <div class="content">
+  <div id="leadsView">
 
     <!-- summary cards -->
     <div class="stats" id="statsCards">
       <div class="stat-card">
-        <div class="label">Total de leads</div>
+        <div class="stat-top"><span class="label">Total de leads</span><span class="material-symbols-outlined stat-ico">groups</span></div>
         <div class="value gold" id="statTotal">0</div>
         <div class="sub">cadastros realizados</div>
       </div>
       <div class="stat-card">
-        <div class="label">Leads hoje</div>
+        <div class="stat-top"><span class="label">Leads hoje</span><span class="material-symbols-outlined stat-ico">today</span></div>
         <div class="value" id="statHoje">0</div>
         <div class="sub" id="statHojeDate">—</div>
       </div>
       <div class="stat-card">
-        <div class="label">Faturamento predominante</div>
+        <div class="stat-top"><span class="label">Faturamento predominante</span><span class="material-symbols-outlined stat-ico">payments</span></div>
         <div class="value gold" id="statTop" style="font-size:1.1rem;padding-top:6px;">—</div>
         <div class="sub" id="statTopPct">—</div>
       </div>
       <div class="stat-card">
-        <div class="label">Com e-mail</div>
+        <div class="stat-top"><span class="label">Com e-mail</span><span class="material-symbols-outlined stat-ico">mail</span></div>
         <div class="value" id="statEmail">0</div>
         <div class="sub">leads com e-mail informado</div>
       </div>
@@ -1274,20 +1452,39 @@
     <div class="daily-chart-wrap" id="dailyChartSection">
       <div class="daily-chart-header">
         <div class="chart-title" style="margin-bottom:0">Leads por dia</div>
-        <div class="period-btns">
-          <button class="period-btn" onclick="setChartPeriod(7,this)">7D</button>
-          <button class="period-btn active" onclick="setChartPeriod(30,this)">30D</button>
-          <button class="period-btn" onclick="setChartPeriod(90,this)">90D</button>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div class="dash-daterange">
+            <input type="date" id="chartSince" onchange="chartCustomRange()">
+            <span style="color:var(--dim);font-size:0.8rem;">→</span>
+            <input type="date" id="chartUntil" onchange="chartCustomRange()">
+          </div>
+          <div class="period-btns">
+            <button class="period-btn" onclick="chartPreset('hoje',this)">Hoje</button>
+            <button class="period-btn" onclick="chartPreset('ontem',this)">Ontem</button>
+            <button class="period-btn" onclick="chartPreset('7d',this)">7D</button>
+            <button class="period-btn" onclick="chartPreset('14d',this)">14D</button>
+            <button class="period-btn" id="chartBtn30d" onclick="chartPreset('30d',this)">30D</button>
+          </div>
         </div>
       </div>
       <canvas id="dailyCanvas" height="160"></canvas>
     </div>
 
     <!-- faturamento chart -->
-    <div class="chart-section">
+    <div class="chart-section" id="fatChartSection">
       <div class="chart-title">Distribuição por faixa de faturamento</div>
       <div class="chart-bars" id="chartBars">
         <p style="color:var(--dim);font-size:0.82rem;">Sem dados ainda.</p>
+      </div>
+      <div id="fatProgress" style="display:none; margin-top:14px; padding:14px 20px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:0.75rem;color:var(--mid);">Leads categorizados</span>
+          <span id="fatProgressLabel" style="font-size:0.75rem;font-weight:700;color:var(--white);"></span>
+        </div>
+        <div style="height:5px;background:var(--raise);border-radius:99px;overflow:hidden;">
+          <div id="fatProgressBar" style="height:100%;border-radius:99px;background:var(--gold);transition:width 0.6s ease;width:0%"></div>
+        </div>
+        <div id="fatProgressSub" style="font-size:0.7rem;color:var(--dim);margin-top:6px;"></div>
       </div>
     </div>
 
@@ -1299,11 +1496,16 @@
       <input type="text" id="searchInput" placeholder="Buscar por nome, WhatsApp ou e-mail…" oninput="renderTable()" />
       <select id="filterFat" onchange="renderTable()">
         <option value="">Todas as faixas</option>
+        <option value="__sem__">Sem faturamento</option>
         <option value="Até R$30 mil">Até R$30 mil</option>
         <option value="R$50 mil">R$50 mil</option>
         <option value="R$100 mil">R$100 mil</option>
         <option value="R$200 mil">R$200 mil</option>
         <option value="Mais de R$200 mil">Mais de R$200 mil</option>
+      </select>
+      <select id="filterOrigem" onchange="renderTable()">
+        <option value="">Todas as origens</option>
+        <option value="__landing__">Landing principal</option>
       </select>
     </div>
 
@@ -1313,13 +1515,15 @@
         <thead>
           <tr>
             <th class="td-idx">#</th>
+            <th>Protocolo</th>
             <th>Nome</th>
-            <th>Pet Shop</th>
             <th>WhatsApp</th>
             <th>E-mail</th>
             <th>Faturamento</th>
+            <th>Origem</th>
             <th>Etapa CRM</th>
             <th>Data / Hora</th>
+            <th class="td-actions"></th>
           </tr>
         </thead>
         <tbody id="leadsBody"></tbody>
@@ -1335,34 +1539,31 @@
     </div>
 
     </div><!-- /tableSection -->
+    </div><!-- /leadsView -->
 
     <!-- ── DASHBOARD VIEW ───────────────────────────── -->
     <div id="dashView" style="display:none;">
       <div class="dash-toolbar">
-        <button class="btn-outline" onclick="toggleDash(false)">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;stroke:currentColor"><polyline points="15 18 9 12 15 6"/></svg>
-          Voltar
-        </button>
-        <div class="dash-daterange">
+        <div class="dash-period">
+          <button id="dpHoje"   onclick="dashPreset('hoje',this)">Hoje</button>
+          <button id="dpOntem"  onclick="dashPreset('ontem',this)">Ontem</button>
+          <button id="dp7"      onclick="dashPreset('7d',this)">Últimos 7 dias</button>
+          <button id="dp30"     onclick="dashPreset('30d',this)" class="active">30 dias</button>
+          <button id="dpCustom" onclick="dashCustomToggle(this)">Personalizado</button>
+        </div>
+        <div class="dash-daterange" id="dashRange" style="display:none;">
           <input type="date" id="dashSince" onchange="loadDashCustom()">
           <span style="color:var(--dim);font-size:0.8rem;">→</span>
           <input type="date" id="dashUntil" onchange="loadDashCustom()">
         </div>
-        <div class="dash-period">
-          <button id="dpHoje"  onclick="dashPreset('hoje',this)">Hoje</button>
-          <button id="dpOntem" onclick="dashPreset('ontem',this)">Ontem</button>
-          <button id="dp7"     onclick="dashPreset('7d',this)">7D</button>
-          <button id="dp14"    onclick="dashPreset('14d',this)">14D</button>
-          <button id="dp30"    onclick="dashPreset('30d',this)" class="active">30D</button>
-        </div>
       </div>
-      <div id="dashContent"><div class="dash-loading">Carregando dados do Meta…</div></div>
+      <div id="dashContent"><div class="dash-loading">Carregando dados…</div></div>
     </div>
 
     <!-- ── CRM VIEW ──────────────────────────────────── -->
     <div id="crmView" style="display:none;">
       <div class="crm-toolbar">
-        <button class="btn-outline" onclick="toggleCRM(false)">
+        <button class="btn-outline" onclick="setView('leads')">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;stroke:currentColor"><polyline points="15 18 9 12 15 6"/></svg>
           Voltar para tabela
         </button>
@@ -1374,7 +1575,34 @@
       <div class="kanban" id="kanban"></div>
     </div>
 
-  </div>
+    <!-- ── CONFIG VIEW ───────────────────────────────── -->
+    <div id="configView" style="display:none;">
+      <div class="cfg-grid">
+        <div class="cfg-card">
+          <h3><span class="material-symbols-outlined ms-sm">palette</span> Aparência</h3>
+          <p>Escolha o tema do painel.</p>
+          <div class="cfg-row">
+            <button class="btn-outline" onclick="applyTheme('light');localStorage.setItem('vt_theme','light')">Claro</button>
+            <button class="btn-outline" onclick="applyTheme('dark');localStorage.setItem('vt_theme','dark')">Escuro</button>
+          </div>
+        </div>
+        <div class="cfg-card">
+          <h3><span class="material-symbols-outlined ms-sm">account_circle</span> Sessão</h3>
+          <p>Encerre sua sessão neste dispositivo.</p>
+          <div class="cfg-row">
+            <button class="btn-danger" onclick="logout()"><span class="material-symbols-outlined">logout</span> Sair</button>
+          </div>
+        </div>
+        <div class="cfg-card">
+          <h3><span class="material-symbols-outlined ms-sm">info</span> Sobre</h3>
+          <p>Painel de leads Fluxxo Pet.</p>
+          <div class="cfg-row"><span style="font-size:0.8rem;color:var(--mid)">Versão 2.1</span></div>
+        </div>
+      </div>
+    </div>
+
+    </div><!-- /content -->
+  </main>
 
   <!-- drawer overlay + panel -->
   <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
@@ -1385,7 +1613,7 @@
     <div class="import-box">
       <div class="import-head">
         <h3>Importar Leads da Planilha</h3>
-        <button onclick="closeImport()">✕</button>
+        <button onclick="closeImport()"><span class="material-symbols-outlined ms-xs">close</span></button>
       </div>
       <div class="import-summary">
         <div class="chip gold">Encontrados: <strong id="impTotal">0</strong></div>
@@ -1512,7 +1740,7 @@
         var checked = (lead.tags || []).indexOf(t) >= 0 ? ' checked' : '';
         return '<div class="tag-check-row">' +
           '<label class="tag-check"><input type="checkbox" value="'+esc(t)+'"'+checked+' /> '+esc(t)+'</label>' +
-          '<button class="tag-del-btn" onclick="deleteTag(\''+esc(t)+'\')" title="Excluir tag">✕</button>' +
+          '<button class="tag-del-btn" onclick="deleteTag(\''+esc(t)+'\')" title="Excluir tag"><span class="material-symbols-outlined ms-xs">close</span></button>' +
         '</div>';
       }).join('');
       return checks +
@@ -1534,22 +1762,48 @@
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       var isLight = theme === 'light';
-      document.getElementById('themeIcon').innerHTML = isLight ? SUN_SVG : MOON_SVG;
-      document.getElementById('themeLabel').textContent = isLight ? 'Escuro' : 'Claro';
+      var ic = document.getElementById('themeIcon');
+      if (ic) ic.textContent = isLight ? 'dark_mode' : 'light_mode';
+      var lb = document.getElementById('themeLabel');
+      if (lb) lb.textContent = isLight ? 'Tema escuro' : 'Tema claro';
       if (typeof renderDailyChart === 'function' && Array.isArray(_leads) && _leads.length) renderDailyChart(_leads);
     }
 
     function toggleTheme() {
-      var current = document.documentElement.getAttribute('data-theme') || 'dark';
+      var current = document.documentElement.getAttribute('data-theme') || 'light';
       var next = current === 'light' ? 'dark' : 'light';
       localStorage.setItem('vt_theme', next);
       applyTheme(next);
     }
 
     (function() {
-      var saved = localStorage.getItem('vt_theme') || 'dark';
+      var saved = localStorage.getItem('vt_theme') || 'light';
       applyTheme(saved);
     })();
+
+    /* ── NAVEGAÇÃO (sidebar) ─────────────────────────── */
+    var VIEW_META = {
+      leads:    ['Leads',          'Contatos capturados pelo funil'],
+      crm:      ['CRM',            'Acompanhe cada lead pelas etapas'],
+      anuncios: ['Anúncios',       'Desempenho das campanhas no Meta'],
+      config:   ['Configurações',  'Preferências do painel'],
+    };
+    function setView(name) {
+      var map = { leads: 'leadsView', crm: 'crmView', anuncios: 'dashView', config: 'configView' };
+      Object.keys(map).forEach(function(k) {
+        var el = document.getElementById(map[k]);
+        if (el) el.style.display = (k === name) ? '' : 'none';
+      });
+      document.querySelectorAll('.sb-item[data-view]').forEach(function(b) {
+        b.classList.toggle('active', b.getAttribute('data-view') === name);
+      });
+      var meta = VIEW_META[name] || VIEW_META.leads;
+      var t = document.getElementById('viewTitle'); if (t) t.textContent = meta[0];
+      var s = document.getElementById('viewSub');   if (s) s.textContent = meta[1];
+      var ha = document.getElementById('headerActions'); if (ha) ha.style.display = (name === 'leads') ? 'flex' : 'none';
+      if (name === 'crm') renderKanban();
+      if (name === 'anuncios') dashPreset('30d', document.getElementById('dp30'));
+    }
 
     /* ── AUTH ─────────────────────────────────────────── */
     function getToken() { return sessionStorage.getItem('vt_token'); }
@@ -1587,12 +1841,8 @@
         whatsapp:    l.whatsapp    || '',
         email:       l.email       || '—',
         faturamento: l.faturamento || '',
-        etapa:       (l.etapa && l.etapa !== 'Sem contato') ? l.etapa : 'Contato inicial',
-        ultContato:  l.ult_contato  || '',
-        proxContato: l.prox_contato || '',
-        comentarios: l.comentarios  || '',
-        tags:        Array.isArray(tags) ? tags : [],
-        sessionId:   l.session_id || '',
+        origem:      l.origem      || '',
+        respostas:   l.respostas   || '',
         simFat:      l.sim_fat,
         simRacao:    l.sim_racao,
         simMed:      l.sim_med,
@@ -1600,39 +1850,14 @@
         perdaPis:    l.perda_pis,
         perdaMensal: l.perda_mensal,
         perdaAnual:  l.perda_anual,
+        etapa:       (l.etapa && l.etapa !== 'Sem contato') ? l.etapa : 'Contato inicial',
+        ultContato:  l.ult_contato  || '',
+        proxContato: l.prox_contato || '',
+        comentarios: l.comentarios  || '',
+        tags:        Array.isArray(tags) ? tags : [],
+        sessionId:   l.session_id || '',
         timestamp:   (l.created_at || '').replace(' ', 'T') + (l.created_at && !l.created_at.includes('Z') ? 'Z' : ''),
       };
-    }
-
-    function fmtMoney(v) {
-      if (v === null || v === undefined || v === '') return null;
-      var n = parseFloat(v);
-      if (isNaN(n)) return null;
-      return 'R$ ' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    }
-
-    function buildDiagHTML(lead) {
-      var rows = [
-        ['Faturamento mensal informado', fmtMoney(lead.simFat)],
-        ['Vendas de ração',              fmtMoney(lead.simRacao)],
-        ['Medicamentos e higiene',       fmtMoney(lead.simMed)],
-        ['Perda de ICMS (ração)',        fmtMoney(lead.perdaIcms)],
-        ['Perda de PIS/COFINS (med.)',   fmtMoney(lead.perdaPis)],
-      ].filter(function(r){ return r[1] !== null; });
-      var mensal = fmtMoney(lead.perdaMensal), anual = fmtMoney(lead.perdaAnual);
-      if (!rows.length && !mensal && !anual) return '';
-      var rowStyle = 'display:flex;justify-content:space-between;gap:12px;padding:9px 2px;border-bottom:1px solid var(--border);font-size:0.82rem;';
-      var inner = rows.map(function(r) {
-        return '<div style="'+rowStyle+'"><span style="color:var(--mid);">'+r[0]+'</span><span style="font-weight:600;">'+r[1]+'</span></div>';
-      }).join('');
-      if (mensal) inner += '<div style="'+rowStyle+'"><span style="font-weight:700;">Perda mensal total</span><span style="font-weight:700;">'+mensal+'</span></div>';
-      if (anual)  inner += '<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 2px;font-size:0.82rem;"><span style="font-weight:700;">Projeção anual</span><span style="font-weight:700;color:var(--red);">'+anual+'</span></div>';
-      return '<div class="drawer-section-sep"></div>' +
-        '<div>' +
-          '<label class="field-lbl">Respostas do diagnóstico</label>' +
-          '<p class="field-hint">O que a pessoa preencheu no simulador</p>' +
-          '<div style="background:rgba(128,128,128,0.06);border:1px solid var(--border);border-radius:10px;padding:4px 14px;margin-top:6px;">' + inner + '</div>' +
-        '</div>';
     }
 
     async function loadLeads() {
@@ -1640,6 +1865,9 @@
       if (!data) return;
       _leads = (data.leads || []).map(mapLead);
     }
+
+    // Protocolo estável do lead, derivado do id (ex.: VT0123)
+    function protocolo(id) { return 'FP' + String(id == null ? 0 : id).padStart(4, '0'); }
 
     function fmtDate(iso) {
       var d = new Date(iso);
@@ -1649,6 +1877,15 @@
       var hh   = String(d.getHours()).padStart(2,'0');
       var min  = String(d.getMinutes()).padStart(2,'0');
       return dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + min;
+    }
+
+    // Padroniza a exibição do telefone: (DD) 9XXXX-XXXX (remove DDI 55 se houver)
+    function fmtPhone(raw) {
+      var d = String(raw || '').replace(/\D/g, '');
+      if (d.length > 11 && d.slice(0, 2) === '55') d = d.slice(2);
+      if (d.length === 11) return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
+      if (d.length === 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+      return raw || '';
     }
 
     function todayStr() {
@@ -1664,24 +1901,54 @@
     }
 
     /* ── GRÁFICO DIÁRIO ──────────────────────────────── */
-    var _chartDays = 30;
+    var _chartSince = '';
+    var _chartUntil = '';
 
-    function setChartPeriod(days, btn) {
-      _chartDays = days;
+    function localDateStr(date) {
+      return date.getFullYear() + '-' +
+        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0');
+    }
+
+    function chartPreset(key, btn) {
+      var today = new Date();
+      var since, until;
+      if (key === 'hoje') {
+        since = until = localDateStr(today);
+      } else if (key === 'ontem') {
+        var y = new Date(today); y.setDate(y.getDate() - 1);
+        since = until = localDateStr(y);
+      } else {
+        var n = key === '7d' ? 7 : key === '14d' ? 14 : 30;
+        var s = new Date(today); s.setDate(s.getDate() - n + 1);
+        since = localDateStr(s); until = localDateStr(today);
+      }
+      document.getElementById('chartSince').value = since;
+      document.getElementById('chartUntil').value  = until;
       document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
+      if (btn) btn.classList.add('active');
+      _chartSince = since; _chartUntil = until;
+      renderDailyChart(_leads);
+    }
+
+    function chartCustomRange() {
+      var since = document.getElementById('chartSince').value;
+      var until = document.getElementById('chartUntil').value;
+      if (!since || !until) return;
+      document.querySelectorAll('.period-btn').forEach(function(b) { b.classList.remove('active'); });
+      _chartSince = since; _chartUntil = until;
       renderDailyChart(_leads);
     }
 
     function renderDailyChart(leads) {
       var canvas = document.getElementById('dailyCanvas');
-      if (!canvas) return;
+      if (!canvas || !_chartSince || !_chartUntil) return;
 
       var isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      var gold     = isLight ? '#1232C8'               : '#1232C8';
-      var goldDim  = isLight ? 'rgba(18,50,200,0.15)'  : 'rgba(18,50,200,0.15)';
-      var gridClr  = isLight ? 'rgba(0,0,0,0.07)'      : 'rgba(255,255,255,0.06)';
-      var textClr  = isLight ? '#aaa'                  : '#444';
+      var gold     = isLight ? '#0b57d0'               : '#8ab4f8';
+      var goldDim  = isLight ? 'rgba(11,87,208,0.12)'  : 'rgba(138,180,248,0.18)';
+      var gridClr  = isLight ? '#e8eaed'               : 'rgba(255,255,255,0.06)';
+      var textClr  = isLight ? '#80868b'               : '#9aa0a6';
 
       var dpr = window.devicePixelRatio || 1;
       var W   = canvas.parentElement.clientWidth - 48;
@@ -1695,20 +1962,11 @@
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, W, H);
 
-      // Gera datas do período
-      var today = new Date(); today.setHours(0,0,0,0);
-      var days  = [];
-      for (var i = _chartDays - 1; i >= 0; i--) {
-        var d = new Date(today); d.setDate(d.getDate() - i);
-        days.push(d);
-      }
-
-      // Conta leads por dia em horário local (evita erro de fuso UTC vs Brasil)
-      function localDateStr(date) {
-        return date.getFullYear() + '-' +
-          String(date.getMonth() + 1).padStart(2, '0') + '-' +
-          String(date.getDate()).padStart(2, '0');
-      }
+      // Gera datas do intervalo selecionado
+      var days = [];
+      var cur  = new Date(_chartSince + 'T00:00:00');
+      var end  = new Date(_chartUntil + 'T00:00:00');
+      while (cur <= end) { days.push(new Date(cur)); cur.setDate(cur.getDate() + 1); }
 
       var counts = days.map(function(d) {
         var ds = localDateStr(d);
@@ -1756,7 +2014,7 @@
         // Valor acima da barra
         if (count > 0) {
           ctx.fillStyle  = gold;
-          ctx.font       = 'bold 11px Inter,system-ui,sans-serif';
+          ctx.font       = 'bold 11px Roboto Slab,Georgia,serif';
           ctx.textAlign  = 'center';
           ctx.fillText(count, Math.round(x + barW / 2), Math.max(padT + 12, Math.round(y - 5)));
         }
@@ -1765,7 +2023,7 @@
         var showLabel = n <= 14 ? true : n <= 30 ? i % 5 === 0 : i % 15 === 0;
         if (showLabel || i === n - 1) {
           ctx.fillStyle = textClr;
-          ctx.font      = '11px Inter,system-ui,sans-serif';
+          ctx.font      = '11px Roboto Slab,Georgia,serif';
           ctx.textAlign = 'center';
           var lbl = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
           ctx.fillText(lbl, Math.round(x + barW / 2), H - 8);
@@ -1774,7 +2032,7 @@
 
       // Label Y máx
       ctx.fillStyle = textClr;
-      ctx.font      = '11px Inter,system-ui,sans-serif';
+      ctx.font      = '11px Roboto Slab,Georgia,serif';
       ctx.textAlign = 'right';
       ctx.fillText(maxCount, padL - 4, padT + 6);
       ctx.fillText('0',      padL - 4, padT + chartH + 6);
@@ -1842,6 +2100,26 @@
       });
       document.getElementById('chartBars').innerHTML = html || '<p style="color:var(--dim);font-size:0.82rem;">Sem dados ainda.</p>';
 
+      // Progresso de categorização
+      var categorizados = leads.filter(function(l) { return !!l.faturamento; }).length;
+      var semFat        = leads.length - categorizados;
+      var fatPct        = leads.length ? Math.round(categorizados / leads.length * 100) : 0;
+      var progressEl    = document.getElementById('fatProgress');
+      if (leads.length) {
+        progressEl.style.display = 'block';
+        document.getElementById('fatProgressBar').style.width  = fatPct + '%';
+        document.getElementById('fatProgressBar').style.background =
+          fatPct >= 80 ? 'var(--green)' : fatPct >= 50 ? 'var(--gold)' : 'var(--red)';
+        document.getElementById('fatProgressLabel').textContent =
+          categorizados + ' de ' + leads.length + ' (' + fatPct + '%)';
+        document.getElementById('fatProgressSub').textContent =
+          semFat > 0
+            ? semFat + ' lead' + (semFat > 1 ? 's' : '') + ' ainda sem faixa definida'
+            : 'Todos os leads estão categorizados';
+      } else {
+        progressEl.style.display = 'none';
+      }
+
       renderDailyChart(leads);
     }
 
@@ -1849,6 +2127,7 @@
       var leads  = getLeads();
       var search = document.getElementById('searchInput').value.toLowerCase();
       var filter = document.getElementById('filterFat').value;
+      var filterOrig = document.getElementById('filterOrigem').value;
 
       var filtered = leads.filter(function(l, i) {
         l._idx = i + 1;
@@ -1856,8 +2135,11 @@
           l.nome.toLowerCase().includes(search) ||
           l.whatsapp.includes(search) ||
           (l.email && l.email.toLowerCase().includes(search));
-        var matchFat = !filter || l.faturamento === filter;
-        return matchSearch && matchFat;
+        var matchFat = !filter ||
+          (filter === '__sem__' ? !l.faturamento : l.faturamento === filter);
+        var matchOrig = !filterOrig ||
+          (filterOrig === '__landing__' ? !l.origem : l.origem === filterOrig);
+        return matchSearch && matchFat && matchOrig;
       });
 
       var tbody = document.getElementById('leadsBody');
@@ -1874,17 +2156,30 @@
 
       tbody.innerHTML = filtered.map(function(l) {
         var fi = fatIdx(l.faturamento);
+        var trashSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
         return '<tr>' +
           '<td class="td-idx">' + l._idx + '</td>' +
+          '<td style="font-variant-numeric:tabular-nums;color:var(--mid);font-size:0.78rem;white-space:nowrap">' + protocolo(l.id) + '</td>' +
           '<td class="td-name" style="cursor:pointer" onclick="openDrawerByIdx(' + (l._idx-1) + ')">' + esc(l.nome) + '</td>' +
-          '<td style="font-size:0.82rem;color:var(--mid)">' + esc(l.petshop || '—') + '</td>' +
-          '<td class="td-phone">' + esc(l.whatsapp) + '</td>' +
+          '<td class="td-phone">' + esc(fmtPhone(l.whatsapp)) + '</td>' +
           '<td>' + esc(l.email) + '</td>' +
           '<td>' + (l.faturamento ? '<span class="badge-fat ' + FAT_CLASS[fi] + '">' + esc(l.faturamento) + '</span>' : '<span style="color:var(--dim)">—</span>') + '</td>' +
+          '<td>' + (l.origem ? '<span style="font-size:0.7rem;font-weight:600;padding:2px 10px;border-radius:99px;background:var(--gold-dim);color:var(--gold);white-space:nowrap">' + esc(l.origem) + '</span>' : '<span style="font-size:0.72rem;color:var(--dim)">Landing principal</span>') + '</td>' +
           '<td><span style="font-size:0.72rem;color:var(--dim)">' + esc(l.etapa || 'Sem contato') + '</span></td>' +
           '<td class="td-time">' + fmtDate(l.timestamp) + '</td>' +
+          '<td class="td-actions"><button class="btn-row-del" onclick="deleteLead(' + l.id + ',event)" title="Excluir lead">' + trashSvg + '</button></td>' +
           '</tr>';
       }).join('');
+    }
+
+    async function deleteLead(id, e) {
+      e.stopPropagation();
+      if (!confirm('Excluir este lead? A ação não pode ser desfeita.')) return;
+      var result = await api('DELETE', '/api/leads/' + id);
+      if (!result) return;
+      _leads = _leads.filter(function(l) { return l.id !== id; });
+      renderStats(_leads);
+      renderTable();
     }
 
     function esc(s) {
@@ -1902,20 +2197,62 @@
     function exportCSV() {
       var leads = getLeads();
       if (!leads.length) { alert('Nenhum lead para exportar.'); return; }
-      var rows = [['#','Nome','Pet Shop','WhatsApp','E-mail','Faturamento','Etapa CRM','Últ. Contato','Próx. Contato','Comentários','Data/Hora']];
-      leads.forEach(function(l, i) {
-        rows.push([i+1, l.nome, l.petshop||'', l.whatsapp, l.email, l.faturamento,
-          l.etapa||'', l.ultContato||'', l.proxContato||'',
-          (l.comentarios||'').replace(/\n/g,' '), fmtDate(l.timestamp)]);
+
+      // Descobre as perguntas do quiz a partir do 1º lead que tiver respostas (colunas fixas)
+      var quizQs = [];
+      for (var qi = 0; qi < leads.length; qi++) {
+        try {
+          var rr = JSON.parse(leads[qi].respostas || '{}');
+          if (rr && Array.isArray(rr.quiz) && rr.quiz.length) { quizQs = rr.quiz.map(function(q) { return q.pergunta; }); break; }
+        } catch (e) {}
+      }
+
+      // Estrutura solicitada: 7 colunas principais (PT) + colunas extras depois
+      var header = ['Primeiro nome','Sobrenome','Telefone','Etiqueta','Email','Origem','Data/Hora',
+        'Faturamento','Etapa CRM','Último contato','Próximo contato','Comentários'];
+      quizQs.forEach(function(q, i) { header.push('Quiz ' + (i+1) + ': ' + q); });
+      header.push('Calc — Faturamento','Calc — Custos fixos (%)','Calc — Custos variáveis (%)','Calc — Custo produto (%)','Calc — Desconto médio (%)','Resultado','Margem (%)');
+      var rows = [header];
+
+      leads.forEach(function(l) {
+        var partes       = (l.nome || '').trim().split(/\s+/);
+        var primeiroNome = partes[0] || '';
+        var fone         = (l.whatsapp || '').replace(/\D/g, '');
+        if (fone && fone.length <= 11) fone = '55' + fone;
+        var etiqueta = [l.faturamento, l.origem].concat(l.tags || []).filter(Boolean).join(', ');
+
+        var r = {}; try { r = JSON.parse(l.respostas || '{}') || {}; } catch (e) {}
+        var quizMap = {}; (r.quiz || []).forEach(function(q) { quizMap[q.pergunta] = q.resposta; });
+        var c = r.calculadora || {}, res = r.resultado || {};
+        var tierLabel = res.tier === 'red' ? 'Crítico' : res.tier === 'gold' ? 'Atenção' : res.tier === 'green' ? 'Saudável' : (res.tier || '');
+
+        // 1.Primeiro nome  2.Sobrenome(=protocolo)  3.Telefone  4.Etiqueta  5.Email  6.Origem  7.Data/Hora
+        var row = [primeiroNome, protocolo(l.id), fone, etiqueta, l.email || '', l.origem || 'Landing principal', fmtDate(l.timestamp),
+          l.faturamento || '', l.etapa || '', l.ultContato || '', l.proxContato || '', l.comentarios || ''];
+        quizQs.forEach(function(q) { row.push(quizMap[q] || ''); });
+        row.push(
+          c.faturamento || '',
+          c.custosFixos     != null ? c.custosFixos     : '',
+          c.custosVariaveis != null ? c.custosVariaveis : '',
+          c.custoProduto    != null ? c.custoProduto    : '',
+          c.descontoMedio   != null ? c.descontoMedio   : '',
+          tierLabel,
+          res.margemPct != null ? res.margemPct : ''
+        );
+        rows.push(row);
       });
-      var csv = rows.map(function(r) {
-        return r.map(function(c) { return '"'+String(c).replace(/"/g,'""')+'"'; }).join(',');
-      }).join('\r\n');
-      var blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url; a.download = 'leads-fluxxo-pet-'+new Date().toISOString().slice(0,10)+'.csv';
-      a.click(); URL.revokeObjectURL(url);
+
+      // Exporta como Excel (.xlsx) de verdade — colunas explícitas, sem problema de
+      // delimitador (vírgula x ponto-e-vírgula) e abre certo no Excel/Google Sheets
+      var ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = rows[0].map(function(h, i) {
+        var max = String(h).length;
+        for (var k = 1; k < rows.length; k++) { var v = rows[k][i]; if (v != null) max = Math.max(max, String(v).length); }
+        return { wch: Math.min(48, Math.max(10, max + 2)) };
+      });
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Leads');
+      XLSX.writeFile(wb, 'leads-fluxxo-pet-' + new Date().toISOString().slice(0, 10) + '.xlsx');
     }
 
     /* ── CRM ─────────────────────────────────────────── */
@@ -2004,7 +2341,7 @@
         html +=   '<span class="col-dot ' + dot + '"></span>';
         html +=   '<span class="col-name">' + esc(stage) + '</span>';
         html +=   '<span class="col-count">' + sl.length + '</span>';
-        html += '<button class="col-del" onclick="removeStage('+si+')" title="Remover etapa">✕</button>';
+        html += '<button class="col-del" onclick="removeStage('+si+')" title="Remover etapa"><span class="material-symbols-outlined ms-xs">close</span></button>';
         html += '</div>';
         html += '<div class="kanban-col-body" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOn(event,'+si+')">';
 
@@ -2022,8 +2359,8 @@
               lead.tags.forEach(function(t) { html += '<span class="card-tag">'+esc(t)+'</span>'; });
               html += '</div>';
             }
-            html +=   '<div class="card-meta">' + esc(lead.whatsapp) + '</div>';
-            if (lead.proxContato) html += '<div class="card-date">📅 Próx: '+fmtDateShort(lead.proxContato)+'</div>';
+            html +=   '<div class="card-meta">' + esc(fmtPhone(lead.whatsapp)) + '</div>';
+            if (lead.proxContato) html += '<div class="card-date"><span class="material-symbols-outlined ms-xs">event</span> Próx: '+fmtDateShort(lead.proxContato)+'</div>';
             if (lead.comentarios) {
               var preview = lead.comentarios.split('\n')[0].slice(0,50);
               html += '<div class="card-comment">' + esc(preview) + '</div>';
@@ -2035,6 +2372,35 @@
       });
 
       document.getElementById('kanban').innerHTML = html;
+    }
+
+    function buildRespostasHTML(lead) {
+      function money(v) {
+        if (v === null || v === undefined || v === '') return null;
+        var n = parseFloat(v);
+        if (isNaN(n)) return null;
+        return 'R$ ' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      }
+      function row(q, a, color) {
+        return '<div class="resp-row"><span class="resp-q">' + esc(q) + '</span>' +
+          '<span class="resp-a"' + (color ? ' style="color:' + color + '"' : '') + '>' + a + '</span></div>';
+      }
+
+      var rows = '', f;
+      if ((f = money(lead.simFat)))    rows += row('Faturamento mensal informado', f);
+      if ((f = money(lead.simRacao)))  rows += row('Vendas de ração', f);
+      if ((f = money(lead.simMed)))    rows += row('Medicamentos e higiene', f);
+      if ((f = money(lead.perdaIcms))) rows += row('Perda de ICMS (ração)', f, 'var(--red)');
+      if ((f = money(lead.perdaPis)))  rows += row('Perda de PIS/COFINS (med.)', f, 'var(--red)');
+      if ((f = money(lead.perdaMensal))) rows += row('Perda mensal total', '<strong>' + f + '</strong>');
+      if ((f = money(lead.perdaAnual)))  rows += row('Projeção anual', '<strong style="color:var(--red)">' + f + '</strong>');
+
+      if (!rows) return '';
+
+      return '<div class="drawer-section-sep"></div>' +
+        '<div><label class="field-lbl">Respostas do diagnóstico</label>' +
+        '<p class="field-hint">O que a pessoa preencheu no simulador</p>' +
+        '<div class="resp-block">' + rows + '</div></div>';
     }
 
     function openDrawerByIdx(idx) {
@@ -2059,12 +2425,14 @@
             '<div class="drawer-name">'+esc(lead.nome)+'</div>' +
             '<span class="badge-fat '+FAT_CLASS[fi]+'">'+esc(lead.faturamento)+'</span>' +
           '</div>' +
-          '<button class="drawer-close" onclick="closeDrawer()">✕</button>' +
+          '<button class="drawer-close" onclick="closeDrawer()"><span class="material-symbols-outlined ms-xs">close</span></button>' +
         '</div>' +
         '<div class="drawer-body">' +
           '<div class="drawer-info">' +
-            '<div class="dfield"><label>WhatsApp</label><span>'+esc(lead.whatsapp)+'</span></div>' +
+            '<div class="dfield"><label>Protocolo</label><span style="font-weight:700;color:var(--text)">'+protocolo(lead.id)+'</span></div>' +
+            '<div class="dfield"><label>WhatsApp</label><span>'+esc(fmtPhone(lead.whatsapp))+'</span></div>' +
             '<div class="dfield"><label>E-mail</label><span>'+esc(lead.email)+'</span></div>' +
+            (lead.petshop ? '<div class="dfield"><label>Pet Shop</label><span>'+esc(lead.petshop)+'</span></div>' : '') +
             '<div class="dfield"><label>Cadastro</label><span>'+fmtDate(lead.timestamp)+'</span></div>' +
           '</div>' +
           '<div class="drawer-row">' +
@@ -2085,11 +2453,10 @@
             '<label class="field-lbl">Comentários</label>' +
             '<textarea id="dComent" class="d-textarea" placeholder="Notas sobre este lead…">'+esc(lead.comentarios||'')+'</textarea>' +
           '</div>' +
-          buildDiagHTML(lead) +
+          buildRespostasHTML(lead) +
         '</div>' +
         '<div class="drawer-footer">' +
           '<button class="drawer-save" onclick="saveDrawer()">Salvar alterações</button>' +
-          '<button onclick="deleteDrawer()" style="width:100%;margin-top:10px;background:transparent;color:var(--red);border:1px solid var(--red);border-radius:7px;padding:11px;font-family:inherit;font-size:0.85rem;font-weight:700;cursor:pointer;">Excluir lead</button>' +
         '</div>';
 
       document.getElementById('drawerOverlay').classList.add('active');
@@ -2104,9 +2471,9 @@
 
     var REVENUE_EVENTS = {
       'Até R$20 mil':      'Lead20k',
-      'R$50 mil':          'Lead50k',
-      'R$100 mil':         'Lead100k',
-      'R$200 mil':         'Lead200k',
+      'Até R$50 mil':      'Lead50k',
+      'Até R$100 mil':     'Lead100k',
+      'Até R$200 mil':     'Lead200k',
       'Mais de R$200 mil': 'Lead200kMais',
     };
 
@@ -2163,18 +2530,6 @@
       if (!oldFat && newFat && REVENUE_EVENTS[newFat]) {
         fireRevenueEvent(REVENUE_EVENTS[newFat], lead, newFat);
       }
-      closeDrawer();
-      var inCRM = document.getElementById('crmView').style.display !== 'none';
-      if (inCRM) renderKanban(); else { renderStats(_leads); renderTable(); }
-    }
-
-    async function deleteDrawer() {
-      if (currentLeadIdx === null) return;
-      var lead = _leads[currentLeadIdx];
-      if (!confirm('Excluir o lead "' + lead.nome + '" permanentemente? Esta ação não pode ser desfeita.')) return;
-      var result = await api('DELETE', '/api/leads/' + lead.id);
-      if (!result) return;
-      _leads.splice(currentLeadIdx, 1);
       closeDrawer();
       var inCRM = document.getElementById('crmView').style.display !== 'none';
       if (inCRM) renderKanban(); else { renderStats(_leads); renderTable(); }
@@ -2265,7 +2620,7 @@
         document.getElementById('impPreviewBody').innerHTML = preview.map(function(l) {
           return '<tr class="' + (l._isDup ? 'dup-row' : '') + '">' +
             '<td>' + esc(l.nome) + (l._isDup ? '<span class="dup-badge">duplicado</span>' : '') + '</td>' +
-            '<td>' + esc(l.whatsapp) + '</td>' +
+            '<td>' + esc(fmtPhone(l.whatsapp)) + '</td>' +
             '<td>' + esc(l.email) + '</td>' +
             '<td>' + fmtDate(l.timestamp) + '</td>' +
             '</tr>';
@@ -2432,9 +2787,18 @@
       }
       document.getElementById('dashSince').value = since;
       document.getElementById('dashUntil').value  = until;
+      var rng = document.getElementById('dashRange'); if (rng) rng.style.display = 'none';
       document.querySelectorAll('.dash-period button').forEach(function(b){ b.classList.remove('active'); });
       if (btn) btn.classList.add('active');
       loadDashWithDates(since, until);
+    }
+
+    function dashCustomToggle(btn) {
+      var rng = document.getElementById('dashRange'); if (rng) rng.style.display = 'flex';
+      document.querySelectorAll('.dash-period button').forEach(function(b){ b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      var s = document.getElementById('dashSince').value, u = document.getElementById('dashUntil').value;
+      if (s && u) loadDashWithDates(s, u);
     }
 
     function loadDashCustom() {
@@ -2469,51 +2833,194 @@
         '</div>';
     }
 
+    function dashKpiCard(label, value, sub, icon) {
+      return '<div class="stat-card">' +
+        '<div class="stat-top"><span class="label">' + label + '</span>' +
+        '<span class="material-symbols-outlined stat-ico">' + icon + '</span></div>' +
+        '<div class="value gold">' + value + '</div>' +
+        '<div class="sub">' + sub + '</div></div>';
+    }
+
+    function dashRangeLabel(since, until) {
+      function br(s) { var p = String(s).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : s; }
+      return since === until ? br(since) : br(since) + ' a ' + br(until);
+    }
+
+    function secItem(icon, label, value) {
+      return '<div class="sec-item">' +
+        '<span class="material-symbols-outlined sec-ico">' + icon + '</span>' +
+        '<span class="sec-label">' + label + '</span>' +
+        '<span class="sec-val">' + value + '</span></div>';
+    }
+
+    var DASH_METRICS = [
+      { key: 'cpl',   label: 'Custo por Lead', color: '#0b57d0', fmt: fmtBRL },
+      { key: 'spend', label: 'Investimento',   color: '#1e8e3e', fmt: fmtBRL },
+      { key: 'leads', label: 'Resultados',     color: '#9334e6', fmt: fmtNum },
+      { key: 'ctr',   label: 'CTR %',          color: '#ea8600', fmt: fmtPct },
+      { key: 'cpm',   label: 'CPM',            color: '#d93025', fmt: fmtBRL },
+      { key: 'freq',  label: 'Frequência',     color: '#12a4af', fmt: fmtDec },
+    ];
+    var _dashActive = { cpl: true, spend: false, leads: true, ctr: false, cpm: false, freq: false };
+
+    function hexA(h, a) { var n = parseInt(h.slice(1), 16); return 'rgba(' + ((n>>16)&255) + ',' + ((n>>8)&255) + ',' + (n&255) + ',' + a + ')'; }
+
     function renderDash(m, daily, crmDaily, since, until) {
-      var html = '';
+      var periodo = dashRangeLabel(since, until);
 
-      // Chart
-      html += '<div class="dash-chart-wrap">';
-      html += '<div class="dash-section-title" style="margin-top:0">Leads por dia (CRM)</div>';
-      html += '<canvas id="dashCanvas" style="display:block;width:100%;"></canvas>';
+      // Série diária por métrica
+      var byDay = {}; (daily || []).forEach(function(r) { byDay[r.date] = r; });
+      var leadsByDay = {}; (crmDaily || []).forEach(function(r) { leadsByDay[r.day] = r.total; });
+      var S = { days: [], cpl: [], spend: [], leads: [], ctr: [], cpm: [], freq: [] };
+      var cur = new Date(since + 'T00:00:00'), end = new Date(until + 'T00:00:00');
+      while (cur <= end) {
+        var ds = cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0') + '-' + String(cur.getDate()).padStart(2,'0');
+        var r = byDay[ds], has = !!r; r = r || {};
+        var ld = leadsByDay[ds] || 0, sp = parseFloat(r.spend || 0);
+        S.days.push(ds);
+        // Métricas do Meta: null nos dias sem veiculação (vira vão na linha, não cai pra zero)
+        S.spend.push(has ? sp : null);
+        S.cpl.push(has ? (ld > 0 ? sp / ld : 0) : null);
+        S.ctr.push(has ? parseFloat(r.ctrLink || 0) : null);
+        S.cpm.push(has ? parseFloat(r.cpm || 0) : null);
+        S.freq.push(has ? parseFloat(r.frequency || 0) : null);
+        S.leads.push(ld); // leads do CRM são reais (podem existir mesmo sem anúncio)
+        cur.setDate(cur.getDate() + 1);
+      }
+      window._dashSeries = S;
+
+      var html = '<div class="kpi-3">';
+      html += dashKpiCard('Leads do CRM',   fmtNum(m.crmLeads), 'cadastros no período', 'groups');
+      html += dashKpiCard('Custo por lead', fmtBRL(m.cpl),      'investido ÷ leads',    'sell');
+      html += dashKpiCard('Valor investido', fmtBRL(m.spend),   periodo,                'account_balance_wallet');
       html += '</div>';
 
-      // KPIs
-      html += '<div class="dash-section-title">Resultados</div><div class="dash-kpis">';
-      html += dashCard('Leads no CRM', fmtNum(m.crmLeads), 'cadastros no período', true);
-      html += dashCard('Custo por lead', fmtBRL(m.cpl), 'gasto / leads CRM', true);
-      html += dashCard('Valor gasto', fmtBRL(m.spend), since + ' → ' + until);
-      html += dashCard('Alcance', fmtNum(m.reach), 'pessoas únicas');
-      html += dashCard('Frequência', fmtDec(m.frequency), 'impressões por pessoa');
+      // Gráfico multi-métrica por dia (chips + tooltip)
+      html += '<div class="dash-card2">';
+      html += '<div class="dash-chart-head"><div class="dash-card2-title" style="margin-bottom:0">Variação por dia</div><div class="mchips" id="mchips"></div></div>';
+      html += '<div class="mchart-wrap"><canvas id="cplCanvas" style="display:block;width:100%"></canvas><div id="cplTip" class="mtip" style="display:none"></div></div>';
+      html += '<p class="field-hint" style="margin-top:10px;margin-bottom:0">Passe o mouse para ver os valores do dia. Cada linha usa a própria escala — clique nos chips para ligar/desligar.</p>';
       html += '</div>';
 
-      html += '<div class="dash-section-title">Distribuição do Tráfego</div><div class="dash-kpis">';
-      html += dashCard('Impressões', fmtNum(m.impressions), '');
-      html += dashCard('CPM', fmtBRL(m.cpm), 'custo por 1.000 imp.');
-      html += dashCard('Cliques no link', fmtNum(m.linkClicks), '');
-      html += dashCard('CPC', fmtBRL(m.cpcLink), 'custo por clique no link');
-      html += dashCard('CTR', fmtPct(m.ctrLink), 'cliques / impressões');
-      html += '</div>';
+      // Métricas secundárias (taxas e custos) — 2 colunas
+      html += '<div class="dash-card2"><div class="dash-card2-title">Métricas secundárias</div><div class="sec-grid">';
+      html += secItem('ads_click',  'CTR %',               fmtPct(m.ctrLink));
+      html += secItem('mouse',      'Custo por clique',    fmtBRL(m.cpcLink));
+      html += secItem('link',       'Connect Rate',        fmtPct(m.connectRate));
+      html += secItem('visibility', 'Custo por view page', fmtBRL(m.costLpv));
+      html += secItem('percent',    'Taxa de conversão %', fmtPct(m.regRate));
+      html += secItem('sell',       'Custo por lead',      fmtBRL(m.cpl));
+      html += '</div></div>';
 
-      html += '<div class="dash-section-title">Qualidade do Funil</div><div class="dash-kpis">';
-      html += dashCard('Vis. da página', fmtNum(m.lpv), 'landing page views');
-      html += dashCard('Custo por LPV', fmtBRL(m.costLpv), '');
-      html += dashCard('Connect Rate', fmtPct(m.connectRate), 'LPV / cliques no link');
-      html += dashCard('Taxa de cadastro', fmtPct(m.regRate), 'leads CRM / LPV');
-      html += '</div>';
-
-      html += '<div class="dash-section-title">Qualidade do Criativo (Vídeo)</div><div class="dash-kpis">';
-      html += dashCard('Hook Rate', fmtPct(m.hookRate), '25% assistido / impressões');
-      html += dashCard('Hold Rate', fmtPct(m.holdRate), '75% assistido / impressões');
-      html += dashCard('Video plays', fmtNum(m.videoPlays), 'reproduções iniciadas');
-      html += dashCard('ThruPlays', fmtNum(m.thruPlays), 'assistidos até o fim');
-      html += '</div>';
-
-      window._lastCrmDaily = crmDaily;
       document.getElementById('dashContent').innerHTML = html;
+      renderDashChips();
+      setTimeout(drawDashChart, 0);
+    }
 
-      // Render chart after DOM update
-      setTimeout(function() { renderDashChart(since, until, crmDaily); }, 0);
+    function renderDashChips() {
+      var el = document.getElementById('mchips'); if (!el) return;
+      el.innerHTML = DASH_METRICS.map(function(mt) {
+        var on = _dashActive[mt.key];
+        var st = on ? 'border-color:' + mt.color + ';background:' + hexA(mt.color, 0.10) + ';color:var(--text)' : '';
+        return '<button class="mchip' + (on ? ' on' : '') + '" style="' + st + '" onclick="toggleMetric(\'' + mt.key + '\')">' +
+          '<span class="mdot" style="background:' + mt.color + ';opacity:' + (on ? 1 : 0.4) + '"></span>' + mt.label + '</button>';
+      }).join('');
+    }
+
+    function toggleMetric(k) { _dashActive[k] = !_dashActive[k]; renderDashChips(); drawDashChart(); }
+
+    function _smooth(ctx, pts) {
+      if (pts.length < 2) return;
+      ctx.moveTo(pts[0].x, pts[0].y);
+      if (pts.length === 2) { ctx.lineTo(pts[1].x, pts[1].y); return; }
+      for (var i = 0; i < pts.length - 1; i++) {
+        var p0 = pts[i-1] || pts[i], p1 = pts[i], p2 = pts[i+1], p3 = pts[i+2] || p2;
+        var c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
+        var c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+        ctx.bezierCurveTo(c1x, c1y, c2x, c2y, p2.x, p2.y);
+      }
+    }
+
+    function drawDashChart(hoverIdx) {
+      var canvas = document.getElementById('cplCanvas'); var S = window._dashSeries;
+      if (!canvas || !S || !S.days.length) return;
+
+      var isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      var grid = isLight ? '#eef0f3' : 'rgba(255,255,255,0.06)';
+      var txt  = isLight ? '#80868b' : '#9aa0a6';
+      var ring = isLight ? '#ffffff' : '#1e1f20';
+
+      var dpr = window.devicePixelRatio || 1;
+      var W = Math.max(120, canvas.parentElement.clientWidth);
+      var H = 300;
+      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      var ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, W, H);
+
+      var days = S.days, n = days.length;
+      var padL = 12, padR = 12, padT = 16, padB = 28;
+      var chartW = W - padL - padR, chartH = H - padT - padB;
+
+      ctx.strokeStyle = grid; ctx.lineWidth = 1;
+      for (var g = 0; g <= 4; g++) { var gy = padT + (chartH/4)*g; ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(W-padR, gy); ctx.stroke(); }
+
+      var xs = []; for (var i = 0; i < n; i++) xs.push(n === 1 ? padL + chartW/2 : padL + chartW * (i/(n-1)));
+
+      // guia vertical no hover
+      if (hoverIdx != null && xs[hoverIdx] != null) {
+        ctx.strokeStyle = isLight ? '#dadce0' : 'rgba(255,255,255,0.18)';
+        ctx.lineWidth = 1; ctx.beginPath();
+        ctx.moveTo(xs[hoverIdx], padT); ctx.lineTo(xs[hoverIdx], padT + chartH); ctx.stroke();
+      }
+
+      DASH_METRICS.forEach(function(mt) {
+        if (!_dashActive[mt.key]) return;
+        var arr = S[mt.key];
+        var vals = arr.filter(function(v) { return v != null; });
+        var mx = vals.length ? Math.max.apply(null, vals) : 1; if (!mx || !isFinite(mx)) mx = 1;
+        // linha contínua e suave (conecta através de dias sem dado)
+        var pts = [], idxs = [];
+        arr.forEach(function(v, i) { if (v != null) { pts.push({ x: xs[i], y: padT + chartH - (v/mx)*chartH }); idxs.push(i); } });
+        if (!pts.length) return;
+        ctx.strokeStyle = mt.color; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+        ctx.beginPath(); _smooth(ctx, pts); ctx.stroke();
+        // pontos com halo
+        pts.forEach(function(p, k) {
+          var big = idxs[k] === hoverIdx;
+          ctx.beginPath(); ctx.arc(p.x, p.y, big ? 5 : 3.4, 0, Math.PI*2); ctx.fillStyle = ring; ctx.fill();
+          ctx.beginPath(); ctx.arc(p.x, p.y, big ? 3.6 : 2.3, 0, Math.PI*2); ctx.fillStyle = mt.color; ctx.fill();
+        });
+      });
+
+      // Mostra todos os dias; reduz a fonte se houver muitos pra caber sem amontoar
+      var fs = n > 24 ? 9 : n > 16 ? 10 : 11;
+      ctx.fillStyle = txt; ctx.font = fs + 'px "Roboto Slab",Georgia,serif'; ctx.textAlign = 'center';
+      days.forEach(function(d, i) { var p = d.split('-'); ctx.fillText(p[2] + '/' + p[1], xs[i], H - 8); });
+
+      window._dashGeo = { xs: xs, days: days };
+
+      canvas.onmousemove = function(e) {
+        var geo = window._dashGeo, SS = window._dashSeries; if (!geo) return;
+        var rect = canvas.getBoundingClientRect();
+        var mx = e.clientX - rect.left;
+        var best = 0, bd = 1e9;
+        geo.xs.forEach(function(x, i) { var dd = Math.abs(x - mx); if (dd < bd) { bd = dd; best = i; } });
+        drawDashChart(best);
+        var tip = document.getElementById('cplTip'); if (!tip) return;
+        var p = geo.days[best].split('-');
+        var rows = '<div class="mtip-date">' + p[2] + '/' + p[1] + '</div>', any = false;
+        DASH_METRICS.forEach(function(mt) {
+          if (!_dashActive[mt.key]) return; any = true;
+          var v = SS[mt.key][best];
+          rows += '<div class="mtip-row"><span class="mtip-sq" style="background:' + mt.color + '"></span>' + mt.label + ': <b>' + (v == null ? '—' : mt.fmt(v)) + '</b></div>';
+        });
+        if (!any) { tip.style.display = 'none'; return; }
+        tip.innerHTML = rows; tip.style.display = 'block';
+        var wrapW = canvas.parentElement.clientWidth, tw = tip.offsetWidth;
+        var left = geo.xs[best] + 14; if (left + tw > wrapW) left = geo.xs[best] - tw - 14; if (left < 0) left = 0;
+        tip.style.left = left + 'px'; tip.style.top = '6px';
+      };
+      canvas.onmouseleave = function() { var t = document.getElementById('cplTip'); if (t) t.style.display = 'none'; drawDashChart(); };
     }
 
     function renderDashChart(since, until, crmDaily) {
@@ -2535,8 +3042,8 @@
 
       var dpr  = window.devicePixelRatio || 1;
       var isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      var gold    = isLight ? '#1232C8' : '#1232C8';
-      var goldDim = isLight ? 'rgba(18,50,200,0.15)' : 'rgba(18,50,200,0.15)';
+      var gold    = isLight ? '#0b57d0' : '#8ab4f8';
+      var goldDim = isLight ? 'rgba(11,87,208,0.12)' : 'rgba(138,180,248,0.18)';
       var gridClr = isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.06)';
       var textClr = isLight ? '#aaa' : '#888';
 
@@ -2579,7 +3086,7 @@
           roundRect(ctx, Math.round(x), Math.round(y), Math.round(barW), barH, Math.min(3, barW/2));
           ctx.fill();
           ctx.fillStyle = gold;
-          ctx.font = 'bold 11px Inter,system-ui,sans-serif';
+          ctx.font = 'bold 11px Roboto Slab,Georgia,serif';
           ctx.textAlign = 'center';
           ctx.fillText(count, Math.round(x + barW/2), Math.max(padT+12, Math.round(y-5)));
         } else {
@@ -2592,7 +3099,7 @@
         var step5 = n <= 7 ? 1 : n <= 14 ? 2 : n <= 30 ? 5 : 7;
         if (i % step5 === 0 || i === n - 1) {
           ctx.fillStyle = textClr;
-          ctx.font = '10px Inter,system-ui,sans-serif';
+          ctx.font = '10px Roboto Slab,Georgia,serif';
           ctx.textAlign = 'center';
           var parts = day.split('-');
           ctx.fillText(parts[2] + '/' + parts[1], Math.round(x + barW/2), H - 8);
@@ -2601,27 +3108,31 @@
 
       // Label Y
       ctx.fillStyle = textClr;
-      ctx.font = '10px Inter,system-ui,sans-serif';
+      ctx.font = '10px Roboto Slab,Georgia,serif';
       ctx.textAlign = 'right';
       ctx.fillText(maxCount, padL - 4, padT + 6);
       ctx.fillText('0', padL - 4, padT + chartH + 6);
     }
 
     window.addEventListener('resize', function() {
-      var s = document.getElementById('dashSince').value;
-      var u = document.getElementById('dashUntil').value;
-      if (s && u && document.getElementById('dashView').style.display !== 'none') {
-        // só re-renderiza o gráfico sem rebuscar dados
-        var cd = window._lastCrmDaily || [];
-        renderDashChart(s, u, cd);
+      // Re-renderiza gráfico principal
+      if (_chartSince && _chartUntil && document.getElementById('dailyChartSection').style.display !== 'none') {
+        renderDailyChart(_leads);
+      }
+      // Re-renderiza gráfico da aba Anúncios
+      if (document.getElementById('dashView').style.display !== 'none') {
+        drawDashChart();
       }
     });
 
     async function init() {
       if (!getToken()) { window.location.href = '/login'; return; }
+      // Inicializa o gráfico com 30D antes de carregar os dados
+      chartPreset('30d', document.getElementById('chartBtn30d'));
       await loadLeads();
       renderStats(_leads);
       renderTable();
+      setView('leads');
     }
 
     init();
