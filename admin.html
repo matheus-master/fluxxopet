@@ -2050,6 +2050,7 @@
         '</div>' +
         '<div class="drawer-footer">' +
           '<button class="drawer-save" onclick="saveDrawer()">Salvar alterações</button>' +
+          '<button onclick="deleteDrawer()" style="width:100%;margin-top:10px;background:transparent;color:var(--red);border:1px solid var(--red);border-radius:7px;padding:11px;font-family:inherit;font-size:0.85rem;font-weight:700;cursor:pointer;">Excluir lead</button>' +
         '</div>';
 
       document.getElementById('drawerOverlay').classList.add('active');
@@ -2123,6 +2124,18 @@
       if (!oldFat && newFat && REVENUE_EVENTS[newFat]) {
         fireRevenueEvent(REVENUE_EVENTS[newFat], lead, newFat);
       }
+      closeDrawer();
+      var inCRM = document.getElementById('crmView').style.display !== 'none';
+      if (inCRM) renderKanban(); else { renderStats(_leads); renderTable(); }
+    }
+
+    async function deleteDrawer() {
+      if (currentLeadIdx === null) return;
+      var lead = _leads[currentLeadIdx];
+      if (!confirm('Excluir o lead "' + lead.nome + '" permanentemente? Esta ação não pode ser desfeita.')) return;
+      var result = await api('DELETE', '/api/leads/' + lead.id);
+      if (!result) return;
+      _leads.splice(currentLeadIdx, 1);
       closeDrawer();
       var inCRM = document.getElementById('crmView').style.display !== 'none';
       if (inCRM) renderKanban(); else { renderStats(_leads); renderTable(); }
