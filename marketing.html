@@ -8,119 +8,164 @@
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#F7F9FC; --card:#fff; --ink:#0F172A; --mid:#64748B; --dim:#94A3B8;
-      --border:#E6EAF0; --green:#16A34A; --green-dim:#E7F6EC; --green-bd:#BBE8CB;
-      --head:#24345B; --red:#DC2626; --blue:#2563EB;
+      --green:#10B981; --green-strong:#059669; --green-dim:#ECFDF5; --green-bd:#A7F3D0;
+      --ink:#111827; --mid:#6B7280; --dim:#9CA3AF; --border:#EAECEF; --soft:#F9FAFB; --card:#fff;
+      --red:#DC2626;
     }
-    body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.4}
-    a{color:inherit}
-    /* topbar */
-    .top{background:var(--card);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+    html,body{height:100%}
+    body{background:var(--card);color:var(--ink);font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.45}
+    a{color:inherit;text-decoration:none}
+
+    /* ── TOPBAR ── */
+    .topbar{height:62px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;background:var(--card);z-index:20}
     .brand{display:flex;align-items:center;gap:10px}
     .brand svg{width:26px;height:26px}
-    .brand-name{font-weight:800;letter-spacing:.02em;font-size:1rem}
-    .brand-sub{font-size:.72rem;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.08em}
-    .back{font-size:.8rem;color:var(--mid);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px}
-    .back:hover{color:var(--ink)}
-    /* wrap */
-    .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 60px}
-    .h1{font-size:1.35rem;font-weight:800;margin-bottom:4px}
-    .sub{color:var(--mid);font-size:.86rem;margin-bottom:22px}
-    /* filters */
-    .filters{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+    .brand b{font-weight:800;letter-spacing:.02em;font-size:1rem}
+    .brand .docs{background:var(--ink);color:#fff;font-size:.6rem;font-weight:800;letter-spacing:.12em;padding:3px 8px;border-radius:6px;margin-left:4px}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .btn{font-size:.82rem;font-weight:600;padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--ink);cursor:pointer;font-family:inherit}
+    .btn:hover{background:var(--soft)}
+    .btn.green{background:var(--green);color:#fff;border-color:var(--green)}
+    .btn.green:hover{background:var(--green-strong)}
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;padding:6px}
+    .menu-btn svg{width:24px;height:24px;stroke:var(--ink)}
+
+    /* ── SHELL ── */
+    .shell{display:flex;min-height:calc(100vh - 62px)}
+    .sidebar{width:266px;flex-shrink:0;border-right:1px solid var(--border);padding:24px 16px;overflow-y:auto;position:sticky;top:62px;height:calc(100vh - 62px)}
+    .nav-group{margin-bottom:22px}
+    .nav-title{font-size:.68rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);padding:0 10px;margin-bottom:8px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;font-size:.88rem;font-weight:500;color:var(--mid);cursor:pointer;transition:background .12s,color .12s}
+    .nav-item:hover{background:var(--soft);color:var(--ink)}
+    .nav-item.active{background:var(--green-dim);color:var(--green-strong);font-weight:700}
+    .nav-item svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+
+    /* ── MAIN ── */
+    .main{flex:1;min-width:0;padding:34px 44px 70px;max-width:1180px}
+    .crumb{font-size:.76rem;color:var(--dim);font-weight:600;margin-bottom:8px}
+    .crumb b{color:var(--green-strong)}
+    .h1{font-size:1.7rem;font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+    .sub{color:var(--mid);font-size:.9rem;margin-bottom:26px}
+    .warn{background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;border-radius:10px;padding:11px 14px;font-size:.82rem;margin-bottom:18px}
+
+    .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:24px}
+    .kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
+    .kpi .k-l{font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;font-weight:800;margin-bottom:7px}
+    .kpi .k-v{font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums}
+    .kpi .k-v.green{color:var(--green-strong)}
+
+    .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
     .filters select{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 14px;font-size:.85rem;font-weight:600;color:var(--ink);cursor:pointer;font-family:inherit}
     .filters select:focus{outline:none;border-color:var(--green)}
-    .saved{font-size:.78rem;color:var(--green);font-weight:700;opacity:0;transition:opacity .2s}
+    .saved{font-size:.78rem;color:var(--green-strong);font-weight:700;opacity:0;transition:opacity .2s}
     .saved.show{opacity:1}
-    /* kpis */
-    .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
-    .kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px}
-    .kpi .k-l{font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px}
-    .kpi .k-v{font-size:1.25rem;font-weight:800;font-variant-numeric:tabular-nums}
-    .kpi .k-v.green{color:var(--green)}
-    /* table */
-    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,.04)}
+
+    .tcard{border:1px solid var(--border);border-radius:16px;overflow:hidden}
     .scroll{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;font-size:.84rem;min-width:920px}
-    thead th{background:var(--head);color:#fff;font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;padding:13px 14px;text-align:right;white-space:nowrap}
+    table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:920px}
+    thead th{background:var(--soft);color:var(--mid);font-weight:800;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;padding:13px 14px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border)}
     thead th:first-child,thead th:nth-child(2),thead th:nth-child(3){text-align:left}
-    thead th.roas-h{background:var(--green)}
+    thead th.roas-h{background:var(--green);color:#fff}
     tbody td{padding:11px 14px;text-align:right;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums;white-space:nowrap}
     tbody td.l{text-align:left}
-    .month-cell{font-weight:800;color:var(--ink);vertical-align:middle}
+    .month-cell{font-weight:800;color:var(--ink)}
     .wk{color:var(--mid);font-weight:600}
-    .roas-cell{background:var(--green-dim);color:var(--green);font-weight:800}
-    tr.total-row td{background:#F1F5F9;font-weight:800;border-top:2px solid var(--border)}
-    tr.total-row td.roas-cell{background:var(--green-bd)}
-    tr.month-sep td{border-top:3px solid #DDE3EC}
-    .cell-input{width:96px;text-align:right;border:1px solid transparent;background:transparent;border-radius:7px;padding:6px 8px;font:inherit;font-variant-numeric:tabular-nums;color:var(--ink)}
+    .roas-cell{background:var(--green-dim);color:var(--green-strong);font-weight:800}
+    tr.total-row td{background:var(--soft);font-weight:800;border-top:2px solid var(--border)}
+    tr.total-row td.roas-cell{background:var(--green-bd);color:var(--green-strong)}
+    tr.month-sep td{border-top:3px solid #E4E8EE}
+    .cell-input{width:98px;text-align:right;border:1px solid transparent;background:transparent;border-radius:7px;padding:6px 8px;font:inherit;font-variant-numeric:tabular-nums;color:var(--ink)}
     .cell-input:hover{border-color:var(--border)}
     .cell-input:focus{outline:none;border-color:var(--green);background:#fff;box-shadow:0 0 0 3px var(--green-dim)}
     .muted{color:var(--dim)}
-    .warn{background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;border-radius:10px;padding:11px 14px;font-size:.82rem;margin-bottom:16px}
     .loading{padding:60px 20px;text-align:center;color:var(--mid)}
-    @media(max-width:640px){.wrap{padding:18px 12px 50px}.h1{font-size:1.15rem}}
+
+    .backdrop{display:none}
+    @media(max-width:900px){
+      .menu-btn{display:block}
+      .sidebar{position:fixed;left:0;top:62px;z-index:30;background:var(--card);transform:translateX(-100%);transition:transform .22s;box-shadow:0 12px 40px rgba(0,0,0,.12)}
+      .sidebar.open{transform:translateX(0)}
+      .backdrop.open{display:block;position:fixed;inset:62px 0 0 0;background:rgba(0,0,0,.35);z-index:25}
+      .main{padding:24px 16px 60px}
+      .h1{font-size:1.35rem}
+    }
   </style>
 </head>
 <body>
-  <div class="top">
+  <div class="topbar">
     <div class="brand">
-      <svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="7" fill="#16A34A"/><path d="M10 20 Q10 16 14 16 Q16 16 16 14 Q16 12 18 12 Q22 12 22 16 Q22 20 18 20 Z" fill="#fff" opacity=".92"/><circle cx="11" cy="11" r="2" fill="#fff" opacity=".72"/><circle cx="21" cy="11" r="2" fill="#fff" opacity=".72"/></svg>
-      <div>
-        <div class="brand-name">FLUXXO PET</div>
-        <div class="brand-sub">Marketing</div>
-      </div>
+      <button class="menu-btn" onclick="toggleNav()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="7" fill="#10B981"/><path d="M10 20 Q10 16 14 16 Q16 16 16 14 Q16 12 18 12 Q22 12 22 16 Q22 20 18 20 Z" fill="#fff" opacity=".92"/><circle cx="11" cy="11" r="2" fill="#fff" opacity=".72"/><circle cx="21" cy="11" r="2" fill="#fff" opacity=".72"/></svg>
+      <b>FLUXXO PET</b><span class="docs">MKT</span>
     </div>
-    <a href="/admin" class="back">← Voltar ao painel</a>
+    <div class="top-actions">
+      <a href="/" class="btn">Ver site</a>
+      <button class="btn green" onclick="logout()">Sair</button>
+    </div>
   </div>
 
-  <div class="wrap">
-    <div class="h1">Controle de Marketing</div>
-    <div class="sub">Investimento e conversões puxados do Meta (WhatsApp) • Vendas e Faturamento editáveis • ROAS calculado</div>
+  <div class="shell">
+    <div class="backdrop" id="backdrop" onclick="toggleNav()"></div>
+    <aside class="sidebar" id="sidebar">
+      <div class="nav-group">
+        <div class="nav-title">Comece aqui</div>
+        <a href="/admin" class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Painel de Leads</a>
+        <a href="/admin" class="nav-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/></svg>CRM</a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-title">Marketing</div>
+        <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/></svg>Controle Semanal</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-title">Geral</div>
+        <a href="/" class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg>Ver site</a>
+      </div>
+    </aside>
 
-    <div id="warn" class="warn" style="display:none"></div>
+    <main class="main">
+      <div class="crumb">Marketing / <b>Controle Semanal</b></div>
+      <div class="h1">Controle de Marketing</div>
+      <div class="sub">Investimento e conversões puxados do Meta (WhatsApp) • Vendas e Faturamento editáveis • ROAS calculado</div>
 
-    <div class="kpis" id="kpis"></div>
+      <div id="warn" class="warn" style="display:none"></div>
+      <div class="kpis" id="kpis"></div>
 
-    <div class="filters">
-      <select id="fMonth" onchange="render()"><option value="">Todos os meses</option></select>
-      <select id="fWeek" onchange="render()">
-        <option value="">Todas as semanas</option>
-        <option value="1">Semana 1</option>
-        <option value="2">Semana 2</option>
-        <option value="3">Semana 3</option>
-        <option value="4">Semana 4</option>
-      </select>
-      <span class="saved" id="saved">✓ salvo</span>
-    </div>
+      <div class="filters">
+        <select id="fMonth" onchange="render()"><option value="">Todos os meses</option></select>
+        <select id="fWeek" onchange="render()">
+          <option value="">Todas as semanas</option>
+          <option value="1">Semana 1</option><option value="2">Semana 2</option>
+          <option value="3">Semana 3</option><option value="4">Semana 4</option>
+        </select>
+        <span class="saved" id="saved">✓ salvo</span>
+      </div>
 
-    <div class="card">
-      <div class="scroll">
-        <table>
-          <thead>
-            <tr>
+      <div class="tcard">
+        <div class="scroll">
+          <table>
+            <thead><tr>
               <th>Mês</th><th>Semana</th><th>Data</th>
               <th>Investimento</th><th>Conversões</th><th>Custo/Conversão</th>
               <th>Vendas</th><th>Faturamento</th><th class="roas-h">ROAS</th>
-            </tr>
-          </thead>
-          <tbody id="tbody">
-            <tr><td colspan="9" class="loading">Carregando dados do Meta…</td></tr>
-          </tbody>
-        </table>
+            </tr></thead>
+            <tbody id="tbody"><tr><td colspan="9" class="loading">Carregando dados do Meta…</td></tr></tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 
   <script>
     var state = { months: [] };
 
+    function toggleNav(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('backdrop').classList.toggle('open'); }
+    function logout(){ sessionStorage.removeItem('vt_token'); location.href='/login'; }
     function getToken(){ return sessionStorage.getItem('vt_token'); }
     async function api(method, path, body){
-      var t = getToken(); if(!t){ location.href='/login'; return null; }
-      var o = { method:method, headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+t } };
-      if(body!==undefined) o.body = JSON.stringify(body);
-      var r = await fetch(path, o);
+      var t=getToken(); if(!t){ location.href='/login'; return null; }
+      var o={ method:method, headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+t } };
+      if(body!==undefined) o.body=JSON.stringify(body);
+      var r=await fetch(path,o);
       if(r.status===401){ location.href='/login'; return null; }
       return r.json();
     }
@@ -128,7 +173,6 @@
     function fmtBRL(v){ v=+v||0; return 'R$ '+v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
     function fmtNum(v){ return String(Math.round(+v||0)); }
     function fmtRoas(v){ v=+v||0; return v ? v.toFixed(2).replace('.',',') : '0'; }
-    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
     function parseNum(s){
       if(s==null) return null; s=String(s).trim(); if(!s) return null;
       s=s.replace(/[^\d.,-]/g,'');
@@ -136,21 +180,17 @@
       else if(s.indexOf(',')>-1) s=s.replace(',','.');
       var n=parseFloat(s); return isNaN(n)?null:n;
     }
+    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
     async function load(){
-      var data = await api('GET','/api/marketing');
-      if(!data) return;
-      state.months = data.months || [];
+      var data=await api('GET','/api/marketing'); if(!data) return;
+      state.months=data.months||[];
       if(!data.metaOk){
-        var w=document.getElementById('warn');
-        w.style.display='block';
+        var w=document.getElementById('warn'); w.style.display='block';
         w.textContent='⚠ Não foi possível puxar dados do Meta agora ('+(data.metaError||'erro')+'). O token pode ter expirado — os valores manuais continuam funcionando.';
       }
-      // popular filtro de meses
       var fm=document.getElementById('fMonth');
-      state.months.forEach(function(m){
-        var o=document.createElement('option'); o.value=m.ym; o.textContent=m.label+' '+m.year; fm.appendChild(o);
-      });
+      state.months.forEach(function(m){ var o=document.createElement('option'); o.value=m.ym; o.textContent=m.label+' '+m.year; fm.appendChild(o); });
       render();
     }
 
@@ -158,8 +198,8 @@
       state.months.forEach(function(m){
         var t={spend:0,conv:0,vendas:0,faturamento:0};
         m.weeks.forEach(function(w){
-          w.custoConv = w.conv>0 ? w.spend/w.conv : 0;
-          w.roas = (w.spend>0 && w.faturamento) ? w.faturamento/w.spend : 0;
+          w.custoConv=w.conv>0?w.spend/w.conv:0;
+          w.roas=(w.spend>0 && w.faturamento)?w.faturamento/w.spend:0;
           t.spend+=w.spend; t.conv+=w.conv; t.vendas+=(w.vendas||0); t.faturamento+=(w.faturamento||0);
         });
         m.total={spend:t.spend,conv:t.conv,custoConv:t.conv>0?t.spend/t.conv:0,vendas:t.vendas,faturamento:t.faturamento,roas:t.spend>0?t.faturamento/t.spend:0};
@@ -168,21 +208,14 @@
 
     function render(){
       recompute();
-      var fMonth=document.getElementById('fMonth').value;
-      var fWeek=document.getElementById('fWeek').value;
+      var fMonth=document.getElementById('fMonth').value, fWeek=document.getElementById('fWeek').value;
       var months=state.months.filter(function(m){ return !fMonth || m.ym===fMonth; });
-
-      // KPIs (dos meses filtrados)
       var kp={spend:0,conv:0,faturamento:0};
       months.forEach(function(m){ m.weeks.forEach(function(w){ if(fWeek && String(w.week)!==fWeek) return; kp.spend+=w.spend; kp.conv+=w.conv; kp.faturamento+=(w.faturamento||0); }); });
-      var kpRoas=kp.spend>0?kp.faturamento/kp.spend:0;
-      var kpCpc=kp.conv>0?kp.spend/kp.conv:0;
       document.getElementById('kpis').innerHTML=
-        kpi('Investimento total',fmtBRL(kp.spend))+
-        kpi('Conversões',fmtNum(kp.conv))+
-        kpi('Custo por conversão',fmtBRL(kpCpc))+
-        kpi('Faturamento',fmtBRL(kp.faturamento))+
-        kpi('ROAS',fmtRoas(kpRoas),true);
+        kpi('Investimento total',fmtBRL(kp.spend))+kpi('Conversões',fmtNum(kp.conv))+
+        kpi('Custo por conversão',fmtBRL(kp.conv>0?kp.spend/kp.conv:0))+kpi('Faturamento',fmtBRL(kp.faturamento))+
+        kpi('ROAS',fmtRoas(kp.spend>0?kp.faturamento/kp.spend:0),true);
 
       var html='';
       months.forEach(function(m){
@@ -193,41 +226,34 @@
             '<td class="l month-cell">'+(i===0?esc(m.label):'')+'</td>'+
             '<td class="l wk">Semana '+w.week+'</td>'+
             '<td class="l muted">'+esc(w.dateLabel||'')+'</td>'+
-            '<td>'+fmtBRL(w.spend)+'</td>'+
-            '<td>'+fmtNum(w.conv)+'</td>'+
-            '<td>'+fmtBRL(w.custoConv)+'</td>'+
+            '<td>'+fmtBRL(w.spend)+'</td><td>'+fmtNum(w.conv)+'</td><td>'+fmtBRL(w.custoConv)+'</td>'+
             '<td>'+inp(m.ym,w.week,'vendas',w.vendas)+'</td>'+
             '<td>'+inp(m.ym,w.week,'faturamento',w.faturamento)+'</td>'+
-            '<td class="roas-cell">'+fmtRoas(w.roas)+'</td>'+
-          '</tr>';
+            '<td class="roas-cell">'+fmtRoas(w.roas)+'</td></tr>';
         });
         if(!fWeek){
           var t=m.total;
-          html+='<tr class="total-row">'+
-            '<td class="l"></td><td class="l">Total</td><td></td>'+
+          html+='<tr class="total-row"><td class="l"></td><td class="l">Total</td><td></td>'+
             '<td>'+fmtBRL(t.spend)+'</td><td>'+fmtNum(t.conv)+'</td><td>'+fmtBRL(t.custoConv)+'</td>'+
             '<td>'+fmtNum(t.vendas)+'</td><td>'+fmtBRL(t.faturamento)+'</td>'+
-            '<td class="roas-cell">'+fmtRoas(t.roas)+'</td>'+
-          '</tr>';
+            '<td class="roas-cell">'+fmtRoas(t.roas)+'</td></tr>';
         }
       });
-      document.getElementById('tbody').innerHTML= html || '<tr><td colspan="9" class="loading">Sem dados para o filtro.</td></tr>';
+      document.getElementById('tbody').innerHTML=html||'<tr><td colspan="9" class="loading">Sem dados para o filtro.</td></tr>';
     }
 
     function kpi(l,v,green){ return '<div class="kpi"><div class="k-l">'+l+'</div><div class="k-v'+(green?' green':'')+'">'+v+'</div></div>'; }
     function inp(ym,week,field,val){
-      var v = val==null ? '' : (field==='faturamento'? (+val).toFixed(2).replace('.',',') : fmtNum(val));
+      var v=val==null?'':(field==='faturamento'?(+val).toFixed(2).replace('.',','):fmtNum(val));
       return '<input class="cell-input" data-ym="'+ym+'" data-week="'+week+'" data-field="'+field+'" value="'+v+'" placeholder="'+(field==='faturamento'?'0,00':'0')+'" inputmode="decimal" onchange="saveCell(this)" />';
     }
 
     async function saveCell(el){
       var ym=el.getAttribute('data-ym'), week=+el.getAttribute('data-week'), field=el.getAttribute('data-field');
-      var val=parseNum(el.value);
       var m=state.months.find(function(x){return x.ym===ym;}); if(!m) return;
       var w=m.weeks.find(function(x){return x.week===week;}); if(!w) return;
-      w[field]=val;
+      w[field]=parseNum(el.value);
       render();
-      // persiste os dois campos da semana
       await api('POST','/api/marketing',{ ym:ym, week:week, vendas:w.vendas, faturamento:w.faturamento });
       var s=document.getElementById('saved'); s.classList.add('show'); setTimeout(function(){s.classList.remove('show');},1400);
     }
