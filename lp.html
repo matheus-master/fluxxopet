@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- ===== Google tag (gtag.js) — Google Ads =====
        Troque 'AW-CONVERSION_ID' pelo seu ID e 'CONVERSION_LABEL' pelo rótulo da conversão. -->
@@ -57,7 +57,7 @@
     .section{padding:52px 0}
     h1,h2,h3{font-family:'Poppins',sans-serif;color:var(--text-dark)}
     .sec-label{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--secondary);margin-bottom:12px}
-    .sec-title{font-size:26px;font-weight:700;line-height:1.18;margin-bottom:14px}
+    .sec-title{font-size:27px;font-weight:700;line-height:1.16;letter-spacing:-.02em;margin-bottom:14px}
     .sec-sub{font-size:16px;color:var(--muted);max-width:600px;margin:0 auto}
     .center{text-align:center}
 
@@ -82,14 +82,14 @@
 
     /* hero */
     .hero{background:radial-gradient(at 100% 50%, #1F5EDB 0%, #0A2A6B 100%);color:var(--text-light);padding:44px 0 56px}
-    .hero-in{max-width:var(--container);margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:34px}
+    .hero-in{max-width:var(--container);margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:36px;text-align:center}
     .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:6px 14px;font-size:12.5px;font-weight:600;color:#fff;margin-bottom:18px;align-self:flex-start}
     .hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px rgba(0,194,168,.25)}
-    .hero h1{font-family:'Poppins';font-weight:400;font-size:34px;line-height:1.1;color:var(--text-light);margin-bottom:16px}
-    .hero h1 b{font-weight:700}
-    .hero h1 .rose{color:#FF8FA3;font-weight:700}
-    .hero-sub{font-family:'Inter';font-weight:400;font-size:16.5px;line-height:1.55;color:rgba(245,247,250,.85);margin-bottom:24px;max-width:520px}
-    .hero-cta-row{display:flex}
+    .hero h1{font-family:'Poppins';font-weight:500;font-size:38px;line-height:1.06;letter-spacing:-.022em;color:#fff;margin-bottom:18px}
+    .hero h1 b{font-weight:800}
+    .hero h1 .rose{color:#FF9DAF;font-weight:800}
+    .hero-sub{font-family:'Inter';font-weight:400;font-size:17px;line-height:1.55;color:rgba(245,247,250,.9);margin:0 auto 28px;max-width:430px}
+    .hero-cta-row{display:flex;justify-content:center}
     .hero-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
     .hero-trust .ht{display:flex;flex-direction:column}
     .hero-trust b{font-family:'Poppins';font-weight:700;font-size:18px;color:#fff}
@@ -188,9 +188,10 @@
       .nav-cta{padding:11px 24px;font-size:14px}
       .nav-right{gap:22px}
       .hero{padding:76px 0 90px}
-      .hero-in{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center}
-      .hero h1{font-size:54px}
-      .hero-sub{font-size:19px}
+      .hero-in{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center;text-align:left}
+      .hero h1{font-size:56px;line-height:1.03}
+      .hero-sub{font-size:20px;margin-left:0;margin-right:0;max-width:520px}
+      .hero-cta-row{justify-content:flex-start}
       .mockup{transform:rotate(1.2deg)}
       .grid3{grid-template-columns:repeat(3,1fr);gap:28px;margin-top:44px}
       .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;max-width:none;text-align:center}
