@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluxxo Pet — Seu Pet Shop paga imposto que não deve</title>
+  <meta name="description" content="Contabilidade especializada em pet shops. Ração, medicamentos e higiene têm isenção fiscal. Descubra quanto seu pet shop pode recuperar." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- ===== Google tag (gtag.js) — Google Ads =====
+       SUBSTITUA 'AW-CONVERSION_ID' pelo seu ID e 'CONVERSION_LABEL' pelo rótulo da conversão. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-CONVERSION_ID"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'AW-CONVERSION_ID');
+
+    var WA_NUMBER = '5571982346881';
+    var WA_TEXT   = 'Olá! Tenho interesse na análise fiscal do meu pet shop.';
+
+    // Dispara a conversão do Google Ads e abre o WhatsApp
+    function goWhats(){
+      var url = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(WA_TEXT);
+      try {
+        gtag('event', 'conversion', {
+          'send_to': 'AW-CONVERSION_ID/CONVERSION_LABEL',
+          'event_callback': function(){ window.open(url, '_blank'); }
+        });
+        setTimeout(function(){ window.open(url, '_blank'); }, 700); // fallback caso o callback não dispare
+      } catch(e){ window.open(url, '_blank'); }
+      return false;
+    }
+  </script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --primary:#1F5EDB; --primary-hover:#164BB3; --primary-dark:#0A2A6B;
+      --secondary:#E11D48; --teal:#00C2A8;
+      --bg:#FFFFFF; --bg-soft:#F8F8F8; --cream:#FAF9F5;
+      --text-light:#F5F7FA; --text-body:#333; --text-dark:#1A202C;
+      --heading-navy:#0F3D91; --muted:#475569;
+      --radius-card:24px; --radius-pill:100px; --radius-faq:14px;
+      --shadow-card:0 4px 20px rgba(0,0,0,.04);
+      --container:1080px;
+    }
+    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+    body{font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text-body);background:var(--bg);line-height:1.6;overflow-x:hidden}
+    a{text-decoration:none;color:inherit}
+    .wrap{max-width:var(--container);margin:0 auto;padding:0 40px}
+    .section{padding:80px 0}
+    h1,h2,h3{font-family:'Poppins',sans-serif;color:var(--text-dark)}
+    .sec-label{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--secondary);margin-bottom:14px}
+    .sec-title{font-size:clamp(28px,4vw,42px);font-weight:700;line-height:1.15;margin-bottom:16px}
+    .sec-sub{font-size:18px;color:var(--muted);max-width:640px;margin:0 auto 6px}
+    .center{text-align:center}
+
+    /* buttons */
+    .btn{display:inline-flex;align-items:center;gap:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;border-radius:var(--radius-pill);font-weight:700;transition:all .25s ease;font-size:16px}
+    .btn-primary{background:var(--primary);color:#fff;padding:16px 34px}
+    .btn-primary:hover{background:var(--primary-hover);transform:translateY(-2px);box-shadow:0 8px 25px rgba(31,94,219,.4)}
+    .btn-white{background:#fff;color:var(--primary);padding:16px 34px}
+    .btn-white:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.18)}
+    .btn-lg{padding:20px 48px;font-size:18px}
+    .btn svg{width:20px;height:20px;fill:currentColor}
+
+    /* navbar */
+    .nav{background:var(--primary);height:85px;display:flex;align-items:center}
+    .nav-in{width:100%;max-width:var(--container);margin:0 auto;padding:0 40px;display:flex;align-items:center;justify-content:space-between}
+    .logo{display:flex;align-items:center;gap:10px;color:#fff;font-family:'Poppins';font-weight:800;font-size:1.15rem;letter-spacing:.02em}
+    .logo svg{width:30px;height:30px}
+    .nav-right{display:flex;align-items:center;gap:24px}
+    .nav-social{display:flex;gap:10px}
+    .soc{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.35);color:#fff;transition:all .2s}
+    .soc:hover{background:rgba(255,255,255,.15);transform:translateY(-3px)}
+    .soc svg{width:17px;height:17px;fill:currentColor}
+    .nav-cta{background:#fff;color:var(--primary);padding:11px 24px;border-radius:var(--radius-pill);font-weight:700;font-size:14px;transition:all .2s}
+    .nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2)}
+
+    /* hero */
+    .hero{background:radial-gradient(at 100% 50%, #1F5EDB 0%, #0A2A6B 100%);color:var(--text-light);padding:80px 0 96px;position:relative;overflow:hidden}
+    .hero-in{max-width:var(--container);margin:0 auto;padding:0 40px;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:99px;padding:7px 16px;font-size:13px;font-weight:600;color:#fff;margin-bottom:22px}
+    .hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px rgba(0,194,168,.25)}
+    .hero h1{font-family:'Poppins';font-weight:400;font-size:clamp(34px,5.2vw,56px);line-height:1.05;color:var(--text-light);margin-bottom:20px}
+    .hero h1 b{font-weight:700}
+    .hero h1 .rose{color:#FF8FA3;font-weight:700}
+    .hero-sub{font-family:'Poppins';font-weight:300;font-size:clamp(16px,2vw,21px);line-height:1.5;color:rgba(245,247,250,.82);margin-bottom:30px;max-width:520px}
+    .hero-cta-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+    .hero-trust{display:flex;gap:22px;margin-top:26px;flex-wrap:wrap}
+    .hero-trust .ht{display:flex;flex-direction:column}
+    .hero-trust b{font-family:'Poppins';font-weight:700;font-size:20px;color:#fff}
+    .hero-trust span{font-size:12.5px;color:rgba(245,247,250,.6)}
+
+    /* hero mockup */
+    .mockup{background:#fff;border-radius:20px;box-shadow:0 30px 70px rgba(4,14,50,.45);overflow:hidden;transform:rotate(1.2deg)}
+    .mk-bar{background:#F1F5F9;padding:12px 16px;display:flex;gap:7px;align-items:center;border-bottom:1px solid #E5E9F0}
+    .mk-bar i{width:11px;height:11px;border-radius:50%;display:block}
+    .mk-title{margin-left:10px;font-size:12.5px;font-weight:700;color:#64748B;font-family:'Montserrat'}
+    .mk-body{padding:20px}
+    .mk-row{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-radius:11px;margin-bottom:9px;font-size:14px;font-weight:600}
+    .mk-row .name{color:#1A202C}
+    .mk-row.ok{background:#ECFDF5;border:1px solid #A7F3D0}
+    .mk-row.ok .tag{color:#059669;font-weight:800}
+    .mk-row.warn{background:#FFFBEB;border:1px solid #FDE68A}
+    .mk-row.warn .tag{color:#B45309;font-weight:800}
+    .mk-row.tax{background:#FEF2F2;border:1px solid #FECACA}
+    .mk-row.tax .tag{color:#DC2626;font-weight:800}
+    .mk-total{margin-top:14px;padding:16px;border-radius:12px;background:#0A2A6B;color:#fff;display:flex;align-items:center;justify-content:space-between}
+    .mk-total .l{font-size:13px;opacity:.75}
+    .mk-total .v{font-family:'Poppins';font-weight:800;font-size:22px}
+
+    /* marquee */
+    .marquee{background:var(--primary);overflow:hidden;padding:15px 0;white-space:nowrap}
+    .marquee-track{display:inline-flex;gap:44px;animation:scrollx 20s linear infinite}
+    .marquee span{font-family:'Montserrat';font-weight:800;color:#fff;font-size:15px;letter-spacing:.04em;text-transform:uppercase;display:inline-flex;align-items:center;gap:44px}
+    .marquee span::after{content:"●";color:var(--teal);font-size:9px}
+    @keyframes scrollx{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+    /* grid cards */
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:44px}
+    .card{background:#fff;border:1px solid #F1F5F9;border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:32px;transition:transform .3s ease,box-shadow .3s ease}
+    .dor-card:hover{transform:translateY(-10px);box-shadow:0 20px 40px rgba(225,29,72,.12);border-color:#FECDD3}
+    .card-ico{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;background:#FEF2F2;color:var(--secondary)}
+    .card-ico svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .card h3{font-family:'Montserrat';font-weight:700;font-size:19.2px;color:var(--heading-navy);margin-bottom:9px}
+    .card p{font-size:15px;color:var(--muted);line-height:1.65}
+
+    /* solução (blue cards) */
+    .sol{background:radial-gradient(#F6F6F6 0%,#FFFFFF 100%)}
+    .solucao-card{background:var(--primary);border:1px solid rgba(255,255,255,.1);color:#fff}
+    .solucao-card:hover{transform:translateY(-8px);box-shadow:0 24px 48px rgba(10,42,107,.35)}
+    .solucao-card .card-ico{background:rgba(255,255,255,.14);color:#fff}
+    .solucao-card h3{color:#fff}
+    .solucao-card p{color:rgba(245,247,250,.85)}
+
+    /* steps */
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:44px}
+    .step{padding:8px 6px}
+    .step .n{font-family:'Poppins';font-weight:800;font-size:15px;color:#fff;background:var(--primary);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+    .step h3{font-family:'Montserrat';font-size:18px;color:var(--heading-navy);margin-bottom:8px}
+    .step p{font-size:15px;color:var(--muted)}
+
+    /* depoimentos */
+    .dep{background:var(--cream)}
+    .dep-card{background:#fff;border:1px solid rgba(10,15,30,.08);border-radius:var(--radius-card);padding:32px}
+    .stars{display:flex;gap:3px;margin-bottom:14px}
+    .stars svg{width:18px;height:18px;fill:#F59E0B}
+    .dep-card p{font-size:15.5px;color:#1A202C;line-height:1.7;margin-bottom:18px}
+    .dep-author{display:flex;align-items:center;gap:12px}
+    .dep-av{width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Poppins'}
+    .dep-name{font-weight:700;color:var(--text-dark);font-size:15px}
+    .dep-role{font-size:13px;color:var(--muted)}
+
+    /* faq */
+    .faq-list{max-width:760px;margin:40px auto 0;display:flex;flex-direction:column;gap:12px}
+    .faq-item{background:#fff;border:1px solid rgba(31,94,219,.1);border-radius:var(--radius-faq);overflow:hidden}
+    .faq-q{width:100%;background:none;border:none;cursor:pointer;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;text-align:left;font-family:'Montserrat';font-weight:600;font-size:16px;color:var(--text-dark)}
+    .faq-q .ic{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:rgba(31,94,219,.1);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;transition:transform .2s}
+    .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;padding:0 24px}
+    .faq-a p{padding-bottom:22px;font-size:15px;color:var(--muted);line-height:1.7}
+    .faq-item.open .faq-a{max-height:320px}
+    .faq-item.open .ic{transform:rotate(45deg)}
+
+    /* cta final */
+    .cta-final{background:radial-gradient(at 100% 50%, #1F5EDB 0%, #0A2A6B 100%);color:#fff;text-align:center}
+    .cta-final h2{color:#fff;font-size:clamp(30px,4.5vw,46px);font-weight:700;line-height:1.1;margin-bottom:14px}
+    .cta-final p{color:rgba(245,247,250,.85);font-size:19px;max-width:560px;margin:0 auto 30px}
+
+    /* footer */
+    .footer{background:radial-gradient(at 100% 50%, #123c8f 0%, #08214f 100%);color:rgba(245,247,250,.7);padding:56px 0 34px;position:relative}
+    .footer::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,194,168,.5),transparent)}
+    .footer-in{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+    .footer .logo{font-size:1.05rem}
+    .footer-copy{font-size:13px;color:rgba(245,247,250,.5)}
+
+    @media(max-width:900px){
+      .hero-in{grid-template-columns:1fr;gap:40px}
+      .mockup{transform:none;max-width:420px;margin:0 auto}
+      .grid3,.steps{grid-template-columns:1fr}
+      .nav-social{display:none}
+    }
+    @media(max-width:600px){
+      .wrap,.nav-in,.hero-in{padding-left:20px;padding-right:20px}
+      .section{padding:60px 0}
+      .card{padding:26px}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="nav">
+    <div class="nav-in">
+      <a href="#" class="logo">
+        <svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="#fff"/><path d="M10 20 Q10 16 14 16 Q16 16 16 14 Q16 12 18 12 Q22 12 22 16 Q22 20 18 20 Z" fill="#1F5EDB"/><circle cx="11" cy="11" r="2" fill="#1F5EDB"/><circle cx="21" cy="11" r="2" fill="#1F5EDB"/></svg>
+        FLUXXO PET
+      </a>
+      <div class="nav-right">
+        <div class="nav-social">
+          <a href="#" class="soc" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 01-1.38-.9 3.7 3.7 0 01-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zm0 3.24A6.6 6.6 0 105.4 12 6.6 6.6 0 0012 5.4zm0 10.89A4.29 4.29 0 1116.29 12 4.29 4.29 0 0112 16.29zm6.85-11.15a1.54 1.54 0 11-1.54-1.54 1.54 1.54 0 011.54 1.54z"/></svg></a>
+          <a href="#" class="soc" aria-label="WhatsApp" onclick="return goWhats()"><svg viewBox="0 0 24 24"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.34m-5.42 7.4A9.87 9.87 0 017 20.4l-.36-.21-3.74.98 1-3.65-.24-.37A9.86 9.86 0 012.16 12c0-5.45 4.43-9.88 9.89-9.88 2.64 0 5.12 1.03 6.98 2.9a9.83 9.83 0 012.9 6.99c0 5.45-4.44 9.88-9.88 9.88m8.42-18.3A11.82 11.82 0 0012.05 0C5.5 0 .16 5.33.16 11.89c0 2.1.55 4.14 1.59 5.94L.06 24l6.3-1.65a11.88 11.88 0 005.69 1.45h.01c6.55 0 11.89-5.34 11.9-11.9a11.82 11.82 0 00-3.49-8.42"/></svg></a>
+        </div>
+        <a href="#" class="nav-cta" onclick="return goWhats()">Falar no WhatsApp</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-in">
+      <div>
+        <div class="hero-badge"><span class="dot"></span>Contabilidade especializada em pet shops</div>
+        <h1>Seu Pet Shop <b>paga imposto</b><br><span class="rose">que não deve</span></h1>
+        <p class="hero-sub">Ração, medicamentos e produtos de higiene têm isenção fiscal garantida por lei. A maioria dos pet shops nunca aproveitou — e perde dinheiro todo mês. Descubra quanto o seu pode recuperar.</p>
+        <div class="hero-cta-row">
+          <a href="#" class="btn btn-white btn-lg" onclick="return goWhats()">
+            <svg viewBox="0 0 24 24"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.34"/></svg>
+            Descobrir agora — é grátis
+          </a>
+        </div>
+        <div class="hero-trust">
+          <div class="ht"><b>R$2.400</b><span>recuperados/mês em média</span></div>
+          <div class="ht"><b>800+</b><span>pet shops diagnosticados</span></div>
+          <div class="ht"><b>100%</b><span>diagnóstico gratuito</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="mockup">
+          <div class="mk-bar"><i style="background:#ff5f57"></i><i style="background:#ffbd2e"></i><i style="background:#28c840"></i><span class="mk-title">Diagnóstico Fiscal — Pet Shop</span></div>
+          <div class="mk-body">
+            <div class="mk-row ok"><span class="name">✓ Ração para cães e gatos</span><span class="tag">Isento</span></div>
+            <div class="mk-row ok"><span class="name">✓ Medicamentos veterinários</span><span class="tag">Isento</span></div>
+            <div class="mk-row warn"><span class="name">~ Produtos de higiene</span><span class="tag">Verificar</span></div>
+            <div class="mk-row tax"><span class="name">Imposto pago indevidamente</span><span class="tag">R$ 2.400</span></div>
+            <div class="mk-total"><span class="l">Recuperável por ano</span><span class="v">R$ 28.800</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MARQUEE -->
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>Ração isenta&nbsp;<span></span></span><span>Medicamentos isentos</span><span>Recuperação retroativa</span><span>Contador especializado</span><span>Economia garantida</span><span>Diagnóstico gratuito</span>
+      <span>Ração isenta</span><span>Medicamentos isentos</span><span>Recuperação retroativa</span><span>Contador especializado</span><span>Economia garantida</span><span>Diagnóstico gratuito</span>
+    </div>
+  </div>
+
+  <!-- PROBLEMAS -->
+  <section class="section">
+    <div class="wrap center">
+      <p class="sec-label">Os problemas</p>
+      <h2 class="sec-title">Seu contador genérico<br>está te custando caro</h2>
+      <p class="sec-sub">A maioria dos escritórios não conhece as regras específicas do setor pet — e você paga a conta todo mês.</p>
+      <div class="grid3">
+        <div class="card dor-card">
+          <div class="card-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <h3>Regime tributário genérico</h3>
+          <p>Seu contador aplica o mesmo modelo de qualquer comércio, sem olhar as isenções específicas do setor pet.</p>
+        </div>
+        <div class="card dor-card">
+          <div class="card-ico"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+          <h3>Isenções ignoradas</h3>
+          <p>Ração e medicamentos têm alíquota zero ou isenção — mas você continua pagando ICMS e PIS/COFINS sobre eles.</p>
+        </div>
+        <div class="card dor-card">
+          <div class="card-ico"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+          <h3>Dinheiro que não volta</h3>
+          <p>Além de pagar a mais todo mês, você não recupera os valores pagos indevidamente nos últimos anos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOLUÇÃO -->
+  <section class="section sol">
+    <div class="wrap center">
+      <p class="sec-label" style="color:var(--primary)">A solução</p>
+      <h2 class="sec-title">Contabilidade 100%<br>especializada em pets</h2>
+      <p class="sec-sub">A Fluxxo Pet conhece cada isenção do setor e coloca esse dinheiro de volta no seu caixa.</p>
+      <div class="grid3">
+        <div class="card solucao-card">
+          <div class="card-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <h3>Diagnóstico fiscal completo</h3>
+          <p>Mapeamos todo o seu estoque e identificamos exatamente quais produtos têm benefício fiscal garantido por lei.</p>
+        </div>
+        <div class="card solucao-card">
+          <div class="card-ico"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+          <h3>Recuperação retroativa</h3>
+          <p>Recuperamos os impostos pagos a mais nos últimos 5 anos. É o seu dinheiro voltando pro caixa.</p>
+        </div>
+        <div class="card solucao-card">
+          <div class="card-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+          <h3>Contador dedicado</h3>
+          <p>Um especialista em pet shops cuida do seu negócio de forma exclusiva — sem fila, sem robô, sem enrolação.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="section">
+    <div class="wrap center">
+      <p class="sec-label" style="color:var(--primary)">Simples assim</p>
+      <h2 class="sec-title">Como funciona</h2>
+      <div class="steps">
+        <div class="step"><div class="n" style="margin:0 auto 16px">1</div><h3>Fale no WhatsApp</h3><p>Clique no botão e mande uma mensagem. Leva menos de 1 minuto e é 100% gratuito.</p></div>
+        <div class="step"><div class="n" style="margin:0 auto 16px">2</div><h3>Receba o diagnóstico</h3><p>Nosso especialista analisa seu caso e mostra quanto seu pet shop pode economizar e recuperar.</p></div>
+        <div class="step"><div class="n" style="margin:0 auto 16px">3</div><h3>Recupere seu dinheiro</h3><p>Começamos a trabalhar imediatamente: você para de pagar o que não deve e recupera o histórico.</p></div>
+      </div>
+      <div style="margin-top:40px"><a href="#" class="btn btn-primary btn-lg" onclick="return goWhats()">Quero meu diagnóstico gratuito</a></div>
+    </div>
+  </section>
+
+  <!-- DEPOIMENTOS -->
+  <section class="section dep">
+    <div class="wrap center">
+      <p class="sec-label" style="color:var(--primary)">Quem já recuperou</p>
+      <h2 class="sec-title">Resultados reais</h2>
+      <div class="grid3">
+        <div class="dep-card">
+          <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></div>
+          <p>"Meu contador de 10 anos nunca me falou sobre isso. Em 2 semanas a Fluxxo Pet achou R$1.800 que eu pagava todo mês sem precisar."</p>
+          <div class="dep-author"><div class="dep-av">MF</div><div><div class="dep-name">Marcos Ferreira</div><div class="dep-role">Amigos do Bicho — SP</div></div></div>
+        </div>
+        <div class="dep-card">
+          <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></div>
+          <p>"O diagnóstico foi em minutos. Resultado: R$3.200 por mês que eu jogava fora. Recuperei também os últimos 18 meses. Inacreditável."</p>
+          <div class="dep-author"><div class="dep-av">AC</div><div><div class="dep-name">Ana Costa</div><div class="dep-role">VetShop Premium — RJ</div></div></div>
+        </div>
+        <div class="dep-card">
+          <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></div>
+          <p>"Faturamento de R$85 mil/mês e pagava R$2.100 de imposto indevido. A Fluxxo Pet resolveu em uma semana. Recomendo demais."</p>
+          <div class="dep-author"><div class="dep-av">RL</div><div><div class="dep-name">Ricardo Lima</div><div class="dep-role">Casa dos Animais — MG</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section">
+    <div class="wrap center">
+      <p class="sec-label" style="color:var(--primary)">Dúvidas frequentes</p>
+      <h2 class="sec-title">Perguntas comuns</h2>
+      <div class="faq-list">
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">O diagnóstico é realmente gratuito?<span class="ic">+</span></button><div class="faq-a"><p>Sim, 100% gratuito e sem compromisso. Analisamos seu caso e mostramos quanto dá para economizar antes de qualquer contratação.</p></div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Preciso trocar de contador?<span class="ic">+</span></button><div class="faq-a"><p>Você decide. Muitos clientes migram para a Fluxxo Pet pela especialização, mas o diagnóstico não obriga a nada.</p></div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Dá pra recuperar impostos de meses anteriores?<span class="ic">+</span></button><div class="faq-a"><p>Sim. A legislação permite recuperar valores pagos indevidamente nos últimos 5 anos. Analisamos seu histórico para isso.</p></div></div>
+        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Funciona para qualquer tamanho de pet shop?<span class="ic">+</span></button><div class="faq-a"><p>Sim — de pet shops pequenos a redes. Quanto maior o volume de ração e medicamentos, maior costuma ser a economia.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="section cta-final">
+    <div class="wrap">
+      <h2>Descubra quanto você<br>pode recuperar</h2>
+      <p>É grátis, leva 1 minuto e pode mudar o caixa do seu pet shop para sempre.</p>
+      <a href="#" class="btn btn-white btn-lg" onclick="return goWhats()">
+        <svg viewBox="0 0 24 24"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.34"/></svg>
+        Falar com um especialista
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="wrap footer-in">
+      <div class="logo"><svg viewBox="0 0 32 32" fill="none" width="26" height="26"><rect x="2" y="2" width="28" height="28" rx="8" fill="#fff"/><path d="M10 20 Q10 16 14 16 Q16 16 16 14 Q16 12 18 12 Q22 12 22 16 Q22 20 18 20 Z" fill="#123c8f"/><circle cx="11" cy="11" r="2" fill="#123c8f"/><circle cx="21" cy="11" r="2" fill="#123c8f"/></svg>FLUXXO PET</div>
+      <span class="footer-copy">© 2026 Fluxxo Pet — Contabilidade especializada para pet shops</span>
+    </div>
+  </footer>
+
+  <script>
+    function toggleFaq(btn){
+      var item = btn.parentElement;
+      var open = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(function(f){ f.classList.remove('open'); });
+      if(!open) item.classList.add('open');
+    }
+  </script>
+</body>
+</html>
