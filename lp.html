@@ -23,15 +23,20 @@
     var WA_NUMBER = '5571982346881';
     var WA_TEXT   = 'Oi! Vim pela página da Fluxxo Pet e quero mais informações.';
 
+    var convFired = false; // dispara a conversao no maximo 1x por visita
     function goWhats(){
       var url = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(WA_TEXT);
+      var opened = false;
+      var open = function(){ if(opened) return; opened = true; window.open(url, '_blank'); };
+      if (convFired) { open(); return false; }   // cliques seguintes: abre o zap, mas nao conta de novo
+      convFired = true;
       try {
         gtag('event', 'conversion', {
           'send_to': 'AW-18311780308/Jg8ECMyt7tQcENSv3ptE',
-          'event_callback': function(){ window.open(url, '_blank'); }
+          'event_callback': open
         });
-        setTimeout(function(){ window.open(url, '_blank'); }, 700);
-      } catch(e){ window.open(url, '_blank'); }
+        setTimeout(open, 900); // fallback caso o callback nao dispare
+      } catch(e){ open(); }
       return false;
     }
   </script>
