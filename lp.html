@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Fluxxo Pet — contabilidade que já recuperou o lucro de centenas de pet shops</title>
-  <meta name="description" content="Menos impostos, mais clareza financeira e preços certos pra você lucrar de verdade. Já recuperamos o lucro de centenas de pet shops no Brasil." />
+  <title>Fluxxo Pet — contabilidade especializada em pet shops e clínicas veterinárias</title>
+  <meta name="description" content="A sua contabilidade entende de pet shop? Já atendemos mais de 200 pet shops e clínicas no Brasil. Veja os depoimentos e fale com a gente." />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -220,6 +220,21 @@
       .dor-card:hover{box-shadow:0 20px 40px rgba(225,29,72,.12);border-color:#FECDD3}
       .solucao-card:hover{box-shadow:0 24px 48px rgba(10,42,107,.35)}
     }
+    /* videos (lite youtube) */
+    .videos-grid{display:grid;grid-template-columns:1fr;gap:26px;margin-top:34px}
+    .video-single{max-width:720px;margin:34px auto 0}
+    .video-wrap{position:relative;padding-top:56.25%;border-radius:16px;overflow:hidden;background:#0A2A6B;cursor:pointer;box-shadow:0 12px 34px rgba(4,14,50,.22)}
+    .video-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9;transition:opacity .2s}
+    .video-wrap:hover img{opacity:1}
+    .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .video-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+    .video-play span{width:62px;height:62px;border-radius:50%;background:var(--secondary);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(0,0,0,.35);transition:transform .2s}
+    .video-wrap:hover .video-play span{transform:scale(1.08)}
+    .video-play svg{width:24px;height:24px;fill:#fff;margin-left:3px}
+    .vcap{margin-top:12px;text-align:center}
+    .vcap b{display:block;font-family:'Montserrat';font-weight:700;color:var(--text-dark);font-size:15px}
+    .vcap span{font-size:13px;color:var(--muted)}
+    @media(min-width:700px){.videos-grid{grid-template-columns:1fr 1fr}}
   </style>
 </head>
 <body>
@@ -242,8 +257,9 @@
   <header class="hero">
     <div class="hero-in">
       <div>
-        <h1>A contabilidade pra pet shop que <b>já recuperou o lucro</b> de <span class="rose">centenas de lojas no Brasil</span></h1>
-        <p class="hero-sub">Menos impostos, mais clareza financeira e preços certos pra você sair dessa lama financeira e lucrar de verdade.</p>
+        <div class="hero-badge">Especialista em pet shops e clínicas veterinárias</div>
+        <h1>A sua contabilidade <span class="rose">entende de pet shop?</span></h1>
+        <p class="hero-sub">Se ela só te entrega guia de imposto, essa é a pergunta que importa. Um contador que atende todo tipo de empresa quase nunca conhece os erros que fazem um pet shop perder dinheiro. A gente é especialista em pet e já atende mais de 200 clientes no Brasil inteiro.</p>
         <div class="hero-cta-row">
           <a href="#" class="btn btn-cta btn-hero" onclick="return goWhats()">
             <svg viewBox="0 0 24 24"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.34"/></svg>
@@ -251,9 +267,9 @@
           </a>
         </div>
         <div class="hero-trust">
-          <div class="ht"><b>R$2.400</b><span>de economia média por mês</span></div>
-          <div class="ht"><b>+800</b><span>pet shops já passaram por aqui</span></div>
-          <div class="ht"><b>R$0</b><span>pra fazer o diagnóstico</span></div>
+          <div class="ht"><b>+200</b><span>clientes no Brasil</span></div>
+          <div class="ht"><b>100%</b><span>focada em pet e vet</span></div>
+          <div class="ht"><b>R$0</b><span>pra falar com a gente</span></div>
         </div>
       </div>
       <div>
@@ -334,23 +350,52 @@
 
   <section class="section dep">
     <div class="wrap center">
-      <p class="sec-label" style="color:var(--primary)">Quem já mexeu nisso</p>
-      <h2 class="sec-title">Resultado de verdade</h2>
-      <div class="grid3">
-        <div class="dep-card">
-          <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></div>
-          <p>"Fiquei 10 anos com o mesmo contador e nunca ouvi falar disso. Em duas semanas acharam R$1.800 por mês que eu pagava à toa."</p>
-          <div class="dep-author"><div class="dep-av">MF</div><div><div class="dep-name">Marcos Ferreira</div><div class="dep-role">Amigos do Bicho, SP</div></div></div>
+      <p class="sec-label" style="color:var(--primary)">Quem já é cliente</p>
+      <h2 class="sec-title">Veja o que mudou pra<br>quem trabalha com a gente</h2>
+      <p class="sec-sub">Assista aos depoimentos e veja como uma contabilidade especializada pode aumentar o lucro do seu pet shop.</p>
+      <div class="videos-grid">
+        <div>
+          <div class="video-wrap" onclick="playVideo(this,'Nbq0AaLzeMQ')">
+            <img loading="lazy" src="https://i.ytimg.com/vi/Nbq0AaLzeMQ/hqdefault.jpg" alt="Depoimento Dra. Susana" />
+            <div class="video-play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+          </div>
+          <div class="vcap"><b>Dra. Susana</b><span>Sócia da Rino dos Pets</span></div>
         </div>
-        <div class="dep-card">
-          <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></div>
-          <p>"Achei que era papo de vendedor. Era R$3.200 todo mês indo embora. Ainda recuperei os últimos 18 meses."</p>
-          <div class="dep-author"><div class="dep-av">AC</div><div><div class="dep-name">Ana Costa</div><div class="dep-role">VetShop Premium, RJ</div></div></div>
+        <div>
+          <div class="video-wrap" onclick="playVideo(this,'g_Z8DZSVKG8')">
+            <img loading="lazy" src="https://i.ytimg.com/vi/g_Z8DZSVKG8/hqdefault.jpg" alt="Depoimento Wilker" />
+            <div class="video-play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+          </div>
+          <div class="vcap"><b>Wilker</b><span>Sócio da Clínica Vet Prime</span></div>
         </div>
-        <div class="dep-card">
-          <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg></div>
-          <p>"Faturo R$85 mil e pagava R$2.100 de imposto que nem era pra pagar. Resolveram em uma semana."</p>
-          <div class="dep-author"><div class="dep-av">RL</div><div><div class="dep-name">Ricardo Lima</div><div class="dep-role">Casa dos Animais, MG</div></div></div>
+        <div>
+          <div class="video-wrap" onclick="playVideo(this,'ahxuowW2sHI')">
+            <img loading="lazy" src="https://i.ytimg.com/vi/ahxuowW2sHI/hqdefault.jpg" alt="Depoimento Dra. Mariana" />
+            <div class="video-play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+          </div>
+          <div class="vcap"><b>Dra. Mariana</b><span>Sócia da Vila Animalle Pet Care</span></div>
+        </div>
+        <div>
+          <div class="video-wrap" onclick="playVideo(this,'p2HB_ox63aM')">
+            <img loading="lazy" src="https://i.ytimg.com/vi/p2HB_ox63aM/hqdefault.jpg" alt="Depoimento Alan Sena" />
+            <div class="video-play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+          </div>
+          <div class="vcap"><b>Alan Sena</b><span>Sócio da Pet Shop Central</span></div>
+        </div>
+      </div>
+      <div style="margin-top:36px"><a href="#" class="btn btn-cta btn-block" onclick="return goWhats()"><svg viewBox="0 0 24 24"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.34"/></svg>Quero uma contabilidade especialista</a></div>
+    </div>
+  </section>
+
+  <section class="section sol">
+    <div class="wrap center">
+      <p class="sec-label" style="color:var(--primary)">Revisão tributária</p>
+      <h2 class="sec-title">O que essa veterinária<br>descobriu na revisão</h2>
+      <p class="sec-sub">Ela ficou surpresa ao ver que estava pagando imposto de forma incorreta e perdendo dinheiro sem perceber. Assista e veja o que encontramos na revisão do Simples Nacional da clínica dela.</p>
+      <div class="video-single">
+        <div class="video-wrap" onclick="playVideo(this,'g5ntmITMLa4')">
+          <img loading="lazy" src="https://i.ytimg.com/vi/g5ntmITMLa4/hqdefault.jpg" alt="Revisão tributária de uma clínica veterinária" />
+          <div class="video-play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
         </div>
       </div>
     </div>
@@ -358,14 +403,16 @@
 
   <section class="section">
     <div class="wrap center">
-      <p class="sec-label" style="color:var(--primary)">Perguntas rápidas</p>
-      <h2 class="sec-title">Antes de você perguntar</h2>
-      <div class="faq-list">
-        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">É de graça mesmo?<span class="ic">+</span></button><div class="faq-a"><p>É. O diagnóstico não custa nada e você não fica preso a nada. A gente só mostra quanto dá pra economizar.</p></div></div>
-        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Vou ter que trocar de contador?<span class="ic">+</span></button><div class="faq-a"><p>Não precisa. Muita gente troca depois que vê a diferença, mas a decisão é toda sua.</p></div></div>
-        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Dá pra recuperar de meses atrás?<span class="ic">+</span></button><div class="faq-a"><p>Dá. A lei deixa pedir de volta o que foi pago errado nos últimos 5 anos. A gente olha seu histórico pra isso.</p></div></div>
-        <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Serve pro meu tamanho de loja?<span class="ic">+</span></button><div class="faq-a"><p>Serve, de loja pequena a rede. Quanto mais ração e remédio você vende, mais costuma sobrar pra recuperar.</p></div></div>
+      <p class="sec-label" style="color:var(--primary)">Nossa apresentação</p>
+      <h2 class="sec-title">Conheça o nosso método</h2>
+      <p class="sec-sub">Depois dos depoimentos, assista à apresentação e conheça o método que usamos pra pet shops e clínicas pagarem menos imposto, organizarem as finanças e aumentarem o lucro.</p>
+      <div class="video-single">
+        <div class="video-wrap" onclick="playVideo(this,'NeY_hyK03D4')">
+          <img loading="lazy" src="https://i.ytimg.com/vi/NeY_hyK03D4/hqdefault.jpg" alt="Apresentação do método Fluxxo Pet" />
+          <div class="video-play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></div>
+        </div>
       </div>
+      <div style="margin-top:36px"><a href="#" class="btn btn-cta btn-block" onclick="return goWhats()"><svg viewBox="0 0 24 24"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.34"/></svg>Falar com a Fluxxo Pet</a></div>
     </div>
   </section>
 
@@ -388,6 +435,9 @@
   </footer>
 
   <script>
+    function playVideo(el, id){
+      el.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0" title="Vídeo Fluxxo Pet" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+    }
     function toggleFaq(btn){
       var item = btn.parentElement, open = item.classList.contains('open');
       document.querySelectorAll('.faq-item').forEach(function(f){ f.classList.remove('open'); });
