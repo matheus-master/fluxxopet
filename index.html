@@ -174,38 +174,24 @@
       font-size: 0.97rem; color: var(--blue); margin-bottom: 3px;
     }
     .vid-cap span { font-size: 0.87rem; color: rgba(9,16,64,0.6); }
-    /* ── STATS (card com ícones) ── */
-    .hero-stats {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 20px; align-items: start;
-      max-width: 620px;
-      background: rgba(255,255,255,0.75);
-      border: 1px solid rgba(18,50,200,0.12);
-      border-radius: 18px; padding: 22px 24px 14px;
-      box-shadow: 0 10px 30px rgba(9,16,64,0.06);
-    }
-    .h-stat { display: flex; align-items: flex-start; gap: 12px; }
-    .h-stat-ico {
-      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
-      background: rgba(18,50,200,0.09);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .h-stat-ico svg {
-      width: 18px; height: 18px; fill: none; stroke: var(--blue);
-      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
-    }
+    /* ── STATS (faixa limpa, sem card) ──
+       Cada rótulo cabe em uma linha na largura disponível, então as três
+       colunas terminam na mesma altura sem precisar de truque de grid.  */
+    .hero-stats { display: flex; align-items: stretch; max-width: 620px; }
+    .h-stat { padding: 0 24px; border-left: 1px solid rgba(9,16,64,0.13); }
+    .h-stat:first-child { padding-left: 0; border-left: none; }
     .h-stat strong {
       display: block; font-family: 'Anton', sans-serif;
-      font-size: 1.5rem; color: var(--dark); line-height: 1; margin-bottom: 3px;
+      font-size: 1.6rem; color: var(--blue); line-height: 1; margin-bottom: 5px;
     }
-    .h-stat b { display: block; font-size: 0.82rem; font-weight: 700; color: var(--dark); line-height: 1.3; }
-    .h-stat span { display: block; font-size: 0.75rem; color: var(--sage); line-height: 1.35; }
-    .stats-note {
-      grid-column: 1 / -1; text-align: center;
-      font-size: 0.68rem; color: var(--sage);
-      border-top: 1px solid rgba(9,16,64,0.07);
-      padding-top: 11px; margin-top: 2px;
+    .h-stat b {
+      display: block; font-size: 0.79rem; font-weight: 700;
+      color: var(--dark); line-height: 1.25;
     }
+    .h-stat span {
+      display: block; font-size: 0.72rem; color: var(--sage); line-height: 1.3;
+    }
+    .stats-note { font-size: 0.66rem; color: var(--sage); margin-top: 13px; }
 
     /* ── CARD ── */
     .card {
@@ -479,7 +465,8 @@
       .testi-grid { grid-template-columns: 1fr; }
       .tc.dark { transform: translateY(0); }
       .tc.dark:hover { transform: translateY(-4px); }
-      .hero-stats { max-width: none; gap: 16px; padding: 20px 20px 12px; }
+      .hero-stats { max-width: none; }
+      .h-stat { padding: 0 18px; }
       .hero-video { max-width: none; margin-bottom: 28px; border-radius: 14px; }
       .vid-cap { max-width: none; }
       .split-h { margin-bottom: 26px; }
@@ -488,7 +475,11 @@
       .nav { padding: 0 18px; }
       .hero { padding: 44px 18px; }
       .hero-title { font-size: clamp(1.9rem, 7.4vw, 2.4rem); }
-      .hero-stats { grid-template-columns: 1fr; gap: 15px; }
+      /* empilha: divisoria vira linha horizontal */
+      .hero-stats { flex-direction: column; }
+      .h-stat { padding: 13px 0 0; border-left: none; border-top: 1px solid rgba(9,16,64,0.13); }
+      .h-stat:first-child { padding-top: 0; }
+      .h-stat strong { margin-bottom: 3px; }
       .vid-play-btn { width: 60px; height: 60px; }
       .vid-play-btn svg { width: 21px; height: 21px; }
       .bento { grid-template-columns: 1fr; }
@@ -614,19 +605,22 @@
 
         <div class="hero-stats">
           <div class="h-stat">
-            <div class="h-stat-ico"><svg viewBox="0 0 24 24"><path d="M3 7h13a2 2 0 0 1 2 2v1"/><path d="M18 10h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a2 2 0 0 1 0-4z"/><path d="M3 7v10a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-2"/><path d="M3 7a2 2 0 0 1 2-2h9"/></svg></div>
-            <div><strong>R$2.400</strong><b>de economia média</b><span>por mês para nossos clientes</span></div>
+            <strong>R$2.400</strong>
+            <b>de economia média</b>
+            <span>por mês para nossos clientes</span>
           </div>
           <div class="h-stat">
-            <div class="h-stat-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-            <div><strong>800+</strong><b>pet shops e clínicas</b><span>atendidos em todo o Brasil</span></div>
+            <strong>800+</strong>
+            <b>pet shops e clínicas</b>
+            <span>atendidos em todo o Brasil</span>
           </div>
           <div class="h-stat">
-            <div class="h-stat-ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 11.5 11.2 13.7 15.2 9.7"/></svg></div>
-            <div><strong>0</strong><b>risco e 100% legal</b><span>atuamos dentro da lei</span></div>
+            <strong>0</strong>
+            <b>risco e 100% legal</b>
+            <span>atuamos dentro da lei</span>
           </div>
-          <p class="stats-note">*Resultados médios com base em diagnósticos realizados.</p>
         </div>
+        <p class="stats-note">*Resultados médios com base em diagnósticos realizados.</p>
       </div>
 
       <div class="card">
