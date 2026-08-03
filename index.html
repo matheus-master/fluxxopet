@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap" />
-  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" />
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,701&display=swap" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,18 +44,16 @@
       background-size: 40px 40px;
     }
 
-    /* ── HIGHLIGHT BAR ── */
-    .hl { position: relative; display: inline-block; white-space: nowrap; }
-    .hl::before {
-      content: '';
-      position: absolute;
-      inset: 0px -8px;
-      background: var(--red);
-      transform: rotate(-1.2deg) skewX(-1deg);
-      z-index: 0;
-      border-radius: 3px;
+    /* ── TIPOGRAFIA DE TÍTULO ──
+       Títulos em Satoshi 700, caixa baixa. O Anton fica reservado para
+       os "acentos": números, botões e títulos de card.               */
+    .hero-title, .sec-title, .split-h, .how-title, .cta-title,
+    .bc h3, .step-t, .t-name, .nav-logo, .footer-logo {
+      font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: -0.02em;
     }
-    .hl > * { position: relative; z-index: 1; color: var(--white); }
 
     /* ── NAV ── */
     .nav {
@@ -74,10 +72,9 @@
       display: flex; align-items: center; justify-content: space-between;
     }
     .nav-logo {
-      font-family: 'Anton', sans-serif;
-      font-size: 1.3rem; letter-spacing: 0.06em;
+      font-size: 1.22rem; letter-spacing: -0.01em;
       color: var(--dark); text-decoration: none;
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: center; gap: 9px;
     }
     .nav-logo .dot { color: var(--red); }
     .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
@@ -117,17 +114,11 @@
       50%      { opacity:0.5; transform:scale(1.4); }
     }
     .hero-title {
-      font-family: 'Anton', sans-serif;
-      font-size: clamp(3rem, 6vw, 5.4rem);
-      line-height: 1.0; letter-spacing: 0.01em;
-      text-transform: uppercase; color: var(--blue);
-      margin-bottom: 28px;
+      font-size: clamp(2.3rem, 3.6vw, 3.5rem);
+      line-height: 1.1; color: var(--blue);
+      margin-bottom: 26px; max-width: 620px;
     }
-    .hero-sub {
-      font-size: 1.02rem; font-weight: 400;
-      color: rgba(9,16,64,0.62); max-width: 500px;
-      line-height: 1.72; margin-bottom: 28px;
-    }
+    .hero-title .t-red { color: var(--red); }
 
     /* ── HERO VIDEO ── */
     .hero-video {
@@ -152,42 +143,76 @@
       font-size: 0.86rem; font-weight: 500; line-height: 1.5;
     }
 
-    .vid-sound {
-      position: absolute; inset: 0; width: 100%;
-      display: flex; align-items: flex-end; justify-content: center;
-      padding-bottom: 16px;
-      background: linear-gradient(to top, rgba(9,16,64,0.55) 0%, rgba(9,16,64,0) 42%);
-      border: none; cursor: pointer;
-      font-family: 'Satoshi', sans-serif;
-      transition: opacity 0.25s;
+    /* capa clicável: o player do YouTube só carrega no clique */
+    .vid-play {
+      position: absolute; inset: 0; width: 100%; padding: 0;
+      border: none; cursor: pointer; background: none;
+      display: flex; align-items: center; justify-content: center;
     }
-    .vid-sound:hover { opacity: 0.92; }
-    .vid-sound-pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--red); color: var(--white);
-      font-size: 0.78rem; font-weight: 700;
-      padding: 10px 18px; border-radius: 999px;
-      box-shadow: 0 6px 18px rgba(9,16,64,0.32);
+    .vid-play img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; object-fit: cover; display: block;
     }
-    .vid-sound svg {
-      width: 15px; height: 15px; flex-shrink: 0;
-      stroke: currentColor; fill: none;
+    .vid-play::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(9,16,64,0.30), rgba(9,16,64,0) 55%);
+    }
+    .vid-play-btn {
+      position: relative; z-index: 1;
+      width: 74px; height: 74px; border-radius: 50%;
+      background: rgba(9,16,64,0.55);
+      backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .vid-play:hover .vid-play-btn { background: var(--red); transform: scale(1.07); }
+    .vid-play-btn svg { width: 26px; height: 26px; fill: var(--white); margin-left: 4px; }
+
+    .vid-cap { max-width: 500px; text-align: center; margin: -6px 0 30px; }
+    .vid-cap strong {
+      display: block; font-style: italic; font-weight: 700;
+      font-size: 0.97rem; color: var(--blue); margin-bottom: 3px;
+    }
+    .vid-cap span { font-size: 0.87rem; color: rgba(9,16,64,0.6); }
+    /* ── STATS (card com ícones) ── */
+    .hero-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 20px; align-items: start;
+      max-width: 620px;
+      background: rgba(255,255,255,0.75);
+      border: 1px solid rgba(18,50,200,0.12);
+      border-radius: 18px; padding: 22px 24px 14px;
+      box-shadow: 0 10px 30px rgba(9,16,64,0.06);
+    }
+    .h-stat { display: flex; align-items: flex-start; gap: 12px; }
+    .h-stat-ico {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(18,50,200,0.09);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .h-stat-ico svg {
+      width: 18px; height: 18px; fill: none; stroke: var(--blue);
       stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
     }
-    .hero-stats { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; }
     .h-stat strong {
       display: block; font-family: 'Anton', sans-serif;
-      font-size: 1.5rem; color: var(--blue); line-height: 1;
+      font-size: 1.5rem; color: var(--dark); line-height: 1; margin-bottom: 3px;
     }
-    .h-stat span { font-size: 0.76rem; color: var(--sage); font-weight: 500; }
-    .vd { width: 1px; height: 36px; background: rgba(9,16,64,0.12); }
+    .h-stat b { display: block; font-size: 0.82rem; font-weight: 700; color: var(--dark); line-height: 1.3; }
+    .h-stat span { display: block; font-size: 0.75rem; color: var(--sage); line-height: 1.35; }
+    .stats-note {
+      grid-column: 1 / -1; text-align: center;
+      font-size: 0.68rem; color: var(--sage);
+      border-top: 1px solid rgba(9,16,64,0.07);
+      padding-top: 11px; margin-top: 2px;
+    }
 
     /* ── CARD ── */
     .card {
       background: var(--white);
       border: 1px solid rgba(18,50,200,0.18);
       border-top: 4px solid var(--blue);
-      border-radius: 20px; padding: 38px 34px;
+      border-radius: 22px; padding: 40px 36px;
       box-shadow: 0 28px 72px rgba(18,50,200,0.18);
     }
     .card-title {
@@ -198,12 +223,12 @@
     .card-title .red { color: var(--red); }
     .card-sub { font-size: 0.81rem; color: var(--sage); margin-bottom: 26px; }
 
-    .field { margin-bottom: 12px; }
+    .field { margin-bottom: 14px; }
     .field input {
-      width: 100%; background: var(--light);
-      border: 1px solid rgba(9,16,64,0.11); border-radius: 10px;
-      padding: 13px 16px; font-family: 'Satoshi', sans-serif;
-      font-size: 0.9rem; color: var(--dark); outline: none;
+      width: 100%; background: var(--white);
+      border: 1px solid rgba(9,16,64,0.16); border-radius: 12px;
+      padding: 15px 17px; font-family: 'Satoshi', sans-serif;
+      font-size: 0.92rem; color: var(--dark); outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(18,50,200,0.09); }
@@ -251,9 +276,8 @@
     .split-l .split-lbl { color: rgba(255,255,255,0.55); }
     .split-r .split-lbl { color: rgba(255,255,255,0.75); }
     .split-h {
-      font-family: 'Anton', sans-serif;
-      font-size: clamp(2.2rem, 3.5vw, 3.2rem);
-      text-transform: uppercase; line-height: 0.95; margin-bottom: 36px;
+      font-size: clamp(1.9rem, 3vw, 2.6rem);
+      line-height: 1.12; margin-bottom: 34px;
     }
     .split-l .split-h { color: rgba(255,255,255,0.6); }
     .split-r .split-h { color: var(--white); }
@@ -274,10 +298,9 @@
     .bento-wrap { padding: 96px 32px; max-width: 1200px; margin: 0 auto; }
     .sec-lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
     .sec-title {
-      font-family: 'Anton', sans-serif;
-      font-size: clamp(2.4rem, 4vw, 3.8rem);
-      text-transform: uppercase; line-height: 0.95;
-      color: var(--dark); margin-bottom: 48px;
+      font-size: clamp(2rem, 3.2vw, 2.9rem);
+      line-height: 1.12;
+      color: var(--dark); margin-bottom: 46px;
     }
     .sec-title .red { color: var(--red); }
 
@@ -301,7 +324,7 @@
     .lt .b-ico svg { stroke: var(--blue); }
     .dk .b-ico svg, .bl .b-ico svg { stroke: white; }
 
-    .bc h3 { font-family: 'Anton', sans-serif; font-size: 1.5rem; text-transform: uppercase; line-height: 1; margin-bottom: 10px; }
+    .bc h3 { font-size: 1.22rem; line-height: 1.2; margin-bottom: 10px; }
     .lt h3 { color: var(--dark); }
     .dk h3, .bl h3 { color: var(--white); }
     .bc p { font-size: 0.84rem; line-height: 1.6; }
@@ -339,7 +362,7 @@
     .how-in { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 80px; align-items: start; }
     .how-sticky { position: sticky; top: 90px; }
     .how-lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
-    .how-title { font-family: 'Anton', sans-serif; font-size: clamp(3rem, 5vw, 4.8rem); text-transform: uppercase; line-height: 0.9; color: var(--white); }
+    .how-title { font-size: clamp(2.2rem, 3.6vw, 3.2rem); line-height: 1.1; color: var(--white); }
     .how-title .red { color: var(--red); }
 
     .steps { display: flex; flex-direction: column; }
@@ -347,7 +370,7 @@
     .step:last-child { border-bottom: 1px solid rgba(255,255,255,0.14); }
     .step-n { font-family: 'Anton', sans-serif; font-size: 4.5rem; line-height: 1; color: rgba(229,48,48,0.55); transition: color 0.3s; text-align: center; }
     .step:hover .step-n { color: var(--red); }
-    .step-t { font-family: 'Anton', sans-serif; font-size: 1.5rem; text-transform: uppercase; color: var(--white); margin-bottom: 8px; line-height: 1.1; }
+    .step-t { font-size: 1.22rem; color: var(--white); margin-bottom: 8px; line-height: 1.25; }
     .step-d { font-size: 0.88rem; color: rgba(255,255,255,0.68); line-height: 1.65; }
 
     /* ── TESTIMONIALS ── */
@@ -374,7 +397,7 @@
     }
     .lite .t-av { background: var(--light); color: var(--blue); }
     .dark .t-av { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
-    .t-name { font-family: 'Anton', sans-serif; font-size: 0.92rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .t-name { font-size: 0.95rem; }
     .lite .t-name { color: var(--dark); }
     .dark .t-name { color: var(--white); }
     .t-role { font-size: 0.73rem; color: var(--sage); }
@@ -382,15 +405,16 @@
     /* ── FINAL CTA ── */
     .cta-sec { background: var(--red); padding: 100px 32px; position: relative; overflow: hidden; }
     .cta-deco {
-      position: absolute; font-family: 'Anton', sans-serif;
-      font-size: 22vw; text-transform: uppercase;
+      position: absolute;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
+      font-size: 20vw; letter-spacing: -0.03em; text-transform: uppercase;
       color: rgba(255,255,255,0.07); line-height: 0.85;
       pointer-events: none; user-select: none; white-space: nowrap;
     }
     .cta-deco.t { top: -10px; left: -10px; }
     .cta-deco.b { bottom: -10px; right: -10px; }
     .cta-in { max-width: 680px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
-    .cta-title { font-family: 'Anton', sans-serif; font-size: clamp(2.8rem, 6vw, 4.8rem); text-transform: uppercase; line-height: 0.92; color: var(--white); margin-bottom: 18px; }
+    .cta-title { font-size: clamp(2.1rem, 4vw, 3.2rem); line-height: 1.12; color: var(--white); margin-bottom: 18px; }
     .cta-sub { font-size: 1.05rem; color: rgba(255,255,255,0.78); max-width: 460px; margin: 0 auto 44px; line-height: 1.65; }
     .cta-card { background: white; border-radius: 20px; padding: 36px 32px; box-shadow: 0 28px 72px rgba(0,0,0,0.22); text-align: left; }
     .cta-card-title { font-family: 'Anton', sans-serif; font-size: 1.25rem; text-transform: uppercase; color: var(--dark); margin-bottom: 20px; }
@@ -433,7 +457,7 @@
 
     /* ── FOOTER ── */
     .footer { background: var(--dark); padding: 26px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-    .footer-logo { font-family: 'Anton', sans-serif; font-size: 0.95rem; letter-spacing: 0.08em; color: rgba(255,255,255,0.38); display: flex; align-items: center; gap: 8px; }
+    .footer-logo { font-size: 0.98rem; color: rgba(255,255,255,0.38); display: flex; align-items: center; gap: 8px; }
     .footer-copy { font-size: 0.77rem; color: rgba(255,255,255,0.26); }
 
     /* ── MOBILE ── */
@@ -455,15 +479,18 @@
       .testi-grid { grid-template-columns: 1fr; }
       .tc.dark { transform: translateY(0); }
       .tc.dark:hover { transform: translateY(-4px); }
-      .vd { display: none; }
-      .hero-stats { gap: 20px; flex-wrap: wrap; }
+      .hero-stats { max-width: none; gap: 16px; padding: 20px 20px 12px; }
       .hero-video { max-width: none; margin-bottom: 28px; border-radius: 14px; }
+      .vid-cap { max-width: none; }
+      .split-h { margin-bottom: 26px; }
     }
     @media (max-width: 560px) {
       .nav { padding: 0 18px; }
       .hero { padding: 44px 18px; }
-      .hero-title { font-size: clamp(2.5rem, 11vw, 3.2rem); }
-      .vid-sound-pill { font-size: 0.72rem; padding: 9px 15px; }
+      .hero-title { font-size: clamp(1.9rem, 7.4vw, 2.4rem); }
+      .hero-stats { grid-template-columns: 1fr; gap: 15px; }
+      .vid-play-btn { width: 60px; height: 60px; }
+      .vid-play-btn svg { width: 21px; height: 21px; }
       .bento { grid-template-columns: 1fr; }
       .bc.s2 { grid-column: span 1; }
       .split-l, .split-r { padding: 44px 18px; }
@@ -574,30 +601,31 @@
       <div>
         <div class="badge"><span class="badge-dot"></span>Contabilidade especializada para pets</div>
         <h1 class="hero-title">
-          SEU PET SHOP<br>PAGA IMPOSTO<br>
-          <span class="hl"><span>QUE NÃO DEVE</span></span>
+          Seu pet shop paga imposto que não deve?<br>
+          <span class="t-red">Veja o que aconteceu com esta pet.</span>
         </h1>
-        <p class="hero-sub">
-          Ração, medicamentos e produtos de higiene para pets têm isenção fiscal.
-          A maioria dos pet shops nunca aproveitou — e perde dinheiro todo mês.
-        </p>
 
         <!-- VÍDEO — o ID do YouTube fica em YT_ID, no script do fim da página -->
-        <div class="hero-video" id="heroVideo">
-          <button type="button" class="vid-sound" id="vidSound" aria-label="Ativar o som do vídeo">
-            <span class="vid-sound-pill">
-              <svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-              Clique para ativar o som
-            </span>
-          </button>
-        </div>
+        <div class="hero-video" id="heroVideo"></div>
+        <p class="vid-cap">
+          <strong>Histórias reais. Resultados reais.</strong>
+          <span>Assista ao depoimento de quem recuperou dinheiro e ganhou tranquilidade.</span>
+        </p>
 
         <div class="hero-stats">
-          <div class="h-stat"><strong>R$2.400</strong><span>em média por mês recuperados</span></div>
-          <div class="vd"></div>
-          <div class="h-stat"><strong>800+</strong><span>pet shops diagnosticados</span></div>
-          <div class="vd"></div>
-          <div class="h-stat"><strong>0</strong><span>risco — gratuito</span></div>
+          <div class="h-stat">
+            <div class="h-stat-ico"><svg viewBox="0 0 24 24"><path d="M3 7h13a2 2 0 0 1 2 2v1"/><path d="M18 10h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a2 2 0 0 1 0-4z"/><path d="M3 7v10a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-2"/><path d="M3 7a2 2 0 0 1 2-2h9"/></svg></div>
+            <div><strong>R$2.400</strong><b>de economia média</b><span>por mês para nossos clientes</span></div>
+          </div>
+          <div class="h-stat">
+            <div class="h-stat-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div><strong>800+</strong><b>pet shops e clínicas</b><span>atendidos em todo o Brasil</span></div>
+          </div>
+          <div class="h-stat">
+            <div class="h-stat-ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 11.5 11.2 13.7 15.2 9.7"/></svg></div>
+            <div><strong>0</strong><b>risco e 100% legal</b><span>atuamos dentro da lei</span></div>
+          </div>
+          <p class="stats-note">*Resultados médios com base em diagnósticos realizados.</p>
         </div>
       </div>
 
@@ -643,7 +671,7 @@
   <div class="split">
     <div class="split-l">
       <p class="split-lbl">O jeito antigo</p>
-      <h2 class="split-h">SEU CONTADOR<br>GENÉRICO</h2>
+      <h2 class="split-h">Seu contador genérico</h2>
       <div class="split-items">
         <div class="split-item"><div class="ico-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Usa regime tributário genérico sem olhar isenções do setor pet</div>
         <div class="split-item"><div class="ico-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Nunca falou que ração e medicamentos têm isenção fiscal</div>
@@ -653,7 +681,7 @@
     </div>
     <div class="split-r">
       <p class="split-lbl">O jeito Fluxxo Pet</p>
-      <h2 class="split-h">CONTABILIDADE<br>ESPECIALIZADA</h2>
+      <h2 class="split-h">Contabilidade especializada</h2>
       <div class="split-items">
         <div class="split-item"><div class="ico-ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Especializado 100% em pet shops — conhece cada isenção do setor</div>
         <div class="split-item"><div class="ico-ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Identifica todos os produtos com benefício fiscal no seu estoque</div>
@@ -666,7 +694,7 @@
   <!-- BENTO -->
   <div class="bento-wrap" id="benefits">
     <p class="sec-lbl">Por que a Fluxxo Pet</p>
-    <h2 class="sec-title">TUDO QUE SEU PET SHOP <span class="red">PRECISA</span></h2>
+    <h2 class="sec-title">Tudo que seu pet shop <span class="red">precisa</span></h2>
     <div class="bento">
       <div class="bc lt s2">
         <span class="b-tag">Diagnóstico</span>
@@ -713,7 +741,7 @@
     <div class="how-in">
       <div class="how-sticky">
         <p class="how-lbl">Simples assim</p>
-        <h2 class="how-title">COMO<br>FUN<span class="red">CIONA</span></h2>
+        <h2 class="how-title">Como <span class="red">funciona</span></h2>
       </div>
       <div class="steps">
         <div class="step">
@@ -735,7 +763,7 @@
   <!-- TESTIMONIALS -->
   <div class="testi-wrap">
     <p class="sec-lbl">O que dizem nossos clientes</p>
-    <h2 class="sec-title" style="margin-bottom:44px;">QUEM JÁ <span class="red">RECUPEROU</span></h2>
+    <h2 class="sec-title" style="margin-bottom:44px;">Quem já <span class="red">recuperou</span></h2>
     <div class="testi-grid">
       <div class="tc lite">
         <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
@@ -760,7 +788,7 @@
     <div class="cta-deco t">FLUXXO</div>
     <div class="cta-deco b">PET</div>
     <div class="cta-in">
-      <h2 class="cta-title">DESCUBRA QUANTO<br>VOCÊ PODE<br>RECUPERAR</h2>
+      <h2 class="cta-title">Descubra quanto você pode recuperar</h2>
       <p class="cta-sub">É grátis. Leva 30 segundos. Pode mudar o caixa do seu negócio para sempre.</p>
       <div class="cta-card">
         <p class="cta-card-title">Fazer diagnóstico gratuito</p>
@@ -875,7 +903,6 @@
 
     (function(){
       var box = document.getElementById('heroVideo');
-      var btn = document.getElementById('vidSound');
       if (!box) return;
 
       if (!YT_ID) {
@@ -884,31 +911,31 @@
         return;
       }
 
-      var params = [
-        'autoplay=1','mute=1','playsinline=1','loop=1','playlist='+YT_ID,
-        'controls=0','modestbranding=1','rel=0','iv_load_policy=3',
-        'cc_load_policy=1','cc_lang_pref=pt',
-        'enablejsapi=1','origin='+encodeURIComponent(location.origin)
-      ].join('&');
-
-      var f = document.createElement('iframe');
-      f.src = 'https://www.youtube-nocookie.com/embed/' + YT_ID + '?' + params;
-      f.title = 'Diagnóstico fiscal para pet shops';
-      f.allow = 'autoplay; encrypted-media; picture-in-picture';
-      f.setAttribute('allowfullscreen','');
-      box.insertBefore(f, box.firstChild);
-
-      function cmd(func, args) {
-        if (!f.contentWindow) return;
-        f.contentWindow.postMessage(JSON.stringify({ event:'command', func:func, args:args||[] }), 'https://www.youtube-nocookie.com');
-      }
+      /* capa estática — o player do YouTube só é carregado no clique,
+         então a dobra não paga o peso do embed em quem nem assiste */
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'vid-play';
+      btn.setAttribute('aria-label','Assistir ao depoimento');
+      btn.innerHTML =
+        '<img src="https://i.ytimg.com/vi/' + YT_ID + '/maxresdefault.jpg" alt="Depoimento de cliente da Fluxxo Pet" ' +
+        'onerror="this.src=\'https://i.ytimg.com/vi/' + YT_ID + '/hqdefault.jpg\'">' +
+        '<span class="vid-play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>';
+      box.appendChild(btn);
 
       btn.addEventListener('click', function(){
-        /* reinicia do começo: quem ativa o som no meio do loop
-           pegaria o depoimento pela metade */
-        cmd('unMute'); cmd('setVolume',[100]); cmd('seekTo',[0,true]); cmd('playVideo');
-        btn.style.display = 'none';
-        track('VideoSomAtivado',{},{});
+        var params = [
+          'autoplay=1','playsinline=1','rel=0','modestbranding=1',
+          'cc_load_policy=1','cc_lang_pref=pt'
+        ].join('&');
+        var f = document.createElement('iframe');
+        f.src = 'https://www.youtube-nocookie.com/embed/' + YT_ID + '?' + params;
+        f.title = 'Depoimento de cliente da Fluxxo Pet';
+        f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+        f.setAttribute('allowfullscreen','');
+        box.innerHTML = '';
+        box.appendChild(f);
+        track('VideoPlay',{},{});
       });
     })();
 
