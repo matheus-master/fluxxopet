@@ -19,13 +19,38 @@
 - Hospedagem: Cloudflare Pages (projeto `fluxxopet`, git-connected)
 - URL Pages: https://fluxxopet.pages.dev
 - **Domínio de produção:** https://diagnostico.fluxxopet.com.br (custom domain do Pages;
-  CNAME `diagnostico` -> `fluxxopet.pages.dev`, proxied). É o link que o bot manda aos leads.
+  CNAME `diagnostico` -> `fluxxopet.pages.dev`, proxied).
 - Zona Cloudflare `fluxxopet.com.br` (id `14bec166115f98ea5c3ac266ccfbb362`). O apex e o `www`
   continuam apontando pro site/e-mail da Hostinger — NÃO mexer.
 - DKIM do ActiveCampaign (`acdkim1/acdkim2._domainkey`) ajustado para DNS-only (proxy off)
   para a autenticação de envio funcionar.
-- Página principal: `index.html`
-- Painel admin: `admin.html` → rota `/admin`
+
+## Rotas
+| Rota | Arquivo | O que é |
+|---|---|---|
+| `/` | `index.html` | **LP do Google Ads** (era `lp.html`) |
+| `/lp` | — | 301 → `/` (via `_redirects`, preserva `gclid`/`utm_*`) |
+| `/lp-obrigado` | `lp-obrigado.html` | Obrigado da LP + botão do WhatsApp |
+| `/diagnostico` | `diagnostico.html` | Quiz de diagnóstico (era `index.html`, na raiz) |
+| `/obrigado` | `obrigado.html` | Obrigado do quiz |
+| `/resultado` | `resultado.html` | Resultado do simulador do quiz |
+| `/admin` | `admin.html` | Painel admin |
+
+> ⚠️ Em 2026-08-06 a LP assumiu a raiz `/`. **O link que o bot do BotConversa manda aos
+> leads era a raiz do domínio** — precisa ser trocado para `/diagnostico`, senão o lead
+> cai na LP em vez do quiz.
+
+## LP do Google Ads (`index.html` → `/`)
+- **O formulário fica na primeira dobra**, dentro do hero (`<form id="form" class="form-card">`),
+  ao lado da headline no desktop e logo abaixo dela no mobile.
+  Campos: nome, WhatsApp (com máscara), e-mail, pet shop, faturamento mensal.
+- Os CTAs do meio/fim da página rolam de volta para `#form`.
+- Submit → `POST /api/submit` (grava em D1 + sincroniza ActiveCampaign) → redireciona
+  para `/lp-obrigado` (`lp-obrigado.html`), que tem o botão do WhatsApp.
+- **A conversão do Google Ads (`AW-18311780308/Jg8ECMyt7tQcENSv3ptE`) dispara na
+  `/lp-obrigado`**, não mais no clique do botão. Dedupe por `sessionStorage`.
+- Número do WhatsApp: `5571982346881` (fica em `WA_NUMBER` no `lp-obrigado.html`).
+- O `lead_data` do `sessionStorage` alimenta a saudação e a mensagem pré-preenchida do zap.
 
 ## Integração BotConversa → ActiveCampaign
 - Endpoint: `functions/api/botconversa.js` → rota `POST /api/botconversa?token=<BC_WEBHOOK_SECRET>`

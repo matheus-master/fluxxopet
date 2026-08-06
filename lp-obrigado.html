@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Recebemos seus dados — Fluxxo Pet</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- ===== Google tag (gtag.js) — Google Ads + GA4 ===== -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18311780308"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'AW-18311780308');
+    gtag('config', 'G-3L4M9LVX7W');
+
+    var WA_NUMBER = '5571982346881';
+
+    // Conversao do Google Ads: dispara 1x, aqui, quando o lead ja preencheu o formulario.
+    (function(){
+      var lead = {};
+      try { lead = JSON.parse(sessionStorage.getItem('lead_data') || '{}'); } catch(e){}
+
+      // dedupe: se o lead recarregar a pagina, nao conta a conversao de novo
+      var key = 'lp_conv_' + (lead.email || '');
+      var alreadySent = false;
+      try { alreadySent = sessionStorage.getItem(key) === '1'; } catch(e){}
+
+      if (!alreadySent) {
+        try {
+          gtag('event', 'conversion', { 'send_to': 'AW-18311780308/Jg8ECMyt7tQcENSv3ptE' });
+          sessionStorage.setItem(key, '1');
+        } catch(e){}
+      }
+
+      window.__lead = lead;
+    })();
+  </script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --primary:#1F5EDB; --primary-dark:#0A2A6B; --teal:#00C2A8;
+      --text-dark:#1A202C; --heading-navy:#0F3D91; --muted:#475569;
+      --radius-card:22px; --radius-pill:100px;
+    }
+    html{-webkit-text-size-adjust:100%}
+    body{
+      font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+      background:radial-gradient(at 100% 50%, #1F5EDB 0%, #0A2A6B 100%);
+      color:#fff;line-height:1.6;-webkit-font-smoothing:antialiased;
+      min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:40px 20px;text-align:center
+    }
+    a{text-decoration:none;color:inherit}
+
+    .logo{display:inline-flex;align-items:center;gap:9px;color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:1.02rem;margin-bottom:32px}
+    .logo svg{width:27px;height:27px}
+
+    .card{
+      background:#fff;color:var(--text-dark);border-radius:var(--radius-card);
+      box-shadow:0 24px 60px rgba(4,14,50,.4);
+      padding:34px 24px 30px;max-width:520px;width:100%
+    }
+
+    .ico{
+      width:70px;height:70px;border-radius:50%;margin:0 auto 22px;
+      background:rgba(31,94,219,.1);border:1px solid rgba(31,94,219,.22);
+      display:flex;align-items:center;justify-content:center
+    }
+    .ico svg{width:32px;height:32px;fill:none;stroke:var(--primary);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
+    h1{font-family:'Poppins',sans-serif;font-weight:700;font-size:27px;line-height:1.18;letter-spacing:-.02em;color:var(--heading-navy);margin-bottom:12px}
+    h1 b{color:var(--primary)}
+    .sub{font-size:16px;color:var(--muted);max-width:400px;margin:0 auto 26px}
+
+    .btn{
+      display:flex;width:100%;align-items:center;justify-content:center;gap:9px;
+      border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:16px;font-weight:700;line-height:1;
+      border-radius:var(--radius-pill);padding:17px 28px;
+      background:linear-gradient(180deg,#22C55E 0%,#16A34A 100%);color:#fff;
+      box-shadow:0 10px 26px rgba(16,163,74,.42);
+      transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;
+      animation:ctaPulse 2.4s ease-in-out infinite
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(16,163,74,.6);filter:brightness(1.04)}
+    .btn:active{transform:translateY(1px)}
+    .btn svg{width:21px;height:21px;fill:currentColor;flex-shrink:0}
+    @keyframes ctaPulse{0%,100%{box-shadow:0 8px 22px rgba(16,163,74,.38)}50%{box-shadow:0 12px 36px rgba(16,163,74,.66)}}
+    @media(prefers-reduced-motion:reduce){.btn{animation:none}}
+
+    .hint{font-size:13px;color:var(--muted);margin-top:15px}
+
+    .steps{
+      margin-top:26px;padding-top:22px;border-top:1px solid #EEF2F7;
+      display:flex;flex-direction:column;gap:13px;text-align:left
+    }
+    .step{display:flex;gap:11px;align-items:flex-start}
+    .step .n{
+      font-family:'Poppins',sans-serif;font-weight:800;font-size:12.5px;color:#fff;background:var(--primary);
+      width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px
+    }
+    .step p{font-size:14px;color:var(--muted)}
+    .step p b{color:var(--text-dark);font-weight:700}
+
+    .back{display:inline-block;margin-top:26px;font-size:13.5px;color:rgba(245,247,250,.65);transition:color .2s}
+    .back:hover{color:#fff}
+
+    @media(min-width:700px){
+      h1{font-size:32px}
+      .card{padding:42px 40px 36px}
+      .btn{display:inline-flex;width:auto}
+    }
+  </style>
+</head>
+<body>
+
+  <a href="/" class="logo">
+    <svg viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="#fff"/><path d="M10 20 Q10 16 14 16 Q16 16 16 14 Q16 12 18 12 Q22 12 22 16 Q22 20 18 20 Z" fill="#1F5EDB"/><circle cx="11" cy="11" r="2" fill="#1F5EDB"/><circle cx="21" cy="11" r="2" fill="#1F5EDB"/></svg>
+    FLUXXO PET
+  </a>
+
+  <main class="card">
+    <div class="ico">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+
+    <h1 id="titulo">Recebemos seus dados, <b>tudo certo!</b></h1>
+    <p class="sub">Nosso time já está analisando as informações do seu pet shop. Pra agilizar, chame a gente agora no WhatsApp.</p>
+
+    <a href="#" class="btn" id="waBtn" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.34"/></svg>
+      Chamar no WhatsApp agora
+    </a>
+    <p class="hint">Ou aguarde — entramos em contato em breve.</p>
+
+    <div class="steps">
+      <div class="step"><span class="n">1</span><p><b>Análise rápida.</b> Olhamos o regime tributário e o perfil do seu pet shop.</p></div>
+      <div class="step"><span class="n">2</span><p><b>Conversa no WhatsApp.</b> Mostramos onde costuma estar o dinheiro que você perde.</p></div>
+      <div class="step"><span class="n">3</span><p><b>Sem compromisso.</b> Você decide se quer seguir com a gente ou não.</p></div>
+    </div>
+  </main>
+
+  <a href="/" class="back">← Voltar para a página</a>
+
+  <script>
+    (function(){
+      var lead  = window.__lead || {};
+      var nome  = (lead.nome || '').trim().split(' ')[0];
+      var loja  = (lead.petshop || '').trim();
+
+      if (nome) {
+        document.getElementById('titulo').innerHTML =
+          'Recebemos seus dados, <b>' + nome.replace(/[<>&]/g, '') + '!</b>';
+      }
+
+      var texto = 'Oi! Acabei de preencher o formulário no site da Fluxxo Pet'
+                + (nome ? '. Meu nome é ' + nome : '')
+                + (loja ? ' e meu pet shop é ' + loja : '')
+                + '. Quero saber quanto estou perdendo de imposto.';
+
+      document.getElementById('waBtn').href =
+        'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(texto);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+# A LP virou a pagina principal (/). Mantem as URLs antigas de anuncio funcionando.
+# O Pages preserva a query string (gclid, utm_*) automaticamente no 301.
+/lp    /   301
+/lp/   /   301
