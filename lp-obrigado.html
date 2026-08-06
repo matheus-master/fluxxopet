@@ -17,29 +17,63 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'AW-18311780308');
-    gtag('config', 'G-3L4M9LVX7W');
 
-    var WA_NUMBER = '5571982346881';
+    var WA_NUMBER  = '5571982346881';
+    var GA4_ID     = 'G-3L4M9LVX7W';
+    var ADS_ID     = 'AW-18311780308';
+    var ADS_LABEL  = 'AW-18311780308/Jg8ECMyt7tQcENSv3ptE';
 
-    // Conversao do Google Ads: dispara 1x, aqui, quando o lead ja preencheu o formulario.
     (function(){
       var lead = {};
       try { lead = JSON.parse(sessionStorage.getItem('lead_data') || '{}'); } catch(e){}
+      window.__lead = lead;
 
-      // dedupe: se o lead recarregar a pagina, nao conta a conversao de novo
-      var key = 'lp_conv_' + (lead.email || '');
-      var alreadySent = false;
-      try { alreadySent = sessionStorage.getItem(key) === '1'; } catch(e){}
+      // ── Conversoes aprimoradas ────────────────────────────────────────────
+      // O gtag normaliza e aplica SHA-256 nesses campos sozinho antes de enviar;
+      // nada em texto puro sai do navegador. Precisa estar setado ANTES do
+      // config/conversion. So funciona depois de ligar "Conversoes aprimoradas
+      // para leads" na acao de conversao do Google Ads.
+      var partes = (lead.nome || '').trim().split(/\s+/);
+      var userData = {};
+      if (lead.email) userData.email = lead.email.trim().toLowerCase();
 
-      if (!alreadySent) {
+      var dig = (lead.whatsapp || '').replace(/\D/g, '');
+      if (dig.length === 10 || dig.length === 11) userData.phone_number = '+55' + dig;
+
+      if (partes[0]) {
+        userData.address = {
+          first_name: partes[0].toLowerCase(),
+          last_name : partes.length > 1 ? partes.slice(1).join(' ').toLowerCase() : '',
+          country   : 'BR'
+        };
+      }
+      if (userData.email || userData.phone_number) gtag('set', 'user_data', userData);
+
+      gtag('config', ADS_ID);
+      gtag('config', GA4_ID);
+
+      // ── Conversao + lead ──────────────────────────────────────────────────
+      // Dedupe por e-mail: recarregar a pagina nao conta a conversao de novo.
+      var key = 'lp_conv_' + (lead.email || 'anon');
+      var jaEnviou = false;
+      try { jaEnviou = sessionStorage.getItem(key) === '1'; } catch(e){}
+
+      if (!jaEnviou) {
         try {
-          gtag('event', 'conversion', { 'send_to': 'AW-18311780308/Jg8ECMyt7tQcENSv3ptE' });
+          gtag('event', 'conversion', { 'send_to': ADS_LABEL });
+
+          // Evento recomendado do GA4 para captura de lead.
+          gtag('event', 'generate_lead', {
+            send_to    : GA4_ID,
+            currency   : 'BRL',
+            value      : 0,
+            form_id    : 'lp_lead_form',
+            faturamento: lead.faturamento || '(nao informado)'
+          });
+
           sessionStorage.setItem(key, '1');
         } catch(e){}
       }
-
-      window.__lead = lead;
     })();
   </script>
 
@@ -165,8 +199,18 @@
                 + (loja ? ' e meu pet shop é ' + loja : '')
                 + '. Quero saber quanto estou perdendo de imposto.';
 
-      document.getElementById('waBtn').href =
-        'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(texto);
+      var btn = document.getElementById('waBtn');
+      btn.href = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(texto);
+
+      // GA4: quantos leads puxam a conversa em vez de esperar o contato.
+      btn.addEventListener('click', function(){
+        try {
+          gtag('event', 'contato_whatsapp', {
+            send_to: GA4_ID,
+            origem : 'lp_obrigado'
+          });
+        } catch(e){}
+      });
     })();
   </script>
 </body>

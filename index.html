@@ -11,8 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- ===== Google tag (gtag.js) — Google Ads =====
-       Troque 'AW-18311780308' pelo seu ID e 'CONVERSION_LABEL' pelo rótulo da conversão. -->
+  <!-- ===== Google tag (gtag.js) — Google Ads AW-18311780308 + GA4 G-3L4M9LVX7W ===== -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18311780308"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -21,7 +20,19 @@
     gtag('config', 'AW-18311780308');
     gtag('config', 'G-3L4M9LVX7W');
 
-    // Todos os CTAs levam ao formulario no fim da pagina (#form).
+    var GA4_ID = 'G-3L4M9LVX7W';
+
+    // Eventos de funil do formulario. send_to explicito pro GA4 para nao
+    // poluir o Google Ads com evento que nao e conversao.
+    function ga4(nome, params){
+      try {
+        params = params || {};
+        params.send_to = GA4_ID;
+        gtag('event', nome, params);
+      } catch(e){}
+    }
+
+    // Todos os CTAs levam ao formulario na primeira dobra (#form).
     // A conversao do Google Ads agora dispara na pagina de obrigado (/lp-obrigado).
     function goForm(){
       var el = document.getElementById('form');
@@ -512,6 +523,16 @@
         el.addEventListener('change', function(){ el.closest('.field').classList.remove('invalid'); });
       });
 
+      // GA4: form_start na primeira interacao (mede quantos comecam vs. terminam)
+      var started = false;
+      form.querySelectorAll('input, select').forEach(function(el){
+        el.addEventListener('focus', function(){
+          if (started) return;
+          started = true;
+          ga4('form_start', { form_id: 'lp_lead_form', form_name: 'LP contato' });
+        });
+      });
+
       var sending = false;
       form.addEventListener('submit', function(e){
         e.preventDefault();
@@ -519,6 +540,14 @@
 
         var lead = validate();
         if (!lead) {
+          // GA4: quais campos travam o envio (pra saber onde o form perde gente)
+          var ruins = [];
+          form.querySelectorAll('.field.invalid').forEach(function(f){
+            var c = f.querySelector('input, select');
+            if (c) ruins.push(c.name);
+          });
+          ga4('form_error', { form_id: 'lp_lead_form', campos: ruins.join(',') });
+
           var first = form.querySelector('.field.invalid input, .field.invalid select');
           if (first) first.focus();
           return;
@@ -547,6 +576,9 @@
           btn.disabled = false;
           btnTxt.textContent = 'Quero falar com a Fluxxo Pet';
           errBox.classList.add('show');
+          // GA4: falha de API != desistencia do usuario. Separar isso evita
+          // culpar o formulario por um problema de backend.
+          ga4('form_api_error', { form_id: 'lp_lead_form' });
         });
       });
     })();

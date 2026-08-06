@@ -47,10 +47,34 @@
 - Os CTAs do meio/fim da página rolam de volta para `#form`.
 - Submit → `POST /api/submit` (grava em D1 + sincroniza ActiveCampaign) → redireciona
   para `/lp-obrigado` (`lp-obrigado.html`), que tem o botão do WhatsApp.
-- **A conversão do Google Ads (`AW-18311780308/Jg8ECMyt7tQcENSv3ptE`) dispara na
-  `/lp-obrigado`**, não mais no clique do botão. Dedupe por `sessionStorage`.
 - Número do WhatsApp: `5571982346881` (fica em `WA_NUMBER` no `lp-obrigado.html`).
 - O `lead_data` do `sessionStorage` alimenta a saudação e a mensagem pré-preenchida do zap.
+
+## Rastreamento Google (Ads `AW-18311780308` + GA4 `G-3L4M9LVX7W`)
+| Evento | Onde dispara | Destino |
+|---|---|---|
+| `form_start` | primeiro foco em qualquer campo | GA4 |
+| `form_error` | validação barra o envio (param `campos` diz quais) | GA4 |
+| `form_api_error` | `/api/submit` falhou (≠ desistência do usuário) | GA4 |
+| `conversion` | load da `/lp-obrigado` | **Google Ads** |
+| `generate_lead` | load da `/lp-obrigado` (param `faturamento`) | GA4 |
+| `contato_whatsapp` | clique no botão do zap da `/lp-obrigado` | GA4 |
+
+- Os eventos de GA4 usam `send_to: G-3L4M9LVX7W` explícito, pra não jogar evento
+  não-conversão dentro do Google Ads.
+- **A conversão do Ads dispara na `/lp-obrigado`**, não no clique do botão.
+  Dedupe por e-mail no `sessionStorage` (recarregar a página não conta de novo).
+- **Conversões aprimoradas:** a `/lp-obrigado` faz `gtag('set','user_data', …)` com
+  e-mail, telefone em E.164 (`+55` + DDD) e nome, **antes** do `config`/`conversion`.
+  O gtag aplica SHA-256 sozinho — nada sai em texto puro. Telefone com tamanho
+  inválido é omitido em vez de enviado torto.
+  ⚠️ Só passa a valer depois de ligar **"Conversões aprimoradas para leads"** na ação
+  de conversão dentro do Google Ads — é passo de UI, não dá pra fazer por código.
+- `value: 0` no `generate_lead`: se um dia quiser lances por valor, é aqui que entra
+  o valor do lead por faixa de faturamento.
+- `gclid`/`utm_*` já são gravados pelo `functions/_middleware.js` na tabela `sessions`,
+  e o lead referencia a sessão por `session_id` — dá pra fazer importação de conversão
+  offline no Ads a partir disso.
 
 ## Integração BotConversa → ActiveCampaign
 - Endpoint: `functions/api/botconversa.js` → rota `POST /api/botconversa?token=<BC_WEBHOOK_SECRET>`
