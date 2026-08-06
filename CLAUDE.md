@@ -72,7 +72,8 @@
   não-conversão dentro do Google Ads.
 - **A conversão do Ads dispara na `/lp-obrigado`**, não no clique do botão.
   Dedupe por e-mail no `sessionStorage` (recarregar a página não conta de novo).
-- Ação em uso: **"Lead"** — `AW-18311780308/lmNoCNC7od0cENSv3ptE`.
+- Ação em uso: **"Lead"** — `AW-18311780308/ImNoCNC7od0cENSv3ptE`
+  (começa com **I maiúsculo**, não `l` nem `1`).
   Substituiu `Jg8ECMyt7tQcENSv3ptE` (a ação antiga de "clique no botão do WhatsApp")
   em 2026-08-06. As duas na mesma página fariam cada lead contar 2 conversões.
   A antiga só parou de disparar — o histórico dela segue intacto no relatório.
