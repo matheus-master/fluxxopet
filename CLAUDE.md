@@ -64,7 +64,7 @@
 | `form_start` | primeiro foco em qualquer campo | GA4 |
 | `form_error` | validação barra o envio (param `campos` diz quais) | GA4 |
 | `form_api_error` | `/api/submit` falhou (≠ desistência do usuário) | GA4 |
-| `conversion` | load da `/lp-obrigado` | **Google Ads** |
+| `conversion` | load da `/lp-obrigado` | **Google Ads** — ação "Lead" |
 | `generate_lead` | load da `/lp-obrigado` (param `faturamento`) | GA4 |
 | `contato_whatsapp` | clique no botão do zap da `/lp-obrigado` | GA4 |
 
@@ -72,6 +72,10 @@
   não-conversão dentro do Google Ads.
 - **A conversão do Ads dispara na `/lp-obrigado`**, não no clique do botão.
   Dedupe por e-mail no `sessionStorage` (recarregar a página não conta de novo).
+- Ação em uso: **"Lead"** — `AW-18311780308/lmNoCNC7od0cENSv3ptE`.
+  Substituiu `Jg8ECMyt7tQcENSv3ptE` (a ação antiga de "clique no botão do WhatsApp")
+  em 2026-08-06. As duas na mesma página fariam cada lead contar 2 conversões.
+  A antiga só parou de disparar — o histórico dela segue intacto no relatório.
 - **Conversões aprimoradas:** a `/lp-obrigado` faz `gtag('set','user_data', …)` com
   e-mail, telefone em E.164 (`+55` + DDD) e nome, **antes** do `config`/`conversion`.
   O gtag aplica SHA-256 sozinho — nada sai em texto puro. Telefone com tamanho

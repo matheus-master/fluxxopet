@@ -21,7 +21,13 @@
     var WA_NUMBER  = '5571982346881';
     var GA4_ID     = 'G-3L4M9LVX7W';
     var ADS_ID     = 'AW-18311780308';
-    var ADS_LABEL  = 'AW-18311780308/Jg8ECMyt7tQcENSv3ptE';
+
+    // Acao de conversao "Lead" — criada para o envio do formulario da LP.
+    var ADS_LABEL  = 'AW-18311780308/lmNoCNC7od0cENSv3ptE';
+    // Substituiu 'Jg8ECMyt7tQcENSv3ptE', que era a acao antiga de "clique no
+    // botao do WhatsApp". As duas na mesma pagina fariam cada lead contar
+    // duas conversoes. A antiga so nao dispara mais; o historico dela continua
+    // intacto no relatorio do Google Ads.
 
     (function(){
       var lead = {};
