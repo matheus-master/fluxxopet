@@ -5,3 +5,15 @@
 /login
   Cache-Control: no-store, no-cache, must-revalidate
   Pragma: no-cache
+
+# As duas LPs vivem em funis diferentes (Meta na raiz, Google em /lp) e ja
+# trocaram de endereco uma vez. no-store impede que o navegador do visitante
+# guarde HTML ou redirect antigo e continue mandando o lead pro lugar errado.
+/
+  Cache-Control: no-store, must-revalidate
+
+/lp
+  Cache-Control: no-store, must-revalidate
+
+/diagnostico
+  Cache-Control: no-store, must-revalidate

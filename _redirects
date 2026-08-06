@@ -2,6 +2,11 @@
 # A LP do Google fica em /lp.
 #
 # /diagnostico existiu por algumas horas em 2026-08-06, quando a LP ocupou a raiz
-# por engano. Mantido como 301 para nao deixar link quebrado por ai.
-/diagnostico    /   301
-/diagnostico/   /   301
+# por engano. Mantido so pra nao deixar link quebrado por ai.
+#
+# 302 e NAO 301 de proposito: 301 e "movido permanentemente" e fica gravado no
+# navegador do visitante praticamente pra sempre, mesmo depois da regra sair
+# daqui. Foi exatamente isso que aconteceu com /lp -> / e deu dor de cabeca.
+# Redirect temporario nunca deve ser 301.
+/diagnostico    /   302
+/diagnostico/   /   302
