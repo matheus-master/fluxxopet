@@ -25,22 +25,30 @@
 - DKIM do ActiveCampaign (`acdkim1/acdkim2._domainkey`) ajustado para DNS-only (proxy off)
   para a autenticação de envio funcionar.
 
-## Rotas
+## Rotas — DOIS funis separados, não misturar
+**Funil do META** (pixel `fbq` 1338198531534558, zero Google Ads):
+
 | Rota | Arquivo | O que é |
 |---|---|---|
-| `/` | `index.html` | **LP do Google Ads** (era `lp.html`) |
-| `/lp` | — | 301 → `/` (via `_redirects`, preserva `gclid`/`utm_*`) |
-| `/lp-obrigado` | `lp-obrigado.html` | Obrigado da LP + botão do WhatsApp |
-| `/diagnostico` | `diagnostico.html` | Quiz de diagnóstico (era `index.html`, na raiz) |
+| `/` | `index.html` | Quiz de diagnóstico — **é o link do bot e dos anúncios do Meta** |
 | `/obrigado` | `obrigado.html` | Obrigado do quiz |
-| `/resultado` | `resultado.html` | Resultado do simulador do quiz |
-| `/admin` | `admin.html` | Painel admin |
+| `/resultado` | `resultado.html` | Resultado do simulador |
 
-> ⚠️ Em 2026-08-06 a LP assumiu a raiz `/`. **O link que o bot do BotConversa manda aos
-> leads era a raiz do domínio** — precisa ser trocado para `/diagnostico`, senão o lead
-> cai na LP em vez do quiz.
+**Funil do GOOGLE** (gtag `AW-18311780308` + GA4, zero pixel do Meta):
 
-## LP do Google Ads (`index.html` → `/`)
+| Rota | Arquivo | O que é |
+|---|---|---|
+| `/lp` | `lp.html` | LP dos anúncios do Google Ads |
+| `/lp-obrigado` | `lp-obrigado.html` | Obrigado da LP + botão do WhatsApp |
+
+| `/admin` | `admin.html` | Painel admin (comum aos dois) |
+
+> ⚠️ **A raiz `/` pertence ao Meta.** Em 2026-08-06 a LP do Google ocupou a raiz por
+> algumas horas e o quiz foi pra `/diagnostico` — foi revertido no mesmo dia, porque
+> os anúncios do Meta e o bot apontam para a raiz. `/diagnostico` ficou como 301 → `/`.
+> Ao mexer numa LP, conferir em qual funil ela está: `grep -c 'fbq(' arquivo.html`.
+
+## LP do Google Ads (`lp.html` → `/lp`)
 - **O formulário fica na primeira dobra**, dentro do hero (`<form id="form" class="form-card">`),
   ao lado da headline no desktop e logo abaixo dela no mobile.
   Campos: nome, WhatsApp (com máscara), e-mail, pet shop, faturamento mensal.

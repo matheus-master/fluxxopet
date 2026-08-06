@@ -1,4 +1,7 @@
-# A LP virou a pagina principal (/). Mantem as URLs antigas de anuncio funcionando.
-# O Pages preserva a query string (gclid, utm_*) automaticamente no 301.
-/lp    /   301
-/lp/   /   301
+# A raiz / e o funil do Meta (quiz de diagnostico) — nao mexer.
+# A LP do Google fica em /lp.
+#
+# /diagnostico existiu por algumas horas em 2026-08-06, quando a LP ocupou a raiz
+# por engano. Mantido como 301 para nao deixar link quebrado por ai.
+/diagnostico    /   301
+/diagnostico/   /   301
