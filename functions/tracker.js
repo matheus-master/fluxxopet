@@ -106,18 +106,35 @@ export async function onRequestPost(context) {
     };
 
     let metaStatus = 0, metaBody = '';
-    try {
-      const r = await fetch(
-        `https://graph.facebook.com/v25.0/${env.META_PIXEL_ID}/events?access_token=${env.META_CAPI_TOKEN}`,
-        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(metaPayload) }
-      );
-      metaStatus = r.status;
-      metaBody   = await r.text();
-    } catch (e) { metaBody = e.message; }
+    // Sem os secrets a URL sairia com "undefined" no lugar do token e o
+    // Facebook rejeitaria calado. Foi o que aconteceu na migracao de conta
+    // da Cloudflare em 2026-06: o token nao veio junto e ninguem viu, porque
+    // o erro era engolido aqui e o endpoint respondia ok do mesmo jeito.
+    const faltando = [
+      !env.META_PIXEL_ID   && 'META_PIXEL_ID',
+      !env.META_CAPI_TOKEN && 'META_CAPI_TOKEN',
+    ].filter(Boolean);
+
+    if (faltando.length) {
+      metaBody = 'CONFIG AUSENTE: ' + faltando.join(', ') +
+                 ' — setar em Pages > Settings > Environment variables';
+    } else {
+      try {
+        const r = await fetch(
+          `https://graph.facebook.com/v25.0/${env.META_PIXEL_ID}/events?access_token=${env.META_CAPI_TOKEN}`,
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(metaPayload) }
+        );
+        metaStatus = r.status;
+        metaBody   = await r.text();
+      } catch (e) { metaBody = e.message; }
+    }
 
     // ── GA4 MEASUREMENT PROTOCOL ──────────────────────────────────────────────
     let ga4Status = 0, ga4Body = '';
-    if (event_name !== 'PageView' && env.GA4_MEASUREMENT_ID && env.GA4_API_SECRET) {
+    // startsWith('G-') e proposital: o wrangler.toml ficou meses com o
+    // placeholder "GA4_ID_AQUI", que e truthy e passaria numa checagem simples.
+    if (event_name !== 'PageView' &&
+        (env.GA4_MEASUREMENT_ID || '').startsWith('G-') && env.GA4_API_SECRET) {
       const ga4Payload = {
         client_id: gaClientId,
         events: [{

@@ -9,7 +9,7 @@ database_id   = "b1dfad2f-6637-43ea-bfb9-8289f4405466"
 
 [vars]
 META_PIXEL_ID      = "1338198531534558"
-GA4_MEASUREMENT_ID = "GA4_ID_AQUI"
+GA4_MEASUREMENT_ID = "G-3L4M9LVX7W"
 
 # Secrets — set via Cloudflare Pages dashboard (Settings > Environment Variables)
 # or via: npx wrangler pages secret put META_CAPI_TOKEN
