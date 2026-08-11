@@ -470,6 +470,21 @@
       .hero-video { max-width: none; margin-bottom: 28px; border-radius: 14px; }
       .vid-cap { max-width: none; }
       .split-h { margin-bottom: 26px; }
+
+      /* No mobile o formulario so aparecia depois dos 3 stats: o card e a
+         segunda coluna inteira do grid, e as colunas empilham. display:contents
+         dissolve o wrapper da coluna 1, os filhos viram itens do grid e ai da
+         pra ordenar um por um. Com gap:0 o espacamento volta a vir das margens
+         que esses elementos ja tinham. Desktop nao e afetado. */
+      .hero { gap: 0; }
+      .hero > div:not(.card) { display: contents; }
+      .hero .badge      { order: 1; justify-self: start; }
+      .hero .hero-title { order: 2; }
+      .hero .hero-video { order: 3; }
+      .hero .vid-cap    { order: 4; }
+      .hero > .card     { order: 5; margin-bottom: 40px; }
+      .hero .hero-stats { order: 6; }
+      .hero .stats-note { order: 7; }
     }
     @media (max-width: 560px) {
       .nav { padding: 0 18px; }
