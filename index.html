@@ -233,6 +233,17 @@
     .btn-sub:hover  { background: #c42020; transform: translateY(-2px); }
     .btn-sub:active { transform: translateY(0); }
 
+    /* O formulario do hero comeca fechado e abre no clique do #revealBtn.
+       [hidden] explicito porque o display:flex/grid de um reset venceria o
+       comportamento padrao do atributo. */
+    #leadFormWrap[hidden] { display: none; }
+    #leadFormWrap { animation: formIn 0.28s ease-out; }
+    @keyframes formIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) { #leadFormWrap { animation: none; } }
+
     .trust {
       display: flex; align-items: center; justify-content: center; gap: 5px;
       font-size: 0.71rem; color: var(--sage); margin-top: 14px;
@@ -641,6 +652,13 @@
       <div class="card">
         <h2 class="card-title">Diagnóstico <span class="red">Gratuito</span></h2>
         <p class="card-sub">Leva menos de 30 segundos</p>
+
+        <!-- O formulário começa fechado; este botão o revela (ver revealLeadForm) -->
+        <button type="button" class="btn-sub" id="revealBtn" onclick="revealLeadForm()">
+          Quero meu diagnóstico &rarr;
+        </button>
+
+        <div id="leadFormWrap" hidden>
         <form id="leadForm" onsubmit="handleSubmit(event)">
           <div class="field"><input type="text" id="nome" placeholder="Seu nome completo" autocomplete="given-name" required /></div>
           <div class="field"><input type="text" id="petshop" placeholder="Nome do seu Pet Shop" required /></div>
@@ -651,6 +669,7 @@
           <div class="field"><input type="email" id="email" placeholder="E-mail" autocomplete="email" required /></div>
           <button type="submit" class="btn-sub">Continuar para o diagnóstico →</button>
         </form>
+        </div>
         <p class="trust" id="heroTrust">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           100% gratuito &bull; Sem spam &bull; Dados protegidos
@@ -1006,6 +1025,31 @@
       window.location.href = '/resultado';
     }
 
+    // O card do hero mostra so o botao; o formulario aparece no clique.
+    // Ocupa menos altura, principalmente no mobile, onde os 4 campos comiam
+    // quase uma tela inteira antes dos numeros de prova social.
+    function revealLeadForm() {
+      var wrap = document.getElementById('leadFormWrap');
+      if (!wrap || !wrap.hidden) return false;      // ja esta aberto
+      wrap.hidden = false;
+
+      var btn = document.getElementById('revealBtn');
+      if (btn) btn.style.display = 'none';
+
+      // Mede quantos abrem o formulario vs. quantos enviam. Sem isso nao da
+      // pra saber se o botao ajudou ou atrapalhou a conversao.
+      try {
+        gtag('event', 'form_reveal', { send_to: 'G-3L4M9LVX7W', form_id: 'hero_leadForm' });
+      } catch (e) {}
+
+      // Foco so no desktop: no celular o teclado subindo sozinho atrapalha.
+      if (window.innerWidth >= 900) {
+        var f = document.getElementById('nome');
+        if (f) f.focus({ preventScroll: true });
+      }
+      return true;
+    }
+
     function handleSubmit(e) {
       e.preventDefault();
       leadData = { nome:document.getElementById('nome').value.trim(), petshop:document.getElementById('petshop').value.trim(), whatsapp:document.getElementById('whatsapp').value.trim(), email:document.getElementById('email').value.trim(), _formSource:'hero' };
@@ -1047,7 +1091,22 @@
     document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
     document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
     document.querySelectorAll('a[href^="#"]').forEach(function(a){
-      a.addEventListener('click',function(e){ var el=document.querySelector(a.getAttribute('href')); if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth'});} });
+      a.addEventListener('click',function(e){
+        var href = a.getAttribute('href');
+        // href="#" puro (o logo) quebrava aqui: querySelector('#') lanca excecao
+        if (!href || href === '#') return;
+
+        // Os links "Diagnostico" apontam pro formulario, que agora comeca
+        // fechado. Abre antes, senao rola ate um elemento invisivel.
+        if (href === '#leadForm') {
+          revealLeadForm();
+          var card = document.querySelector('.hero .card');
+          if (card) { e.preventDefault(); card.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+        }
+
+        var el = document.querySelector(href);
+        if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
+      });
     });
   </script>
 </body>
