@@ -99,6 +99,25 @@
 - Body esperado (JSON): `{ "nome": "...", "email": "...", "telefone": "..." }`.
 
 ## Secrets do Pages (não estão no repo)
-`ADMIN_PASSWORD`, `JWT_SECRET`, `BC_WEBHOOK_SECRET`, `AC_*` (ver acima).
-Tracking Meta/GA (`META_CAPI_TOKEN`, `META_ADS_TOKEN`, `META_ADS_ACCOUNT_ID`, `GA4_API_SECRET`)
-**não** foram migrados — setar de novo se quiser reativar o envio de eventos.
+Inventário conferido em 2026-08-06 via `wrangler pages secret list --project-name fluxxopet`:
+
+| Secret | Status |
+|---|---|
+| `AC_API_TOKEN`, `AC_API_URL`, `AC_DEAL_OWNER_ID`, `AC_PIPELINE_ID`, `AC_STAGE_ID` | ✅ |
+| `ADMIN_PASSWORD`, `JWT_SECRET`, `BC_WEBHOOK_SECRET` | ✅ |
+| `META_ADS_TOKEN`, `META_ADS_ACCOUNT_ID` | ✅ |
+| **`META_CAPI_TOKEN`** | ❌ **AUSENTE — o CAPI do Meta não envia nada desde a migração de junho** |
+| `GA4_API_SECRET` | ❌ ausente (bloco GA4 do `tracker.js` fica inativo; ok se não usar) |
+
+> O `META_PIXEL_ID` é `[vars]` no `wrangler.toml`, então viaja no git e sobreviveu à
+> migração. O `META_CAPI_TOKEN` é secret e mora só no painel — ficou na conta antiga.
+> Resultado: URL do CAPI saía com `access_token=undefined`, o Facebook rejeitava e o
+> `catch` engolia. Hoje o `tracker.js` grava `CONFIG AUSENTE: …` em `events.meta_response`
+> em vez de falhar calado.
+
+### Perfis cf nesta máquina
+`fluxxo-pet-novo` → conta atual `f16ea8ca…` (**usar este**).
+`fluxxo-pet` → conta **antiga** `e4a039cf…` — não usar.
+⚠️ Em shell não-interativo o `cf-on` falha com "Profile not found" porque `$CF_TOKENS`
+não vem definido. Contornar com:
+`export CF_CONFIG="$HOME/.config/cloudflare"; export CF_TOKENS="$CF_CONFIG/tokens"`
