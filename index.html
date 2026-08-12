@@ -223,6 +223,21 @@
     .btn-sub:hover  { background: #c42020; transform: translateY(-2px); }
     .btn-sub:active { transform: translateY(0); }
 
+    /* Formulario em 2 etapas: nome+email, depois whatsapp+petshop. */
+    .step-count { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--sage); margin-bottom: 12px; }
+    .step-count b { color: var(--blue); font-weight: 700; }
+    #fstep2[hidden], #fstep1[hidden] { display: none; }
+    #fstep1, #fstep2 { animation: formIn 0.24s ease-out; }
+    .ferr { display: none; font-size: 0.78rem; color: var(--red);
+      margin: -4px 0 10px; line-height: 1.4; }
+    .ferr.show { display: block; }
+    .field.bad input { border-color: var(--red); }
+    .btn-back { width: 100%; background: none; border: none; cursor: pointer;
+      font-family: 'Satoshi', sans-serif; font-size: 0.8rem; color: var(--sage);
+      padding: 12px 0 2px; transition: color 0.2s; }
+    .btn-back:hover { color: var(--dark); }
+
     /* O formulario do hero comeca fechado e abre no clique do #revealBtn.
        [hidden] explicito porque o display:flex/grid de um reset venceria o
        comportamento padrao do atributo. */
@@ -666,15 +681,27 @@
         </button>
 
         <div id="leadFormWrap" hidden>
-        <form id="leadForm" onsubmit="handleSubmit(event)">
-          <div class="field"><input type="text" id="nome" placeholder="Seu nome completo" autocomplete="given-name" required /></div>
-          <div class="field"><input type="text" id="petshop" placeholder="Nome do seu Pet Shop" required /></div>
-          <div class="field">
-            <input type="tel" id="whatsapp" placeholder="WhatsApp com DDD" autocomplete="tel" inputmode="numeric" required />
-            <p class="hint">Enviaremos o diagnóstico por lá</p>
+        <p class="step-count"><b id="stepNum">1</b> de 2</p>
+        <form id="leadForm" onsubmit="handleSubmit(event)" novalidate>
+          <!-- ETAPA 1 -->
+          <div id="fstep1">
+            <div class="field"><input type="text" id="nome" placeholder="Seu nome completo" autocomplete="name" /></div>
+            <div class="field"><input type="email" id="email" placeholder="Seu melhor e-mail" autocomplete="email" /></div>
+            <p class="ferr" id="ferr1"></p>
+            <button type="button" class="btn-sub" onclick="formStep2()">Continuar &rarr;</button>
           </div>
-          <div class="field"><input type="email" id="email" placeholder="E-mail" autocomplete="email" required /></div>
-          <button type="submit" class="btn-sub">Continuar para o diagnóstico →</button>
+
+          <!-- ETAPA 2 -->
+          <div id="fstep2" hidden>
+            <div class="field">
+              <input type="tel" id="whatsapp" placeholder="WhatsApp com DDD" autocomplete="tel" inputmode="numeric" maxlength="15" />
+              <p class="hint">Enviaremos o diagnóstico por lá</p>
+            </div>
+            <div class="field"><input type="text" id="petshop" placeholder="Nome do seu Pet Shop" autocomplete="organization" /></div>
+            <p class="ferr" id="ferr2"></p>
+            <button type="submit" class="btn-sub">Continuar para o diagnóstico →</button>
+            <button type="button" class="btn-back" onclick="formStep1()">&larr; Voltar</button>
+          </div>
         </form>
         </div>
         <p class="trust" id="heroTrust">
@@ -1057,12 +1084,81 @@
       return true;
     }
 
+    // ── Formulario do hero em 2 etapas ────────────────────────────────────────
+    // Etapa 1 pede nome e e-mail; etapa 2, WhatsApp e pet shop. Menos campos de
+    // cara reduz o atrito, e quem investe na 1a tende a terminar a 2a.
+    // O form tem novalidate: a validacao HTML nativa nao serve aqui, porque
+    // campo required escondido na outra etapa trava o submit sem dizer o porque.
+    function fmark(id, ok) {
+      var el = document.getElementById(id);
+      if (el && el.closest('.field')) el.closest('.field').classList.toggle('bad', !ok);
+      return ok;
+    }
+    function fmsg(boxId, texto) {
+      var b = document.getElementById(boxId);
+      if (!b) return;
+      b.textContent = texto || '';
+      b.classList.toggle('show', !!texto);
+    }
+    function fdigitos(v) {
+      var d = (v || '').replace(/\D/g, '');
+      // Quem digita "+55 11 99999-9999" seria barrado por ter 13 digitos.
+      // Tira o codigo do pais antes de contar.
+      if (d.length > 11 && d.slice(0, 2) === '55') d = d.slice(2);
+      return d;
+    }
+
+    function formStep2() {
+      var nome  = document.getElementById('nome').value.trim();
+      var email = document.getElementById('email').value.trim();
+      var okN = fmark('nome',  nome.length >= 3);
+      var okE = fmark('email', /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email));
+      if (!okN || !okE) {
+        fmsg('ferr1', !okN ? 'Digite seu nome completo.' : 'Digite um e-mail válido.');
+        document.getElementById(!okN ? 'nome' : 'email').focus();
+        return;
+      }
+      fmsg('ferr1', '');
+      document.getElementById('fstep1').hidden = true;
+      document.getElementById('fstep2').hidden = false;
+      document.getElementById('stepNum').textContent = '2';
+      // Mede a passagem de etapa: separa "nao comecou" de "parou no meio".
+      try { gtag('event','form_step_1',{ send_to:'G-3L4M9LVX7W', form_id:'hero_leadForm' }); } catch(e){}
+      if (window.innerWidth >= 900) document.getElementById('whatsapp').focus({ preventScroll: true });
+    }
+
+    function formStep1() {
+      document.getElementById('fstep2').hidden = true;
+      document.getElementById('fstep1').hidden = false;
+      document.getElementById('stepNum').textContent = '1';
+      fmsg('ferr2', '');
+    }
+
     function handleSubmit(e) {
       e.preventDefault();
-      leadData = { nome:document.getElementById('nome').value.trim(), petshop:document.getElementById('petshop').value.trim(), whatsapp:document.getElementById('whatsapp').value.trim(), email:document.getElementById('email').value.trim(), _formSource:'hero' };
+      var whats = document.getElementById('whatsapp').value.trim();
+      var pet   = document.getElementById('petshop').value.trim();
+      var nd    = fdigitos(whats).length;
+      var okW = fmark('whatsapp', nd === 10 || nd === 11);
+      var okP = fmark('petshop',  pet.length >= 2);
+      if (!okW || !okP) {
+        fmsg('ferr2', !okW ? 'Informe um WhatsApp válido com DDD.' : 'Informe o nome do seu pet shop.');
+        document.getElementById(!okW ? 'whatsapp' : 'petshop').focus();
+        return;
+      }
+      fmsg('ferr2', '');
+      leadData = { nome:document.getElementById('nome').value.trim(), petshop:pet, whatsapp:whats, email:document.getElementById('email').value.trim(), _formSource:'hero' };
       track('Lead',{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{currency:'BRL'});
       openModal();
     }
+
+    // Tira a marca de erro assim que a pessoa corrige
+    ['nome','email','whatsapp','petshop'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', function(){
+        if (el.closest('.field')) el.closest('.field').classList.remove('bad');
+      });
+    });
 
     function handleSubmitB(e) {
       e.preventDefault();
