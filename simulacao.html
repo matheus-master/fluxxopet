@@ -1,0 +1,968 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Descubra em menos de 1 minuto se o seu pet shop está pagando imposto a mais no Simples Nacional. Simulação gratuita." />
+  <title>Simulação gratuita do Simples Nacional – Fluxxo Pet</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,701&display=swap" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:   #E53030;
+      --blue:  #1232C8;
+      --dark:  #091040;
+      --mid:   #0D1B6B;
+      --sage:  #7A87B8;
+      --white: #ffffff;
+      --light: #f0f3ff;
+    }
+
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--white);
+      color: var(--dark);
+      font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── TIPOGRAFIA DE TÍTULO ──
+       Tudo em Satoshi, caixa baixa. A Anton foi removida da página em
+       2026-08-06: display condensada em CAIXA ALTA dava ar de cartaz.  */
+    .hero-title, .sec-title, .split-h, .how-title, .cta-title,
+    .bc h3, .step-t, .t-name, .nav-logo, .footer-logo {
+      font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 70px;
+      background: rgba(255,255,255,0.93);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(9,16,64,0.08);
+      z-index: 100;
+      display: flex; align-items: center;
+      padding: 0 32px;
+    }
+    .nav-in {
+      width: 100%; max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 1.22rem; letter-spacing: -0.01em;
+      color: var(--dark); text-decoration: none;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .nav-logo .dot { color: var(--red); }
+    .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 0.87rem; font-weight: 500; color: rgba(9,16,64,0.6); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--dark); }
+    .nav-right { display: flex; align-items: center; gap: 18px; }
+    .nav-login { font-size: 0.87rem; font-weight: 500; color: rgba(9,16,64,0.55); text-decoration: none; }
+    .nav-cta {
+      background: var(--blue); color: var(--white);
+      font-family: 'Satoshi', sans-serif; font-size: 0.84rem; font-weight: 700;
+      padding: 9px 20px; border-radius: 999px; border: none; cursor: pointer;
+      text-decoration: none; transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: var(--red); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero-wrap { padding-top: 70px; }
+    .hero {
+      min-height: calc(100svh - 70px);
+      display: grid; grid-template-columns: 1fr 420px;
+      gap: 64px; align-items: center;
+      padding: 80px 32px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 24px;
+    }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--red); flex-shrink: 0;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.5; transform:scale(1.4); }
+    }
+    .hero-title {
+      font-size: clamp(2.3rem, 3.6vw, 3.5rem);
+      line-height: 1.1; color: var(--blue);
+      margin-bottom: 26px; max-width: 620px;
+    }
+    .hero-title .t-red { color: var(--dark); }
+
+    /* ── HERO VIDEO ── */
+    .hero-video {
+      position: relative;
+      width: 100%; max-width: 500px;
+      aspect-ratio: 16 / 9;
+      margin-bottom: 32px;
+      border-radius: 12px; overflow: hidden;
+      background: var(--dark);
+      box-shadow: 0 8px 24px rgba(9,16,64,0.10);
+    }
+    .hero-video iframe {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      border: 0; display: block;
+    }
+    .hero-video.is-placeholder {
+      display: flex; align-items: center; justify-content: center;
+      background: var(--light); box-shadow: none;
+      border: 2px dashed rgba(18,50,200,0.32);
+      color: var(--sage); text-align: center; padding: 20px;
+      font-size: 0.86rem; font-weight: 500; line-height: 1.5;
+    }
+
+    /* capa clicável: o player do YouTube só carrega no clique */
+    .vid-play {
+      position: absolute; inset: 0; width: 100%; padding: 0;
+      border: none; cursor: pointer; background: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .vid-play img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .vid-play::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(9,16,64,0.30), rgba(9,16,64,0) 55%);
+    }
+    .vid-play-btn {
+      position: relative; z-index: 1;
+      width: 74px; height: 74px; border-radius: 50%;
+      background: rgba(9,16,64,0.55);
+      backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .vid-play:hover .vid-play-btn { background: var(--red); transform: scale(1.07); }
+    .vid-play-btn svg { width: 26px; height: 26px; fill: var(--white); margin-left: 4px; }
+
+    .vid-cap { max-width: 500px; text-align: center; margin: -6px 0 30px; }
+    .vid-cap strong {
+      display: block; font-style: italic; font-weight: 700;
+      font-size: 0.97rem; color: var(--blue); margin-bottom: 3px;
+    }
+    .vid-cap span { font-size: 0.87rem; color: rgba(9,16,64,0.6); }
+    /* ── STATS (faixa limpa, sem card) ──
+       Cada rótulo cabe em uma linha na largura disponível, então as três
+       colunas terminam na mesma altura sem precisar de truque de grid.  */
+    .hero-stats { display: flex; align-items: stretch; max-width: 620px; }
+    .h-stat { padding: 0 24px; border-left: 1px solid rgba(9,16,64,0.13); }
+    .h-stat:first-child { padding-left: 0; border-left: none; }
+    .h-stat strong {
+      display: block; font-family: 'Satoshi', sans-serif; font-weight: 700;
+      font-size: 1.6rem; color: var(--blue); line-height: 1; margin-bottom: 5px;
+    }
+    .h-stat b {
+      display: block; font-size: 0.79rem; font-weight: 700;
+      color: var(--dark); line-height: 1.25;
+    }
+    .h-stat span {
+      display: block; font-size: 0.72rem; color: var(--sage); line-height: 1.3;
+    }
+    .stats-note { font-size: 0.66rem; color: var(--sage); margin-top: 13px; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border: 1px solid rgba(18,50,200,0.18);
+      border-top: 4px solid var(--blue);
+      border-radius: 12px; padding: 40px 36px;
+      box-shadow: 0 10px 28px rgba(9,16,64,0.09);
+    }
+    .card-title {
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
+      font-size: 1.65rem; line-height: 1.05; color: var(--dark); margin-bottom: 4px;
+    }
+    .card-title .red { color: var(--blue); }
+    .card-sub { font-size: 0.81rem; color: var(--sage); margin-bottom: 26px; }
+
+    .field { margin-bottom: 14px; }
+    .field input {
+      width: 100%; background: var(--white);
+      border: 1px solid rgba(9,16,64,0.16); border-radius: 12px;
+      padding: 15px 17px; font-family: 'Satoshi', sans-serif;
+      font-size: 0.92rem; color: var(--dark); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(18,50,200,0.09); }
+    .field input::placeholder { color: var(--sage); }
+    .hint { font-size: 0.69rem; color: var(--sage); margin-top: 4px; padding-left: 2px; }
+
+    .btn-sub {
+      width: 100%; background: var(--red); color: var(--white);
+      font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1rem;
+      letter-spacing: 0.04em;
+      border: none; border-radius: 10px; padding: 15px 20px;
+      cursor: pointer; margin-top: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-sub:hover  { background: #c42020; transform: translateY(-2px); }
+    .btn-sub:active { transform: translateY(0); }
+
+    /* Formulario em 2 etapas: nome+email, depois whatsapp+petshop. */
+    .step-count { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--sage); margin-bottom: 12px; }
+    .step-count b { color: var(--blue); font-weight: 700; }
+    #fstep2[hidden], #fstep1[hidden] { display: none; }
+    #fstep1, #fstep2 { animation: formIn 0.24s ease-out; }
+    .ferr { display: none; font-size: 0.78rem; color: var(--red);
+      margin: -4px 0 10px; line-height: 1.4; }
+    .ferr.show { display: block; }
+    .field.bad input { border-color: var(--red); }
+    .btn-back { width: 100%; background: none; border: none; cursor: pointer;
+      font-family: 'Satoshi', sans-serif; font-size: 0.8rem; color: var(--sage);
+      padding: 12px 0 2px; transition: color 0.2s; }
+    .btn-back:hover { color: var(--dark); }
+
+    /* O formulario do hero comeca fechado e abre no clique do #revealBtn.
+       [hidden] explicito porque o display:flex/grid de um reset venceria o
+       comportamento padrao do atributo. */
+    #leadFormWrap[hidden] { display: none; }
+    #leadFormWrap { animation: formIn 0.28s ease-out; }
+    @keyframes formIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) { #leadFormWrap { animation: none; } }
+
+    .trust {
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      font-size: 0.71rem; color: var(--sage); margin-top: 14px;
+    }
+    .trust svg { width: 11px; height: 11px; stroke: var(--sage); }
+
+    /* ── PROOF BAR ── */
+    .proof-bar { background: var(--blue); padding: 26px 32px; }
+    /* Era flex-wrap com as divisorias em elementos .pv soltos: ao quebrar
+       linha sobrava divisoria orfa pendurada na ponta. Virou grid de colunas
+       fixas, com a divisoria desenhada pelo border-left do proprio item —
+       assim ela nunca existe sem um item do lado. */
+    .proof-bar-in {
+      max-width: 1080px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      align-items: center;
+    }
+    .pv { display: none; }
+    .proof-item {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      padding: 2px 20px;
+      border-left: 1px solid rgba(255,255,255,0.18);
+    }
+    .proof-item:first-child { border-left: none; }
+    .proof-item strong { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.4rem; color: var(--white); line-height: 1; white-space: nowrap; }
+    .proof-item span { font-size: 0.76rem; color: rgba(255,255,255,0.66); font-weight: 500; max-width: 94px; line-height: 1.3; }
+
+    /* ── SPLIT ── */
+    .split { display: grid; grid-template-columns: 1fr 1fr; }
+    .split-l { background: var(--dark); padding: 80px 60px; }
+    .split-r { background: var(--blue); padding: 80px 60px; border-left: 4px solid var(--red); }
+    .split-lbl {
+      font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 0.72rem;
+      letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 28px;
+    }
+    .split-l .split-lbl { color: rgba(255,255,255,0.64); }
+    .split-r .split-lbl { color: rgba(255,255,255,0.75); }
+    .split-h {
+      font-size: clamp(1.9rem, 3vw, 2.6rem);
+      line-height: 1.12; margin-bottom: 34px;
+    }
+    .split-l .split-h { color: rgba(255,255,255,0.86); }
+    .split-r .split-h { color: var(--white); }
+    .split-items { display: flex; flex-direction: column; gap: 16px; }
+    .split-item { display: flex; align-items: flex-start; gap: 13px; font-size: 0.9rem; line-height: 1.55; }
+    .split-l .split-item { color: rgba(255,255,255,0.84); }
+    .split-r .split-item { color: rgba(255,255,255,0.92); }
+    .ico-x, .ico-ck {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    /* #E53030 sobre marinho fica escuro demais e o circulo vira uma mancha.
+       Coral mais claro le como "erro" sem sumir no fundo. */
+    .ico-x  { background: rgba(255,107,107,0.16); }
+    .ico-x  svg { width: 10px; height: 10px; stroke: #FF6B6B; }
+    .ico-ck { background: rgba(255,255,255,0.15); }
+    .ico-ck svg { width: 10px; height: 10px; stroke: white; }
+
+    /* ── BENTO ── */
+    .bento-wrap { padding: 96px 32px; max-width: 1200px; margin: 0 auto; }
+    .sec-lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+    .sec-title {
+      font-size: clamp(2rem, 3.2vw, 2.9rem);
+      line-height: 1.12;
+      color: var(--dark); margin-bottom: 46px;
+    }
+    .sec-title .red { color: var(--blue); }
+
+    .bento { display: grid; grid-template-columns: repeat(3,1fr); grid-auto-rows: 280px; gap: 14px; }
+    .bc {
+      border-radius: 12px; padding: 34px 30px; overflow: hidden;
+      position: relative;
+      transition: transform 300ms cubic-bezier(0.4,0,0.2,1), box-shadow 300ms cubic-bezier(0.4,0,0.2,1);
+    }
+    .bc:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(9,16,64,0.08); }
+    .bc.lt { background: var(--light); border: 1px solid rgba(9,16,64,0.08); }
+    .bc.dk { background: var(--dark); }
+    .bc.bl { background: var(--blue); }
+    .bc.s2 { grid-column: span 2; }
+
+    .b-ico { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+    .lt .b-ico { background: rgba(18,50,200,0.10); }
+    .dk .b-ico { background: rgba(255,255,255,0.10); }
+    .bl .b-ico { background: rgba(255,255,255,0.15); }
+    .b-ico svg { width: 20px; height: 20px; }
+    .lt .b-ico svg { stroke: var(--blue); }
+    .dk .b-ico svg, .bl .b-ico svg { stroke: white; }
+
+    .bc h3 { font-size: 1.22rem; line-height: 1.2; margin-bottom: 10px; }
+    .lt h3 { color: var(--dark); }
+    .dk h3, .bl h3 { color: var(--white); }
+    .bc p { font-size: 0.84rem; line-height: 1.6; }
+    .lt p { color: rgba(9,16,64,0.58); }
+    .dk p { color: rgba(255,255,255,0.48); }
+    .bl p { color: rgba(255,255,255,0.72); }
+
+    .b-tag {
+      position: absolute; top: 26px; right: 26px;
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 999px;
+    }
+    .lt .b-tag { background: rgba(229,48,48,0.10); color: var(--red); border: 1px solid rgba(229,48,48,0.22); }
+    .dk .b-tag, .bl .b-tag { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15); }
+
+    /* mockup inside bento */
+    .b-mockup {
+      position: absolute; bottom: -16px; right: -8px;
+      width: 52%; background: white;
+      border-radius: 12px 12px 0 0;
+      border: 1px solid rgba(9,16,64,0.09);
+      box-shadow: 0 -8px 36px rgba(9,16,64,0.09);
+      overflow: hidden;
+    }
+    .m-bar { background: #f0f3ff; padding: 8px 12px; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid rgba(9,16,64,0.06); }
+    .m-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .m-body { padding: 12px; }
+    .m-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; margin-bottom: 5px; font-size: 0.71rem; }
+    .m-row.g { background: rgba(34,197,94,0.10); color: #15803d; font-weight: 600; }
+    .m-row.b { background: rgba(18,50,200,0.07); color: var(--blue); font-weight: 500; }
+    .m-row.s { background: rgba(9,16,64,0.04); color: var(--sage); }
+
+    /* ── HOW IT WORKS ── */
+    .how-wrap { background: var(--dark); padding: 96px 32px; }
+    .how-in { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 80px; align-items: start; }
+    .how-sticky { position: sticky; top: 90px; }
+    .how-lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
+    .how-title { font-size: clamp(2.2rem, 3.6vw, 3.2rem); line-height: 1.1; color: var(--white); }
+    .how-title .red { color: var(--blue); }
+
+    .steps { display: flex; flex-direction: column; }
+    .step { padding: 36px 0; border-top: 1px solid rgba(255,255,255,0.14); display: grid; grid-template-columns: 72px 1fr; gap: 28px; align-items: start; }
+    .step:last-child { border-bottom: 1px solid rgba(255,255,255,0.14); }
+    .step-n { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 4.5rem; line-height: 1; color: rgba(229,48,48,0.55); transition: color 0.3s; text-align: center; }
+    .step:hover .step-n { color: var(--red); }
+    .step-t { font-size: 1.22rem; color: var(--white); margin-bottom: 8px; line-height: 1.25; }
+    .step-d { font-size: 0.88rem; color: rgba(255,255,255,0.68); line-height: 1.65; }
+
+    /* ── TESTIMONIALS ── */
+    .testi-wrap { padding: 96px 32px; max-width: 1200px; margin: 0 auto; }
+    .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; align-items: center; }
+    .tc {
+      border-radius: 12px; padding: 30px 26px;
+      transition: transform 300ms cubic-bezier(0.4,0,0.2,1), box-shadow 300ms cubic-bezier(0.4,0,0.2,1);
+    }
+    .tc:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(9,16,64,0.07); }
+    .tc.lite { background: white; border: 1px solid rgba(9,16,64,0.08); }
+    .tc.dark { background: var(--dark); transform: translateY(14px); }
+    .tc.dark:hover { transform: translateY(10px); }
+    .stars { display: flex; gap: 2px; margin-bottom: 16px; }
+    .stars svg { width: 15px; height: 15px; fill: var(--red); }
+    .t-body { font-size: 0.9rem; line-height: 1.72; margin-bottom: 22px; font-weight: 500; }
+    .lite .t-body { color: rgba(9,16,64,0.72); }
+    .dark .t-body { color: rgba(255,255,255,0.78); }
+    .t-author { display: flex; align-items: center; gap: 12px; }
+    .t-av {
+      width: 42px; height: 42px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 0.82rem; flex-shrink: 0;
+    }
+    .lite .t-av { background: var(--light); color: var(--blue); }
+    .dark .t-av { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
+    .t-name { font-size: 0.95rem; }
+    .lite .t-name { color: var(--dark); }
+    .dark .t-name { color: var(--white); }
+    .t-role { font-size: 0.73rem; color: var(--sage); }
+
+    /* ── FINAL CTA ── */
+    .cta-sec { background: var(--dark); padding: 100px 32px; position: relative; overflow: hidden; }
+    .cta-deco {
+      position: absolute;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
+      font-size: 20vw; letter-spacing: -0.03em;
+      color: rgba(255,255,255,0.07); line-height: 0.85;
+      pointer-events: none; user-select: none; white-space: nowrap;
+    }
+    .cta-deco.t { top: -10px; left: -10px; }
+    .cta-deco.b { bottom: -10px; right: -10px; }
+    .cta-in { max-width: 680px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
+    .cta-title { font-size: clamp(2.1rem, 4vw, 3.2rem); line-height: 1.12; color: var(--white); margin-bottom: 18px; }
+    .cta-sub { font-size: 1.05rem; color: rgba(255,255,255,0.78); max-width: 460px; margin: 0 auto 44px; line-height: 1.65; }
+    .cta-card { background: white; border-radius: 12px; padding: 36px 32px; box-shadow: 0 12px 32px rgba(0,0,0,0.14); text-align: left; }
+    .cta-card-title { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.25rem; color: var(--dark); margin-bottom: 20px; }
+    .btn-dark {
+      width: 100%; background: var(--red); color: var(--white);
+      font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.04em; border: none; border-radius: 10px; padding: 15px 20px;
+      cursor: pointer; margin-top: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-dark:hover { background: #c42020; transform: translateY(-2px) scale(1.02); }
+
+    /* ── SIMULATOR / RESULT ── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .sim-panel, .result-panel { animation: fadeUp 0.35s ease; }
+    .sim-title { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.25rem; color:var(--dark); text-align:center; margin-bottom:4px; letter-spacing:0.02em; }
+    .sim-greeting { font-size:0.8rem; color:var(--sage); text-align:center; margin-bottom:20px; line-height:1.5; }
+    .sim-lbl { font-size:0.77rem; font-weight:600; color:var(--dark); margin-bottom:6px; display:flex; align-items:center; gap:5px; }
+    .diag-card { background:var(--mid); border-radius:12px; padding:22px 18px; margin-bottom:12px; }
+    .diag-title { font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.95rem; color:var(--white); margin-bottom:14px; display:flex; align-items:center; gap:8px; letter-spacing:0.03em; line-height:1.2; }
+    .diag-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.15); font-size:0.8rem; }
+    .diag-row:last-of-type { border-bottom:none; }
+    .dlbl { color:rgba(255,255,255,0.9); display:flex; align-items:center; gap:5px; }
+    .dval { font-weight:700; color:var(--white); white-space:nowrap; font-variant-numeric:tabular-nums; flex-shrink:0; }
+    .diag-total { display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.22); border-radius:8px; padding:11px 14px; margin-top:10px; gap:8px; }
+    .diag-total .dlbl { font-size:0.84rem; color:rgba(255,255,255,0.9); font-weight:600; }
+    .diag-total .dval { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.1rem; }
+    .diag-anual { display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.32); border:1.5px solid rgba(255,208,0,0.45); border-radius:9px; padding:12px 14px; margin-top:8px; gap:8px; }
+    .diag-anual .dlbl { font-size:0.84rem; color:rgba(255,255,255,0.95); font-weight:700; }
+    .diag-anual .dval { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.3rem; color:#FFD000; }
+    .diag-msg { text-align:center; margin-top:14px; }
+    .diag-msg p { font-size:0.79rem; color:rgba(255,255,255,0.92); font-weight:600; line-height:1.55; }
+    .diag-msg .hl-gold { color:#FFD000; margin-top:3px; }
+    .wa-card { background:var(--light); border:1px solid rgba(9,16,64,0.08); border-radius:12px; padding:18px 16px; text-align:center; }
+    .wa-card-title { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1rem; color:var(--dark); margin-bottom:5px; line-height:1.2; }
+    .wa-card-sub { font-size:0.76rem; color:var(--sage); margin-bottom:14px; line-height:1.5; }
+    .btn-wa { width:100%; background:#25D366; color:var(--white); font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.88rem; letter-spacing:0.04em; border:none; border-radius:10px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.2s,transform 0.15s; text-decoration:none; }
+    .btn-wa:hover { background:#1ebe5c; transform:translateY(-2px); }
+
+    /* ── FOOTER ── */
+    .footer { background: var(--dark); padding: 26px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-logo { font-size: 0.98rem; color: rgba(255,255,255,0.38); display: flex; align-items: center; gap: 8px; }
+    .footer-copy { font-size: 0.77rem; color: rgba(255,255,255,0.26); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; gap: 40px; padding: 52px 20px; min-height: unset; }
+      .bento-wrap { padding: 64px 20px; }
+      .how-wrap { padding: 64px 20px; }
+      .how-in { grid-template-columns: 1fr; gap: 40px; }
+      .how-sticky { position: static; }
+      .testi-wrap { padding: 64px 20px; }
+      .cta-sec { padding: 64px 20px; }
+      .split { grid-template-columns: 1fr; }
+      .split-l, .split-r { padding: 52px 28px; }
+      .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
+      .bc.s2 { grid-column: span 2; }
+      .bc { min-height: 200px; }
+      .b-mockup { display: none; }
+      .testi-grid { grid-template-columns: 1fr; }
+      .tc.dark { transform: translateY(0); }
+      .tc.dark:hover { transform: translateY(-4px); }
+      .hero-stats { max-width: none; }
+      .h-stat { padding: 0 18px; }
+      .hero-video { max-width: none; margin-bottom: 28px; border-radius: 12px; }
+      .vid-cap { max-width: none; }
+      .split-h { margin-bottom: 26px; }
+
+      /* 4 colunas nao cabem no tablet: vira 2x2. Os itens sao os filhos
+         1,3,5,7 (as .pv escondidas contam), entao o 5 abre a 2a linha e
+         perde a divisoria da esquerda. */
+      .proof-bar-in { grid-template-columns: repeat(2, 1fr); row-gap: 24px; }
+      .proof-item:nth-child(5) { border-left: none; }
+
+      /* No mobile o formulario so aparecia depois dos 3 stats: o card e a
+         segunda coluna inteira do grid, e as colunas empilham. display:contents
+         dissolve o wrapper da coluna 1, os filhos viram itens do grid e ai da
+         pra ordenar um por um. Com gap:0 o espacamento volta a vir das margens
+         que esses elementos ja tinham. Desktop nao e afetado. */
+      .hero { gap: 0; }
+      .hero > div:not(.card) { display: contents; }
+      .hero .badge      { order: 1; justify-self: start; }
+      .hero .hero-title { order: 2; }
+      .hero .hero-video { order: 3; }
+      .hero .vid-cap    { order: 4; }
+      .hero > .card     { order: 5; margin-bottom: 40px; }
+      .hero .hero-stats { order: 6; }
+      .hero .stats-note { order: 7; }
+    }
+    @media (max-width: 560px) {
+      .nav { padding: 0 18px; }
+      .hero { padding: 44px 18px; }
+      .hero-title { font-size: clamp(1.9rem, 7.4vw, 2.4rem); }
+      /* empilha: divisoria vira linha horizontal */
+      .hero-stats { flex-direction: column; }
+      .h-stat { padding: 13px 0 0; border-left: none; border-top: 1px solid rgba(9,16,64,0.13); }
+      .h-stat:first-child { padding-top: 0; }
+      .h-stat strong { margin-bottom: 3px; }
+      .vid-play-btn { width: 60px; height: 60px; }
+      .vid-play-btn svg { width: 21px; height: 21px; }
+      .bento { grid-template-columns: 1fr; }
+      .bc.s2 { grid-column: span 1; }
+      .split-l, .split-r { padding: 44px 18px; }
+      .proof-bar { padding: 22px 14px; }
+      .proof-item { padding: 2px 10px; }
+      .proof-item strong { font-size: 1.2rem; }
+      .proof-item span { font-size: 0.72rem; max-width: 84px; }
+      .card, .cta-card { padding: 26px 18px; }
+      .bento-wrap, .testi-wrap { padding: 52px 18px; }
+      .how-wrap { padding: 52px 18px; }
+      .cta-sec { padding: 52px 18px; }
+      .cta-title { font-size: clamp(2.2rem, 10vw, 3rem); }
+      .cta-deco { display: none; }
+      .footer { padding: 20px 18px; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+    }
+
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; z-index: 1000;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .overlay.active { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--white); border: 1px solid rgba(9,16,64,0.10);
+      border-radius: 12px; width: 100%; max-width: 460px; overflow: hidden auto; max-height: 92vh;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.28s cubic-bezier(.22,.68,0,1.2);
+    }
+    .overlay.active .modal { transform: translateY(0) scale(1); }
+    .modal-progress { padding: 20px 28px 0; }
+    .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .progress-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); }
+    .progress-pct { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--blue); }
+    .progress-track { width: 100%; height: 4px; background: var(--light); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 90%; background: var(--blue); border-radius: 99px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+    .modal-body { padding: 22px 28px 28px; }
+    .modal-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); margin-bottom: 6px; }
+    .modal-question { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.45rem; line-height: 1.1; color: var(--dark); margin-bottom: 18px; }
+    .options { display: flex; flex-direction: column; gap: 8px; }
+    .opt {
+      background: var(--light); border: 1px solid rgba(9,16,64,0.10); border-radius: 10px;
+      padding: 12px 16px; font-family: 'Satoshi', sans-serif; font-size: 0.9rem; font-weight: 500;
+      color: rgba(9,16,64,0.68); text-align: left; cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+    .opt::before { content: ''; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--sage); flex-shrink: 0; transition: border-color 0.15s, background 0.15s; }
+    .opt:hover { border-color: rgba(18,50,200,0.35); background: rgba(18,50,200,0.05); color: var(--dark); }
+    .opt:hover::before { border-color: var(--blue); }
+    .opt.selected { border-color: var(--blue); background: rgba(18,50,200,0.08); color: var(--dark); }
+    .opt.selected::before { border-color: var(--blue); background: var(--blue); box-shadow: inset 0 0 0 3px var(--light); }
+    .modal-success { display: none; flex-direction: column; align-items: center; text-align: center; padding: 8px 0 4px; gap: 12px; }
+    .success-ico { width: 52px; height: 52px; border-radius: 50%; background: rgba(18,50,200,0.09); border: 1px solid rgba(18,50,200,0.2); display: flex; align-items: center; justify-content: center; }
+    .success-ico svg { width: 24px; height: 24px; stroke: var(--blue); }
+    .success-title { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.45rem; color: var(--dark); }
+    .success-desc { color: var(--sage); font-size: 0.84rem; line-height: 1.6; max-width: 320px; }
+    /* ── DOBRA UNICA (pagina /simulacao) ──────────────────────────────────
+       Uma coluna centrada: headline, subheadline e o formulario. Sem video,
+       sem stats, sem nada que dispute atencao com o objetivo da pagina.    */
+    .hero-solo {
+      grid-template-columns: 1fr;
+      max-width: 600px;
+      gap: 30px;
+      min-height: auto;
+      padding: 60px 24px 80px;
+      text-align: center;
+      align-items: start;
+    }
+    .hero-solo .badge { justify-content: center; }
+    .hero-solo .hero-title {
+      font-size: clamp(1.85rem, 5.2vw, 2.55rem);
+      max-width: none;
+      margin-bottom: 14px;
+    }
+    .solo-sub {
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: rgba(9,16,64,0.62);
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .hero-solo .card { text-align: left; }
+    @media (max-width: 560px) {
+      .hero-solo { padding: 40px 18px 56px; gap: 24px; }
+      .solo-sub { font-size: 0.97rem; }
+    }
+  </style>
+
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init','1338198531534558');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1338198531534558&ev=PageView&noscript=1"/></noscript>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3L4M9LVX7W"></script>
+  <script>
+  window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+  gtag('js',new Date());gtag('config','G-3L4M9LVX7W');
+  </script>
+</head>
+
+  <!-- NAV — enxuta: a pagina tem um objetivo so -->
+  <nav class="nav">
+    <div class="nav-in">
+      <a href="/" class="nav-logo">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <ellipse cx="8" cy="6" rx="2.3" ry="2.9" opacity=".9"/>
+          <ellipse cx="13" cy="5" rx="2.3" ry="2.9" opacity=".9"/>
+          <ellipse cx="18" cy="7" rx="2.1" ry="2.6" opacity=".9"/>
+          <ellipse cx="5.2" cy="11.5" rx="1.9" ry="2.4" opacity=".9"/>
+          <path d="M8.5 13 C6 17 7 21.5 12.5 22 C18 21.5 19 17 16.5 13 C14.8 10 10.2 10 8.5 13Z" opacity=".9"/>
+        </svg>
+        FLUXXO PET<span class="dot">.</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO — headline, subheadline e o formulario. Nada mais. -->
+  <div class="hero-wrap">
+    <div class="hero hero-solo">
+      <div class="solo-head">
+        <div class="badge"><span class="badge-dot"></span>Simulação gratuita</div>
+        <h1 class="hero-title">Descubra se está pagando imposto a mais no seu Simples Nacional.</h1>
+        <p class="solo-sub">Faça a simulação gratuita em menos de 1 minuto.</p>
+      </div>
+
+      <div class="card">
+        <p class="step-count"><b id="stepNum">1</b> de 2</p>
+        <form id="leadForm" onsubmit="handleSubmit(event)" novalidate>
+          <!-- ETAPA 1 -->
+          <div id="fstep1">
+            <div class="field"><input type="text" id="nome" placeholder="Seu nome completo" autocomplete="name" /></div>
+            <div class="field"><input type="email" id="email" placeholder="Seu melhor e-mail" autocomplete="email" /></div>
+            <p class="ferr" id="ferr1"></p>
+            <button type="button" class="btn-sub" onclick="formStep2()">Continuar &rarr;</button>
+          </div>
+
+          <!-- ETAPA 2 -->
+          <div id="fstep2" hidden>
+            <div class="field">
+              <input type="tel" id="whatsapp" placeholder="WhatsApp com DDD" autocomplete="tel" inputmode="numeric" maxlength="15" />
+              <p class="hint">Enviaremos o diagnóstico por lá</p>
+            </div>
+            <div class="field"><input type="text" id="petshop" placeholder="Nome do seu Pet Shop" autocomplete="organization" /></div>
+            <p class="ferr" id="ferr2"></p>
+            <button type="submit" class="btn-sub">Fazer minha simulação →</button>
+            <button type="button" class="btn-back" onclick="formStep1()">&larr; Voltar</button>
+          </div>
+        </form>
+        <p class="trust">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          100% gratuito &bull; Sem spam &bull; Dados protegidos
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-logo">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="rgba(255,255,255,0.38)">
+        <ellipse cx="8" cy="6" rx="2.3" ry="2.9"/><ellipse cx="13" cy="5" rx="2.3" ry="2.9"/>
+        <ellipse cx="18" cy="7" rx="2.1" ry="2.6"/><ellipse cx="5.2" cy="11.5" rx="1.9" ry="2.4"/>
+        <path d="M8.5 13 C6 17 7 21.5 12.5 22 C18 21.5 19 17 16.5 13 C14.8 10 10.2 10 8.5 13Z"/>
+      </svg>
+      FLUXXO PET
+    </div>
+    <span class="footer-copy">© 2025 Fluxxo Pet — Contabilidade para pets</span>
+  </div>
+
+  <!-- MODAL -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-progress">
+        <div class="progress-meta">
+          <span class="progress-label">Diagnóstico em andamento</span>
+          <span class="progress-pct" id="progressPct">90%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <div class="modal-body" id="modalQuestion">
+        <p class="modal-eyebrow">Para finalizar, responda</p>
+        <h3 class="modal-question">Qual o faturamento mensal do seu Pet Shop?</h3>
+        <div class="options">
+          <button class="opt" onclick="selectOption(this,'Até R$30 mil')">Até R$30 mil</button>
+          <button class="opt" onclick="selectOption(this,'R$50 mil')">R$50 mil</button>
+          <button class="opt" onclick="selectOption(this,'R$100 mil')">R$100 mil</button>
+          <button class="opt" onclick="selectOption(this,'R$200 mil')">R$200 mil</button>
+          <button class="opt" onclick="selectOption(this,'Mais de R$200 mil')">Mais de R$200 mil</button>
+        </div>
+      </div>
+      <div class="modal-body" id="modalSuccess" style="display:none;">
+        <div class="modal-success" style="display:flex;">
+          <div class="success-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="success-title">Diagnóstico Confirmado!</p>
+          <p class="success-desc">Recebemos suas informações, <strong id="successName"></strong>. Enviaremos o resultado pelo WhatsApp em instantes.</p>
+        </div>
+      </div>
+      <div class="modal-body" id="modalSimulator" style="display:none;">
+        <p class="sim-title" style="text-align:center;">Simulador de Impostos</p>
+        <p class="sim-greeting" id="simGreeting" style="text-align:center;">Preencha os dados — leva menos de 1 minuto</p>
+        <div class="field">
+          <p class="sim-lbl">💰 Faturamento Mensal Total (R$)</p>
+          <input type="tel" id="simFat" placeholder="Ex: 50000" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <p class="sim-lbl">🐾 Valor vendas de Ração (R$)</p>
+          <input type="tel" id="simRacao" placeholder="Ex: 20000" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <p class="sim-lbl">💊 Valor Medicamentos e Higiene (R$)</p>
+          <input type="tel" id="simMed" placeholder="Ex: 10000" inputmode="numeric" />
+        </div>
+        <button class="btn-sub" onclick="calcSimulator()">Calcular minha perda agora →</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    var leadData = {};
+    var REVENUE_EVENTS = { 'Até R$30 mil':'Lead30k','R$50 mil':'Lead50k','R$100 mil':'Lead100k','R$200 mil':'Lead200k','Mais de R$200 mil':'Lead200kMais' };
+
+    function genEventId() { return Date.now().toString(36) + Math.random().toString(36).substr(2,9); }
+    function getCookie(n) { var m=document.cookie.match(new RegExp('(?:^|;)\\s*'+n+'=([^;]*)')); return m?decodeURIComponent(m[1]):''; }
+
+    function track(eventName, userData, customData) {
+      var eid = genEventId();
+      var std = ['PageView','Lead'].indexOf(eventName) !== -1;
+      if (typeof fbq !== 'undefined') { std ? fbq('track',eventName,customData||{},{eventID:eid}) : fbq('trackCustom',eventName,customData||{},{eventID:eid}); }
+      fetch('/tracker',{ method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ event_name:eventName, event_id:eid, user_data:userData||{}, custom_data:customData||{},
+          source_url:window.location.href, fbp:getCookie('_fbp'), fbc:getCookie('_fbc'), session_id:getCookie('_krob_sid') })
+      }).catch(function(){});
+    }
+
+    track('PageView',{},{});
+
+    (function(){
+      var th=[25,50,75,95], fired={};
+      function sc(){
+        var st=window.pageYOffset||document.documentElement.scrollTop;
+        var wh=window.innerHeight||document.documentElement.clientHeight;
+        var dh=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,document.body.offsetHeight,document.documentElement.offsetHeight);
+        var p=Math.round((st+wh)/dh*100);
+        th.forEach(function(t){ if(!fired[t]&&p>=t){fired[t]=true;track('ScrollDepth'+t,{},{percent:t});} });
+      }
+      window.addEventListener('scroll',sc,{passive:true});
+    })();
+
+    function openModal() {
+      document.getElementById('progressFill').style.width='90%';
+      document.getElementById('progressPct').textContent='90%';
+      document.getElementById('modalQuestion').style.display='block';
+      document.getElementById('modalSuccess').style.display='none';
+      document.querySelectorAll('.opt').forEach(function(b){b.classList.remove('selected');b.disabled=false;});
+      document.getElementById('overlay').classList.add('active');
+      document.body.style.overflow='hidden';
+    }
+
+    var TAX_RATES = [
+      {ate:180000,   pisCofins:0.0062, icms:0.0136},
+      {ate:360000,   pisCofins:0.0113, icms:0.0248},
+      {ate:720000,   pisCofins:0.0147, icms:0.0318},
+      {ate:1800000,  pisCofins:0.0166, icms:0.0358},
+      {ate:3600000,  pisCofins:0.0222, icms:0.0479},
+      {ate:Infinity, pisCofins:0.0654, icms:0.0479}
+    ];
+
+    function fmtBRL(v) {
+      return 'R$ ' + v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+    }
+
+    function showSimulator() {
+      document.getElementById('progressFill').style.width = '95%';
+      document.getElementById('progressPct').textContent = '95%';
+      document.getElementById('modalQuestion').style.display = 'none';
+      document.getElementById('modalSuccess').style.display = 'none';
+      document.getElementById('modalSimulator').style.display = 'block';
+      document.getElementById('simGreeting').textContent = 'Olá, ' + leadData.nome + '! Preencha os dados — leva menos de 1 minuto';
+      document.getElementById('overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function calcSimulator() {
+      var fat = parseFloat((document.getElementById('simFat').value||'').replace(/\D/g,''))||0;
+      var racao = parseFloat((document.getElementById('simRacao').value||'').replace(/\D/g,''))||0;
+      var med = parseFloat((document.getElementById('simMed').value||'').replace(/\D/g,''))||0;
+      if (!fat) { document.getElementById('simFat').focus(); return; }
+      var fatAnual = fat * 12;
+      var bracket = TAX_RATES.find(function(b){ return fatAnual <= b.ate; }) || TAX_RATES[TAX_RATES.length-1];
+      var perdaICMS = racao * bracket.icms;
+      var perdaPIS = med * bracket.pisCofins;
+      var mensal = perdaICMS + perdaPIS;
+      var anual = mensal * 12;
+      if (leadData.id) {
+        fetch('/api/submit',{ method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ id:leadData.id, sim_fat:fat, sim_racao:racao, sim_med:med, perda_icms:perdaICMS, perda_pis:perdaPIS, perda_mensal:mensal, perda_anual:anual })
+        }).catch(function(){});
+      }
+      sessionStorage.setItem('sim_result', JSON.stringify({
+        nome: leadData.nome, petshop: leadData.petshop,
+        email: leadData.email||'', whatsapp: leadData.whatsapp||'',
+        icms: perdaICMS, pis: perdaPIS, mensal: mensal, anual: anual
+      }));
+      window.location.href = '/resultado';
+    }
+
+    // ── Formulario do hero em 2 etapas ────────────────────────────────────────
+    // Etapa 1 pede nome e e-mail; etapa 2, WhatsApp e pet shop. Menos campos de
+    // cara reduz o atrito, e quem investe na 1a tende a terminar a 2a.
+    // O form tem novalidate: a validacao HTML nativa nao serve aqui, porque
+    // campo required escondido na outra etapa trava o submit sem dizer o porque.
+    function fmark(id, ok) {
+      var el = document.getElementById(id);
+      if (el && el.closest('.field')) el.closest('.field').classList.toggle('bad', !ok);
+      return ok;
+    }
+    function fmsg(boxId, texto) {
+      var b = document.getElementById(boxId);
+      if (!b) return;
+      b.textContent = texto || '';
+      b.classList.toggle('show', !!texto);
+    }
+    function fdigitos(v) {
+      var d = (v || '').replace(/\D/g, '');
+      // Quem digita "+55 11 99999-9999" seria barrado por ter 13 digitos.
+      // Tira o codigo do pais antes de contar.
+      if (d.length > 11 && d.slice(0, 2) === '55') d = d.slice(2);
+      return d;
+    }
+
+    function formStep2() {
+      var nome  = document.getElementById('nome').value.trim();
+      var email = document.getElementById('email').value.trim();
+      var okN = fmark('nome',  nome.length >= 3);
+      var okE = fmark('email', /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email));
+      if (!okN || !okE) {
+        fmsg('ferr1', !okN ? 'Digite seu nome completo.' : 'Digite um e-mail válido.');
+        document.getElementById(!okN ? 'nome' : 'email').focus();
+        return;
+      }
+      fmsg('ferr1', '');
+      document.getElementById('fstep1').hidden = true;
+      document.getElementById('fstep2').hidden = false;
+      document.getElementById('stepNum').textContent = '2';
+      // Mede a passagem de etapa: separa "nao comecou" de "parou no meio".
+      try { gtag('event','form_step_1',{ send_to:'G-3L4M9LVX7W', form_id:'hero_leadForm' }); } catch(e){}
+      if (window.innerWidth >= 900) document.getElementById('whatsapp').focus({ preventScroll: true });
+    }
+
+    function formStep1() {
+      document.getElementById('fstep2').hidden = true;
+      document.getElementById('fstep1').hidden = false;
+      document.getElementById('stepNum').textContent = '1';
+      fmsg('ferr2', '');
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      var whats = document.getElementById('whatsapp').value.trim();
+      var pet   = document.getElementById('petshop').value.trim();
+      var nd    = fdigitos(whats).length;
+      var okW = fmark('whatsapp', nd === 10 || nd === 11);
+      var okP = fmark('petshop',  pet.length >= 2);
+      if (!okW || !okP) {
+        fmsg('ferr2', !okW ? 'Informe um WhatsApp válido com DDD.' : 'Informe o nome do seu pet shop.');
+        document.getElementById(!okW ? 'whatsapp' : 'petshop').focus();
+        return;
+      }
+      fmsg('ferr2', '');
+      leadData = { nome:document.getElementById('nome').value.trim(), petshop:pet, whatsapp:whats, email:document.getElementById('email').value.trim(), _formSource:'hero' };
+      track('Lead',{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{currency:'BRL'});
+      openModal();
+    }
+
+    // Tira a marca de erro assim que a pessoa corrige
+    ['nome','email','whatsapp','petshop'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', function(){
+        if (el.closest('.field')) el.closest('.field').classList.remove('bad');
+      });
+    });
+
+    function selectOption(btn, value) {
+      document.querySelectorAll('.opt').forEach(function(b){b.classList.remove('selected');});
+      btn.classList.add('selected');
+      document.querySelectorAll('.opt').forEach(function(b){b.disabled=true;});
+      leadData.faturamento = value;
+      var rev = REVENUE_EVENTS[value];
+      if (rev) track(rev,{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{faturamento:value,currency:'BRL'});
+      fetch('/api/submit',{ method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({nome:leadData.nome,petshop:leadData.petshop,whatsapp:leadData.whatsapp,email:leadData.email||'',faturamento:value})
+      }).then(function(r){return r.json();}).then(function(res){ if(res&&res.id) leadData.id=res.id; }).catch(function(){});
+      setTimeout(function(){document.getElementById('progressFill').style.width='100%';document.getElementById('progressPct').textContent='100%';},120);
+      setTimeout(function(){document.getElementById('successName').textContent=leadData.nome;document.getElementById('modalQuestion').style.display='none';document.getElementById('modalSuccess').style.display='block';},700);
+      if (leadData._formSource === 'hero') {
+        setTimeout(function(){ showSimulator(); }, 2200);
+      } else {
+        sessionStorage.setItem('lead_data', JSON.stringify({
+          nome:leadData.nome, petshop:leadData.petshop,
+          whatsapp:leadData.whatsapp, email:leadData.email||'', faturamento:value
+        }));
+        setTimeout(function(){window.location.href='/obrigado';},3000);
+      }
+    }
+
+    function closeModal() { document.getElementById('overlay').classList.remove('active'); document.body.style.overflow=''; }
+    document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      a.addEventListener('click',function(e){
+        var href = a.getAttribute('href');
+        // href="#" puro (o logo) quebrava aqui: querySelector('#') lanca excecao
+        if (!href || href === '#') return;
+
+        // Nesta pagina o formulario ja nasce aberto, entao nao ha nada para
+        // revelar: basta rolar ate o card.
+        if (href === '#leadForm') {
+          var card = document.querySelector('.hero .card');
+          if (card) { e.preventDefault(); card.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+        }
+
+        var el = document.querySelector(href);
+        if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
+      });
+    });
+  </script>
+</body>
