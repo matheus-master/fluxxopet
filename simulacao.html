@@ -664,27 +664,17 @@
       </div>
 
       <div class="card">
-        <p class="step-count"><b id="stepNum">1</b> de 2</p>
+        <!-- Formulario todo exposto: os 4 campos de uma vez, um unico envio. -->
         <form id="leadForm" onsubmit="handleSubmit(event)" novalidate>
-          <!-- ETAPA 1 -->
-          <div id="fstep1">
-            <div class="field"><input type="text" id="nome" placeholder="Seu nome completo" autocomplete="name" /></div>
-            <div class="field"><input type="email" id="email" placeholder="Seu melhor e-mail" autocomplete="email" /></div>
-            <p class="ferr" id="ferr1"></p>
-            <button type="button" class="btn-sub" onclick="formStep2()">Continuar &rarr;</button>
+          <div class="field"><input type="text" id="nome" placeholder="Seu nome completo" autocomplete="name" /></div>
+          <div class="field"><input type="email" id="email" placeholder="Seu melhor e-mail" autocomplete="email" /></div>
+          <div class="field">
+            <input type="tel" id="whatsapp" placeholder="(11) 99999-9999" autocomplete="tel" inputmode="numeric" />
+            <p class="hint">Enviaremos o diagnóstico por lá</p>
           </div>
-
-          <!-- ETAPA 2 -->
-          <div id="fstep2" hidden>
-            <div class="field">
-              <input type="tel" id="whatsapp" placeholder="WhatsApp com DDD" autocomplete="tel" inputmode="numeric" maxlength="15" />
-              <p class="hint">Enviaremos o diagnóstico por lá</p>
-            </div>
-            <div class="field"><input type="text" id="petshop" placeholder="Nome do seu Pet Shop" autocomplete="organization" /></div>
-            <p class="ferr" id="ferr2"></p>
-            <button type="submit" class="btn-sub">Fazer minha simulação →</button>
-            <button type="button" class="btn-back" onclick="formStep1()">&larr; Voltar</button>
-          </div>
+          <div class="field"><input type="text" id="petshop" placeholder="Nome do seu Pet Shop" autocomplete="organization" /></div>
+          <p class="ferr" id="ferr1"></p>
+          <button type="submit" class="btn-sub">Fazer minha simulação →</button>
         </form>
         <p class="trust">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -869,46 +859,51 @@
       return d;
     }
 
-    function formStep2() {
-      var nome  = document.getElementById('nome').value.trim();
-      var email = document.getElementById('email').value.trim();
-      var okN = fmark('nome',  nome.length >= 3);
-      var okE = fmark('email', /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email));
-      if (!okN || !okE) {
-        fmsg('ferr1', !okN ? 'Digite seu nome completo.' : 'Digite um e-mail válido.');
-        document.getElementById(!okN ? 'nome' : 'email').focus();
-        return;
-      }
-      fmsg('ferr1', '');
-      document.getElementById('fstep1').hidden = true;
-      document.getElementById('fstep2').hidden = false;
-      document.getElementById('stepNum').textContent = '2';
-      // Mede a passagem de etapa: separa "nao comecou" de "parou no meio".
-      try { gtag('event','form_step_1',{ send_to:'G-3L4M9LVX7W', form_id:'hero_leadForm' }); } catch(e){}
-      if (window.innerWidth >= 900) document.getElementById('whatsapp').focus({ preventScroll: true });
+    // Mascara do telefone. Sem ela, quem colava "+55 (71) 98234-6881" ficava
+    // preso: o campo cortava no limite de caracteres, sobravam 9 digitos, a
+    // validacao recusava e nao dava pra digitar mais nada. A mascara descarta
+    // o que nao e digito e limita a 11, entao o campo nunca entra nesse estado.
+    function mascaraTelefone(v) {
+      var d = fdigitos(v).slice(0, 11);
+      if (d.length <= 2)  return d.length ? '(' + d : '';
+      if (d.length <= 6)  return '(' + d.slice(0,2) + ') ' + d.slice(2);
+      if (d.length <= 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+      return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
     }
+    (function(){
+      var w = document.getElementById('whatsapp');
+      if (w) w.addEventListener('input', function(){ this.value = mascaraTelefone(this.value); });
+    })();
 
-    function formStep1() {
-      document.getElementById('fstep2').hidden = true;
-      document.getElementById('fstep1').hidden = false;
-      document.getElementById('stepNum').textContent = '1';
-      fmsg('ferr2', '');
-    }
-
+    // Formulario todo exposto: valida os 4 campos de uma vez no envio.
+    // Marca todos os campos errados juntos, em vez de revelar um problema por
+    // vez — com tudo na tela, corrigir de uma so vez e menos irritante.
     function handleSubmit(e) {
       e.preventDefault();
+      var nome  = document.getElementById('nome').value.trim();
+      var email = document.getElementById('email').value.trim();
       var whats = document.getElementById('whatsapp').value.trim();
       var pet   = document.getElementById('petshop').value.trim();
       var nd    = fdigitos(whats).length;
+
+      var okN = fmark('nome',     nome.length >= 3);
+      var okE = fmark('email',    /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email));
       var okW = fmark('whatsapp', nd === 10 || nd === 11);
       var okP = fmark('petshop',  pet.length >= 2);
-      if (!okW || !okP) {
-        fmsg('ferr2', !okW ? 'Informe um WhatsApp válido com DDD.' : 'Informe o nome do seu pet shop.');
-        document.getElementById(!okW ? 'whatsapp' : 'petshop').focus();
+
+      if (!okN || !okE || !okW || !okP) {
+        var msg = !okN ? 'Digite seu nome completo.'
+                : !okE ? 'Digite um e-mail válido.'
+                : !okW ? 'Informe um WhatsApp válido com DDD.'
+                :        'Informe o nome do seu pet shop.';
+        fmsg('ferr1', msg);
+        var primeiro = !okN ? 'nome' : !okE ? 'email' : !okW ? 'whatsapp' : 'petshop';
+        document.getElementById(primeiro).focus();
         return;
       }
-      fmsg('ferr2', '');
-      leadData = { nome:document.getElementById('nome').value.trim(), petshop:pet, whatsapp:whats, email:document.getElementById('email').value.trim(), _formSource:'hero' };
+
+      fmsg('ferr1', '');
+      leadData = { nome:nome, petshop:pet, whatsapp:whats, email:email, _formSource:'hero' };
       track('Lead',{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{currency:'BRL'});
       openModal();
     }

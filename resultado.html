@@ -15,10 +15,10 @@
   </script>
   <title>Seu Resultado – Fluxxo Pet</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" /></noscript>
+  <!-- Satoshi, a mesma da home. A Anton saiu: display condensada de cartaz
+       nao combina com uma pagina que apresenta numeros de imposto. -->
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,701&display=swap" />
 
   <!-- Meta Pixel -->
   <script>
@@ -56,7 +56,7 @@
 
     body {
       background: var(--off);
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
       color: var(--ink);
     }
@@ -85,7 +85,7 @@
     }
     .logo svg { width: 26px; height: 26px; }
     .logo-name {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
       font-size: 0.92rem;
       letter-spacing: 0.1em;
       color: #fff;
@@ -147,7 +147,7 @@
     .hero-headline strong { color: rgba(255,255,255,0.85); font-weight: 700; }
 
     .hero-amount {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
       font-size: clamp(2.8rem, 11vw, 4.2rem);
       line-height: 1;
       letter-spacing: 0.01em;
@@ -267,7 +267,7 @@
       margin-top: 1px;
     }
     .loss-amount {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
       font-size: 1.1rem;
       color: var(--red);
       white-space: nowrap;
@@ -295,7 +295,7 @@
       margin-top: 2px;
     }
     .mensal-amount {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
       font-size: 1.3rem;
       color: var(--ink);
       white-space: nowrap;
@@ -341,7 +341,7 @@
       margin-top: 3px;
     }
     .annual-val {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
       font-size: clamp(1.5rem, 5.5vw, 1.85rem);
       color: var(--gold);
       white-space: nowrap;
@@ -385,7 +385,7 @@
       border-left: 1px solid var(--border);
     }
     .proof-num {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
       font-size: 1.1rem;
       color: var(--blue);
       line-height: 1;
@@ -424,7 +424,7 @@
       margin-bottom: 8px;
     }
     .cta-title {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
       font-size: 1.45rem;
       letter-spacing: 0.02em;
       text-transform: uppercase;
@@ -456,6 +456,61 @@
     .btn-wa:hover  { background: var(--green2); transform: translateY(-2px); box-shadow: 0 8px 26px rgba(22,163,74,0.38); }
     .btn-wa:active { transform: translateY(0); box-shadow: none; }
 
+    /* ── CTA do hero: logo abaixo do valor ─────────────────────────────── */
+    .btn-wa-hero {
+      width: auto;
+      max-width: 420px;
+      margin: 30px auto 0;
+      justify-content: center;
+      gap: 10px;
+      padding: 17px 30px;
+      font-weight: 700;
+      font-size: 1.02rem;
+      border-radius: 12px;
+    }
+    .btn-wa-hero svg { width: 21px; height: 21px; flex-shrink: 0; }
+    .hero-cta-sub {
+      margin-top: 11px;
+      font-size: 0.79rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ── Barra fixa no rodape ──────────────────────────────────────────── */
+    .wa-bar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+      background: rgba(13,17,23,0.94);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255,255,255,0.10);
+      padding: 11px 16px calc(11px + env(safe-area-inset-bottom));
+      transform: translateY(105%);
+      transition: transform 0.28s ease;
+    }
+    .wa-bar.show { transform: translateY(0); }
+    .wa-bar-in {
+      max-width: 620px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    }
+    .wa-bar-txt { line-height: 1.2; min-width: 0; }
+    .wa-bar-txt b {
+      display: block; color: #fff; font-size: 1.05rem;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
+    }
+    .wa-bar-txt span { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+    .btn-wa-bar {
+      width: auto; flex-shrink: 0;
+      gap: 8px; padding: 13px 22px;
+      font-weight: 700; font-size: 0.92rem;
+      border-radius: 11px; box-shadow: none;
+    }
+    .btn-wa-bar svg { width: 18px; height: 18px; flex-shrink: 0; }
+    /* a barra nao pode cobrir o fim da pagina */
+    body { padding-bottom: 84px; }
+    @media (max-width: 460px) {
+      .wa-bar-txt span { display: none; }
+      .btn-wa-bar { padding: 13px 18px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .wa-bar { transition: none; } }
+
     .wa-icon-wrap {
       width: 38px;
       height: 38px;
@@ -470,7 +525,7 @@
 
     .wa-text { text-align: left; flex: 1; }
     .wa-line1 {
-      font-family: 'Anton', sans-serif;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
       font-size: 0.9rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -569,6 +624,28 @@
         <span class="pill">📊 Simples Nacional</span>
         <span class="pill">⚡ Recuperável agora</span>
       </div>
+
+      <!-- CTA no auge: a pessoa acabou de ver o valor. Antes o unico botao
+           ficava depois de todo o detalhamento, longe desse momento. -->
+      <a href="#" class="btn-wa btn-wa-hero js-wa" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Quero recuperar esse valor
+      </a>
+      <p class="hero-cta-sub">Resposta em até 5 minutos · Sem compromisso</p>
+    </div>
+  </div>
+
+  <!-- Barra fixa: o botao deixa de depender de onde a pessoa parou de rolar -->
+  <div class="wa-bar" id="waBar">
+    <div class="wa-bar-in">
+      <div class="wa-bar-txt">
+        <b id="waBarVal">R$ 0,00</b>
+        <span>recuperáveis por ano</span>
+      </div>
+      <a href="#" class="btn-wa btn-wa-bar js-wa" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Falar agora
+      </a>
     </div>
   </div>
 
@@ -654,7 +731,7 @@
         Apresente o resultado e nosso time analisa<br>como recuperar esses valores para o seu negócio.
       </p>
 
-      <a id="btnWA" href="#" class="btn-wa" target="_blank" rel="noopener">
+      <a id="btnWA" href="#" class="btn-wa js-wa" target="_blank" rel="noopener">
         <div class="wa-icon-wrap">
           <svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -702,8 +779,28 @@
           'Identificamos uma oportunidade para<br><strong>' + fn + '</strong>';
       }
 
-      var msg = encodeURIComponent('Olá! Tenho interesse na análise');
-      document.getElementById('btnWA').href = 'https://wa.me/5571982346881?text=' + msg;
+      // Agora sao tres botoes (hero, barra fixa e CTA do rodape). Por classe,
+      // e nao por id, senao so o primeiro receberia o link.
+      var msg = encodeURIComponent(
+        'Olá! Fiz a simulação no site e deu ' + fmtBRL(data.anual) +
+        ' por ano em impostos indevidos. Quero entender como recuperar.'
+      );
+      var linkWA = 'https://wa.me/5571982346881?text=' + msg;
+      document.querySelectorAll('.js-wa').forEach(function(a){ a.href = linkWA; });
+
+      document.getElementById('waBarVal').textContent = fmtBRL(data.anual);
+
+      // A barra so entra depois que a pessoa comeca a rolar: aparecer de cara,
+      // por cima do valor que ela acabou de ver, atrapalharia em vez de ajudar.
+      (function(){
+        var bar = document.getElementById('waBar');
+        function alterna(){
+          if (window.pageYOffset > 240) bar.classList.add('show');
+          else bar.classList.remove('show');
+        }
+        window.addEventListener('scroll', alterna, { passive: true });
+        alterna();
+      })();
 
       // ViewContent — evento de alta intenção (viu resultado do simulador)
       (function(){

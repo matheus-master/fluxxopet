@@ -694,7 +694,7 @@
           <!-- ETAPA 2 -->
           <div id="fstep2" hidden>
             <div class="field">
-              <input type="tel" id="whatsapp" placeholder="WhatsApp com DDD" autocomplete="tel" inputmode="numeric" maxlength="15" />
+              <input type="tel" id="whatsapp" placeholder="(11) 99999-9999" autocomplete="tel" inputmode="numeric" />
               <p class="hint">Enviaremos o diagnóstico por lá</p>
             </div>
             <div class="field"><input type="text" id="petshop" placeholder="Nome do seu Pet Shop" autocomplete="organization" /></div>
@@ -1107,6 +1107,22 @@
       if (d.length > 11 && d.slice(0, 2) === '55') d = d.slice(2);
       return d;
     }
+
+    // Mascara do telefone. Sem ela, quem colava "+55 (71) 98234-6881" ficava
+    // preso: o campo cortava no limite de caracteres, sobravam 9 digitos, a
+    // validacao recusava e nao dava pra digitar mais nada. A mascara descarta
+    // o que nao e digito e limita a 11, entao o campo nunca entra nesse estado.
+    function mascaraTelefone(v) {
+      var d = fdigitos(v).slice(0, 11);
+      if (d.length <= 2)  return d.length ? '(' + d : '';
+      if (d.length <= 6)  return '(' + d.slice(0,2) + ') ' + d.slice(2);
+      if (d.length <= 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+      return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
+    }
+    (function(){
+      var w = document.getElementById('whatsapp');
+      if (w) w.addEventListener('input', function(){ this.value = mascaraTelefone(this.value); });
+    })();
 
     function formStep2() {
       var nome  = document.getElementById('nome').value.trim();
