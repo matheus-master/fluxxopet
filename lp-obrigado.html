@@ -201,10 +201,10 @@
           'Recebemos seus dados, <b>' + nome.replace(/[<>&]/g, '') + '!</b>';
       }
 
-      var texto = 'Oi! Acabei de preencher o formulário no site da Fluxxo Pet'
-                + (nome ? '. Meu nome é ' + nome : '')
-                + (loja ? ' e meu pet shop é ' + loja : '')
-                + '. Quero saber quanto estou perdendo de imposto.';
+      // NAO ALTERAR: gatilho exato do fluxo do BotConversa. Mensagem
+      // personalizada com nome e pet shop parece melhor, mas o bot nao
+      // reconhece e o lead cai numa conversa sem resposta.
+      var texto = 'Olá! Tenho interesse na análise';
 
       var btn = document.getElementById('waBtn');
       btn.href = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(texto);

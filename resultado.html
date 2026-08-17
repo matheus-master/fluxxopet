@@ -14,6 +14,7 @@
     gtag('config', 'G-3L4M9LVX7W');
   </script>
   <title>Seu Resultado – Fluxxo Pet</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
   <!-- Satoshi, a mesma da home. A Anton saiu: display condensada de cartaz
        nao combina com uma pagina que apresenta numeros de imposto. -->
@@ -781,10 +782,10 @@
 
       // Agora sao tres botoes (hero, barra fixa e CTA do rodape). Por classe,
       // e nao por id, senao so o primeiro receberia o link.
-      var msg = encodeURIComponent(
-        'Olá! Fiz a simulação no site e deu ' + fmtBRL(data.anual) +
-        ' por ano em impostos indevidos. Quero entender como recuperar.'
-      );
+      //
+      // NAO ALTERAR ESTE TEXTO: e o gatilho exato do fluxo do BotConversa.
+      // Qualquer palavra a mais e o bot nao reconhece e nao responde.
+      var msg = encodeURIComponent('Olá! Tenho interesse na análise');
       var linkWA = 'https://wa.me/5571982346881?text=' + msg;
       document.querySelectorAll('.js-wa').forEach(function(a){ a.href = linkWA; });
 
