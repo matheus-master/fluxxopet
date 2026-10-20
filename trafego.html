@@ -161,8 +161,8 @@
     .empty-state .ms{font-size:40px;color:var(--ink-off);font-variation-settings:'FILL' 0,'wght' 300}
     .empty-state b{display:block;color:var(--ink);font-weight:500;font-size:1.05rem;margin:10px 0 6px}
     .notice button{margin-left:auto;border:1px solid currentColor;background:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.8rem;color:inherit;white-space:nowrap}
-    .info{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#ECEDF0;color:var(--ink-2);font-size:.6rem;font-weight:600;cursor:help;text-transform:none;letter-spacing:0}
-    .kpi.hero .info{background:#26282C;color:#9AA0A8}
+    .hint{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#ECEDF0;color:var(--ink-2);font-size:.6rem;font-weight:600;cursor:help;text-transform:none;letter-spacing:0}
+    .kpi.hero .hint{background:#26282C;color:#9AA0A8}
     @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
     @media (max-width:640px){ .top{position:sticky;top:0;z-index:20;background:var(--canvas);margin:-16px -16px 0;padding:12px 16px} }
 
@@ -388,7 +388,7 @@
   function kpi(o) {
     return '<div class="card kpi' + (o.hero ? ' hero' : '') + '">' +
       '<div class="row1"><span class="label"><span class="ms" aria-hidden="true">' + o.icon + '</span>' + o.label +
-      (o.info ? ' <span class="info" title="' + esc(o.info) + '" aria-label="' + esc(o.info) + '" tabindex="0">i</span>' : '') + '</span>' + (o.badge || '') + '</div>' +
+      (o.info ? ' <span class="hint" title="' + esc(o.info) + '" aria-label="' + esc(o.info) + '" tabindex="0">i</span>' : '') + '</span>' + (o.badge || '') + '</div>' +
       '<div class="row2"><span class="big">' + o.value + '</span><span class="unit">' + (o.unit || '') + '</span></div></div>';
   }
   function chartCard(o) {
@@ -741,7 +741,7 @@
       else if (x.tot.folDays < x.nd) {
         notes.push(['info', 'Seguidores com dado em ' + x.tot.folDays + ' de ' + x.nd + ' dias' +
           (d.ig.firstDay ? ' (histórico desde ' + longDate(d.ig.firstDay) + ')' : '') +
-          '. O Instagram só informa os últimos 30 dias e leva 1–2 dias para consolidar; o painel guarda cada dia e o histórico vai crescendo. Custo por seguidor usa só os dias com dado.']);
+          '. O Instagram só guarda 30 dias e leva 1–2 dias para consolidar; o painel salva cada dia e o histórico vai crescendo.']);
       }
     }
     $('notice').innerHTML = notes.map(function (n) {
