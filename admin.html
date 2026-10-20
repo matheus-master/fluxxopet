@@ -2110,12 +2110,67 @@
 
     var DEFAULT_TAGS = ['Lead LTDA','Lead MEI','Qualificado','Desqualificado'];
 
-    function getTags() {
-      var saved = localStorage.getItem('vt_tags');
-      return saved ? JSON.parse(saved) : DEFAULT_TAGS.slice();
+    /* ── CONFIGURAÇÃO DO CRM NO BANCO (etapas e tags) ─────
+       Fica em /api/crm-config (tabela crm_config). O localStorage vira só uma
+       cópia de segurança, usada se o servidor não responder. */
+    var _tags = null, _stages = null;
+
+    function readLocalList(key) {
+      try {
+        if (key === 'vt_stages' && localStorage.getItem('vt_stages_v') !== '2') return null;
+        var v = JSON.parse(localStorage.getItem(key) || 'null');
+        return Array.isArray(v) && v.length ? v : null;
+      } catch (e) { return null; }
+    }
+    function cacheLocalList(key, list) {
+      try {
+        localStorage.setItem(key, JSON.stringify(list));
+        if (key === 'vt_stages') localStorage.setItem('vt_stages_v', '2');
+      } catch (e) {}
+    }
+    // junta listas mantendo a ordem da primeira e sem repetir
+    function unionList(base, extra) {
+      var out = [];
+      base.concat(extra).forEach(function(x) { x = String(x || '').trim(); if (x && out.indexOf(x) < 0) out.push(x); });
+      return out;
     }
 
-    function saveTags(tags) { localStorage.setItem('vt_tags', JSON.stringify(tags)); }
+    async function pushCrmConfig(body, what) {
+      var r = await api('PUT', '/api/crm-config', body);
+      if (!r || !r.ok) { toast('Não consegui salvar ' + what + ' no servidor. ' + ((r && r.error) || 'Tente de novo.'), 'error'); return false; }
+      return true;
+    }
+
+    // carrega do banco; na 1ª vez (banco vazio) sobe o que este navegador tinha
+    // somado ao que já está em uso nos leads, para recuperar etapas e tags criadas em outros aparelhos
+    async function loadCrmConfig() {
+      var localStages = readLocalList('vt_stages'), localTags = readLocalList('vt_tags');
+      var cfg = await api('GET', '/api/crm-config');
+      if (!cfg || !cfg.ok) {
+        _stages = localStages || DEFAULT_STAGES.slice();
+        _tags = localTags || DEFAULT_TAGS.slice();
+        return;
+      }
+      var seed = {};
+      var usedStages = _leads.map(function(l) { return l.etapa; });
+      var usedTags = []; _leads.forEach(function(l) { usedTags = usedTags.concat(l.tags || []); });
+      if (cfg.stages && cfg.stages.length) _stages = cfg.stages;
+      else { _stages = unionList(localStages || DEFAULT_STAGES, usedStages); seed.stages = _stages; }
+      if (cfg.tags) _tags = cfg.tags;
+      else { _tags = unionList(localTags || DEFAULT_TAGS, usedTags); seed.tags = _tags; }
+      if (seed.stages || seed.tags) {
+        if (await pushCrmConfig(seed, 'a configuração do CRM')) toast('Etapas e tags do CRM agora ficam salvas no servidor.');
+      }
+      cacheLocalList('vt_stages', _stages); cacheLocalList('vt_tags', _tags);
+    }
+
+    function getTags() { return (_tags || readLocalList('vt_tags') || DEFAULT_TAGS).slice(); }
+
+    function saveTags(tags) {
+      _tags = tags.slice();
+      cacheLocalList('vt_tags', _tags);
+      return pushCrmConfig({ tags: _tags }, 'as tags');
+    }
 
     function deleteTag(name) {
       var tags = getTags().filter(function(t) { return t !== name; });
@@ -2733,20 +2788,13 @@
     }
 
     /* ── CRM ─────────────────────────────────────────── */
-    var STAGES_VERSION = '2';
-
-    function getStages() {
-      if (localStorage.getItem('vt_stages_v') !== STAGES_VERSION) {
-        localStorage.removeItem('vt_stages');
-        localStorage.setItem('vt_stages_v', STAGES_VERSION);
-      }
-      var saved = localStorage.getItem('vt_stages');
-      return saved ? JSON.parse(saved) : DEFAULT_STAGES.slice();
-    }
+    // etapas vêm do banco (loadCrmConfig); o localStorage é só cópia de segurança
+    function getStages() { return (_stages || readLocalList('vt_stages') || DEFAULT_STAGES).slice(); }
 
     function saveStages(s) {
-      localStorage.setItem('vt_stages_v', STAGES_VERSION);
-      localStorage.setItem('vt_stages', JSON.stringify(s));
+      _stages = s.slice();
+      cacheLocalList('vt_stages', _stages);
+      return pushCrmConfig({ stages: _stages }, 'as etapas');
     }
 
     var currentLeadIdx = null;
@@ -3210,9 +3258,12 @@
       if (!name || !name.trim()) return;
       var stages = getStages();
       if (stages.indexOf(name.trim()) >= 0) { toast('Essa etapa já existe.', 'error'); return; }
+      var before = getStages();
       stages.push(name.trim());
-      saveStages(stages);
+      var p = saveStages(stages);
       renderKanban();
+      if (await p) toast('Etapa "' + name.trim() + '" criada.');
+      else { _stages = before; cacheLocalList('vt_stages', before); renderKanban(); }
     }
 
     async function removeStage(si) {
@@ -3232,8 +3283,9 @@
         }));
       }
       stages.splice(si, 1);
-      saveStages(stages);
+      var p = saveStages(stages);
       renderKanban();
+      if (await p) toast('Etapa "' + name + '" removida.');
     }
 
     /* ── IMPORT XLSX ─────────────────────────────────── */
@@ -3821,6 +3873,7 @@
       // Inicializa o gráfico com 30D antes de carregar os dados
       chartPreset('30d', document.getElementById('chartBtn30d'));
       await loadLeads();
+      await loadCrmConfig();
       renderStats(_leads);
       renderTable();
       var h = location.hash.slice(1);

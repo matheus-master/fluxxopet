@@ -129,10 +129,14 @@
   funciona), aviso com "Desfazer" ao mover e reversão se o PATCH falhar.
 - Ordem dentro da coluna: follow-up atrasado → hoje → mais recentes. 40 cards por
   coluna + "mostrar mais".
-- ⚠️ **As etapas do CRM vivem só no `localStorage` do navegador** (`vt_stages`), não
-  no banco. Etapa criada num aparelho não existe nos outros; leads com etapa
-  desconhecida aparecem na coluna "Outras etapas" (não somem). Candidato a migrar
-  para o D1.
+- **Etapas e lista de tags ficam no banco** (tabela `crm_config`, migration 0010;
+  API `functions/api/crm-config.js`, GET/PUT). Todos os aparelhos veem as mesmas.
+  O `localStorage` (`vt_stages`, `vt_tags`) é só cópia de segurança se a API cair.
+  Na 1ª abertura com o banco vazio, o painel sobe as etapas/tags daquele navegador
+  **somadas às já usadas nos leads** (recupera etapas criadas em outros aparelhos).
+  Leads com etapa que não está na lista ainda aparecem em "Outras etapas".
+- Ficam no navegador só preferências pessoais: tema (`vt_theme`) e filtros do CRM
+  (`crm_filters`). Regra combinada: **dado compartilhado sempre no banco**.
 
 ## Integração BotConversa → ActiveCampaign
 - Endpoint: `functions/api/botconversa.js` → rota `POST /api/botconversa?token=<BC_WEBHOOK_SECRET>`
