@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Tráfego — Fluxxo Pet</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0&display=swap" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --accent:#FF5A1F;
+      --surface:#FAFAFC; --canvas:#F5F6F8; --card:#FDFDFE;
+      --ink:#0E0F11; --ink-2:#5F656D; --ink-3:#9AA0A8; --ink-off:#BCC0C7;
+      --line:#E7E8EC; --bar:#DADCE1;
+      --good:#22A75A; --bad:#E5484D;
+    }
+    html{background:var(--canvas)}
+    body{background:var(--canvas);color:var(--ink);font-family:'Onest',system-ui,-apple-system,Segoe UI,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+    .ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;font-size:20px;line-height:1;display:inline-block;font-variation-settings:'FILL' 1,'wght' 400}
+    button,select,input{font:inherit;color:inherit}
+
+    .frame{margin:24px;background:var(--canvas);border:1px solid var(--line);border-radius:20px;padding:24px 28px 32px;min-height:calc(100vh - 48px)}
+
+    /* topo */
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .icons{display:flex;gap:10px}
+    .ibtn{width:44px;height:44px;border-radius:8px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer;text-decoration:none;color:var(--ink);transition:background .15s}
+    .ibtn:hover{background:#fff}
+    .ibtn.on{background:var(--ink);border-color:var(--ink);color:#fff}
+    .ibtn.spin .ms{animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .who{display:flex;align-items:center;gap:12px}
+    .avatar{width:44px;height:44px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:600;font-size:1.05rem}
+    .who b{display:block;font-weight:500;font-size:1.05rem}
+    .who small{color:var(--ink-3);font-size:.78rem}
+
+    .head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:30px 0 26px;flex-wrap:wrap}
+    h1{font-weight:300;font-size:3rem;letter-spacing:-.02em;line-height:1}
+    .filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;min-width:0}
+    .tabs{display:flex;gap:6px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+    .tab{height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer;white-space:nowrap;font-size:.88rem}
+    .tab:hover{background:#fff}
+    .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .box{height:44px;border-radius:8px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;gap:8px;padding:0 14px;font-size:.88rem}
+    .box input[type=date]{border:none;background:none;outline:none;font-size:.88rem;width:118px}
+    .box input[type=date]::-webkit-calendar-picker-indicator{opacity:.55;cursor:pointer}
+    .box .arrow{color:var(--ink-3);font-size:16px}
+    .sel{position:relative;padding:0}
+    .sel select{appearance:none;border:none;background:none;height:100%;padding:0 40px 0 16px;outline:none;cursor:pointer;font-size:.88rem;max-width:300px;text-overflow:ellipsis}
+    .sel .ms{position:absolute;right:12px;pointer-events:none;color:var(--ink-2);font-size:18px}
+
+    /* avisos */
+    .notice{border-radius:10px;padding:12px 16px;margin-bottom:18px;background:#FFF1EB;color:#9A3412;font-size:.86rem;display:flex;gap:8px;align-items:center}
+
+    /* KPIs */
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:28px}
+    .card{background:var(--card);border-radius:14px;padding:20px 22px}
+    .kpi .row1{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:24px}
+    .label{display:flex;align-items:center;gap:6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+    .label .ms{font-size:17px;font-variation-settings:'FILL' 0,'wght' 300}
+    .badge{font-size:.72rem;font-weight:500;color:#fff;border-radius:4px;padding:3px 7px;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .badge.good{background:var(--good)} .badge.bad{background:var(--bad)} .badge.flat{background:var(--ink-off)}
+    .kpi .row2{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:12px}
+    .big{font-size:2.15rem;font-weight:400;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .big .of{color:var(--ink-off)}
+    .unit{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+
+    /* gráficos */
+    .chart-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+    .legend{display:flex;gap:16px;align-items:center;font-size:.76rem;color:var(--ink-2)}
+    .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+    .legend .dot{background:var(--bar)} .legend .ring{border:2px solid var(--ink)} .legend .blk{background:var(--ink)}
+    .group{display:flex;gap:4px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+    .card,.head>*,.filters>*,.chart-head>*{min-width:0}
+    .legend{flex-wrap:wrap}
+    .group button{border:none;background:none;padding:5px 10px;border-radius:6px;font-size:.78rem;color:var(--ink-3);cursor:pointer}
+    .group button.on{background:var(--ink);color:#fff}
+    .group button:not(.on):hover{color:var(--ink)}
+    .plot{position:relative;height:340px}
+    .plot.sm{height:240px}
+    .main-chart{margin-bottom:10px;padding:22px 22px 16px}
+
+    .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .stats{display:flex;gap:48px;margin:6px 0 22px;flex-wrap:wrap}
+    .stat .v{font-size:2rem;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+    .stat .l{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin-top:4px;display:flex;gap:8px;align-items:center}
+    .chg{font-size:.72rem;letter-spacing:0;font-variant-numeric:tabular-nums}
+    .chg.good{color:var(--good)} .chg.bad{color:var(--bad)} .chg.flat{color:var(--ink-3)}
+
+    /* tooltip de vidro */
+    .tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;z-index:5;
+      background:rgba(250,250,252,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+      border:1px solid rgba(231,232,236,.9);border-radius:14px;padding:14px 18px;box-shadow:0 10px 30px rgba(14,15,17,.08);min-width:170px}
+    .tip .t{font-size:.8rem;color:var(--ink-2);margin-bottom:10px;white-space:nowrap}
+    .tip .vals{display:flex;gap:22px}
+    .tip .k{font-size:.72rem;color:var(--ink-2)}
+    .tip .n{font-size:1.25rem;font-weight:500;letter-spacing:-.01em;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+    .foot{color:var(--ink-3);font-size:.76rem;margin-top:18px;line-height:1.5}
+    .loading .kpis,.loading .main-chart,.loading .duo{opacity:.45;transition:opacity .2s}
+
+    @media (max-width:1180px){ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .duo{grid-template-columns:1fr} .head{align-items:flex-start;flex-direction:column} .filters{justify-content:flex-start;width:100%} }
+    @media (max-width:640px){
+      .frame{margin:0;border:none;border-radius:0;padding:16px 16px 28px}
+      h1{font-size:2.3rem}
+      .kpis{grid-template-columns:1fr}
+      .who div{display:none}
+      .filters,.filters>*{width:100%}
+      .chart-head .legend{width:100%}
+      .box input[type=date]{width:auto;flex:1;min-width:0}
+      .box{justify-content:space-between}
+      .sel select{width:100%;max-width:none}
+      .plot{height:260px} .plot.sm{height:220px}
+      .stats{gap:28px}
+    }
+  </style>
+</head>
+<body>
+<div class="frame" id="app">
+  <div class="top">
+    <nav class="icons">
+      <a class="ibtn on" href="/trafego" title="Tráfego"><span class="ms">monitoring</span></a>
+      <a class="ibtn" href="/admin" title="Leads e CRM"><span class="ms">groups</span></a>
+    </nav>
+    <div class="who">
+      <button class="ibtn" id="refresh" title="Atualizar"><span class="ms">refresh</span></button>
+      <span class="avatar">F</span>
+      <div><b>Fluxxo Pet</b><small id="acctName">Meta Ads</small></div>
+    </div>
+  </div>
+
+  <div class="head">
+    <h1>Tráfego</h1>
+    <div class="filters">
+      <div class="tabs" id="tabs">
+        <button class="tab" data-p="dia">Dia</button>
+        <button class="tab" data-p="semana">Semana</button>
+        <button class="tab on" data-p="mes">Mês</button>
+        <button class="tab" data-p="trimestre">Trimestre</button>
+        <button class="tab" data-p="semestre">Semestre</button>
+        <button class="tab" data-p="ano">Ano</button>
+        <button class="tab" data-p="custom">Personalizado</button>
+      </div>
+      <label class="box" title="Período">
+        <input type="date" id="since" />
+        <span class="ms arrow">arrow_forward</span>
+        <input type="date" id="until" />
+      </label>
+      <div class="box sel">
+        <select id="campaign"><option value="">Todas as campanhas</option></select>
+        <span class="ms">expand_more</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="notice"></div>
+
+  <section class="kpis">
+    <div class="card kpi">
+      <div class="row1"><span class="label"><span class="ms">payments</span>Investimento / acumulado</span><span id="b-spend"></span></div>
+      <div class="row2"><span class="big" id="v-spend">—</span><span class="unit" id="u-spend">período</span></div>
+    </div>
+    <div class="card kpi">
+      <div class="row1"><span class="label" id="l-mspend"></span><span id="b-mspend"></span></div>
+      <div class="row2"><span class="big" id="v-mspend">—</span><span class="unit" id="u-mspend"></span></div>
+    </div>
+    <div class="card kpi">
+      <div class="row1"><span class="label"><span class="ms">person_add</span>Leads / acumulado</span><span id="b-leads"></span></div>
+      <div class="row2"><span class="big" id="v-leads">—</span><span class="unit" id="u-leads"></span></div>
+    </div>
+    <div class="card kpi">
+      <div class="row1"><span class="label" id="l-mleads"></span><span id="b-mleads"></span></div>
+      <div class="row2"><span class="big" id="v-mleads">—</span><span class="unit" id="u-mleads"></span></div>
+    </div>
+  </section>
+
+  <section class="card main-chart">
+    <div class="chart-head">
+      <span class="label" id="t-main">Investimento</span>
+      <div class="legend">
+        <span><i class="dot"></i>No período</span>
+        <span><i class="ring"></i>Acumulado</span>
+        <div class="group" id="group"></div>
+      </div>
+    </div>
+    <div class="plot"><canvas id="c-spend"></canvas><div class="tip" id="tip-spend"></div></div>
+  </section>
+
+  <section class="duo">
+    <div class="card">
+      <div class="chart-head">
+        <span class="label"><span class="ms">person_add</span>Leads</span>
+        <div class="legend"><span><i class="blk"></i>Leads</span><span><i class="dot"></i>Acumulado</span></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="v" id="s-leads">—</div><div class="l">Leads no período <span class="chg" id="d-leads"></span></div></div>
+        <div class="stat"><div class="v" id="s-avg">—</div><div class="l" id="l-avg">Média por mês</div></div>
+      </div>
+      <div class="plot sm"><canvas id="c-leads"></canvas><div class="tip" id="tip-leads"></div></div>
+    </div>
+    <div class="card">
+      <div class="chart-head">
+        <span class="label"><span class="ms">sell</span>Custo por lead</span>
+        <div class="legend"><span><i class="blk"></i>CPL</span></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="v" id="s-cpl">—</div><div class="l">CPL no período <span class="chg" id="d-cpl"></span></div></div>
+        <div class="stat"><div class="v" id="s-best">—</div><div class="l" id="l-best">Melhor mês</div></div>
+      </div>
+      <div class="plot sm"><canvas id="c-cpl"></canvas><div class="tip" id="tip-cpl"></div></div>
+    </div>
+  </section>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script>
+  /* ── estado ───────────────────────────────────────── */
+  var state = { period: 'mes', group: null, campaign: '', data: null };
+  var charts = {};
+  var C = { accent: '#FF5A1F', ink: '#0E0F11', ink2: '#5F656D', ink3: '#9AA0A8', bar: '#DADCE1', grid: '#ECEDF0' };
+
+  var GROUPS = [
+    { k: 'dia', l: 'Dia', name: 'dia' }, { k: 'semana', l: 'Semana', name: 'semana' },
+    { k: 'mes', l: 'Mês', name: 'mês' }, { k: 'trimestre', l: 'Trimestre', name: 'trimestre' },
+    { k: 'semestre', l: 'Semestre', name: 'semestre' }, { k: 'ano', l: 'Ano', name: 'ano' },
+  ];
+
+  /* ── auth / api ───────────────────────────────────── */
+  function getToken() { return sessionStorage.getItem('vt_token'); }
+  async function api(path) {
+    var t = getToken();
+    if (!t) { location.href = '/login'; return null; }
+    var r = await fetch(path, { headers: { Authorization: 'Bearer ' + t } });
+    if (r.status === 401) { location.href = '/login'; return null; }
+    return r.json();
+  }
+
+  /* ── datas (fuso de Brasília) ─────────────────────── */
+  var DAY = 864e5;
+  function today() { return new Date(Date.now() - 3 * 36e5).toISOString().slice(0, 10); }
+  function addDays(d, n) { return new Date(Date.parse(d + 'T00:00:00Z') + n * DAY).toISOString().slice(0, 10); }
+  function diffDays(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / DAY); }
+  function shiftMonth(d, n) { var x = new Date(d + 'T00:00:00Z'); x.setUTCMonth(x.getUTCMonth() + n); return x.toISOString().slice(0, 10); }
+  function dow(d) { return new Date(d + 'T00:00:00Z').getUTCDay(); }
+  function monday(d) { return addDays(d, -((dow(d) + 6) % 7)); }
+
+  // período atual de cada aba + o mesmo trecho do período anterior
+  function periodRange(p) {
+    var t = today(), y = +t.slice(0, 4), m = +t.slice(5, 7), s, back;
+    if (p === 'dia')       { s = t; return { since: t, until: t, prevSince: addDays(t, -1), prevUntil: addDays(t, -1) }; }
+    if (p === 'semana')    { s = monday(t); return { since: s, until: t, prevSince: addDays(s, -7), prevUntil: addDays(t, -7) }; }
+    if (p === 'mes')       { s = t.slice(0, 8) + '01'; back = 1; }
+    if (p === 'trimestre') { s = y + '-' + pad(Math.floor((m - 1) / 3) * 3 + 1) + '-01'; back = 3; }
+    if (p === 'semestre')  { s = y + '-' + (m <= 6 ? '01' : '07') + '-01'; back = 6; }
+    if (p === 'ano')       { s = y + '-01-01'; back = 12; }
+    var ps = shiftMonth(s, -back), pu = addDays(ps, diffDays(s, t));
+    if (pu >= s) pu = addDays(s, -1);
+    return { since: s, until: t, prevSince: ps, prevUntil: pu };
+  }
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function defaultGroup(since, until) {
+    var n = diffDays(since, until) + 1;
+    return n <= 31 ? 'dia' : n <= 120 ? 'semana' : n <= 800 ? 'mes' : 'trimestre';
+  }
+
+  /* ── agrupamento ──────────────────────────────────── */
+  var MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  var MESES_L = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  function bucketKey(d, g) {
+    var y = d.slice(0, 4), m = +d.slice(5, 7);
+    if (g === 'dia') return d;
+    if (g === 'semana') return monday(d);
+    if (g === 'mes') return d.slice(0, 7);
+    if (g === 'trimestre') return y + '-T' + Math.ceil(m / 3);
+    if (g === 'semestre') return y + '-S' + (m <= 6 ? 1 : 2);
+    return y;
+  }
+  function shortDate(d) { return +d.slice(8, 10) + ' ' + MESES[+d.slice(5, 7) - 1]; }
+  function longDate(d) { return shortDate(d) + ' ' + d.slice(0, 4); }
+  function bucketLabel(b, g) {
+    var k = b.key;
+    if (g === 'dia' || g === 'semana') return k.slice(8, 10) + '/' + k.slice(5, 7);
+    if (g === 'mes') return MESES[+k.slice(5, 7) - 1] + '/' + k.slice(2, 4);
+    if (g === 'trimestre' || g === 'semestre') return k.slice(5) + '/' + k.slice(2, 4);
+    return k;
+  }
+  function bucketTitle(b, g) {
+    if (g === 'dia') return longDate(b.first);
+    if (g === 'mes') return MESES_L[+b.key.slice(5, 7) - 1] + ' ' + b.key.slice(0, 4);
+    if (g === 'ano') return b.key;
+    return shortDate(b.first) + ' – ' + longDate(b.last);
+  }
+  function aggregate(daily, g) {
+    var out = [], idx = {}, cs = 0, cl = 0;
+    daily.forEach(function (d) {
+      var k = bucketKey(d.date, g), b = idx[k];
+      if (!b) { b = idx[k] = { key: k, first: d.date, last: d.date, spend: 0, leads: 0 }; out.push(b); }
+      b.last = d.date; b.spend += d.spend; b.leads += d.leads;
+    });
+    out.forEach(function (b) {
+      cs += b.spend; cl += b.leads;
+      b.cumSpend = cs; b.cumLeads = cl;
+      b.cpl = b.leads ? b.spend / b.leads : null;
+    });
+    return out;
+  }
+
+  /* ── formatação ───────────────────────────────────── */
+  var brl  = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  var int  = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+  var dec1 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+  function compact(v, money) {
+    var p = money ? 'R$ ' : '';
+    if (Math.abs(v) >= 1e6) return p + dec1.format(v / 1e6) + ' mi';
+    if (Math.abs(v) >= 1e3) return p + dec1.format(v / 1e3) + ' mil';
+    return p + int.format(v);
+  }
+  function change(cur, prev) { return (cur == null || !prev) ? null : (cur - prev) / prev * 100; }
+  function tone(d, lowerIsBetter) { return Math.abs(d) < 0.05 ? 'flat' : ((d < 0) === !!lowerIsBetter ? 'good' : 'bad'); }
+  function badge(id, cur, prev, lowerIsBetter, title) {
+    var d = change(cur, prev), el = document.getElementById(id);
+    if (d == null) { el.innerHTML = ''; return; }
+    el.innerHTML = '<span class="badge ' + tone(d, lowerIsBetter) + '" title="' + title + '">' + (d > 0 ? '+' : '') + dec1.format(d) + '%</span>';
+  }
+  function chg(id, cur, prev, lowerIsBetter) {
+    var d = change(cur, prev), el = document.getElementById(id);
+    if (d == null) { el.textContent = ''; el.className = 'chg'; return; }
+    el.className = 'chg ' + tone(d, lowerIsBetter);
+    el.textContent = (d > 0 ? '↑ +' : '↓ ') + dec1.format(d) + '%';
+  }
+  function set(id, html) { document.getElementById(id).innerHTML = html; }
+
+  /* ── gráficos ─────────────────────────────────────── */
+  // barras finas + linha suave; barra sob o cursor fica laranja e abre o tooltip de vidro
+  function drawChart(id, tipId, buckets, opt) {
+    if (charts[id]) charts[id].destroy();
+    var labels = buckets.map(function (b) { return bucketLabel(b, state.group); });
+    var hover = -1;
+    var datasets = [{
+      type: 'bar', data: opt.bars, yAxisID: 'y', order: 2,
+      backgroundColor: function (c) { return c.dataIndex === hover ? C.accent : opt.barColor; },
+      borderRadius: 6, borderSkipped: false, maxBarThickness: opt.thick || 10, barPercentage: .5, categoryPercentage: .9,
+    }];
+    if (opt.line) datasets.push({
+      type: 'line', data: opt.line, yAxisID: 'y1', order: 1,
+      borderColor: opt.lineColor, borderWidth: opt.lineWidth || 2, tension: .4, pointRadius: 0, pointHoverRadius: 0, fill: false,
+    });
+    var tick = { color: C.ink3, font: { family: 'Onest', size: 11 } };
+    var tip = document.getElementById(tipId);
+
+    var chart = new Chart(document.getElementById(id), {
+      data: { labels: labels, datasets: datasets },
+      options: {
+        maintainAspectRatio: false, animation: { duration: 350 },
+        interaction: { mode: 'index', intersect: false },
+        layout: { padding: { top: 8 } },
+        scales: {
+          x: { grid: { display: false }, border: { display: false }, ticks: Object.assign({ maxRotation: 0, autoSkipPadding: 14 }, tick) },
+          y: { beginAtZero: true, grid: { color: C.grid }, border: { display: false }, position: 'left',
+               ticks: Object.assign({ maxTicksLimit: 6, callback: function (v) { return compact(v, opt.money); } }, tick) },
+          y1: { display: !!opt.line, beginAtZero: true, position: 'right', grid: { display: false }, border: { display: false },
+                ticks: Object.assign({ maxTicksLimit: 6, callback: function (v) { return compact(v, opt.lineMoney); } }, tick) },
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false, external: function (ctx) {
+            var t = ctx.tooltip;
+            if (!t.opacity || !t.dataPoints || !t.dataPoints.length) { tip.style.opacity = 0; return; }
+            var i = t.dataPoints[0].dataIndex, b = buckets[i];
+            tip.innerHTML = '<div class="t">' + bucketTitle(b, state.group) + '</div><div class="vals">' +
+              opt.tip(b).map(function (p) { return '<div><div class="k">' + p[0] + '</div><div class="n">' + p[1] + '</div></div>'; }).join('') + '</div>';
+            var w = tip.offsetWidth, box = ctx.chart.canvas.parentNode.clientWidth;
+            var x = t.caretX + 16; if (x + w > box) x = t.caretX - w - 16;
+            tip.style.left = Math.max(0, x) + 'px';
+            tip.style.top = Math.max(0, ctx.chart.chartArea.top + 10) + 'px';
+            tip.style.opacity = 1;
+          } },
+        },
+        onHover: function (e, els, ch) {
+          var pts = ch.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
+          var i = pts.length ? pts[0].index : -1;
+          if (i !== hover) { hover = i; ch.update('none'); }
+        },
+      },
+    });
+    chart.canvas.addEventListener('mouseleave', function () { hover = -1; chart.update('none'); tip.style.opacity = 0; });
+    charts[id] = chart;
+  }
+
+  /* ── render ───────────────────────────────────────── */
+  function render() {
+    var d = state.data; if (!d) return;
+    var g = state.group, gname = GROUPS.filter(function (x) { return x.k === g; })[0].name;
+    var buckets = aggregate(d.daily, g);
+    var tot = d.daily.reduce(function (a, x) { a.spend += x.spend; a.leads += x.leads; return a; }, { spend: 0, leads: 0 });
+    var cpl = tot.leads ? tot.spend / tot.leads : null;
+    var prev = d.prev, pcpl = prev && prev.leads ? prev.spend / prev.leads : null;
+    var m = d.month, pm = d.prevMonth;
+    var mLabel = MESES[+d.until.slice(5, 7) - 1] + '/' + d.until.slice(2, 4);
+    var cmpTxt = prev ? 'vs ' + longDate(prev.since) + ' – ' + longDate(prev.until) : '';
+    var cmpMonth = pm ? 'vs ' + longDate(pm.since) + ' – ' + longDate(pm.until) : '';
+
+    // KPIs
+    set('v-spend', brl.format(tot.spend));
+    set('u-spend', (diffDays(d.since, d.until) + 1) + ' dias');
+    badge('b-spend', tot.spend, prev && prev.spend, false, cmpTxt);
+    set('v-leads', int.format(tot.leads));
+    set('u-leads', cpl != null ? 'CPL ' + brl.format(cpl) : '');
+    badge('b-leads', tot.leads, prev && prev.leads, false, cmpTxt);
+
+    // 2º e 4º cards: mês corrente; se o período já é o próprio mês, viram média diária
+    if (m && m.since === d.since) {
+      var nd = diffDays(d.since, d.until) + 1, pnd = prev ? diffDays(prev.since, prev.until) + 1 : 0;
+      set('l-mspend', '<span class="ms">avg_pace</span>Investimento / média diária');
+      set('v-mspend', brl.format(tot.spend / nd));
+      set('u-mspend', 'por dia');
+      badge('b-mspend', tot.spend / nd, prev && prev.spend / pnd, false, cmpTxt);
+      set('l-mleads', '<span class="ms">avg_pace</span>Leads / média diária');
+      set('v-mleads', dec1.format(tot.leads / nd));
+      set('u-mleads', 'por dia');
+      badge('b-mleads', tot.leads / nd, prev && prev.leads / pnd, false, cmpTxt);
+    } else {
+      set('l-mspend', '<span class="ms">calendar_month</span>Investimento / mês');
+      set('v-mspend', m ? brl.format(m.spend) : '—');
+      set('u-mspend', mLabel);
+      badge('b-mspend', m && m.spend, pm && pm.spend, false, cmpMonth);
+      set('l-mleads', '<span class="ms">event_available</span>Leads / mês');
+      set('v-mleads', m ? int.format(m.leads) : '—');
+      set('u-mleads', m && m.leads ? 'CPL ' + brl.format(m.spend / m.leads) : mLabel);
+      badge('b-mleads', m && m.leads, pm && pm.leads, false, cmpMonth);
+    }
+
+    // grupo
+    set('group', GROUPS.map(function (x) {
+      return '<button class="' + (x.k === g ? 'on' : '') + '" data-g="' + x.k + '">' + x.l + '</button>';
+    }).join(''));
+    set('t-main', '<span class="ms">payments</span>Investimento por ' + gname);
+
+    drawChart('c-spend', 'tip-spend', buckets, {
+      bars: buckets.map(function (b) { return b.spend; }), barColor: C.bar, thick: 12, money: true,
+      line: buckets.map(function (b) { return b.cumSpend; }), lineColor: C.ink, lineMoney: true,
+      tip: function (b) { return [['Investimento', brl.format(b.spend)], ['Acumulado', brl.format(b.cumSpend)]]; },
+    });
+
+    // leads
+    set('s-leads', int.format(tot.leads));
+    chg('d-leads', tot.leads, prev && prev.leads, false);
+    set('s-avg', dec1.format(buckets.length ? tot.leads / buckets.length : 0));
+    set('l-avg', 'Média por ' + gname);
+    drawChart('c-leads', 'tip-leads', buckets, {
+      bars: buckets.map(function (b) { return b.leads; }), barColor: C.ink, thick: 10,
+      line: buckets.map(function (b) { return b.cumLeads; }), lineColor: C.bar, lineWidth: 2,
+      tip: function (b) { return [['Leads', int.format(b.leads)], ['Acumulado', int.format(b.cumLeads)]]; },
+    });
+
+    // CPL
+    set('s-cpl', cpl != null ? brl.format(cpl) : '—');
+    chg('d-cpl', cpl, pcpl, true);
+    var best = buckets.filter(function (b) { return b.cpl != null; }).sort(function (a, b) { return a.cpl - b.cpl; })[0];
+    set('s-best', best ? brl.format(best.cpl) : '—');
+    set('l-best', best ? 'Melhor ' + gname + ' · ' + bucketLabel(best, g) : 'Melhor ' + gname);
+    drawChart('c-cpl', 'tip-cpl', buckets, {
+      bars: buckets.map(function (b) { return b.cpl; }), barColor: C.ink, thick: 10, money: true,
+      tip: function (b) { return [['CPL', b.cpl != null ? brl.format(b.cpl) : 'sem leads'], ['Investimento', brl.format(b.spend)]]; },
+    });
+
+    var camp = document.getElementById('campaign');
+    set('foot', 'Fonte: Meta Ads · ' + esc(camp.options[camp.selectedIndex].text) +
+      ' · leads = evento Lead atribuído pelo Meta · comparação ' + (cmpTxt || '—') +
+      ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+  }
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function notice(msg) {
+    set('notice', msg ? '<div class="notice"><span class="ms">error</span><span>' + esc(msg) + '</span></div>' : '');
+  }
+
+  /* ── carregamento ─────────────────────────────────── */
+  var seq = 0;
+  async function load() {
+    var since = document.getElementById('since').value, until = document.getElementById('until').value;
+    if (!since || !until || since > until) { notice('Escolha um período válido.'); return; }
+    var q = 'since=' + since + '&until=' + until;
+    if (state.period !== 'custom') { var r = periodRange(state.period); q += '&prevSince=' + r.prevSince + '&prevUntil=' + r.prevUntil; }
+    if (state.campaign) q += '&campaign=' + state.campaign;
+
+    var my = ++seq, app = document.getElementById('app'), rb = document.getElementById('refresh');
+    app.classList.add('loading'); rb.classList.add('spin');
+    try {
+      var data = await api('/api/meta-trafego?' + q);
+      if (my !== seq || !data) return;
+      if (!data.ok) { notice('Erro ao carregar dados do Meta: ' + (data.error || 'verifique o token')); return; }
+      notice('');
+      state.data = data;
+      if (!state.group) state.group = defaultGroup(since, until);
+      render();
+    } catch (e) {
+      if (my === seq) notice('Erro de conexão: ' + e.message);
+    } finally {
+      if (my === seq) { app.classList.remove('loading'); rb.classList.remove('spin'); }
+    }
+  }
+
+  function setPeriod(p) {
+    state.period = p;
+    document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('on', t.dataset.p === p); });
+    if (p !== 'custom') {
+      var r = periodRange(p);
+      document.getElementById('since').value = r.since;
+      document.getElementById('until').value = r.until;
+      state.group = defaultGroup(r.since, r.until);
+      load();
+    } else {
+      document.getElementById('since').focus();
+    }
+  }
+
+  async function loadCampaigns() {
+    var d = await api('/api/meta-campanhas');
+    if (!d || !d.ok) return;
+    if (d.account) set('acctName', 'Meta Ads · ' + esc(d.account));
+    var act = d.campaigns.filter(function (c) { return c.active; }), pau = d.campaigns.filter(function (c) { return !c.active; });
+    function opts(list) { return list.map(function (c) { return '<option value="' + c.id + '">' + esc(c.name) + '</option>'; }).join(''); }
+    var sel = document.getElementById('campaign');
+    sel.innerHTML = '<option value="">Todas as campanhas</option>' +
+      (act.length ? '<optgroup label="Ativas">' + opts(act) + '</optgroup>' : '') +
+      (pau.length ? '<optgroup label="Pausadas">' + opts(pau) + '</optgroup>' : '');
+    sel.value = state.campaign;
+  }
+
+  /* ── eventos ──────────────────────────────────────── */
+  document.getElementById('tabs').addEventListener('click', function (e) { var b = e.target.closest('.tab'); if (b) setPeriod(b.dataset.p); });
+  ['since', 'until'].forEach(function (id) {
+    document.getElementById(id).addEventListener('change', function () {
+      state.period = 'custom';
+      document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('on', t.dataset.p === 'custom'); });
+      var s = document.getElementById('since').value, u = document.getElementById('until').value;
+      if (s && u) state.group = defaultGroup(s, u);
+      load();
+    });
+  });
+  document.getElementById('campaign').addEventListener('change', function (e) { state.campaign = e.target.value; load(); });
+  document.getElementById('group').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    state.group = b.dataset.g; render();
+  });
+  document.getElementById('refresh').addEventListener('click', load);
+
+  if (!getToken()) location.href = '/login';
+  else {
+    document.getElementById('until').max = today();
+    loadCampaigns();
+    setPeriod('mes');
+  }
+</script>
+</body>
+</html>

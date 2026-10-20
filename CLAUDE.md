@@ -89,6 +89,20 @@
   e o lead referencia a sessão por `session_id` — dá pra fazer importação de conversão
   offline no Ads a partir disso.
 
+## Dashboard de Tráfego (`/trafego` → `trafego.html`)
+- Painel do Meta Ads: investimento e leads (acumulado, mês, média diária), por
+  Dia/Semana/Mês/Trimestre/Semestre/Ano/Personalizado, com filtro de campanha.
+  Mesmo login do `/admin` (JWT em `sessionStorage.vt_token`).
+- APIs: `functions/api/meta-trafego.js` (série diária + comparações; o agrupamento
+  é feito na página) e `functions/api/meta-campanhas.js` (lista de campanhas).
+- Leads = ação `lead` atribuída pelo Meta (evento Lead do pixel), não o total do CRM.
+- Design: fundo `#F5F6F8`, destaque `#FF5A1F`, texto `#0E0F11`, fonte Onest.
+- **Conta de anúncios em uso: `4038372153047790` ("Pacttus pet")** — trocada em
+  2026-10-19. A antiga `1118060079685162` não tem mais acesso.
+  `META_ADS_TOKEN` é de **usuário do sistema** ("Dashboardtoken", app "Analise de
+  Dados Pactus Pet"), não expira. Ele também enxerga a página e o IG @fluxxopet
+  (`17841468174480500`) — dá pra puxar seguidores.
+
 ## Integração BotConversa → ActiveCampaign
 - Endpoint: `functions/api/botconversa.js` → rota `POST /api/botconversa?token=<BC_WEBHOOK_SECRET>`
 - Quando o lead deixa o e-mail no bot, cria/atualiza o contato no ActiveCampaign e abre um
