@@ -1569,6 +1569,26 @@
     }
     [data-theme="dark"] .mtip { background: rgba(22,23,26,.82); }
 
+    /* ── experiência: foco, avisos, movimento ─────────── */
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    button:focus:not(:focus-visible) { outline: none; }
+    .toasts { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 500; pointer-events: none; }
+    .toast {
+      display: flex; align-items: center; gap: 10px; max-width: 360px;
+      background: var(--solid); color: var(--on-solid); border-radius: 10px; padding: 12px 16px;
+      font-size: .86rem; box-shadow: 0 10px 30px rgba(14,15,17,.18);
+      animation: toastIn .2s ease-out; pointer-events: auto;
+    }
+    .toast .material-symbols-outlined { font-size: 18px; color: var(--gold); font-variation-settings: 'FILL' 1, 'wght' 400; }
+    .toast.error .material-symbols-outlined { color: var(--red); }
+    .toast.out { opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .2s; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } }
+    .cbtn-confirm.danger, #uiOk.danger { background: var(--red); color: #fff; }
+    .confirm-overlay, .import-overlay, .drawer-overlay {
+      background: rgba(14,15,17,.42); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
     /* ── responsivo ──────────────────────────────────── */
     @media (max-width: 1000px) {
       .sidebar { width: auto; padding: 0; }
@@ -1643,8 +1663,10 @@
       .kanban-col { width: 84vw; scroll-snap-align: start; }
       .crm-toolbar .btn-outline { flex: 1; justify-content: center; }
 
-      /* modais */
+      /* modais e avisos */
       .confirm-box { width: calc(100vw - 32px); max-width: 420px; }
+      .toasts { left: 16px; right: 16px; bottom: 16px; }
+      .toast { max-width: none; }
       .import-box { width: calc(100vw - 24px); }
       .content { padding: 0; }
     }
@@ -1946,6 +1968,22 @@
     </div>
   </div>
 
+  <!-- diálogo genérico (substitui alert/confirm/prompt do navegador) -->
+  <div class="confirm-overlay" id="uiDialog" onclick="if(event.target===this)uiClose(null)">
+    <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="uiTitle" style="text-align:left">
+      <h3 id="uiTitle"></h3>
+      <p id="uiMsg"></p>
+      <input id="uiInput" class="d-input" style="display:none;width:100%;margin:-4px 0 18px" />
+      <div class="confirm-btns">
+        <button type="button" class="cbtn-cancel" id="uiCancel" onclick="uiClose(null)">Cancelar</button>
+        <button type="button" class="cbtn-import" id="uiOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- avisos rápidos -->
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
   <!-- confirm clear dialog -->
   <div class="confirm-overlay" id="confirmOverlay">
     <div class="confirm-box">
@@ -2088,10 +2126,69 @@
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       };
       if (body !== undefined) opts.body = JSON.stringify(body);
-      var resp = await fetch(path, opts);
+      var resp;
+      try { resp = await fetch(path, opts); }
+      catch (e) { toast('Sem conexão com o servidor. Confira a internet e tente de novo.', 'error'); return null; }
       if (resp.status === 401) { window.location.href = '/login'; return null; }
-      return resp.json();
+      if (resp.status >= 500) toast('O servidor teve um problema. Tente de novo em instantes.', 'error');
+      try { return await resp.json(); } catch (e) { return null; }
     }
+
+    /* ── DIÁLOGOS E AVISOS (no lugar de alert/confirm/prompt) ── */
+    var _uiResolve = null, _uiInput = false;
+    function uiDialog(o) {
+      return new Promise(function(resolve) {
+        if (_uiResolve) _uiResolve(null);
+        _uiResolve = resolve; _uiInput = !!o.input;
+        document.getElementById('uiTitle').textContent = o.title || '';
+        var msg = document.getElementById('uiMsg');
+        msg.textContent = o.msg || ''; msg.style.display = o.msg ? '' : 'none';
+        var inp = document.getElementById('uiInput');
+        inp.style.display = o.input ? '' : 'none'; inp.value = ''; inp.placeholder = o.placeholder || '';
+        var ok = document.getElementById('uiOk');
+        ok.textContent = o.ok || 'OK'; ok.classList.toggle('danger', !!o.danger);
+        document.getElementById('uiCancel').style.display = o.cancel === false ? 'none' : '';
+        document.getElementById('uiDialog').classList.add('active');
+        setTimeout(function() { (o.input ? inp : ok).focus(); }, 30);
+      });
+    }
+    function uiClose(val) {
+      document.getElementById('uiDialog').classList.remove('active');
+      var r = _uiResolve; _uiResolve = null;
+      if (r) r(val);
+    }
+    document.getElementById('uiOk').addEventListener('click', function() {
+      uiClose(_uiInput ? document.getElementById('uiInput').value.trim() : true);
+    });
+    document.getElementById('uiInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('uiOk').click();
+    });
+    function uiConfirm(title, msg, okLabel, danger) {
+      return uiDialog({ title: title, msg: msg, ok: okLabel, danger: danger }).then(function(v) { return v === true; });
+    }
+    function uiPrompt(title, placeholder, okLabel) {
+      return uiDialog({ title: title, input: true, placeholder: placeholder, ok: okLabel || 'Salvar' }).then(function(v) { return v || null; });
+    }
+    function toast(msg, kind) {
+      var box = document.getElementById('toasts'); if (!box) return;
+      var el = document.createElement('div');
+      el.className = 'toast' + (kind === 'error' ? ' error' : '');
+      el.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">' + (kind === 'error' ? 'error' : 'check_circle') + '</span><span></span>';
+      el.lastChild.textContent = msg;
+      box.appendChild(el);
+      setTimeout(function() { el.classList.add('out'); setTimeout(function() { el.remove(); }, 250); }, kind === 'error' ? 5000 : 2800);
+    }
+
+    // Esc fecha o que estiver aberto, do mais "por cima" para o de baixo
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Escape') return;
+      var open = function(id) { var el = document.getElementById(id); return el && el.classList.contains('active'); };
+      if (open('uiDialog')) uiClose(null);
+      else if (open('newLeadOverlay')) closeNewLead();
+      else if (open('confirmOverlay')) hideConfirm();
+      else if (open('importOverlay')) closeImport();
+      else if (open('drawer')) closeDrawer();
+    });
 
     /* ── DATA ─────────────────────────────────────────── */
     var _leads = [];
@@ -2442,12 +2539,13 @@
 
     async function deleteLead(id, e) {
       e.stopPropagation();
-      if (!confirm('Excluir este lead? A ação não pode ser desfeita.')) return;
+      if (!(await uiConfirm('Excluir este lead?', 'A ação não pode ser desfeita.', 'Excluir lead', true))) return;
       var result = await api('DELETE', '/api/leads/' + id);
       if (!result) return;
       _leads = _leads.filter(function(l) { return l.id !== id; });
       renderStats(_leads);
       renderTable();
+      toast('Lead excluído.');
     }
 
     function esc(s) {
@@ -2464,7 +2562,7 @@
 
     function exportCSV() {
       var leads = getLeads();
-      if (!leads.length) { alert('Nenhum lead para exportar.'); return; }
+      if (!leads.length) { toast('Nenhum lead para exportar.', 'error'); return; }
 
       // Descobre as perguntas do quiz a partir do 1º lead que tiver respostas (colunas fixas)
       var quizQs = [];
@@ -2799,15 +2897,16 @@
         fireRevenueEvent(REVENUE_EVENTS[newFat], lead, newFat);
       }
       closeDrawer();
+      toast('Alterações salvas.');
       var inCRM = document.getElementById('crmView').style.display !== 'none';
       if (inCRM) renderKanban(); else { renderStats(_leads); renderTable(); }
     }
 
-    function addStage() {
-      var name = prompt('Nome da nova etapa:');
+    async function addStage() {
+      var name = await uiPrompt('Nova etapa do CRM', 'Ex.: Proposta enviada', 'Criar etapa');
       if (!name || !name.trim()) return;
       var stages = getStages();
-      if (stages.indexOf(name.trim()) >= 0) { alert('Essa etapa já existe.'); return; }
+      if (stages.indexOf(name.trim()) >= 0) { toast('Essa etapa já existe.', 'error'); return; }
       stages.push(name.trim());
       saveStages(stages);
       renderKanban();
@@ -2816,13 +2915,13 @@
     async function removeStage(si) {
       var stages = getStages();
       var name   = stages[si];
-      if (stages.length <= 1) { alert('É necessário ter ao menos uma etapa.'); return; }
+      if (stages.length <= 1) { toast('O CRM precisa ter ao menos uma etapa.', 'error'); return; }
       var affected = _leads.filter(function(l){ return l.etapa === name; });
       var fallback = stages[si === 0 ? 1 : 0];
       var msg = affected.length > 0
         ? 'A etapa "'+name+'" tem '+affected.length+' lead(s). Eles serão movidos para "'+fallback+'". Confirmar?'
         : 'Remover a etapa "'+name+'"?';
-      if (!confirm(msg)) return;
+      if (!(await uiConfirm('Remover etapa?', msg, 'Remover', true))) return;
       if (affected.length) {
         await Promise.all(affected.map(function(l) {
           l.etapa = fallback;
@@ -2936,6 +3035,7 @@
       var result = await api('POST', '/api/leads/import', { leads: toAdd });
       if (!result) { document.getElementById('impConfirmBtn').disabled = false; return; }
       closeImport();
+      toast(toAdd.length === 1 ? '1 lead importado.' : toAdd.length + ' leads importados.');
       await loadLeads();
       renderStats(_leads);
       renderTable();
@@ -2951,8 +3051,14 @@
     function hideConfirm() { document.getElementById('confirmOverlay').classList.remove('active'); }
 
     async function clearAll() {
-      await api('DELETE', '/api/leads');
       hideConfirm();
+      // ação irreversível em TODOS os leads: exige digitar APAGAR
+      var typed = await uiDialog({ title: 'Digite APAGAR para confirmar', msg: 'Todos os leads serão removidos para sempre. Não dá para desfazer.', input: true, placeholder: 'APAGAR', ok: 'Apagar todos', danger: true });
+      if (typed == null) return;
+      if (String(typed).trim().toUpperCase() !== 'APAGAR') { toast('Nada foi apagado: o texto não confere.', 'error'); return; }
+      var res = await api('DELETE', '/api/leads');
+      if (!res) return;
+      toast('Todos os leads foram apagados.');
       await loadLeads();
       renderStats(_leads);
       renderTable();
@@ -3008,6 +3114,7 @@
 
       if (!result) { document.getElementById('nlSaveBtn').disabled = false; return; }
       closeNewLead();
+      toast('Contato adicionado.');
       await loadLeads();
       renderStats(_leads);
       renderTable();
@@ -3399,8 +3506,15 @@
       }
     });
 
+    // botões só de ícone ganham nome para leitor de tela; ícones decorativos ficam ocultos
+    function a11y(root) {
+      (root || document).querySelectorAll('button[title]:not([aria-label]), a[title]:not([aria-label])').forEach(function(el) { el.setAttribute('aria-label', el.title); });
+      (root || document).querySelectorAll('.material-symbols-outlined:not([aria-hidden])').forEach(function(el) { el.setAttribute('aria-hidden', 'true'); });
+    }
+
     async function init() {
       if (!getToken()) { window.location.href = '/login'; return; }
+      a11y();
       // Inicializa o gráfico com 30D antes de carregar os dados
       chartPreset('30d', document.getElementById('chartBtn30d'));
       await loadLeads();

@@ -26,8 +26,21 @@ export async function onRequestGet(context) {
   const acct  = env.META_ADS_ACCOUNT_ID || '4038372153047790';
   if (!token) return json({ ok: false, error: 'META_ADS_TOKEN não configurado' }, 500);
 
-  const q = new URL(request.url).searchParams;
+  const reqUrl = new URL(request.url);
+  const q = reqUrl.searchParams;
   const since = q.get('since'), until = q.get('until');
+
+  // cache de 5 min na borda do Cloudflare (o Meta leva 1–5 s por consulta);
+  // ?fresh=1 (botão Atualizar) ignora o cache. A chave não inclui o token: o
+  // middleware já barrou quem não está logado e todos os logados veem os mesmos dados.
+  const fresh = q.get('fresh') === '1';
+  q.delete('fresh');
+  const cache = typeof caches !== 'undefined' ? caches.default : null;
+  const cacheKey = new Request(reqUrl.toString());
+  if (cache && !fresh) {
+    const hit = await cache.match(cacheKey);
+    if (hit) return new Response(hit.body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Cache': 'HIT' } });
+  }
   if (!YMD.test(since || '') || !YMD.test(until || '') || since > until)
     return json({ ok: false, error: 'Parâmetros since/until inválidos' }, 400);
 
@@ -83,7 +96,7 @@ export async function onRequestGet(context) {
     return { since: s, until: u, ...t };
   };
 
-  return json({
+  const body = JSON.stringify({
     ok: true,
     since, until,
     account: account.name || null,
@@ -94,6 +107,12 @@ export async function onRequestGet(context) {
     campaigns: Object.values(camps).filter(c => c.spend > 0).sort((a, b) => b.spend - a.spend),
     ig: { username: ig.username || null, total: ig.total ?? null, firstDay: ig.firstDay || null, error: ig.error || null },
   });
+
+  if (cache) {
+    const put = cache.put(cacheKey, new Response(body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' } }));
+    if (context.waitUntil) context.waitUntil(put); else await put;
+  }
+  return new Response(body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Cache': 'MISS' } });
 }
 
 // funil (só campanhas de leads): impressões → cliques no link → visualizações da página → leads

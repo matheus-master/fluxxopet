@@ -150,6 +150,22 @@
       .view{padding:0 4px;font-size:.84rem} .view .ms{display:none}
     }
 
+    /* ── experiência: foco, carregamento, vazio, ajuda ── */
+    :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    button:focus:not(:focus-visible),a:focus:not(:focus-visible){outline:none}
+    .progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--accent);z-index:100;opacity:0;transition:width .25s,opacity .3s}
+    .loading .progress{opacity:1;width:70%;transition:width 6s cubic-bezier(.1,.7,.2,1),opacity .2s}
+    .skel{background:linear-gradient(90deg,#ECEDF0 25%,#F6F7F9 50%,#ECEDF0 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:14px}
+    @keyframes shimmer{to{background-position:-200% 0}}
+    .empty-state{text-align:center;padding:64px 24px;color:var(--ink-2)}
+    .empty-state .ms{font-size:40px;color:var(--ink-off);font-variation-settings:'FILL' 0,'wght' 300}
+    .empty-state b{display:block;color:var(--ink);font-weight:500;font-size:1.05rem;margin:10px 0 6px}
+    .notice button{margin-left:auto;border:1px solid currentColor;background:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.8rem;color:inherit;white-space:nowrap}
+    .info{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#ECEDF0;color:var(--ink-2);font-size:.6rem;font-weight:600;cursor:help;text-transform:none;letter-spacing:0}
+    .kpi.hero .info{background:#26282C;color:#9AA0A8}
+    @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+    @media (max-width:640px){ .top{position:sticky;top:0;z-index:20;background:var(--canvas);margin:-16px -16px 0;padding:12px 16px} }
+
     .foot{color:var(--ink-3);font-size:.76rem;margin-top:18px;line-height:1.5}
     .loading #content{opacity:.45;transition:opacity .2s}
 
@@ -175,17 +191,18 @@
 </head>
 <body>
 <div class="frame" id="app">
+  <div class="progress" aria-hidden="true"></div>
   <div class="top">
     <!-- mesma barra de ícones do /admin -->
-    <nav class="icons">
-      <a class="ibtn" href="/admin#leads" title="Leads"><span class="ms">groups</span></a>
-      <a class="ibtn" href="/admin#crm" title="CRM"><span class="ms">view_kanban</span></a>
-      <a class="ibtn" href="/admin#anuncios" title="Anúncios"><span class="ms">campaign</span></a>
-      <a class="ibtn on" href="/trafego" title="Tráfego"><span class="ms">monitoring</span></a>
-      <a class="ibtn" href="/admin#config" title="Configurações"><span class="ms">settings</span></a>
+    <nav class="icons" aria-label="Seções do painel">
+      <a class="ibtn" href="/admin#leads" title="Leads" aria-label="Leads"><span class="ms" aria-hidden="true">groups</span></a>
+      <a class="ibtn" href="/admin#crm" title="CRM" aria-label="CRM"><span class="ms" aria-hidden="true">view_kanban</span></a>
+      <a class="ibtn" href="/admin#anuncios" title="Anúncios" aria-label="Anúncios"><span class="ms" aria-hidden="true">campaign</span></a>
+      <a class="ibtn on" href="/trafego" title="Tráfego" aria-label="Tráfego" aria-current="page"><span class="ms" aria-hidden="true">monitoring</span></a>
+      <a class="ibtn" href="/admin#config" title="Configurações" aria-label="Configurações"><span class="ms" aria-hidden="true">settings</span></a>
     </nav>
     <div class="who">
-      <button class="ibtn" id="refresh" title="Atualizar"><span class="ms">refresh</span></button>
+      <button class="ibtn" id="refresh" title="Atualizar agora (busca direto no Meta)" aria-label="Atualizar dados"><span class="ms" aria-hidden="true">refresh</span></button>
       <span class="avatar">F</span>
       <div><b>Fluxxo Pet</b><small id="acctName">Meta Ads</small></div>
     </div>
@@ -219,8 +236,12 @@
     </div>
   </div>
 
-  <div id="notice"></div>
-  <div id="content"></div>
+  <div id="notice" role="status" aria-live="polite"></div>
+  <div id="content">
+    <!-- esqueleto até a primeira resposta do Meta -->
+    <section class="kpis"><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div></section>
+    <div class="skel" style="height:420px"></div>
+  </div>
   <p class="foot" id="foot"></p>
 </div>
 
@@ -366,7 +387,8 @@
   /* ── componentes ──────────────────────────────────── */
   function kpi(o) {
     return '<div class="card kpi' + (o.hero ? ' hero' : '') + '">' +
-      '<div class="row1"><span class="label"><span class="ms">' + o.icon + '</span>' + o.label + '</span>' + (o.badge || '') + '</div>' +
+      '<div class="row1"><span class="label"><span class="ms" aria-hidden="true">' + o.icon + '</span>' + o.label +
+      (o.info ? ' <span class="info" title="' + esc(o.info) + '" aria-label="' + esc(o.info) + '" tabindex="0">i</span>' : '') + '</span>' + (o.badge || '') + '</div>' +
       '<div class="row2"><span class="big">' + o.value + '</span><span class="unit">' + (o.unit || '') + '</span></div></div>';
   }
   function chartCard(o) {
@@ -504,10 +526,10 @@
     geral: function (x) {
       var t = x.tot, p = x.prev;
       var cards =
-        kpi({ hero: true, icon: 'payments', label: 'Investimento / acumulado', value: money(t.spend), unit: x.nd + ' dias', badge: badgeHtml(t.spend, p && p.spend, false, x.cmp) }) +
+        kpi({ hero: true, icon: 'payments', label: 'Investimento / acumulado', value: money(t.spend), info: 'Soma do que a conta inteira gastou no período.', unit: x.nd + ' dias', badge: badgeHtml(t.spend, p && p.spend, false, x.cmp) }) +
         monthSpendCard(x, 'spend') +
-        kpi({ icon: 'person_add', label: 'Investido em leads', value: money(t.leadsSpend), unit: pctOf(t.leadsSpend, t.spend) + ' do total', badge: badgeHtml(t.leadsSpend, p && p.leadsSpend, false, x.cmp) }) +
-        kpi({ icon: 'favorite', label: 'Investido em seguidores', value: money(t.segSpend), unit: pctOf(t.segSpend, t.spend) + ' do total', badge: badgeHtml(t.segSpend, p && p.segSpend, false, x.cmp) });
+        kpi({ icon: 'person_add', label: 'Investido em leads', info: 'Gasto das campanhas com objetivo de cadastro.', value: money(t.leadsSpend), unit: pctOf(t.leadsSpend, t.spend) + ' do total', badge: badgeHtml(t.leadsSpend, p && p.leadsSpend, false, x.cmp) }) +
+        kpi({ icon: 'favorite', label: 'Investido em seguidores', info: 'Gasto das campanhas otimizadas para visita ao perfil do Instagram.', value: money(t.segSpend), unit: pctOf(t.segSpend, t.spend) + ' do total', badge: badgeHtml(t.segSpend, p && p.segSpend, false, x.cmp) });
 
       cumulate(x.buckets, 'spend', '_cum');
       var main = mainCard('Investimento da conta por ' + x.gname,
@@ -554,9 +576,9 @@
       var t = x.tot, p = x.prev, m = x.m, pm = x.pm;
       var cpl = ratio(t.leadsSpend, t.leads), pcpl = p && ratio(p.leadsSpend, p.leads);
       var cards =
-        kpi({ hero: true, icon: 'payments', label: 'Investimento / acumulado', value: money(t.leadsSpend), unit: x.nd + ' dias', badge: badgeHtml(t.leadsSpend, p && p.leadsSpend, false, x.cmp) }) +
+        kpi({ hero: true, icon: 'payments', label: 'Investimento / acumulado', value: money(t.leadsSpend), info: 'Gasto das campanhas de leads no período.', unit: x.nd + ' dias', badge: badgeHtml(t.leadsSpend, p && p.leadsSpend, false, x.cmp) }) +
         monthSpendCard(x, 'leadsSpend') +
-        kpi({ icon: 'person_add', label: 'Leads / acumulado', value: int.format(t.leads), unit: cpl != null ? 'CPL ' + money(cpl) : '', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
+        kpi({ icon: 'person_add', label: 'Leads / acumulado', info: 'Leads que o Meta atribui aos anúncios (evento Lead do pixel). Pode diferir do CRM.', value: int.format(t.leads), unit: cpl != null ? 'CPL ' + money(cpl) : '', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
         (x.monthIsPeriod
           ? kpi({ icon: 'avg_pace', label: 'Leads / média diária', value: dec1.format(t.leads / x.nd), unit: 'por dia', badge: badgeHtml(t.leads / x.nd, p && p.leads / x.pnd, false, x.cmp) })
           : kpi({ icon: 'event_available', label: 'Leads / mês', value: m ? int.format(m.leads) : '—', unit: m && m.leads ? 'CPL ' + money(m.leadsSpend / m.leads) : x.mLabel, badge: badgeHtml(m && m.leads, pm && pm.leads, false, x.cmpM) }));
@@ -594,10 +616,10 @@
       var pcpf = p && p.followers ? p.segSpend / p.followers : null;
       var cpv = ratio(t.segSpend, t.visits), pcpv = p && ratio(p.segSpend, p.visits);
       var cards =
-        kpi({ hero: true, icon: 'payments', label: 'Investimento / acumulado', value: money(t.segSpend), unit: x.nd + ' dias', badge: badgeHtml(t.segSpend, p && p.segSpend, false, x.cmp) }) +
-        kpi({ icon: 'favorite', label: 'Novos seguidores', value: t.followers != null ? '+' + int.format(t.followers) : '—', unit: d.ig.total != null ? int.format(d.ig.total) + ' no total' : '', badge: badgeHtml(t.followers, p && p.followers, false, x.cmp) }) +
-        kpi({ icon: 'sell', label: 'Custo por seguidor', value: money(cpf), unit: 'por seguidor', badge: badgeHtml(cpf, pcpf, true, x.cmp) }) +
-        kpi({ icon: 'ads_click', label: 'Visitas ao perfil', value: int.format(t.visits), unit: cpv != null ? money(cpv) + ' / visita' : '', badge: badgeHtml(t.visits, p && p.visits, false, x.cmp) });
+        kpi({ hero: true, icon: 'payments', label: 'Investimento / acumulado', value: money(t.segSpend), info: 'Gasto das campanhas de seguidores no período.', unit: x.nd + ' dias', badge: badgeHtml(t.segSpend, p && p.segSpend, false, x.cmp) }) +
+        kpi({ icon: 'favorite', label: 'Novos seguidores', info: 'Ganho de seguidores do Instagram no período, orgânico + pago. O Meta não informa quais vieram dos anúncios.', value: t.followers != null ? '+' + int.format(t.followers) : '—', unit: d.ig.total != null ? int.format(d.ig.total) + ' no total' : '', badge: badgeHtml(t.followers, p && p.followers, false, x.cmp) }) +
+        kpi({ icon: 'sell', label: 'Custo por seguidor', info: 'Investimento em seguidores ÷ novos seguidores, só nos dias em que o Instagram já informou o dado.', value: money(cpf), unit: 'por seguidor', badge: badgeHtml(cpf, pcpf, true, x.cmp) }) +
+        kpi({ icon: 'ads_click', label: 'Visitas ao perfil', info: 'Cliques dos anúncios de seguidores que levaram ao perfil. 100% atribuídos aos anúncios.', value: int.format(t.visits), unit: cpv != null ? money(cpv) + ' / visita' : '', badge: badgeHtml(t.visits, p && p.visits, false, x.cmp) });
 
       x.buckets.forEach(function (b) { b._cpf = b.followers ? b.folSpend / b.followers : null; });
       var main = mainSpend(x, 'segSpend', 'Investimento e custo por seguidor por ' + x.gname, 'Custo por seguidor',
@@ -634,10 +656,10 @@
       var cpl = ratio(t.leadsSpend, t.leads);
 
       var cards =
-        kpi({ hero: true, icon: 'person_add', label: 'Leads', value: int.format(t.leads), unit: cpl != null ? 'CPL ' + money(cpl) : '', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
-        kpi({ icon: 'ads_click', label: 'CTR', value: pctTxt(r.ctr), unit: 'cliques ÷ impressões', badge: ppHtml(r.ctr, pr.ctr, true, x.cmp) }) +
-        kpi({ icon: 'link', label: 'Connect rate', value: pctTxt(r.con), unit: 'visualiz. ÷ cliques', badge: ppHtml(r.con, pr.con, true, x.cmp) }) +
-        kpi({ icon: 'conversion_path', label: 'Taxa de conversão', value: pctTxt(r.conv), unit: 'leads ÷ visualiz.', badge: ppHtml(r.conv, pr.conv, true, x.cmp) });
+        kpi({ hero: true, icon: 'person_add', label: 'Leads', value: int.format(t.leads), info: 'Leads das campanhas de cadastro no período.', unit: cpl != null ? 'CPL ' + money(cpl) : '', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
+        kpi({ icon: 'ads_click', label: 'CTR', info: 'Cliques no link ÷ impressões. Mede o quanto o anúncio chama atenção.', value: pctTxt(r.ctr), unit: 'cliques ÷ impressões', badge: ppHtml(r.ctr, pr.ctr, true, x.cmp) }) +
+        kpi({ icon: 'link', label: 'Connect rate', info: 'Visualizações da página ÷ cliques. Mede quantos cliques viram visita de fato (velocidade da página, desistência).', value: pctTxt(r.con), unit: 'visualiz. ÷ cliques', badge: ppHtml(r.con, pr.con, true, x.cmp) }) +
+        kpi({ icon: 'conversion_path', label: 'Taxa de conversão', info: 'Leads ÷ visualizações da página. Mede o quanto a página convence.', value: pctTxt(r.conv), unit: 'leads ÷ visualiz.', badge: ppHtml(r.conv, pr.conv, true, x.cmp) });
 
       // larguras fixas decrescentes: os volumes vão de dezenas de milhares a dezenas,
       // então largura proporcional deixaria as últimas etapas invisíveis
@@ -694,7 +716,21 @@
   function render() {
     var d = state.data; if (!d) return;
     Object.keys(charts).forEach(function (k) { charts[k].destroy(); delete charts[k]; });
-    var x = ctx(), v = RENDER[state.view](x);
+    var x = ctx();
+
+    // período sem veiculação: mensagem clara em vez de cards e gráficos zerados
+    var spendKey = { geral: 'spend', leads: 'leadsSpend', seguidores: 'segSpend', funil: 'leadsSpend' }[state.view];
+    if (!x.tot[spendKey]) {
+      var what = { geral: 'na conta', leads: 'em campanhas de leads', seguidores: 'em campanhas de seguidores', funil: 'em campanhas de leads' }[state.view];
+      $('content').innerHTML = '<div class="card empty-state"><span class="ms" aria-hidden="true">event_busy</span>' +
+        '<b>Nenhum investimento ' + what + ' neste período</b>' +
+        '<span>' + longDate(d.since) + ' – ' + longDate(d.until) + '. Escolha um período maior ou outra aba.</span></div>';
+      $('notice').innerHTML = '';
+      $('foot').textContent = '';
+      return;
+    }
+
+    var v = RENDER[state.view](x);
     $('content').innerHTML = v.html;
     v.draw();
 
@@ -722,48 +758,73 @@
       ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 
-  function notice(msg) {
-    $('notice').innerHTML = msg ? '<div class="notice"><span class="ms">error</span><span>' + esc(msg) + '</span></div>' : '';
+  // aviso com botão opcional de "tentar de novo"
+  function notice(msg, retry) {
+    $('notice').innerHTML = msg ? '<div class="notice"><span class="ms" aria-hidden="true">error</span><span>' + esc(msg) + '</span>' +
+      (retry ? '<button type="button" onclick="load(true)">Tentar de novo</button>' : '') + '</div>' : '';
+  }
+
+  /* ── preferências (lembra período e agrupamento) ─── */
+  var PREFS_KEY = 'trafego_prefs';
+  function savePrefs() {
+    try { localStorage.setItem(PREFS_KEY, JSON.stringify({ period: state.period, group: state.group, since: $('since').value, until: $('until').value })); } catch (e) {}
+  }
+  function readPrefs() {
+    try { return JSON.parse(localStorage.getItem(PREFS_KEY) || 'null'); } catch (e) { return null; }
   }
 
   /* ── carregamento ─────────────────────────────────── */
+  // cache na memória da página: voltar a um período já visto é instantâneo
+  var memo = {}, MEMO_TTL = 5 * 60e3;
   var seq = 0;
-  async function load() {
+  async function load(force) {
     var since = $('since').value, until = $('until').value;
-    if (!since || !until || since > until) { notice('Escolha um período válido.'); return; }
+    if (!since || !until || since > until) { notice('Escolha um período válido: a data inicial precisa ser antes da final.'); return; }
     var q = 'since=' + since + '&until=' + until;
     if (state.period !== 'custom') { var r = periodRange(state.period); q += '&prevSince=' + r.prevSince + '&prevUntil=' + r.prevUntil; }
+    savePrefs();
+
+    var hit = memo[q];
+    if (!force && hit && Date.now() - hit.t < MEMO_TTL) { seq++; apply(hit.data, since, until); return; }
 
     var my = ++seq, app = $('app'), rb = $('refresh');
-    app.classList.add('loading'); rb.classList.add('spin');
+    app.classList.add('loading'); rb.classList.add('spin'); app.setAttribute('aria-busy', 'true');
     try {
-      var data = await api('/api/meta-trafego?' + q);
+      var data = await api('/api/meta-trafego?' + q + (force ? '&fresh=1' : ''));
       if (my !== seq || !data) return;
-      if (!data.ok) { notice('Erro ao carregar dados do Meta: ' + (data.error || 'verifique o token')); return; }
-      state.data = data;
-      if (data.account) $('acctName').textContent = 'Meta Ads · ' + data.account;
-      if (!state.group) state.group = defaultGroup(since, until);
-      render();
+      if (!data.ok) { notice('Não consegui carregar os dados do Meta: ' + (data.error || 'verifique o token') + '.', true); return; }
+      memo[q] = { t: Date.now(), data: data };
+      apply(data, since, until);
     } catch (e) {
-      if (my === seq) notice('Erro de conexão: ' + e.message);
+      if (my === seq) notice('Sem conexão com o servidor. Confira a internet e tente de novo.', true);
     } finally {
-      if (my === seq) { app.classList.remove('loading'); rb.classList.remove('spin'); }
+      if (my === seq) { app.classList.remove('loading'); rb.classList.remove('spin'); app.removeAttribute('aria-busy'); }
     }
   }
+  function apply(data, since, until) {
+    notice('');
+    state.data = data;
+    if (data.account) $('acctName').textContent = 'Meta Ads · ' + data.account;
+    if (!state.group) state.group = defaultGroup(since, until);
+    render();
+  }
 
-  function setPeriod(p) {
+  function markTabs() {
+    document.querySelectorAll('.tab').forEach(function (t) { var on = t.dataset.p === state.period; t.classList.toggle('on', on); t.setAttribute('aria-pressed', on); });
+  }
+  function setPeriod(p, keepGroup) {
     state.period = p;
-    document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('on', t.dataset.p === p); });
+    markTabs();
     if (p === 'custom') { $('since').focus(); return; }
     var r = periodRange(p);
     $('since').value = r.since; $('until').value = r.until;
-    state.group = defaultGroup(r.since, r.until);
+    if (!keepGroup) state.group = defaultGroup(r.since, r.until);
     load();
   }
 
   function setView(v) {
     state.view = VIEWS.indexOf(v) >= 0 ? v : 'geral';
-    document.querySelectorAll('.view').forEach(function (b) { b.classList.toggle('on', b.dataset.v === state.view); });
+    document.querySelectorAll('.view').forEach(function (b) { var on = b.dataset.v === state.view; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
     if (location.hash.slice(1) !== state.view) history.replaceState(null, '', '#' + state.view);
     render();
   }
@@ -774,7 +835,7 @@
   ['since', 'until'].forEach(function (id) {
     $(id).addEventListener('change', function () {
       state.period = 'custom';
-      document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('on', t.dataset.p === 'custom'); });
+      markTabs();
       var s = $('since').value, u = $('until').value;
       if (s && u) state.group = defaultGroup(s, u);
       load();
@@ -782,16 +843,26 @@
   });
   $('content').addEventListener('click', function (e) {
     var b = e.target.closest('.group button'); if (!b) return;
-    state.group = b.dataset.g; render();
+    state.group = b.dataset.g; savePrefs(); render();
   });
-  $('refresh').addEventListener('click', load);
+  $('refresh').addEventListener('click', function () { load(true); });
   window.addEventListener('hashchange', function () { setView(location.hash.slice(1)); });
 
   if (!getToken()) location.href = '/login';
   else {
     $('until').max = today();
     setView(location.hash.slice(1));
-    setPeriod('mes');
+    // volta para o período e o agrupamento da última visita
+    var pf = readPrefs();
+    if (pf && pf.period === 'custom' && pf.since && pf.until) {
+      state.period = 'custom'; markTabs();
+      $('since').value = pf.since; $('until').value = pf.until;
+      state.group = pf.group || defaultGroup(pf.since, pf.until);
+      load();
+    } else if (pf && WINDOW[pf.period]) {
+      state.group = pf.group || null;
+      setPeriod(pf.period, !!pf.group);
+    } else setPeriod('mes');
   }
 </script>
 </body>
