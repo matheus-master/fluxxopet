@@ -90,7 +90,7 @@
   offline no Ads a partir disso.
 
 ## Dashboard de Tráfego (`/trafego` → `trafego.html`)
-- Painel do Meta Ads com 3 abas (`#geral`, `#leads`, `#seguidores`). Períodos em
+- Painel do Meta Ads com 4 abas (`#geral`, `#leads`, `#seguidores`, `#funil`). Períodos em
   **janela móvel** (Semana = 7 dias, Mês = 30, Trimestre = 90, Semestre = 180,
   Ano = 365) + Personalizado; comparação com a janela anterior do mesmo tamanho.
   Mesmo login do `/admin` (JWT em `sessionStorage.vt_token`).
@@ -101,6 +101,12 @@
   `PROFILE_VISIT`; resto = Outros. Geral = conta inteira.
 - Leads = ação `lead` atribuída pelo Meta (evento Lead do pixel), não o total do CRM.
 - Visitas ao perfil = `link_click` das campanhas de seguidores.
+- **Funil de tráfego** (`#funil`, só campanhas de leads): impressões → `link_click` →
+  `landing_page_view` → leads. CTR = cliques ÷ impressões; connect rate =
+  visualizações ÷ cliques; conversão = leads ÷ visualizações. Variações de taxa em
+  **p.p.**. Connect rate diário pode passar de 100% (o Meta atribui a visualização
+  à data do clique, recarregamentos etc.) — é dado do Meta, não bug.
+  Próximos passos combinados: funil comercial (CRM) e um terceiro juntando os dois.
 - Seguidores = `follower_count` do Instagram (orgânico + pago; o Meta não atribui
   seguidor a anúncio). A API só dá 30 dias, então cada acesso grava os dias na
   tabela D1 `ig_followers_daily` (migration 0009) e o histórico vai crescendo.

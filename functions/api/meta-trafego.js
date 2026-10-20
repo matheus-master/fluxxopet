@@ -8,6 +8,7 @@
 //   outros     → todo o resto (vendas, engajamento...)
 // Leads = ação "lead" atribuída pelo Meta. Visitas ao perfil = link_click das campanhas
 // de seguidores (o destino delas é o perfil do Instagram).
+// Funil (impr/clicks/lpv) só das campanhas de leads, que são as que levam para a página.
 //
 // Seguidores: métrica follower_count do Instagram (novos seguidores/dia, orgânico + pago).
 // A API só devolve os últimos 30 dias, então cada acesso grava esses dias na tabela
@@ -41,7 +42,7 @@ export async function onRequestGet(context) {
 
   const act = `${GRAPH}/act_${acct}`;
   const ins = (s, u, daily) => fetchAll(`${act}/insights?level=campaign` +
-    `&fields=campaign_id,campaign_name,objective,spend,actions` +
+    `&fields=campaign_id,campaign_name,objective,spend,impressions,actions` +
     `&time_range=${enc({ since: s, until: u })}` + (daily ? '&time_increment=1' : '') +
     `&limit=500&access_token=${token}`);
 
@@ -95,13 +96,17 @@ export async function onRequestGet(context) {
   });
 }
 
+// funil (só campanhas de leads): impressões → cliques no link → visualizações da página → leads
 function emptyDay(date) {
-  return { date, spend: 0, leadsSpend: 0, leads: 0, segSpend: 0, visits: 0, outrosSpend: 0 };
+  return { date, spend: 0, leadsSpend: 0, leads: 0, impr: 0, clicks: 0, lpv: 0, segSpend: 0, visits: 0, outrosSpend: 0 };
 }
 function add(t, r, type) {
   const s = num(r.spend);
   t.spend += s;
-  if (type === 'leads')           { t.leadsSpend += s; t.leads += leadsOf(r); }
+  if (type === 'leads') {
+    t.leadsSpend += s; t.leads += leadsOf(r);
+    t.impr += num(r.impressions); t.clicks += act_(r, 'link_click'); t.lpv += act_(r, 'landing_page_view');
+  }
   else if (type === 'seguidores') { t.segSpend += s; t.visits += act_(r, 'link_click'); }
   else                            { t.outrosSpend += s; }
 }

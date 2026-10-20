@@ -128,6 +128,28 @@
     .tip .k{font-size:.72rem;color:var(--ink-2)}
     .tip .n{font-size:1.25rem;font-weight:500;letter-spacing:-.01em;white-space:nowrap;font-variant-numeric:tabular-nums}
 
+    /* funil */
+    .funnel{display:flex;flex-direction:column;align-items:center;gap:0;margin:10px 0 4px}
+    .fstage{width:100%;display:flex;justify-content:center}
+    .fbar{height:64px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 22px;min-width:220px;transition:width .4s}
+    .fbar .fl{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;opacity:.75;white-space:nowrap}
+    .fbar b{font-size:1.6rem;font-weight:400;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .frate{display:flex;align-items:center;gap:8px;padding:10px 0;font-size:.82rem;color:var(--ink-2)}
+    .frate .ms{font-size:18px;color:var(--accent);font-variation-settings:'FILL' 0,'wght' 400}
+    .frate b{color:var(--accent);font-weight:500;font-size:1rem;font-variant-numeric:tabular-nums}
+    .trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+    .trio .stats{gap:28px}
+    @media (max-width:1180px){ .trio{grid-template-columns:minmax(0,1fr)} }
+    @media (max-width:640px){
+      .fbar{min-width:0;padding:0 14px;height:56px} .fbar b{font-size:1.25rem} .fbar .fl{font-size:.64rem}
+      /* no celular o funil afunila menos, para os rótulos caberem */
+      .fs-1{width:92%!important} .fs-2{width:84%!important} .fs-3{width:76%!important}
+      /* barra de ícones e abas cabendo em 390px */
+      .icons{gap:6px} .who{gap:6px} .ibtn{width:40px;height:40px} .avatar{display:none}
+      .views{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+      .view{padding:0 4px;font-size:.84rem} .view .ms{display:none}
+    }
+
     .foot{color:var(--ink-3);font-size:.76rem;margin-top:18px;line-height:1.5}
     .loading #content{opacity:.45;transition:opacity .2s}
 
@@ -176,6 +198,7 @@
         <button class="view" data-v="geral"><span class="ms">dashboard</span>Geral</button>
         <button class="view" data-v="leads"><span class="ms">person_add</span>Leads</button>
         <button class="view" data-v="seguidores"><span class="ms">favorite</span>Seguidores</button>
+        <button class="view" data-v="funil"><span class="ms">filter_alt</span>Funil</button>
       </div>
     </div>
     <div class="filters">
@@ -203,7 +226,7 @@
 
 <script>
   /* ── estado ───────────────────────────────────────── */
-  var VIEWS = ['geral', 'leads', 'seguidores'];
+  var VIEWS = ['geral', 'leads', 'seguidores', 'funil'];
   var state = { view: 'geral', period: 'mes', group: null, data: null };
   var charts = {};
   var C = { accent: '#FF5A1F', ink: '#0E0F11', ink2: '#5F656D', ink3: '#9AA0A8', bar: '#DADCE1', grid: '#ECEDF0' };
@@ -251,7 +274,7 @@
   /* ── agrupamento ──────────────────────────────────── */
   var MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
   var MESES_L = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  var SUMS = ['spend', 'leadsSpend', 'leads', 'segSpend', 'visits', 'outrosSpend'];
+  var SUMS = ['spend', 'leadsSpend', 'leads', 'impr', 'clicks', 'lpv', 'segSpend', 'visits', 'outrosSpend'];
   function bucketKey(d, g) {
     var y = d.slice(0, 4), m = +d.slice(5, 7);
     if (g === 'dia') return d;
@@ -313,6 +336,17 @@
     return p + int.format(v);
   }
   function ratio(a, b) { return b ? a / b : null; }
+  var pct2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  function rate(a, b) { return b ? a / b * 100 : null; }
+  function pctTxt(v) { return v == null ? '—' : pct2.format(v) + '%'; }
+  // variação de taxa em pontos percentuais (p.p.), mais honesto que % de %
+  function ppHtml(cur, prev, asBadge, title) {
+    if (cur == null || prev == null) return '';
+    var d = cur - prev, cls = Math.abs(d) < 0.005 ? 'flat' : d > 0 ? 'good' : 'bad';
+    var txt = (d > 0 ? '+' : '') + pct2.format(d) + ' p.p.';
+    return asBadge ? '<span class="badge ' + cls + '" title="' + esc(title || '') + '">' + txt + '</span>'
+                   : '<span class="chg ' + cls + '">' + (d > 0 ? '↑ ' : '↓ ') + txt + '</span>';
+  }
   function money(v) { return v == null ? '—' : brl.format(v); }
   function change(cur, prev) { return (cur == null || !prev) ? null : (cur - prev) / prev * 100; }
   function tone(d, lowerIsBetter) { return Math.abs(d) < 0.05 ? 'flat' : ((d < 0) === !!lowerIsBetter ? 'good' : 'bad'); }
@@ -390,7 +424,7 @@
         scales: {
           x: { stacked: true, grid: { display: false }, border: { display: false }, ticks: Object.assign({ maxRotation: 0, autoSkipPadding: 14 }, tick) },
           y: { stacked: true, beginAtZero: true, grid: { color: C.grid }, border: { display: false },
-               ticks: Object.assign({ maxTicksLimit: 6, callback: function (v) { return compact(v, opt.money); } }, tick) },
+               ticks: Object.assign({ maxTicksLimit: 6, callback: function (v) { return opt.tickFmt ? opt.tickFmt(v) : compact(v, opt.money); } }, tick) },
           y1: { display: !!opt.line, beginAtZero: true, position: 'right', grid: { display: false }, border: { display: false },
                 ticks: Object.assign({ maxTicksLimit: 6, callback: function (v) { return compact(v, opt.lineMoney); } }, tick) },
         },
@@ -592,6 +626,66 @@
         },
       };
     },
+    // funil de tráfego (só campanhas de leads): impressões → cliques → visualizações → leads
+    funil: function (x) {
+      var t = x.tot, p = x.prev || null;
+      var R = function (o) { return o ? { ctr: rate(o.clicks, o.impr), con: rate(o.lpv, o.clicks), conv: rate(o.leads, o.lpv) } : {}; };
+      var r = R(t), pr = R(p);
+      var cpl = ratio(t.leadsSpend, t.leads);
+
+      var cards =
+        kpi({ hero: true, icon: 'person_add', label: 'Leads', value: int.format(t.leads), unit: cpl != null ? 'CPL ' + money(cpl) : '', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
+        kpi({ icon: 'ads_click', label: 'CTR', value: pctTxt(r.ctr), unit: 'cliques ÷ impressões', badge: ppHtml(r.ctr, pr.ctr, true, x.cmp) }) +
+        kpi({ icon: 'link', label: 'Connect rate', value: pctTxt(r.con), unit: 'visualiz. ÷ cliques', badge: ppHtml(r.con, pr.con, true, x.cmp) }) +
+        kpi({ icon: 'conversion_path', label: 'Taxa de conversão', value: pctTxt(r.conv), unit: 'leads ÷ visualiz.', badge: ppHtml(r.conv, pr.conv, true, x.cmp) });
+
+      // larguras fixas decrescentes: os volumes vão de dezenas de milhares a dezenas,
+      // então largura proporcional deixaria as últimas etapas invisíveis
+      var stages = [
+        { l: 'Impressões', v: t.impr, w: 100, bg: '#ECEDF0', fg: C.ink },
+        { l: 'Cliques no link', v: t.clicks, w: 80, bg: '#BCC0C7', fg: C.ink },
+        { l: 'Visualizações da página', v: t.lpv, w: 60, bg: C.ink, fg: '#fff' },
+        { l: 'Leads', v: t.leads, w: 40, bg: C.accent, fg: '#fff' },
+      ];
+      var rates = [['CTR', r.ctr, pr.ctr], ['Connect rate', r.con, pr.con], ['Taxa de conversão', r.conv, pr.conv]];
+      var funnel = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>Funil de tráfego</span>' +
+        '<div class="legend"><span>' + esc(x.cmp ? 'variações ' + x.cmp : '') + '</span></div></div><div class="funnel">' +
+        stages.map(function (s, i) {
+          var bar = '<div class="fstage"><div class="fbar fs-' + i + '" style="width:' + s.w + '%;background:' + s.bg + ';color:' + s.fg + '"><span class="fl">' + s.l + '</span><b>' + int.format(s.v) + '</b></div></div>';
+          if (i === stages.length - 1) return bar;
+          var rt = rates[i];
+          return bar + '<div class="frate"><span class="ms">south</span>' + rt[0] + ' <b>' + pctTxt(rt[1]) + '</b>' + ppHtml(rt[1], rt[2], false) + '</div>';
+        }).join('') + '</div></section>';
+
+      x.buckets.forEach(function (b) { b._ctr = rate(b.clicks, b.impr); b._con = rate(b.lpv, b.clicks); b._conv = rate(b.leads, b.lpv); });
+      function rateCard(id, icon, label, key, cur, prev) {
+        var best = x.buckets.filter(function (b) { return b[key] != null; }).sort(function (a, b) { return b[key] - a[key]; })[0];
+        return chartCard({ id: id, icon: icon, label: label + ' por ' + x.gname, legend: '<span><i class="blk"></i>Taxa</span><span><i class="org"></i>Melhor</span>',
+          stats: stat(pctTxt(cur), 'No período ', ppHtml(cur, prev, false)) + stat(best ? pctTxt(best[key]) : '—', 'Melhor · ' + (best ? bucketLabel(best, x.g) : '—'), '', 'org') });
+      }
+      var trio = '<section class="trio">' +
+        rateCard('c-ctr', 'ads_click', 'CTR', '_ctr', r.ctr, pr.ctr) +
+        rateCard('c-con', 'link', 'Connect rate', '_con', r.con, pr.con) +
+        rateCard('c-conv', 'conversion_path', 'Conversão', '_conv', r.conv, pr.conv) + '</section>';
+
+      function drawRate(id, key, numL, numK, denL, denK) {
+        var vals = x.buckets.map(function (b) { return b[key]; });
+        var bi = -1, bv = -1; vals.forEach(function (v, i) { if (v != null && v > bv) { bv = v; bi = i; } });
+        drawChart(id, x.buckets, {
+          bars: vals, hoverColor: C.ink2, barColor: function (i) { return i === bi ? C.accent : C.ink; },
+          tickFmt: function (v) { return pct2.format(v).replace(/,00$/, '') + '%'; },
+          tip: function (b) { return [['Taxa', pctTxt(b[key])], [numL, int.format(b[numK])], [denL, int.format(b[denK])]]; },
+        });
+      }
+      return {
+        html: '<section class="kpis">' + cards + '</section>' + funnel + trio,
+        draw: function () {
+          drawRate('c-ctr', '_ctr', 'Cliques', 'clicks', 'Impressões', 'impr');
+          drawRate('c-con', '_con', 'Visualiz.', 'lpv', 'Cliques', 'clicks');
+          drawRate('c-conv', '_conv', 'Leads', 'leads', 'Visualiz.', 'lpv');
+        },
+      };
+    },
   };
 
   function pctOf(a, b) { return b ? Math.round(a / b * 100) + '%' : '0%'; }
@@ -622,6 +716,7 @@
       geral: 'conta inteira; tipos pelo objetivo da campanha (Leads = cadastro, Seguidores = visita ao perfil)',
       leads: 'só campanhas com objetivo de cadastro · leads = evento Lead atribuído pelo Meta',
       seguidores: 'só campanhas otimizadas para visita ao perfil · seguidores = ganho diário do Instagram (orgânico + pago)',
+      funil: 'só campanhas com objetivo de cadastro · CTR = cliques no link ÷ impressões · connect rate = visualizações da página ÷ cliques · conversão = leads ÷ visualizações',
     }[state.view];
     $('foot').textContent = 'Fonte: Meta Ads · ' + src + ' · comparação ' + (x.cmp || '—') +
       ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
