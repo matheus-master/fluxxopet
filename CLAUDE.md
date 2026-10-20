@@ -90,12 +90,20 @@
   offline no Ads a partir disso.
 
 ## Dashboard de Tráfego (`/trafego` → `trafego.html`)
-- Painel do Meta Ads: investimento e leads (acumulado, mês, média diária), por
-  Dia/Semana/Mês/Trimestre/Semestre/Ano/Personalizado, com filtro de campanha.
+- Painel do Meta Ads com 3 abas (`#geral`, `#leads`, `#seguidores`). Períodos em
+  **janela móvel** (Semana = 7 dias, Mês = 30, Trimestre = 90, Semestre = 180,
+  Ano = 365) + Personalizado; comparação com a janela anterior do mesmo tamanho.
   Mesmo login do `/admin` (JWT em `sessionStorage.vt_token`).
-- APIs: `functions/api/meta-trafego.js` (série diária + comparações; o agrupamento
-  é feito na página) e `functions/api/meta-campanhas.js` (lista de campanhas).
+- API única: `functions/api/meta-trafego.js` (insights por campanha/dia; o
+  agrupamento por semana/mês/... é feito na página).
+- Classificação **fixa** das campanhas (não depende do nome):
+  Leads = objetivo `OUTCOME_LEADS`; Seguidores = conjunto otimizado para
+  `PROFILE_VISIT`; resto = Outros. Geral = conta inteira.
 - Leads = ação `lead` atribuída pelo Meta (evento Lead do pixel), não o total do CRM.
+- Visitas ao perfil = `link_click` das campanhas de seguidores.
+- Seguidores = `follower_count` do Instagram (orgânico + pago; o Meta não atribui
+  seguidor a anúncio). A API só dá 30 dias, então cada acesso grava os dias na
+  tabela D1 `ig_followers_daily` (migration 0009) e o histórico vai crescendo.
 - Design: fundo `#F5F6F8`, destaque `#FF5A1F`, texto `#0E0F11`, fonte Onest.
 - **Conta de anúncios em uso: `4038372153047790` ("Pacttus pet")** — trocada em
   2026-10-19. A antiga `1118060079685162` não tem mais acesso.
