@@ -1587,6 +1587,65 @@
       .daily-chart-header { flex-direction: column; align-items: flex-start; gap: 12px; }
       .daily-chart-header > div:last-child, .dash-daterange { width: 100%; }
       .dash-daterange input[type="date"] { flex: 1; min-width: 0; }
+
+      /* barra de ícones fixa no topo ao rolar */
+      .sidebar { position: sticky; top: 0; z-index: 50; background: var(--bg); margin: -16px -16px 0; padding: 12px 16px; }
+
+      /* cabeçalho: "Novo contato" em largura total, os outros 3 divididos */
+      .content-header { flex-direction: column; align-items: stretch; gap: 18px; }
+      .actions { width: 100%; gap: 8px; }
+      .actions .btn-primary { flex: 1 1 100%; justify-content: center; }
+      .actions .btn-outline, .actions .btn-danger { flex: 1 1 0; justify-content: center; padding: 0 4px; gap: 4px; font-size: .8rem; white-space: nowrap; }
+
+      /* cards de cima: destaque e faturamento em largura total */
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .stats > .stat-card:first-child { grid-column: 1 / -1; }
+      .stats > .stat-card:nth-child(3) { order: 4; grid-column: 1 / -1; }
+      .stat-card { padding: 16px 18px; }
+      .stat-card .value { font-size: 1.85rem; }
+      .stat-card .label { font-size: .66rem; }
+
+      /* tabela de leads vira lista de cards (o nome não some mais para o lado) */
+      .table-wrap { background: none; overflow: visible; }
+      #leadsTable { min-width: 0; }
+      #leadsTable thead { display: none; }
+      #leadsTable tbody { display: block; }
+      #leadsTable tbody tr {
+        display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 6px;
+        background: var(--surface); border: none; border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
+      }
+      #leadsTable tbody tr:hover { background: var(--surface); }
+      #leadsTable tbody td { display: block; padding: 0; min-width: 0; }
+      #leadsTable td:nth-child(1) { display: none; }                                         /* # */
+      #leadsTable td:nth-child(2) { grid-row: 1; grid-column: 1; font-size: .72rem; }        /* protocolo */
+      #leadsTable td:nth-child(9) { grid-row: 1; grid-column: 2; text-align: right; font-size: .72rem; } /* data */
+      #leadsTable td:nth-child(3) { grid-row: 2; grid-column: 1 / -1; font-size: 1rem; padding: 2px 0; } /* nome */
+      #leadsTable td:nth-child(4) { grid-row: 3; grid-column: 1 / -1; }                      /* whatsapp */
+      #leadsTable td:nth-child(5) { grid-row: 4; grid-column: 1 / -1; font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* e-mail */
+      #leadsTable td:nth-child(6) { grid-row: 5; grid-column: 1; }                           /* faturamento */
+      #leadsTable td:nth-child(8) { grid-row: 5; grid-column: 2; text-align: right; }        /* etapa */
+      #leadsTable td:nth-child(7) { grid-row: 6; grid-column: 1; }                           /* origem */
+      #leadsTable td:nth-child(10) { grid-row: 6; grid-column: 2; width: auto; text-align: right; } /* excluir */
+      #leadsTable .btn-row-del { opacity: 1; }
+      .filter-bar input { flex-basis: 100%; }
+      .filter-bar select { flex: 1; min-width: 0; }
+
+      /* Anúncios: períodos e chips rolam para o lado em vez de estourar */
+      .dash-toolbar { gap: 10px; }
+      .dash-period { margin-left: 0; width: 100%; overflow-x: auto; scrollbar-width: none; }
+      .dash-period button { flex: none; white-space: nowrap; }
+      .mchips { flex-wrap: nowrap; overflow-x: auto; width: 100%; scrollbar-width: none; }
+      .mchip { flex: none; }
+      .dash-card2, .dash-chart-wrap { padding: 18px; }
+
+      /* CRM: uma coluna quase da largura da tela, encaixando ao rolar */
+      .kanban { scroll-snap-type: x mandatory; margin-right: -16px; padding-right: 16px; }
+      .kanban-col { width: 84vw; scroll-snap-align: start; }
+      .crm-toolbar .btn-outline { flex: 1; justify-content: center; }
+
+      /* modais */
+      .confirm-box { width: calc(100vw - 32px); max-width: 420px; }
+      .import-box { width: calc(100vw - 24px); }
       .content { padding: 0; }
     }
   </style>
@@ -3204,7 +3263,12 @@
       // Mostra todos os dias; reduz a fonte se houver muitos pra caber sem amontoar
       var fs = n > 24 ? 9 : n > 16 ? 10 : 11;
       ctx.fillStyle = txt; ctx.font = fs + 'px Onest,system-ui,sans-serif'; ctx.textAlign = 'center';
-      days.forEach(function(d, i) { var p = d.split('-'); ctx.fillText(p[2] + '/' + p[1], xs[i], H - 8); });
+      // pula rótulos quando não cabem (celular): ~44px por data
+      var every = Math.max(1, Math.ceil(n / Math.max(1, Math.floor((xs[n - 1] - xs[0]) / 44))));
+      days.forEach(function(d, i) {
+        if (i !== n - 1 && (i % every || n - 1 - i < every / 2)) return;
+        var p = d.split('-'); ctx.fillText(p[2] + '/' + p[1], xs[i], H - 8);
+      });
 
       window._dashGeo = { xs: xs, days: days };
 
