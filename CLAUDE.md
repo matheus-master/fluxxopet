@@ -122,6 +122,18 @@
   Dados Pactus Pet"), não expira. Ele também enxerga a página e o IG @fluxxopet
   (`17841468174480500`) — dá pra puxar seguidores.
 
+## CRM do admin (`/admin#crm`)
+- Kanban com busca, filtros (faixa, tag, follow-up atrasado/hoje/sem próximo contato,
+  salvos no `localStorage` como `crm_filters`), faixa do funil no topo, botão de
+  WhatsApp e "Mover para…" em cada card (funciona no celular, onde arrastar não
+  funciona), aviso com "Desfazer" ao mover e reversão se o PATCH falhar.
+- Ordem dentro da coluna: follow-up atrasado → hoje → mais recentes. 40 cards por
+  coluna + "mostrar mais".
+- ⚠️ **As etapas do CRM vivem só no `localStorage` do navegador** (`vt_stages`), não
+  no banco. Etapa criada num aparelho não existe nos outros; leads com etapa
+  desconhecida aparecem na coluna "Outras etapas" (não somem). Candidato a migrar
+  para o D1.
+
 ## Integração BotConversa → ActiveCampaign
 - Endpoint: `functions/api/botconversa.js` → rota `POST /api/botconversa?token=<BC_WEBHOOK_SECRET>`
 - Quando o lead deixa o e-mail no bot, cria/atualiza o contato no ActiveCampaign e abre um

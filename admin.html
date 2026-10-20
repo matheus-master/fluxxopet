@@ -1569,6 +1569,104 @@
     }
     [data-theme="dark"] .mtip { background: rgba(22,23,26,.82); }
 
+    /* ── CRM (kanban) ───────────────────────────────── */
+    :root { color-scheme: light; }
+    [data-theme="dark"] { color-scheme: dark; }   /* barras de rolagem, datas e selects nativos no tema escuro */
+    .crm-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-start; margin-bottom: 12px; }
+    .crm-search { flex: 1 1 300px; position: relative; display: flex; align-items: center; }
+    .crm-search .material-symbols-outlined { position: absolute; left: 13px; color: var(--dim); font-size: 20px; pointer-events: none; }
+    .crm-search input { width: 100%; height: 44px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 0 14px 0 42px; font-size: .88rem; outline: none; }
+    .crm-search input:focus, .crm-toolbar select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
+    .crm-toolbar select { height: 44px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 0 12px; font-size: .86rem; cursor: pointer; max-width: 220px; }
+    .crm-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .crm-chip { height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: .82rem; display: inline-flex; align-items: center; gap: 7px; cursor: pointer; white-space: nowrap; }
+    .crm-chip:hover { border-color: var(--border2); }
+    .crm-chip .n { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .crm-chip.late .n { color: var(--red); } .crm-chip.today .n { color: var(--gold); }
+    .crm-chip.on { background: var(--solid); border-color: var(--solid); color: var(--on-solid); }
+    .crm-chip.on .n { color: inherit; }
+    .crm-pipe { background: var(--surface); border-radius: 14px; padding: 14px 18px; margin-bottom: 12px; }
+    .crm-pipe-top { display: flex; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; font-size: .88rem; color: var(--mid); margin-bottom: 10px; }
+    .crm-pipe-top b { color: var(--text); font-weight: 600; }
+    .crm-pipe-top .late { color: var(--red); font-weight: 600; }
+    .crm-clear { background: none; border: none; padding: 0; color: var(--gold); font-weight: 600; font-size: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    .crm-bar { display: flex; height: 8px; border-radius: 99px; overflow: hidden; gap: 2px; background: var(--raise); }
+    .crm-bar i { display: block; height: 100%; min-width: 3px; }
+    .crm-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: .76rem; color: var(--mid); }
+    .crm-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .crm-legend i { width: 8px; height: 8px; border-radius: 50%; }
+    .crm-legend b { color: var(--text); font-weight: 600; }
+
+    .kanban { gap: 10px; align-items: stretch; min-height: 0; padding-bottom: 10px; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+    .kanban-col {
+      flex: 1 0 248px; width: auto; max-width: 400px; min-height: 380px; max-height: calc(100vh - 330px);
+      background: var(--surface); border: 1px solid transparent; border-top: 3px solid var(--stage, var(--dim)); border-radius: 14px;
+      transition: background .15s, border-color .15s;
+    }
+    .kanban-col.drop { background: var(--gold-dim); border-color: var(--gold); }
+    .kanban-col-header { padding: 12px 10px 12px 14px; gap: 8px; align-items: flex-start; border-bottom: 1px solid var(--border); }
+    .col-title { flex: 1; min-width: 0; }
+    .col-name { display: block; font-size: .74rem; font-weight: 600; letter-spacing: .05em; line-height: 1.35; color: var(--text); text-transform: uppercase; }
+    .col-sub { display: block; font-size: .72rem; color: var(--dim); margin-top: 3px; }
+    .col-count { background: var(--raise); color: var(--text); font-weight: 600; font-size: .74rem; padding: 2px 9px; border-radius: 99px; font-variant-numeric: tabular-nums; }
+    .col-btn { width: 26px; height: 26px; border-radius: 6px; border: none; background: none; color: var(--dim); display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .15s; flex-shrink: 0; }
+    .col-btn .material-symbols-outlined { font-size: 18px; }
+    .kanban-col:hover .col-btn, .col-btn:focus-visible { opacity: 1; }
+    .col-btn:hover { background: var(--raise); color: var(--text); }
+    .col-btn.del:hover { color: var(--red); }
+    .kanban-col-body { padding: 8px; gap: 8px; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+    .kanban-col-body::-webkit-scrollbar, .kanban::-webkit-scrollbar { width: 6px; height: 6px; }
+    .kanban-col-body::-webkit-scrollbar-track, .kanban::-webkit-scrollbar-track { background: transparent; }
+    .kanban-col-body::-webkit-scrollbar-thumb, .kanban::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+    .col-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; color: var(--dim); font-size: .8rem; padding: 28px 12px; border: 1px dashed var(--border2); border-radius: 10px; margin: 0; }
+    .col-empty .material-symbols-outlined { font-size: 22px; }
+    .col-more { border: 1px dashed var(--border2); background: none; border-radius: 10px; padding: 10px; color: var(--mid); cursor: pointer; font-size: .8rem; }
+    .col-more:hover { color: var(--text); border-color: var(--dim); }
+
+    .kcard {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+      cursor: pointer; display: flex; flex-direction: column; gap: 8px; position: relative;
+      transition: border-color .15s, box-shadow .15s, opacity .15s;
+    }
+    .kcard:hover { border-color: var(--border2); box-shadow: 0 4px 14px rgba(14,15,17,.07); }
+    .kcard.late { box-shadow: inset 3px 0 0 var(--red); }
+    .kcard.today { box-shadow: inset 3px 0 0 var(--gold); }
+    .kcard.late:hover { box-shadow: inset 3px 0 0 var(--red), 0 4px 14px rgba(14,15,17,.07); }
+    .kcard.today:hover { box-shadow: inset 3px 0 0 var(--gold), 0 4px 14px rgba(14,15,17,.07); }
+    .kcard.dragging { opacity: .35; }
+    .kc-top { display: flex; gap: 8px; align-items: flex-start; }
+    .kc-name { flex: 1; min-width: 0; font-weight: 500; font-size: .9rem; line-height: 1.3; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+    .kc-actions { display: flex; gap: 4px; flex-shrink: 0; opacity: 0; transition: opacity .15s; }
+    .kcard:hover .kc-actions, .kcard:focus-within .kc-actions { opacity: 1; }
+    .kc-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--mid); display: grid; place-items: center; cursor: pointer; text-decoration: none; padding: 0; }
+    .kc-btn:hover { color: var(--text); border-color: var(--border2); }
+    .kc-btn.wa:hover { color: #1DA851; border-color: #1DA851; }
+    .kc-btn .material-symbols-outlined { font-size: 17px; }
+    .kc-btn svg { width: 15px; height: 15px; fill: currentColor; }
+    .kc-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+    .kc-badges .badge-fat, .kc-badges .card-tag { font-size: .66rem; padding: 2px 7px; border-radius: 4px; }
+    .kc-badges .more { font-size: .66rem; color: var(--dim); padding: 2px 4px; }
+    .kc-meta { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: .74rem; color: var(--dim); font-variant-numeric: tabular-nums; }
+    .kc-fu { display: inline-flex; align-items: center; gap: 5px; align-self: flex-start; font-size: .74rem; font-weight: 500; padding: 3px 8px; border-radius: 6px; }
+    .kc-fu .material-symbols-outlined { font-size: 15px; }
+    .kc-fu.late { color: var(--red); background: var(--red-bg); }
+    .kc-fu.today { color: var(--gold); background: var(--gold-dim); }
+    .kc-fu.soon { color: var(--mid); background: var(--raise); }
+    .kc-note { display: flex; gap: 6px; align-items: flex-start; font-size: .76rem; line-height: 1.4; color: var(--mid); }
+    .kc-note .material-symbols-outlined { font-size: 15px; color: var(--dim); margin-top: 1px; }
+    .kc-note span:last-child { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    @media (hover: none) { .col-btn, .kc-actions { opacity: 1; } }
+
+    .crm-menu { position: fixed; z-index: 400; min-width: 230px; max-width: calc(100vw - 24px); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 40px rgba(14,15,17,.18); padding: 6px; }
+    .crm-menu h4 { font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); font-weight: 500; padding: 8px 10px 6px; }
+    .crm-menu button { display: flex; align-items: center; gap: 9px; width: 100%; border: none; background: none; color: var(--text); text-align: left; padding: 10px; border-radius: 8px; font-size: .86rem; cursor: pointer; }
+    .crm-menu button:hover:not([disabled]) { background: var(--raise); }
+    .crm-menu button[disabled] { color: var(--dim); cursor: default; }
+    .crm-menu i { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .crm-menu .check { margin-left: auto; font-size: 16px; color: var(--gold); }
+
+    .toast button { margin-left: 8px; background: none; border: none; color: var(--gold); font-weight: 600; font-size: .84rem; cursor: pointer; padding: 2px 4px; white-space: nowrap; }
+
     /* ── experiência: foco, avisos, movimento ─────────── */
     :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
     button:focus:not(:focus-visible) { outline: none; }
@@ -1660,8 +1758,11 @@
 
       /* CRM: uma coluna quase da largura da tela, encaixando ao rolar */
       .kanban { scroll-snap-type: x mandatory; margin-right: -16px; padding-right: 16px; }
-      .kanban-col { width: 84vw; scroll-snap-align: start; }
-      .crm-toolbar .btn-outline { flex: 1; justify-content: center; }
+      .kanban-col { flex: 0 0 84vw; max-width: none; scroll-snap-align: start; max-height: calc(100vh - 200px); }
+      .crm-search { flex-basis: 100%; }
+      .crm-toolbar select { flex: 1 1 40%; min-width: 0; max-width: none; }
+      .crm-toolbar .btn-outline, .crm-toolbar .btn-primary { flex: 1 1 40%; justify-content: center; white-space: nowrap; }
+      .crm-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: -16px; padding-right: 16px; }
 
       /* modais e avisos */
       .confirm-box { width: calc(100vw - 32px); max-width: 420px; }
@@ -1850,15 +1951,17 @@
     <!-- ── CRM VIEW ──────────────────────────────────── -->
     <div id="crmView" style="display:none;">
       <div class="crm-toolbar">
-        <button class="btn-outline" onclick="setView('leads')">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;stroke:currentColor"><polyline points="15 18 9 12 15 6"/></svg>
-          Voltar para tabela
-        </button>
-        <button class="btn-outline" onclick="addStage()">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px;stroke:currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nova etapa
-        </button>
+        <label class="crm-search">
+          <span class="material-symbols-outlined" aria-hidden="true">search</span>
+          <input type="search" id="crmSearch" placeholder="Buscar por nome, WhatsApp, e-mail ou tag…" aria-label="Buscar lead no CRM" oninput="crmSet('q', this.value)" />
+        </label>
+        <select id="crmFat" aria-label="Filtrar por faixa de faturamento" onchange="crmSet('fat', this.value)"></select>
+        <select id="crmTag" aria-label="Filtrar por tag" onchange="crmSet('tag', this.value)"></select>
+        <button class="btn-outline" onclick="addStage()"><span class="material-symbols-outlined">view_week</span>Nova etapa</button>
+        <button class="btn-primary" onclick="crmNewIn()"><span class="material-symbols-outlined">add</span>Novo contato</button>
       </div>
+      <div class="crm-chips" id="crmChips" role="group" aria-label="Filtrar por follow-up"></div>
+      <div class="crm-pipe" id="crmPipe"></div>
       <div class="kanban" id="kanban"></div>
     </div>
 
@@ -2169,14 +2272,22 @@
     function uiPrompt(title, placeholder, okLabel) {
       return uiDialog({ title: title, input: true, placeholder: placeholder, ok: okLabel || 'Salvar' }).then(function(v) { return v || null; });
     }
-    function toast(msg, kind) {
+    // action opcional: { label: 'Desfazer', fn: function(){...} }
+    function toast(msg, kind, action) {
       var box = document.getElementById('toasts'); if (!box) return;
       var el = document.createElement('div');
       el.className = 'toast' + (kind === 'error' ? ' error' : '');
       el.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">' + (kind === 'error' ? 'error' : 'check_circle') + '</span><span></span>';
-      el.lastChild.textContent = msg;
+      el.children[1].textContent = msg;
+      var gone = false;
+      function close() { if (gone) return; gone = true; el.classList.add('out'); setTimeout(function() { el.remove(); }, 250); }
+      if (action) {
+        var b = document.createElement('button'); b.type = 'button'; b.textContent = action.label;
+        b.onclick = function() { close(); action.fn(); };
+        el.appendChild(b);
+      }
       box.appendChild(el);
-      setTimeout(function() { el.classList.add('out'); setTimeout(function() { el.remove(); }, 250); }, kind === 'error' ? 5000 : 2800);
+      setTimeout(close, action ? 7000 : kind === 'error' ? 5000 : 2800);
     }
 
     // Esc fecha o que estiver aberto, do mais "por cima" para o de baixo
@@ -2649,96 +2760,288 @@
       if (show) renderKanban();
     }
 
-    /* ── DRAG & DROP ─────────────────────────────────── */
-    var _dragLeadId = null;
+    /* ── CRM: estado, filtros e utilitários ─────────────── */
+    var CRM_PAGE = 40;                       // cards por coluna antes do "mostrar mais"
+    var _crmShow = {};                       // quantos cards cada coluna está mostrando
+    var _crmF = (function() {
+      try { return Object.assign({ q: '', fu: 'all', fat: '', tag: '' }, JSON.parse(localStorage.getItem('crm_filters') || '{}'), { q: '' }); }
+      catch (e) { return { q: '', fu: 'all', fat: '', tag: '' }; }
+    })();
+    var OTHER_STAGE = '__outras__';
 
+    function crmSet(k, v) {
+      _crmF[k] = v; _crmShow = {};
+      try { localStorage.setItem('crm_filters', JSON.stringify({ fu: _crmF.fu, fat: _crmF.fat, tag: _crmF.tag })); } catch (e) {}
+      if (k === 'q') { clearTimeout(crmSet._t); crmSet._t = setTimeout(renderKanban, 120); } else renderKanban();
+    }
+
+    // cor de cada etapa pelo nome (etapas personalizadas também ganham cor)
+    function stageColor(name, i) {
+      var n = String(name).toLowerCase();
+      if (/desqualif|perdid|não respond|nao respond|descart/.test(n)) return '#E5484D';
+      if (/fechad|ganh|client|vend|contrat/.test(n)) return '#22A75A';
+      if (/call|reuni|agend|proposta/.test(n)) return '#F59E0B';
+      if (/conversa|negocia/.test(n)) return '#FF5A1F';
+      if (/follow/.test(n)) return '#8B8FD8';
+      return ['#9AA0A8', '#FF5A1F', '#F59E0B', '#8B8FD8', '#22A75A', '#5F656D'][i % 6];
+    }
+
+    function ymdLocal(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function daysBetween(a, b) { return Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 864e5); }
+
+    // follow-up: atrasado / hoje / em breve (pelo "próximo contato")
+    function fuStatus(l) {
+      if (!l.proxContato) return null;
+      var t = ymdLocal(new Date()), d = daysBetween(t, l.proxContato);
+      if (d < 0) return { k: 'late', d: -d };
+      if (d === 0) return { k: 'today', d: 0 };
+      return { k: 'soon', d: d };
+    }
+    function agoTxt(iso) {
+      if (!iso) return '';
+      var d = daysBetween(ymdLocal(new Date(iso)), ymdLocal(new Date()));
+      return d <= 0 ? 'entrou hoje' : d === 1 ? 'entrou ontem' : 'entrou há ' + d + ' dias';
+    }
+    function waLink(phone) {
+      var d = String(phone || '').replace(/\D/g, '');
+      if (d.length === 10 || d.length === 11) d = '55' + d;
+      return d.length >= 12 ? 'https://wa.me/' + d : '';
+    }
+    var WA_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.86 11.86 0 0 0 12.06 0C5.5 0 .16 5.34.16 11.9c0 2.1.55 4.14 1.6 5.95L0 24l6.3-1.65a11.9 11.9 0 0 0 5.75 1.47h.01c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.44-8.44zM12.06 21.8a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.27c0-5.45 4.44-9.89 9.9-9.89 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.9 7c0 5.45-4.44 9.89-9.9 9.89zm5.42-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.79-1.47-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35z"/></svg>';
+
+    // filtros de texto/faixa/tag (sem o de follow-up, que vira contagem nos atalhos)
+    function crmBaseFilter(l) {
+      var q = (_crmF.q || '').trim().toLowerCase();
+      if (q) {
+        var digits = q.replace(/\D/g, '');
+        var hay = (l.nome + ' ' + (l.email || '') + ' ' + (l.petshop || '') + ' ' + (l.tags || []).join(' ')).toLowerCase();
+        if (hay.indexOf(q) < 0 && !(digits.length >= 3 && String(l.whatsapp).replace(/\D/g, '').indexOf(digits) >= 0)) return false;
+      }
+      if (_crmF.fat === '__sem__' ? !!l.faturamento : (_crmF.fat && l.faturamento !== _crmF.fat)) return false;
+      if (_crmF.tag && (l.tags || []).indexOf(_crmF.tag) < 0) return false;
+      return true;
+    }
+    function crmFuFilter(l) {
+      var s = fuStatus(l);
+      if (_crmF.fu === 'late') return s && s.k === 'late';
+      if (_crmF.fu === 'today') return s && s.k === 'today';
+      if (_crmF.fu === 'none') return !l.proxContato;
+      return true;
+    }
+    // mais urgentes primeiro: atrasados (mais antigos antes), hoje, depois os mais recentes
+    function crmSort(a, b) {
+      var sa = fuStatus(a), sb = fuStatus(b);
+      var ra = sa ? (sa.k === 'late' ? 0 : sa.k === 'today' ? 1 : 2) : 2, rb = sb ? (sb.k === 'late' ? 0 : sb.k === 'today' ? 1 : 2) : 2;
+      if (ra !== rb) return ra - rb;
+      if (ra === 0) return sb.d - sa.d;
+      return (b.timestamp || '').localeCompare(a.timestamp || '');
+    }
+
+    /* ── CRM: arrastar e soltar (computador) ─────────────── */
+    var _dragLeadId = null;
     function dragStart(event, leadId) {
       _dragLeadId = leadId;
       event.dataTransfer.effectAllowed = 'move';
-      setTimeout(function() {
-        var el = document.querySelector('.lead-card[data-id="' + leadId + '"]');
-        if (el) el.classList.add('dragging');
-      }, 0);
+      try { event.dataTransfer.setData('text/plain', String(leadId)); } catch (e) {}
+      var el = event.currentTarget;
+      setTimeout(function() { el.classList.add('dragging'); }, 0);
     }
-
-    function dragEnd(event) {
-      document.querySelectorAll('.lead-card.dragging').forEach(function(el) { el.classList.remove('dragging'); });
+    function dragEnd() {
+      document.querySelectorAll('.kcard.dragging').forEach(function(el) { el.classList.remove('dragging'); });
+      document.querySelectorAll('.kanban-col.drop').forEach(function(el) { el.classList.remove('drop'); });
+      _dragLeadId = null;
     }
-
     function dragOver(event) {
+      if (_dragLeadId === null) return;
       event.preventDefault();
       event.dataTransfer.dropEffect = 'move';
-      event.currentTarget.classList.add('drag-over');
+      event.currentTarget.classList.add('drop');
     }
-
     function dragLeave(event) {
-      event.currentTarget.classList.remove('drag-over');
+      if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.classList.remove('drop');
+    }
+    function dropOn(event, stageIdx) {
+      event.preventDefault();
+      event.currentTarget.classList.remove('drop');
+      var id = _dragLeadId; _dragLeadId = null;
+      if (id === null) return;
+      crmMove(id, getStages()[stageIdx]);
     }
 
-    async function dropOn(event, stageIdx) {
-      event.preventDefault();
-      event.currentTarget.classList.remove('drag-over');
-      if (_dragLeadId === null) return;
-
-      var stages = getStages();
-      var newEtapa = stages[stageIdx];
-      var lead = _leads.find(function(l) { return l.id === _dragLeadId; });
-      if (!lead || lead.etapa === newEtapa) return;
-
-      lead.etapa = newEtapa;
+    /* ── CRM: mover (arrastar ou menu) com "Desfazer" ─────── */
+    async function crmMove(id, stage, isUndo) {
+      var lead = _leads.find(function(l) { return l.id === id; });
+      if (!lead || !stage || lead.etapa === stage) return;
+      var old = lead.etapa;
+      lead.etapa = stage;
       renderKanban();
+      var res = await api('PATCH', '/api/leads/' + id, { etapa: stage });
+      if (!res || res.ok === false) {
+        lead.etapa = old; renderKanban();
+        toast('Não consegui mover "' + lead.nome + '". Ele voltou para "' + old + '".', 'error');
+        return;
+      }
+      if (!isUndo) toast('"' + lead.nome + '" foi para "' + stage + '".', null, { label: 'Desfazer', fn: function() { crmMove(id, old, true); } });
+      else toast('Movimento desfeito.');
+    }
 
-      await api('PATCH', '/api/leads/' + _dragLeadId, { etapa: newEtapa });
-      _dragLeadId = null;
+    var _crmMenu = null;
+    function closeCrmMenu() { if (_crmMenu) { _crmMenu.remove(); _crmMenu = null; } }
+    function crmMoveMenu(event, id) {
+      event.stopPropagation();
+      var opener = event.currentTarget;
+      closeCrmMenu();
+      var lead = _leads.find(function(l) { return l.id === id; }); if (!lead) return;
+      var stages = getStages();
+      var m = document.createElement('div');
+      m.className = 'crm-menu'; m.setAttribute('role', 'menu');
+      m.innerHTML = '<h4>Mover para</h4>' + stages.map(function(s, i) {
+        var cur = s === lead.etapa;
+        return '<button type="button" role="menuitem" data-i="' + i + '"' + (cur ? ' disabled' : '') + '><i style="background:' + stageColor(s, i) + '"></i>' + esc(s) +
+          (cur ? '<span class="material-symbols-outlined check" aria-hidden="true">check</span>' : '') + '</button>';
+      }).join('');
+      m.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var b = e.target.closest('button[data-i]'); if (!b || b.disabled) return;
+        closeCrmMenu(); crmMove(id, stages[+b.dataset.i]); opener.focus({ preventScroll: true });
+      });
+      document.body.appendChild(m);
+      var r = opener.getBoundingClientRect(), w = m.offsetWidth, hgt = m.offsetHeight;
+      var left = Math.min(window.innerWidth - w - 12, Math.max(12, r.right - w));
+      var top = r.bottom + 6 + hgt > window.innerHeight - 12 ? Math.max(12, r.top - hgt - 6) : r.bottom + 6;
+      m.style.left = left + 'px'; m.style.top = top + 'px';
+      _crmMenu = m;
+      var first = m.querySelector('button:not([disabled])'); if (first) first.focus({ preventScroll: true });
+    }
+    document.addEventListener('click', closeCrmMenu);
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && _crmMenu) { e.stopImmediatePropagation(); closeCrmMenu(); } }, true);
+    window.addEventListener('resize', closeCrmMenu);
+    document.addEventListener('scroll', closeCrmMenu, true);
+
+    // "+ Novo contato": já abre com a etapa escolhida (pelo "+" da coluna)
+    function crmNewIn(stage) {
+      openNewLead();
+      if (stage) document.getElementById('nlEtapa').value = stage;
+    }
+    function crmClear() {
+      _crmF = { q: '', fu: 'all', fat: '', tag: '' }; _crmShow = {};
+      try { localStorage.removeItem('crm_filters'); } catch (e) {}
+      renderKanban();
+    }
+    function crmShowMore(key) { _crmShow[key] = (_crmShow[key] || CRM_PAGE) + CRM_PAGE; renderKanban(); }
+
+    /* ── CRM: renderização ──────────────────────────────── */
+    function crmCard(lead, leads) {
+      var idx = leads.indexOf(lead);
+      var fi = FAT_ORDER.indexOf(lead.faturamento); if (fi < 0) fi = 0;
+      var s = fuStatus(lead), wa = waLink(lead.whatsapp);
+      var tags = lead.tags || [];
+      var h = '<article class="kcard' + (s && s.k !== 'soon' ? ' ' + s.k : '') + '" draggable="true" tabindex="0" data-id="' + lead.id + '"' +
+        ' aria-label="' + esc(lead.nome) + (s && s.k === 'late' ? ', follow-up atrasado' : '') + '"' +
+        ' ondragstart="dragStart(event,' + lead.id + ')" ondragend="dragEnd(event)" onclick="openDrawerByIdx(' + idx + ')"' +
+        ' onkeydown="if(event.key===\'Enter\'&&event.target===this)openDrawerByIdx(' + idx + ')">';
+      h += '<div class="kc-top"><div class="kc-name">' + esc(lead.nome) + '</div><div class="kc-actions">';
+      if (wa) h += '<a class="kc-btn wa" href="' + wa + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Conversar no WhatsApp" aria-label="Conversar com ' + esc(lead.nome) + ' no WhatsApp">' + WA_SVG + '</a>';
+      h += '<button type="button" class="kc-btn" onclick="crmMoveMenu(event,' + lead.id + ')" title="Mover para outra etapa" aria-label="Mover ' + esc(lead.nome) + ' para outra etapa" aria-haspopup="menu"><span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span></button>';
+      h += '</div></div>';
+      if (lead.faturamento || tags.length) {
+        h += '<div class="kc-badges">';
+        if (lead.faturamento) h += '<span class="badge-fat ' + FAT_CLASS[fi] + '">' + esc(lead.faturamento) + '</span>';
+        tags.slice(0, 3).forEach(function(t) { h += '<span class="card-tag">' + esc(t) + '</span>'; });
+        if (tags.length > 3) h += '<span class="more">+' + (tags.length - 3) + '</span>';
+        h += '</div>';
+      }
+      if (s) {
+        var lbl = s.k === 'late' ? 'Follow-up atrasado há ' + s.d + (s.d === 1 ? ' dia' : ' dias')
+                : s.k === 'today' ? 'Follow-up hoje'
+                : 'Follow-up ' + (s.d === 1 ? 'amanhã' : 'em ' + s.d + ' dias') + ' (' + fmtDateShort(lead.proxContato) + ')';
+        h += '<span class="kc-fu ' + s.k + '"><span class="material-symbols-outlined" aria-hidden="true">' + (s.k === 'late' ? 'warning' : 'schedule') + '</span>' + lbl + '</span>';
+      }
+      h += '<div class="kc-meta"><span>' + esc(fmtPhone(lead.whatsapp)) + '</span><span>' + agoTxt(lead.timestamp) + '</span></div>';
+      if (lead.comentarios) {
+        h += '<div class="kc-note"><span class="material-symbols-outlined" aria-hidden="true">sticky_note_2</span><span>' + esc(lead.comentarios.split('\n')[0].slice(0, 120)) + '</span></div>';
+      }
+      return h + '</article>';
     }
 
     function renderKanban() {
-      var leads  = getLeads();
+      var leads = getLeads();
       var stages = getStages();
-      var html   = '';
+      var base = leads.filter(crmBaseFilter);
+      var shown = base.filter(crmFuFilter);
+      var filtering = !!(_crmF.q || _crmF.fat || _crmF.tag || _crmF.fu !== 'all');
 
-      stages.forEach(function(stage, si) {
-        var sl  = leads.filter(function(l){ return l.etapa === stage; });
-        var dot = COL_DOT[stage] || '';
-        var isDefault = DEFAULT_STAGES.indexOf(stage) >= 0;
+      // selects de faixa e tag (mantém a escolha)
+      var fatSel = document.getElementById('crmFat'), tagSel = document.getElementById('crmTag');
+      if (fatSel) {
+        fatSel.innerHTML = '<option value="">Todas as faixas</option><option value="__sem__">Sem faixa definida</option>' +
+          FAT_ORDER.map(function(f) { return '<option value="' + esc(f) + '">' + esc(f) + '</option>'; }).join('');
+        fatSel.value = _crmF.fat || '';
+      }
+      if (tagSel) {
+        var allTags = {}; getTags().forEach(function(t) { allTags[t] = 1; });
+        leads.forEach(function(l) { (l.tags || []).forEach(function(t) { allTags[t] = 1; }); });
+        tagSel.innerHTML = '<option value="">Todas as tags</option>' + Object.keys(allTags).sort().map(function(t) { return '<option value="' + esc(t) + '">' + esc(t) + '</option>'; }).join('');
+        tagSel.value = _crmF.tag || '';
+      }
 
-        html += '<div class="kanban-col">';
-        html += '<div class="kanban-col-header">';
-        html +=   '<span class="col-dot ' + dot + '"></span>';
-        html +=   '<span class="col-name">' + esc(stage) + '</span>';
-        html +=   '<span class="col-count">' + sl.length + '</span>';
-        html += '<button class="col-del" onclick="removeStage('+si+')" title="Remover etapa"><span class="material-symbols-outlined ms-xs">close</span></button>';
-        html += '</div>';
-        html += '<div class="kanban-col-body" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOn(event,'+si+')">';
+      // atalhos de follow-up com contagem
+      var cnt = { late: 0, today: 0, none: 0 };
+      base.forEach(function(l) { var s = fuStatus(l); if (!l.proxContato) cnt.none++; else if (s.k === 'late') cnt.late++; else if (s.k === 'today') cnt.today++; });
+      var chips = [['all', 'Todos', base.length, ''], ['late', 'Follow-up atrasado', cnt.late, 'late'], ['today', 'Follow-up hoje', cnt.today, 'today'], ['none', 'Sem próximo contato', cnt.none, '']];
+      document.getElementById('crmChips').innerHTML = chips.map(function(c) {
+        var on = _crmF.fu === c[0];
+        return '<button type="button" class="crm-chip ' + c[3] + (on ? ' on' : '') + '" aria-pressed="' + on + '" onclick="crmSet(\'fu\',\'' + c[0] + '\')">' + c[1] + ' <span class="n">' + int0(c[2]) + '</span></button>';
+      }).join('');
 
-        if (!sl.length) {
-          html += '<div class="col-empty">Sem leads</div>';
-        } else {
-          sl.forEach(function(lead) {
-            var idx = leads.indexOf(lead);
-            var fi  = FAT_ORDER.indexOf(lead.faturamento); if (fi<0) fi=0;
-            html += '<div class="lead-card" draggable="true" data-id="'+lead.id+'" ondragstart="dragStart(event,'+lead.id+')" ondragend="dragEnd(event)" onclick="openDrawerByIdx('+idx+')">';
-            html +=   '<div class="card-name">' + esc(lead.nome) + '</div>';
-            if (lead.faturamento) html += '<span class="badge-fat '+FAT_CLASS[fi]+'" style="font-size:0.65rem;padding:2px 7px">' + esc(lead.faturamento) + '</span>';
-            if (lead.tags && lead.tags.length) {
-              html += '<div class="card-tags">';
-              lead.tags.forEach(function(t) { html += '<span class="card-tag">'+esc(t)+'</span>'; });
-              html += '</div>';
-            }
-            html +=   '<div class="card-meta">' + esc(fmtPhone(lead.whatsapp)) + '</div>';
-            if (lead.proxContato) html += '<div class="card-date"><span class="material-symbols-outlined ms-xs">event</span> Próx: '+fmtDateShort(lead.proxContato)+'</div>';
-            if (lead.comentarios) {
-              var preview = lead.comentarios.split('\n')[0].slice(0,50);
-              html += '<div class="card-comment">' + esc(preview) + '</div>';
-            }
-            html += '</div>';
-          });
+      // leads cuja etapa não existe neste navegador (etapas ficam no localStorage)
+      var known = {}; stages.forEach(function(s) { known[s] = 1; });
+      var orphans = shown.filter(function(l) { return !known[l.etapa]; });
+      var cols = stages.map(function(s, i) { return { key: s, name: s, idx: i, color: stageColor(s, i) }; });
+      if (orphans.length) cols.push({ key: OTHER_STAGE, name: 'Outras etapas', idx: -1, color: '#9AA0A8' });
+
+      // faixa do funil
+      var total = shown.length;
+      var per = cols.map(function(c) { return c.key === OTHER_STAGE ? orphans.length : shown.filter(function(l) { return l.etapa === c.key; }).length; });
+      document.getElementById('crmPipe').innerHTML =
+        '<div class="crm-pipe-top"><span><b>' + int0(total) + '</b> ' + (total === 1 ? 'lead' : 'leads') + (filtering ? ' com os filtros atuais (de ' + int0(leads.length) + ') · <button type="button" class="crm-clear" onclick="crmClear()">Limpar filtros</button>' : ' no CRM') + '</span>' +
+        '<span>' + (cnt.late ? '<span class="late">' + int0(cnt.late) + ' follow-up' + (cnt.late === 1 ? '' : 's') + ' atrasado' + (cnt.late === 1 ? '' : 's') + '</span> · ' : '') +
+        int0(cnt.today) + ' para hoje</span></div>' +
+        '<div class="crm-bar" aria-hidden="true">' + cols.map(function(c, i) { return per[i] ? '<i style="flex:' + per[i] + ';background:' + c.color + '" title="' + esc(c.name) + ': ' + per[i] + '"></i>' : ''; }).join('') + '</div>' +
+        '<div class="crm-legend">' + cols.map(function(c, i) {
+          return '<span><i style="background:' + c.color + '"></i>' + esc(c.name) + ' <b>' + int0(per[i]) + '</b>' + (total ? ' (' + Math.round(per[i] / total * 100) + '%)' : '') + '</span>';
+        }).join('') + '</div>';
+
+      // colunas
+      var html = '';
+      cols.forEach(function(c, ci) {
+        var sl = (c.key === OTHER_STAGE ? orphans : shown.filter(function(l) { return l.etapa === c.key; })).slice().sort(crmSort);
+        var all = c.key === OTHER_STAGE ? leads.filter(function(l) { return !known[l.etapa]; }).length : leads.filter(function(l) { return l.etapa === c.key; }).length;
+        var lim = _crmShow[c.key] || CRM_PAGE;
+        var drop = c.idx >= 0 ? ' ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOn(event,' + c.idx + ')"' : '';
+        html += '<section class="kanban-col" style="--stage:' + c.color + '"' + drop + ' aria-label="Etapa ' + esc(c.name) + ', ' + sl.length + ' leads">';
+        html += '<header class="kanban-col-header"><div class="col-title"><span class="col-name">' + esc(c.name) + '</span>' +
+          '<span class="col-sub">' + (filtering ? sl.length + ' de ' + all + ' no filtro' : (total ? Math.round(sl.length / total * 100) + '% dos leads' : '—')) +
+          (c.key === OTHER_STAGE ? ' · etapas que não existem neste aparelho' : '') + '</span></div>' +
+          '<span class="col-count">' + int0(sl.length) + '</span>';
+        if (c.idx >= 0) {
+          html += '<button type="button" class="col-btn" onclick="crmNewIn(\'' + esc(c.key).replace(/'/g, "\\'") + '\')" title="Novo contato nesta etapa" aria-label="Novo contato em ' + esc(c.name) + '"><span class="material-symbols-outlined" aria-hidden="true">add</span></button>';
+          html += '<button type="button" class="col-btn del" onclick="removeStage(' + c.idx + ')" title="Remover etapa" aria-label="Remover etapa ' + esc(c.name) + '"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>';
         }
-        html += '</div></div>';
+        html += '</header><div class="kanban-col-body">';
+        if (!sl.length) {
+          html += '<div class="col-empty"><span class="material-symbols-outlined" aria-hidden="true">' + (filtering ? 'filter_alt_off' : 'move_to_inbox') + '</span>' +
+            '<span>' + (filtering ? 'Nenhum lead com esses filtros' : 'Nenhum lead aqui ainda.<br>Arraste um card para cá ou use o botão <b>Mover</b> do card.') + '</span></div>';
+        } else {
+          sl.slice(0, lim).forEach(function(lead) { html += crmCard(lead, leads); });
+          if (sl.length > lim) html += '<button type="button" class="col-more" onclick="crmShowMore(\'' + esc(c.key).replace(/'/g, "\\'") + '\')">Mostrar mais ' + Math.min(CRM_PAGE, sl.length - lim) + ' de ' + (sl.length - lim) + ' restantes</button>';
+        }
+        html += '</div></section>';
       });
-
       document.getElementById('kanban').innerHTML = html;
+      var si = document.getElementById('crmSearch'); if (si && si.value !== _crmF.q) si.value = _crmF.q;
     }
+    function int0(n) { return Number(n || 0).toLocaleString('pt-BR'); }
 
     function buildRespostasHTML(lead) {
       function money(v) {
