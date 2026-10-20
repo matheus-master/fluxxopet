@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
@@ -23,7 +23,7 @@
       --surface2: #f8f9fa;
       --border:   #e8eaed;
       --border2:  #dadce0;
-      --gold:     #0b57d0;   /* azul de destaque (Google) */
+      --gold:     #FF5A1F;   /* azul de destaque (Google) */
       --gold-dim: #e8f0fe;   /* fundo do destaque */
       --gold-bd:  #aecbfa;   /* borda do destaque */
       --red:      #d93025;
@@ -48,7 +48,7 @@
       --surface2: #1e1f20;
       --border:   #2f3133;
       --border2:  #3c4043;
-      --gold:     #8ab4f8;
+      --gold:     #FF7A47;
       --gold-dim: #1a3157;
       --gold-bd:  #3c5a86;
       --red:      #f28b82;
@@ -87,7 +87,7 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Roboto Slab', Georgia, serif;
+      font-family: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
       font-size: 14px;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
@@ -95,9 +95,9 @@
       display: flex;
     }
 
-    h1, h2, h3 { font-family: 'Roboto Slab', Georgia, serif; font-weight: 600; }
+    h1, h2, h3 { font-family: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 600; }
 
-    input, select, textarea, button { font-family: 'Roboto Slab', Georgia, serif; }
+    input, select, textarea, button { font-family: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif; }
 
     .material-symbols-outlined {
       font-family: 'Material Symbols Outlined' !important;
@@ -1204,8 +1204,8 @@
 
     /* ════════════ REDESENHO GOOGLE AI STUDIO ════════════ */
     .page-title, .stat-card .value, .drawer-name, .logo-name,
-    .dash-card .dk-value, .confirm-box h3, .import-head h3 { font-family: 'Roboto Slab', Georgia, serif; }
-    .d-select, .d-input, .d-textarea, .drawer-save { font-family: 'Roboto Slab', Georgia, serif; }
+    .dash-card .dk-value, .confirm-box h3, .import-head h3 { font-family: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+    .d-select, .d-input, .d-textarea, .drawer-save { font-family: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif; }
 
     /* ── SIDEBAR ─────────────────────────────────────── */
     .sidebar {
@@ -1254,7 +1254,7 @@
       border-radius: 999px; padding: 9px 18px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
       transition: background 0.15s;
     }
-    .btn-primary:hover { background: #0a4fbd; }
+    .btn-primary:hover { background: #E84E15; }
     [data-theme="dark"] .btn-primary, [data-theme="dark"] .drawer-save,
     [data-theme="dark"] .cbtn-import, [data-theme="dark"] .cbtn-confirm { color: #062e6f; }
     .btn-primary .material-symbols-outlined,
@@ -1357,7 +1357,7 @@
     /* ── DRAWER / SAVE / CONFIRM (pílula) ────────────── */
     .drawer-save, .cbtn-confirm, .cbtn-import, .cbtn-cancel, .tag-add-btn { border-radius: 999px; }
     .drawer-save, .cbtn-import { background: var(--gold); color: #fff; }
-    .drawer-save:hover, .cbtn-import:hover { background: #0a4fbd; }
+    .drawer-save:hover, .cbtn-import:hover { background: #E84E15; }
     .drawer-close, .import-head button { border-radius: 8px; }
 
     /* ── CONFIG VIEW ─────────────────────────────────── */
@@ -1379,31 +1379,235 @@
       .content { padding: 20px 14px; }
       .content-header { padding: 16px 14px; }
     }
+
+    /* ════════════ REDESENHO 2026-10 — mesmo design do /trafego ════════════
+       Fundo #F5F6F8, destaque laranja #FF5A1F, texto #0E0F11, fonte Onest.
+       Fica no fim para sobrepor as regras anteriores sem reescrevê-las. */
+    :root {
+      --bg:       #F5F6F8;
+      --surface:  #FDFDFE;
+      --raise:    #F0F1F4;
+      --surface2: #FAFAFC;
+      --border:   #E7E8EC;
+      --border2:  #E1E3E8;
+      --gold:     #FF5A1F;   /* nome legado: é o laranja de destaque */
+      --gold-dim: #FFE9E0;
+      --gold-bd:  #FFC2AA;
+      --red:      #E5484D;
+      --green:    #22A75A;
+      --amber:    #D97706;
+      --white:    #0E0F11;   /* nome legado: é o texto principal */
+      --mid:      #5F656D;
+      --dim:      #9AA0A8;
+      --text:     #0E0F11;
+      --red-bg:   #FDECEC;
+      --green-bg: #E7F6EE;
+      --amber-bg: #FEF4E2;
+      --solid:    #0E0F11;   /* botões/abas ativas */
+      --on-solid: #FFFFFF;
+      --hero:     #0E0F11;   /* card de destaque */
+      --radius:   14px;
+    }
+    [data-theme="dark"] {
+      --bg:       #0B0C0E;
+      --surface:  #16171A;
+      --raise:    #1F2024;
+      --surface2: #131417;
+      --border:   #24262B;
+      --border2:  #2E3036;
+      --gold:     #FF6A33;
+      --gold-dim: #3A1D12;
+      --gold-bd:  #7A3519;
+      --red:      #F2777B;
+      --green:    #4CC38A;
+      --amber:    #F5B544;
+      --white:    #ECEDEF;
+      --mid:      #A0A5AD;
+      --dim:      #6E737B;
+      --text:     #ECEDEF;
+      --red-bg:   #3A1F21;
+      --green-bg: #15301F;
+      --amber-bg: #33280F;
+      --solid:    #ECEDEF;
+      --on-solid: #0E0F11;
+      --hero:     #000000;
+    }
+
+    html { background: var(--bg); }
+    body, h1, h2, h3, input, select, textarea, button,
+    .page-title, .stat-card .value, .drawer-name, .logo-name, .dash-card .dk-value,
+    .confirm-box h3, .import-head h3, .d-select, .d-input, .d-textarea, .drawer-save {
+      font-family: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    }
+    h1, h2, h3 { font-weight: 500; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+
+    /* quadro arredondado em volta de tudo */
+    body {
+      display: block; background: var(--bg);
+      margin: 24px; min-height: calc(100vh - 48px);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 24px 28px 32px;
+    }
+
+    /* ── barra de ícones no topo ─────────────────────── */
+    .sidebar {
+      position: static; height: auto; width: auto;
+      background: none; border: none; padding: 0;
+      flex-direction: row; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .sb-logo { display: none; }
+    .sb-nav { flex-direction: row; gap: 10px; flex: none; }
+    .sb-foot { flex-direction: row; align-items: center; gap: 10px; border-top: none; padding-top: 0; }
+    .sb-item, .sb-foot .sb-item {
+      width: 44px; height: 44px; padding: 0; gap: 0; justify-content: center;
+      border-radius: 8px; border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); font-size: 0;
+    }
+    .sb-item:hover { background: var(--surface2); color: var(--text); }
+    .sb-item.active { background: var(--solid); border-color: var(--solid); color: var(--on-solid); }
+    .sb-item .material-symbols-outlined { font-size: 20px; font-variation-settings: 'FILL' 1, 'wght' 400; }
+    .sb-item .sb-label { display: none; }
+    .sb-avatar { width: 44px; height: 44px; border-radius: 8px; background: var(--gold); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 1.05rem; }
+    .sb-who b { display: block; font-weight: 500; font-size: 1.05rem; color: var(--text); }
+    .sb-who small { color: var(--dim); font-size: .78rem; }
+
+    /* ── cabeçalho da página ─────────────────────────── */
+    .main { display: block; min-height: 0; }
+    .content-header { padding: 30px 0 26px; border-bottom: none; align-items: center; }
+    .content-header .page-title { font-size: 3rem; font-weight: 300; letter-spacing: -.02em; line-height: 1; }
+    .content-header .page-sub { font-size: .88rem; color: var(--mid); margin-top: 10px; }
+    .content { padding: 0; }
+
+    /* ── botões (caixas de 44px, como as abas do /trafego) ── */
+    .btn-outline, .btn-danger, .btn-theme, .btn-primary {
+      height: 44px; padding: 0 16px; border-radius: 8px; font-size: .88rem; font-weight: 400;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-outline, .btn-danger, .btn-theme { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover, .btn-theme:hover { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+    .btn-danger:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+    .btn-primary { background: var(--solid); border: 1px solid var(--solid); color: var(--on-solid); font-weight: 500; }
+    .btn-primary:hover { background: var(--gold); border-color: var(--gold); color: #fff; }
+    .drawer-save, .cbtn-import, .cbtn-confirm, .cbtn-cancel, .tag-add-btn { border-radius: 8px; }
+    .drawer-save, .cbtn-import { background: var(--gold); color: #fff; }
+    .drawer-save:hover, .cbtn-import:hover { background: #E84E15; }
+    [data-theme="dark"] .btn-primary { color: var(--on-solid); }
+    [data-theme="dark"] .btn-primary:hover,
+    [data-theme="dark"] .drawer-save, [data-theme="dark"] .cbtn-import, [data-theme="dark"] .cbtn-confirm { color: #fff; }
+
+    /* ── cards: sem borda, fundo levemente mais claro que o quadro ── */
+    .stat-card, .table-wrap, .chart-bars, .daily-chart-wrap, .dash-card, .dash-card2,
+    .dash-chart-wrap, .cfg-card, .kanban-col, .confirm-box, .import-box {
+      background: var(--surface); border-color: transparent; border-radius: 14px; box-shadow: none;
+    }
+    .confirm-box, .import-box { border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(14,15,17,.12); }
+
+    .stats { gap: 10px; margin-bottom: 28px; }
+    .stat-top { justify-content: flex-start; gap: 6px; margin-bottom: 12px; }
+    .stat-ico { order: -1; background: none; padding: 0; font-size: 17px; color: var(--gold); }
+    .stat-card .label, .dash-card .dk-label, .chart-title, .dash-section-title, .dash-card2-title, .cfg-card h3 {
+      font-size: .72rem; font-weight: 400; letter-spacing: .06em; text-transform: uppercase; color: var(--mid);
+    }
+    .stat-card .value { font-size: 2.15rem; font-weight: 400; letter-spacing: -.02em; color: var(--text); font-variant-numeric: tabular-nums; }
+    .stat-card .value.gold { color: var(--text); }
+    .stat-card .sub { font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); margin-top: 8px; }
+    /* primeiro card de cada linha = destaque escuro com número laranja */
+    .stats > .stat-card:first-child { background: var(--hero); }
+    .stats > .stat-card:first-child .label { color: #9AA0A8; }
+    .stats > .stat-card:first-child .value { color: var(--gold); }
+    .stats > .stat-card:first-child .sub { color: #5F656D; }
+
+    .dash-card .dk-value { font-size: 1.6rem; font-weight: 400; letter-spacing: -.02em; color: var(--text); }
+    .dash-card .dk-value.gold, .sec-ico, .card-tag { color: var(--gold); }
+    .sec-ico { background: none; padding: 0; }
+    .dash-card2-title { margin-bottom: 12px; }
+
+    /* ── abas de período e datas ─────────────────────── */
+    .period-btn, .dash-period button {
+      height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); font-size: .82rem; font-weight: 400;
+    }
+    .period-btn:hover, .dash-period button:hover { background: var(--surface2); }
+    .period-btn.active, .dash-period button.active { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 500; }
+    .dash-daterange input[type="date"] { height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 0 10px; }
+    .mchip { border-radius: 8px; border-color: var(--border); }
+
+    /* ── campos ──────────────────────────────────────── */
+    .filter-bar input, .filter-bar select { height: 44px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+    .filter-bar input:focus, .filter-bar select:focus, .d-select:focus, .d-input:focus, .d-textarea:focus, .tag-add-input:focus {
+      border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim);
+    }
+
+    /* ── tabela ──────────────────────────────────────── */
+    thead th { font-size: .7rem; font-weight: 400; letter-spacing: .06em; color: var(--mid); padding: 14px 16px; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { color: var(--mid); }
+    .td-name { color: var(--text); font-weight: 500; }
+    .badge-fat { border-radius: 4px; }
+
+    /* ── barras / progresso ──────────────────────────── */
+    .bar-track { background: var(--raise); }
+    .bar-fill { background: var(--gold); }
+
+    /* ── kanban ──────────────────────────────────────── */
+    .lead-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; }
+    .lead-card:hover { border-color: var(--gold-bd); box-shadow: none; }
+    .card-tag { background: var(--gold-dim); border-color: transparent; border-radius: 4px; }
+    .kanban-col-body.drag-over { background: var(--gold-dim); outline: 1px dashed var(--gold); }
+
+    /* ── drawer ──────────────────────────────────────── */
+    .drawer { background: var(--surface); border-left: 1px solid var(--border); }
+    .drawer-close, .import-head button { border-radius: 8px; }
+
+    /* ── tooltip de vidro (gráfico de Anúncios) ───────── */
+    .mtip {
+      background: rgba(250,250,252,.78); color: var(--text);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px;
+      box-shadow: 0 10px 30px rgba(14,15,17,.08);
+    }
+    [data-theme="dark"] .mtip { background: rgba(22,23,26,.82); }
+
+    /* ── responsivo ──────────────────────────────────── */
+    @media (max-width: 1000px) {
+      .sidebar { width: auto; padding: 0; }
+      .sb-item, .sb-foot .sb-item { padding: 0; }
+      .content, .content-header { padding-left: 0; padding-right: 0; }
+    }
+    @media (max-width: 760px) {
+      .sb-who { display: none; }
+      .content-header .page-title { font-size: 2.3rem; }
+    }
+    @media (max-width: 640px) {
+      body { margin: 0; border: none; border-radius: 0; padding: 16px 16px 28px; min-height: 100vh; }
+      .sidebar, .sb-nav, .sb-foot { gap: 6px; }
+      .sb-avatar { display: none; }
+      .content-header { padding: 22px 0 20px; }
+      .daily-chart-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .daily-chart-header > div:last-child, .dash-daterange { width: 100%; }
+      .dash-daterange input[type="date"] { flex: 1; min-width: 0; }
+      .content { padding: 0; }
+    }
   </style>
 </head>
 <body>
 
   <!-- sidebar -->
+  <!-- barra de ícones (mesmo topo do /trafego) -->
   <aside class="sidebar">
-    <a href="index.html" class="sb-logo">
-      <svg viewBox="0 0 32 32" fill="none">
-        <rect x="2" y="2" width="28" height="28" rx="7" fill="#0b57d0"/>
-        <path d="M10 20 Q10 16 14 16 Q16 16 16 14 Q16 12 18 12 Q22 12 22 16 Q22 20 18 20 Z" fill="white" opacity="0.9"/>
-        <circle cx="11" cy="11" r="2" fill="white" opacity="0.7"/>
-        <circle cx="21" cy="11" r="2" fill="white" opacity="0.7"/>
-      </svg>
-      <span class="logo-name">FLUXXO PET</span>
-    </a>
     <nav class="sb-nav">
-      <button class="sb-item active" data-view="leads" onclick="setView('leads')"><span class="material-symbols-outlined">groups</span><span class="sb-label">Leads</span></button>
-      <button class="sb-item" data-view="crm" onclick="setView('crm')"><span class="material-symbols-outlined">view_kanban</span><span class="sb-label">CRM</span></button>
-      <button class="sb-item" data-view="anuncios" onclick="setView('anuncios')"><span class="material-symbols-outlined">campaign</span><span class="sb-label">Anúncios</span></button>
-      <button class="sb-item" onclick="location.href='/trafego'"><span class="material-symbols-outlined">monitoring</span><span class="sb-label">Tráfego</span></button>
-      <button class="sb-item" data-view="config" onclick="setView('config')"><span class="material-symbols-outlined">settings</span><span class="sb-label">Configurações</span></button>
+      <button class="sb-item active" data-view="leads" onclick="setView('leads')" title="Leads"><span class="material-symbols-outlined">groups</span><span class="sb-label">Leads</span></button>
+      <button class="sb-item" data-view="crm" onclick="setView('crm')" title="CRM"><span class="material-symbols-outlined">view_kanban</span><span class="sb-label">CRM</span></button>
+      <button class="sb-item" data-view="anuncios" onclick="setView('anuncios')" title="Anúncios"><span class="material-symbols-outlined">campaign</span><span class="sb-label">Anúncios</span></button>
+      <button class="sb-item" onclick="location.href='/trafego'" title="Tráfego"><span class="material-symbols-outlined">monitoring</span><span class="sb-label">Tráfego</span></button>
+      <button class="sb-item" data-view="config" onclick="setView('config')" title="Configurações"><span class="material-symbols-outlined">settings</span><span class="sb-label">Configurações</span></button>
     </nav>
     <div class="sb-foot">
-      <button class="sb-item" id="btnTheme" onclick="toggleTheme()"><span class="material-symbols-outlined" id="themeIcon">dark_mode</span><span class="sb-label" id="themeLabel">Tema escuro</span></button>
-      <button class="sb-item" onclick="logout()"><span class="material-symbols-outlined">logout</span><span class="sb-label">Sair</span></button>
+      <button class="sb-item" id="btnTheme" onclick="toggleTheme()" title="Alternar tema"><span class="material-symbols-outlined" id="themeIcon">dark_mode</span><span class="sb-label" id="themeLabel">Tema escuro</span></button>
+      <button class="sb-item" onclick="logout()" title="Sair"><span class="material-symbols-outlined">logout</span><span class="sb-label">Sair</span></button>
+      <span class="sb-avatar">F</span>
+      <div class="sb-who"><b>Fluxxo Pet</b><small>Painel admin</small></div>
     </div>
   </aside>
 
@@ -1805,6 +2009,8 @@
       var ha = document.getElementById('headerActions'); if (ha) ha.style.display = (name === 'leads') ? 'flex' : 'none';
       if (name === 'crm') renderKanban();
       if (name === 'anuncios') dashPreset('30d', document.getElementById('dp30'));
+      // guarda a aba na URL: o /trafego linka direto para /admin#crm etc.
+      if (location.hash.slice(1) !== name) history.replaceState(null, '', '#' + name);
     }
 
     /* ── AUTH ─────────────────────────────────────────── */
@@ -1947,8 +2153,8 @@
       if (!canvas || !_chartSince || !_chartUntil) return;
 
       var isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      var gold     = isLight ? '#0b57d0'               : '#8ab4f8';
-      var goldDim  = isLight ? 'rgba(11,87,208,0.12)'  : 'rgba(138,180,248,0.18)';
+      var gold     = isLight ? '#FF5A1F'               : '#FF7A47';
+      var goldDim  = isLight ? 'rgba(255,90,31,0.14)'  : 'rgba(255,122,71,0.20)';
       var gridClr  = isLight ? '#e8eaed'               : 'rgba(255,255,255,0.06)';
       var textClr  = isLight ? '#80868b'               : '#9aa0a6';
 
@@ -1985,7 +2191,8 @@
       var chartW = W - padL - padR;
       var chartH = H - padT - padB;
       var n      = days.length;
-      var barW   = Math.max(2, Math.floor(chartW / n * 0.6));
+      // barras finas e arredondadas, como no /trafego
+      var barW   = Math.max(2, Math.min(12, Math.floor(chartW / n * 0.35)));
       var step   = chartW / n;
 
       // Grid
@@ -2005,7 +2212,7 @@
 
         if (barH > 0) {
           ctx.fillStyle = gold;
-          roundRect(ctx, Math.round(x), Math.round(y), Math.round(barW), barH, Math.min(3, barW/2));
+          roundRect(ctx, Math.round(x), Math.round(y), Math.round(barW), barH, barW / 2);
           ctx.fill();
         } else {
           ctx.fillStyle = goldDim;
@@ -2016,7 +2223,7 @@
         // Valor acima da barra
         if (count > 0) {
           ctx.fillStyle  = gold;
-          ctx.font       = 'bold 11px Roboto Slab,Georgia,serif';
+          ctx.font       = 'bold 11px Onest,system-ui,sans-serif';
           ctx.textAlign  = 'center';
           ctx.fillText(count, Math.round(x + barW / 2), Math.max(padT + 12, Math.round(y - 5)));
         }
@@ -2025,7 +2232,7 @@
         var showLabel = n <= 14 ? true : n <= 30 ? i % 5 === 0 : i % 15 === 0;
         if (showLabel || i === n - 1) {
           ctx.fillStyle = textClr;
-          ctx.font      = '11px Roboto Slab,Georgia,serif';
+          ctx.font      = '11px Onest,system-ui,sans-serif';
           ctx.textAlign = 'center';
           var lbl = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
           ctx.fillText(lbl, Math.round(x + barW / 2), H - 8);
@@ -2034,7 +2241,7 @@
 
       // Label Y máx
       ctx.fillStyle = textClr;
-      ctx.font      = '11px Roboto Slab,Georgia,serif';
+      ctx.font      = '11px Onest,system-ui,sans-serif';
       ctx.textAlign = 'right';
       ctx.fillText(maxCount, padL - 4, padT + 6);
       ctx.fillText('0',      padL - 4, padT + chartH + 6);
@@ -2856,11 +3063,11 @@
     }
 
     var DASH_METRICS = [
-      { key: 'cpl',   label: 'Custo por Lead', color: '#0b57d0', fmt: fmtBRL },
-      { key: 'spend', label: 'Investimento',   color: '#1e8e3e', fmt: fmtBRL },
-      { key: 'leads', label: 'Resultados',     color: '#9334e6', fmt: fmtNum },
-      { key: 'ctr',   label: 'CTR %',          color: '#ea8600', fmt: fmtPct },
-      { key: 'cpm',   label: 'CPM',            color: '#d93025', fmt: fmtBRL },
+      { key: 'cpl',   label: 'Custo por Lead', color: '#FF5A1F', fmt: fmtBRL },
+      { key: 'spend', label: 'Investimento',   color: '#5F656D', fmt: fmtBRL },
+      { key: 'leads', label: 'Resultados',     color: '#9AA0A8', fmt: fmtNum },
+      { key: 'ctr',   label: 'CTR %',          color: '#22A75A', fmt: fmtPct },
+      { key: 'cpm',   label: 'CPM',            color: '#E5484D', fmt: fmtBRL },
       { key: 'freq',  label: 'Frequência',     color: '#12a4af', fmt: fmtDec },
     ];
     var _dashActive = { cpl: true, spend: false, leads: true, ctr: false, cpm: false, freq: false };
@@ -2996,7 +3203,7 @@
 
       // Mostra todos os dias; reduz a fonte se houver muitos pra caber sem amontoar
       var fs = n > 24 ? 9 : n > 16 ? 10 : 11;
-      ctx.fillStyle = txt; ctx.font = fs + 'px "Roboto Slab",Georgia,serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = txt; ctx.font = fs + 'px Onest,system-ui,sans-serif'; ctx.textAlign = 'center';
       days.forEach(function(d, i) { var p = d.split('-'); ctx.fillText(p[2] + '/' + p[1], xs[i], H - 8); });
 
       window._dashGeo = { xs: xs, days: days };
@@ -3044,8 +3251,8 @@
 
       var dpr  = window.devicePixelRatio || 1;
       var isLight = document.documentElement.getAttribute('data-theme') === 'light';
-      var gold    = isLight ? '#0b57d0' : '#8ab4f8';
-      var goldDim = isLight ? 'rgba(11,87,208,0.12)' : 'rgba(138,180,248,0.18)';
+      var gold    = isLight ? '#FF5A1F' : '#FF7A47';
+      var goldDim = isLight ? 'rgba(255,90,31,0.14)' : 'rgba(255,122,71,0.20)';
       var gridClr = isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.06)';
       var textClr = isLight ? '#aaa' : '#888';
 
@@ -3066,7 +3273,8 @@
       var chartW = W - padL - padR;
       var chartH = H - padT - padB;
       var n      = days.length;
-      var barW   = Math.max(2, Math.floor(chartW / n * 0.6));
+      // barras finas e arredondadas, como no /trafego
+      var barW   = Math.max(2, Math.min(12, Math.floor(chartW / n * 0.35)));
       var step   = chartW / n;
 
       // Grid
@@ -3085,10 +3293,10 @@
 
         if (barH > 0) {
           ctx.fillStyle = gold;
-          roundRect(ctx, Math.round(x), Math.round(y), Math.round(barW), barH, Math.min(3, barW/2));
+          roundRect(ctx, Math.round(x), Math.round(y), Math.round(barW), barH, barW / 2);
           ctx.fill();
           ctx.fillStyle = gold;
-          ctx.font = 'bold 11px Roboto Slab,Georgia,serif';
+          ctx.font = 'bold 11px Onest,system-ui,sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText(count, Math.round(x + barW/2), Math.max(padT+12, Math.round(y-5)));
         } else {
@@ -3101,7 +3309,7 @@
         var step5 = n <= 7 ? 1 : n <= 14 ? 2 : n <= 30 ? 5 : 7;
         if (i % step5 === 0 || i === n - 1) {
           ctx.fillStyle = textClr;
-          ctx.font = '10px Roboto Slab,Georgia,serif';
+          ctx.font = '10px Onest,system-ui,sans-serif';
           ctx.textAlign = 'center';
           var parts = day.split('-');
           ctx.fillText(parts[2] + '/' + parts[1], Math.round(x + barW/2), H - 8);
@@ -3110,7 +3318,7 @@
 
       // Label Y
       ctx.fillStyle = textClr;
-      ctx.font = '10px Roboto Slab,Georgia,serif';
+      ctx.font = '10px Onest,system-ui,sans-serif';
       ctx.textAlign = 'right';
       ctx.fillText(maxCount, padL - 4, padT + 6);
       ctx.fillText('0', padL - 4, padT + chartH + 6);
@@ -3134,7 +3342,8 @@
       await loadLeads();
       renderStats(_leads);
       renderTable();
-      setView('leads');
+      var h = location.hash.slice(1);
+      setView(VIEW_META[h] ? h : 'leads');
     }
 
     init();
