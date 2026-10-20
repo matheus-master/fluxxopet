@@ -63,6 +63,8 @@
 
     /* KPIs */
     .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0 28px}
+    .kpis-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+    .kpis-5 .big{font-size:1.95rem}
     .card{background:var(--card);border-radius:14px;padding:20px 22px;min-width:0}
     .kpi .row1{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:24px}
     .label{display:flex;align-items:center;gap:6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
@@ -182,7 +184,7 @@
     .loading #content{opacity:.45;transition:opacity .2s}
 
     @media (max-width:1280px){ .head{align-items:flex-start;flex-direction:column} .filters{justify-content:flex-start;width:100%} }
-    @media (max-width:1180px){ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .duo{grid-template-columns:minmax(0,1fr)} }
+    @media (max-width:1180px){ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .kpis-5 .kpi.hero{grid-column:1/-1} .duo{grid-template-columns:minmax(0,1fr)} }
     @media (max-width:640px){
       .frame{margin:0;border:none;border-radius:0;padding:16px 16px 28px}
       h1{font-size:2.3rem}
@@ -595,10 +597,11 @@
       var cards =
         kpi({ hero: true, icon: 'payments', label: 'Investido no período', value: money(t.leadsSpend), info: 'Gasto das campanhas de leads no período.', unit: 'em ' + x.nd + (x.nd === 1 ? ' dia' : ' dias'), badge: badgeHtml(t.leadsSpend, p && p.leadsSpend, null, x.cmp) }) +
         monthSpendCard(x, 'leadsSpend') +
-        kpi({ icon: 'person_add', label: 'Leads no período', info: 'Leads que o Meta atribui aos anúncios (evento Lead do pixel). Pode diferir do CRM.', value: int.format(t.leads), unit: cpl != null ? money(cpl) + ' por lead' : '', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
+        kpi({ icon: 'person_add', label: 'Leads no período', info: 'Leads que o Meta atribui aos anúncios (evento Lead do pixel). Pode diferir do CRM.', value: int.format(t.leads), unit: dec1.format(t.leads / x.nd) + ' por dia, em média', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
         (x.monthIsPeriod
           ? kpi({ icon: 'avg_pace', label: 'Média de leads por dia', value: dec1.format(t.leads / x.nd), unit: 'por dia', badge: badgeHtml(t.leads / x.nd, p && p.leads / x.pnd, false, x.cmp) })
-          : kpi({ icon: 'event_available', label: 'Leads no mês', value: m ? int.format(m.leads) : '—', unit: m && m.leads ? money(m.leadsSpend / m.leads) + ' por lead' : x.mUnit, badge: badgeHtml(m && m.leads, pm && pm.leads, false, x.cmpM) }));
+          : kpi({ icon: 'event_available', label: 'Leads no mês', value: m ? int.format(m.leads) : '—', unit: m && m.leads ? money(m.leadsSpend / m.leads) + ' por lead' : x.mUnit, badge: badgeHtml(m && m.leads, pm && pm.leads, false, x.cmpM) })) +
+        kpi({ icon: 'sell', label: 'Custo por lead', info: 'Investimento em campanhas de leads ÷ leads do período. Quanto menor, melhor: o selo fica verde quando o custo cai.', value: money(cpl), unit: 'média do período', badge: badgeHtml(cpl, pcpl, true, x.cmp) });
 
       x.buckets.forEach(function (b) { b._cpl = ratio(b.leadsSpend, b.leads); });
       var main = mainSpend(x, 'leadsSpend', 'Investimento e custo por lead por ' + x.gname, 'Custo por lead',
@@ -617,7 +620,7 @@
               (function (s) { return s && 'os leads ' + s; })(moveTxt(t.leads, p.leads, 'subiram {n}%', 'caíram {n}%', true, 'ficaram estáveis')),
               (function (s) { return s && 'cada lead ' + s; })(moveTxt(cpl, pcpl, 'ficou {n}% mais caro', 'ficou {n}% mais barato', false, 'custou praticamente o mesmo')),
             ]) + '.' : ''), x) +
-          '<section class="kpis">' + cards + '</section>' + main.html + '<section class="duo">' + leadsCard + cplCard + '</section>',
+          '<section class="kpis kpis-5">' + cards + '</section>' + main.html + '<section class="duo">' + leadsCard + cplCard + '</section>',
         draw: function () {
           main.draw();
           drawChart('c-a', x.buckets, {
