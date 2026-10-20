@@ -369,7 +369,11 @@
         borderRadius: stacked ? 3 : 6, borderSkipped: false, maxBarThickness: opt.thick || 10, barPercentage: .5, categoryPercentage: .9 };
     });
     if (opt.line) datasets.push({ type: 'line', data: opt.line, yAxisID: 'y1', order: 1,
-      borderColor: opt.lineColor, borderWidth: 2.5, tension: .4, pointRadius: 0, pointHoverRadius: 0, fill: false, spanGaps: true });
+      // monotone: a curva passa pelos pontos sem "inventar" picos entre eles;
+      // spanGaps falso: dia sem resultado (custo indefinido) interrompe a linha
+      borderColor: opt.lineColor, borderWidth: 2.5, cubicInterpolationMode: 'monotone', fill: false, spanGaps: !!opt.spanGaps,
+      pointRadius: function (c) { var v = opt.line, i = c.dataIndex; return v[i] != null && v[i - 1] == null && v[i + 1] == null ? 3 : 0; },
+      pointBackgroundColor: opt.lineColor, pointBorderWidth: 0, pointHoverRadius: 0 });
     var tick = { color: C.ink3, font: { family: 'Onest', size: 11 } };
     var tip = $('tip-' + id);
 
@@ -444,15 +448,15 @@
     return kpi({ icon: 'calendar_month', label: 'Investimento / mês', value: x.m ? money(x.m[key]) : '—', unit: x.mLabel,
       badge: badgeHtml(x.m && x.m[key], x.pm && x.pm[key], false, x.cmpM) });
   }
-  function mainSpend(x, key, title) {
-    cumulate(x.buckets, key, '_cum');
+  // barras = investimento; linha = custo por resultado (CPL ou custo por seguidor)
+  function mainSpend(x, key, title, costLabel, costOf, tipExtra) {
     return {
-      html: mainCard(title, '<span><i class="dot"></i>No período</span><span><i class="ring"></i>Acumulado</span>'),
+      html: mainCard(title, '<span><i class="dot"></i>Investimento</span><span><i class="ring"></i>' + costLabel + '</span>'),
       draw: function () {
         drawChart('c-main', x.buckets, {
           bars: x.buckets.map(function (b) { return b[key]; }), barColor: C.bar, hoverColor: C.ink, thick: 12, money: true,
-          line: x.buckets.map(function (b) { return b._cum; }), lineColor: C.accent, lineMoney: true,
-          tip: function (b) { return [['Investimento', money(b[key])], ['Acumulado', money(b._cum)]]; },
+          line: x.buckets.map(costOf), lineColor: C.accent, lineMoney: true,
+          tip: function (b) { var c = costOf(b); return [['Investimento', money(b[key])], tipExtra(b), [costLabel, c != null ? money(c) : '—']]; },
         });
       },
     };
@@ -499,7 +503,7 @@
         draw: function () {
           drawChart('c-main', x.buckets, {
             series: TYPES.map(function (ty) { return { data: x.buckets.map(function (b) { return b[ty.key]; }), color: ty.color }; }),
-            thick: 12, money: true, line: x.buckets.map(function (b) { return b._cum; }), lineColor: C.ink2, lineMoney: true,
+            thick: 12, money: true, line: x.buckets.map(function (b) { return b._cum; }), lineColor: C.ink2, lineMoney: true, spanGaps: true,
             tip: function (b) { return [['Leads', money(b.leadsSpend)], ['Seguidores', money(b.segSpend)], ['Outros', money(b.outrosSpend)], ['Total', money(b.spend)]]; },
           });
           var vals = share.map(function (s) { return s.v; });
@@ -519,12 +523,12 @@
           ? kpi({ icon: 'avg_pace', label: 'Leads / média diária', value: dec1.format(t.leads / x.nd), unit: 'por dia', badge: badgeHtml(t.leads / x.nd, p && p.leads / x.pnd, false, x.cmp) })
           : kpi({ icon: 'event_available', label: 'Leads / mês', value: m ? int.format(m.leads) : '—', unit: m && m.leads ? 'CPL ' + money(m.leadsSpend / m.leads) : x.mLabel, badge: badgeHtml(m && m.leads, pm && pm.leads, false, x.cmpM) }));
 
-      var main = mainSpend(x, 'leadsSpend', 'Investimento em leads por ' + x.gname);
-      cumulate(x.buckets, 'leads', '_cumL');
       x.buckets.forEach(function (b) { b._cpl = ratio(b.leadsSpend, b.leads); });
+      var main = mainSpend(x, 'leadsSpend', 'Investimento e custo por lead por ' + x.gname, 'Custo por lead',
+        function (b) { return b._cpl; }, function (b) { return ['Leads', int.format(b.leads)]; });
       var best = x.buckets.filter(function (b) { return b._cpl != null; }).sort(function (a, b) { return a._cpl - b._cpl; })[0];
 
-      var leadsCard = chartCard({ id: 'c-a', icon: 'person_add', label: 'Leads', legend: '<span><i class="blk"></i>Leads</span><span><i class="ring"></i>Acumulado</span>',
+      var leadsCard = chartCard({ id: 'c-a', icon: 'person_add', label: 'Leads', legend: '<span><i class="blk"></i>Leads</span>',
         stats: stat(int.format(t.leads), 'Leads no período ', chgHtml(t.leads, p && p.leads)) + stat(dec1.format(x.buckets.length ? t.leads / x.buckets.length : 0), 'Média por ' + x.gname) });
       var cplCard = chartCard({ id: 'c-b', icon: 'sell', label: 'Custo por lead', legend: '<span><i class="blk"></i>CPL</span><span><i class="org"></i>Melhor</span>',
         stats: stat(money(cpl), 'CPL no período ', chgHtml(cpl, pcpl, true)) + stat(best ? money(best._cpl) : '—', 'Melhor ' + x.gname + (best ? ' · ' + bucketLabel(best, x.g) : ''), '', 'org') });
@@ -535,8 +539,7 @@
           main.draw();
           drawChart('c-a', x.buckets, {
             bars: x.buckets.map(function (b) { return b.leads; }), barColor: C.ink,
-            line: x.buckets.map(function (b) { return b._cumL; }), lineColor: C.accent,
-            tip: function (b) { return [['Leads', int.format(b.leads)], ['Acumulado', int.format(b._cumL)]]; },
+            tip: function (b) { return [['Leads', int.format(b.leads)], ['CPL', b._cpl != null ? money(b._cpl) : '—']]; },
           });
           drawChart('c-b', x.buckets, {
             bars: x.buckets.map(function (b) { return b._cpl; }), money: true, hoverColor: C.ink2,
@@ -558,12 +561,12 @@
         kpi({ icon: 'favorite', label: 'Novos seguidores', value: t.followers != null ? '+' + int.format(t.followers) : '—', unit: cpf != null ? money(cpf) + ' / seg.' : '', badge: badgeHtml(t.followers, p && p.followers, false, x.cmp) }) +
         kpi({ icon: 'ads_click', label: 'Visitas ao perfil', value: int.format(t.visits), unit: cpv != null ? money(cpv) + ' / visita' : '', badge: badgeHtml(t.visits, p && p.visits, false, x.cmp) });
 
-      var main = mainSpend(x, 'segSpend', 'Investimento em seguidores por ' + x.gname);
       x.buckets.forEach(function (b) { b._cpf = b.followers ? b.folSpend / b.followers : null; });
-      var acc = 0; x.buckets.forEach(function (b) { if (b.followers != null) acc += b.followers; b._cumF = b.followers != null ? acc : null; });
+      var main = mainSpend(x, 'segSpend', 'Investimento e custo por seguidor por ' + x.gname, 'Custo por seguidor',
+        function (b) { return b._cpf; }, function (b) { return ['Seguidores', b.followers != null ? '+' + int.format(b.followers) : '—']; });
       var best = x.buckets.filter(function (b) { return b._cpf != null; }).sort(function (a, b) { return a._cpf - b._cpf; })[0];
 
-      var folCard = chartCard({ id: 'c-a', icon: 'favorite', label: 'Novos seguidores', legend: '<span><i class="blk"></i>Seguidores</span><span><i class="ring"></i>Acumulado</span>',
+      var folCard = chartCard({ id: 'c-a', icon: 'favorite', label: 'Novos seguidores', legend: '<span><i class="blk"></i>Seguidores</span>',
         stats: stat(t.followers != null ? '+' + int.format(t.followers) : '—', 'No período ', chgHtml(t.followers, p && p.followers)) +
                stat(d.ig.total != null ? int.format(d.ig.total) : '—', 'Total' + (d.ig.username ? ' · @' + esc(d.ig.username) : '')) });
       var cpfCard = chartCard({ id: 'c-b', icon: 'sell', label: 'Custo por seguidor', legend: '<span><i class="blk"></i>Custo</span><span><i class="org"></i>Melhor</span>',
@@ -575,7 +578,6 @@
           main.draw();
           drawChart('c-a', x.buckets, {
             bars: x.buckets.map(function (b) { return b.followers; }), barColor: C.ink,
-            line: x.buckets.map(function (b) { return b._cumF; }), lineColor: C.accent,
             tip: function (b) { return [['Seguidores', b.followers != null ? '+' + int.format(b.followers) : 'sem dado'], ['Visitas ao perfil', int.format(b.visits)]]; },
           });
           drawChart('c-b', x.buckets, {
