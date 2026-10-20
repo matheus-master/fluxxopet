@@ -68,8 +68,9 @@
     .label{display:flex;align-items:center;gap:6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
     .label .ms{font-size:17px;font-variation-settings:'FILL' 0,'wght' 300;color:var(--accent)}
     .badge{font-size:.72rem;font-weight:500;color:#fff;border-radius:4px;padding:3px 7px;font-variant-numeric:tabular-nums;white-space:nowrap}
-    .badge.good{background:var(--good)} .badge.bad{background:var(--bad)} .badge.flat{background:var(--ink-off)}
-    .kpi .row2{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:12px}
+    .badge.good{background:var(--good)} .badge.bad{background:var(--bad)} .badge.flat{background:var(--ink-off)} .badge.neutral{background:var(--ink-2)}
+    .kpi.hero .badge.neutral{background:#3A3D42}
+    .kpi .row2{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:12px}
     .big{font-size:2.15rem;font-weight:400;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .unit{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
     .kpi.hero{background:var(--ink);color:#fff}
@@ -165,6 +166,17 @@
     .kpi.hero .hint{background:#26282C;color:#9AA0A8}
     @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
     @media (max-width:640px){ .top{position:sticky;top:0;z-index:20;background:var(--canvas);margin:-16px -16px 0;padding:12px 16px} }
+
+    .summary{background:var(--card);border-radius:14px;padding:18px 22px;margin-top:16px;display:flex;gap:14px;align-items:flex-start}
+    .summary>.ms{color:var(--accent);font-size:22px;margin-top:1px;font-variation-settings:'FILL' 1,'wght' 400}
+    .summary p{font-size:1rem;line-height:1.6;color:var(--ink)}
+    .summary p b{font-weight:600}
+    .summary small{display:block;color:var(--ink-3);font-size:.8rem;margin-top:6px;line-height:1.5}
+    .summary + .kpis{margin-top:10px}
+    .t-good{color:var(--good)} .t-bad{color:var(--bad)}
+    .frate .plain{color:var(--ink-3);font-size:.78rem}
+    .hint-pop{position:fixed;z-index:300;max-width:280px;background:var(--ink);color:#fff;border-radius:10px;padding:10px 12px;font-size:.82rem;line-height:1.45;box-shadow:0 10px 30px rgba(14,15,17,.2)}
+    @media (max-width:640px){ .summary{padding:16px} .summary p{font-size:.94rem} .frate{flex-wrap:wrap;justify-content:center;text-align:center} }
 
     .foot{color:var(--ink-3);font-size:.76rem;margin-top:18px;line-height:1.5}
     .loading #content{opacity:.45;transition:opacity .2s}
@@ -370,7 +382,8 @@
   }
   function money(v) { return v == null ? '—' : brl.format(v); }
   function change(cur, prev) { return (cur == null || !prev) ? null : (cur - prev) / prev * 100; }
-  function tone(d, lowerIsBetter) { return Math.abs(d) < 0.05 ? 'flat' : ((d < 0) === !!lowerIsBetter ? 'good' : 'bad'); }
+  // lowerIsBetter: true = custo (cair é bom), false = volume (subir é bom), null = neutro (ex.: investimento)
+  function tone(d, lowerIsBetter) { return Math.abs(d) < 0.05 ? 'flat' : lowerIsBetter === null ? 'neutral' : ((d < 0) === !!lowerIsBetter ? 'good' : 'bad'); }
   function badgeHtml(cur, prev, lowerIsBetter, title) {
     var d = change(cur, prev);
     if (d == null) return '';
@@ -496,6 +509,7 @@
       nd: diffDays(d.since, d.until) + 1,
       pnd: d.prev ? diffDays(d.prev.since, d.prev.until) + 1 : 0,
       mLabel: MESES[+d.until.slice(5, 7) - 1] + '/' + d.until.slice(2, 4),
+      mUnit: MESES_L[+d.until.slice(5, 7) - 1].toLowerCase() + (d.until === today() ? ' até hoje' : ' até ' + shortDate(d.until)),
       cmp: d.prev ? 'vs ' + longDate(d.prev.since) + ' – ' + longDate(d.prev.until) : '',
       cmpM: d.prevMonth ? 'vs ' + longDate(d.prevMonth.since) + ' – ' + longDate(d.prevMonth.until) : '',
       monthIsPeriod: d.month && d.month.since === d.since,
@@ -503,10 +517,10 @@
   }
   // card 2: investimento do mês corrente (ou média diária, se o período é o próprio mês)
   function monthSpendCard(x, key) {
-    if (x.monthIsPeriod) return kpi({ icon: 'avg_pace', label: 'Investimento / média diária', value: money(x.tot[key] / x.nd), unit: 'por dia',
-      badge: badgeHtml(x.tot[key] / x.nd, x.prev && x.prev[key] / x.pnd, false, x.cmp) });
-    return kpi({ icon: 'calendar_month', label: 'Investimento / mês', value: x.m ? money(x.m[key]) : '—', unit: x.mLabel,
-      badge: badgeHtml(x.m && x.m[key], x.pm && x.pm[key], false, x.cmpM) });
+    if (x.monthIsPeriod) return kpi({ icon: 'avg_pace', label: 'Média investida por dia', value: money(x.tot[key] / x.nd), unit: 'por dia',
+      badge: badgeHtml(x.tot[key] / x.nd, x.prev && x.prev[key] / x.pnd, null, x.cmp) });
+    return kpi({ icon: 'calendar_month', label: 'Investido no mês', value: x.m ? money(x.m[key]) : '—', unit: x.mUnit,
+      badge: badgeHtml(x.m && x.m[key], x.pm && x.pm[key], null, x.cmpM) });
   }
   // barras = investimento; linha = custo por resultado (CPL ou custo por seguidor)
   function mainSpend(x, key, title, costLabel, costOf, tipExtra) {
@@ -526,15 +540,15 @@
     geral: function (x) {
       var t = x.tot, p = x.prev;
       var cards =
-        kpi({ hero: true, icon: 'payments', label: 'Investimento / acumulado', value: money(t.spend), info: 'Soma do que a conta inteira gastou no período.', unit: x.nd + ' dias', badge: badgeHtml(t.spend, p && p.spend, false, x.cmp) }) +
+        kpi({ hero: true, icon: 'payments', label: 'Investido no período', value: money(t.spend), info: 'Soma do que a conta inteira gastou no período.', unit: 'em ' + x.nd + (x.nd === 1 ? ' dia' : ' dias'), badge: badgeHtml(t.spend, p && p.spend, null, x.cmp) }) +
         monthSpendCard(x, 'spend') +
-        kpi({ icon: 'person_add', label: 'Investido em leads', info: 'Gasto das campanhas com objetivo de cadastro.', value: money(t.leadsSpend), unit: pctOf(t.leadsSpend, t.spend) + ' do total', badge: badgeHtml(t.leadsSpend, p && p.leadsSpend, false, x.cmp) }) +
-        kpi({ icon: 'favorite', label: 'Investido em seguidores', info: 'Gasto das campanhas otimizadas para visita ao perfil do Instagram.', value: money(t.segSpend), unit: pctOf(t.segSpend, t.spend) + ' do total', badge: badgeHtml(t.segSpend, p && p.segSpend, false, x.cmp) });
+        kpi({ icon: 'person_add', label: 'Investido em leads', info: 'Gasto das campanhas com objetivo de cadastro.', value: money(t.leadsSpend), unit: pctOf(t.leadsSpend, t.spend) + ' do total', badge: badgeHtml(t.leadsSpend, p && p.leadsSpend, null, x.cmp) }) +
+        kpi({ icon: 'favorite', label: 'Investido em seguidores', info: 'Gasto das campanhas otimizadas para visita ao perfil do Instagram.', value: money(t.segSpend), unit: pctOf(t.segSpend, t.spend) + ' do total', badge: badgeHtml(t.segSpend, p && p.segSpend, null, x.cmp) });
 
       cumulate(x.buckets, 'spend', '_cum');
       var main = mainCard('Investimento da conta por ' + x.gname,
         TYPES.map(function (ty) { return '<span><i style="background:' + ty.color + '"></i>' + ty.label + '</span>'; }).join('') +
-        '<span><i class="ring-g"></i>Acumulado</span>');
+        '<span><i class="ring-g"></i>Total acumulado</span>');
 
       var share = TYPES.map(function (ty) { return { ty: ty, v: t[ty.key] }; });
       var lead = share[0];
@@ -550,7 +564,7 @@
       var colorOfType = {}; TYPES.forEach(function (ty) { colorOfType[ty.k] = ty.color; });
       var list = chartCard({ icon: 'campaign', label: 'Investimento por campanha', legend: '<span>' + camps.length + ' com veiculação</span>',
         body: '<div class="camps">' + (top.length ? top.map(function (c) {
-          var res = c.type === 'leads' ? int.format(c.leads) + ' leads · CPL ' + money(ratio(c.spend, c.leads))
+          var res = c.type === 'leads' ? int.format(c.leads) + ' leads · ' + money(ratio(c.spend, c.leads)) + ' por lead'
                   : c.type === 'seguidores' ? int.format(c.visits) + ' visitas ao perfil · ' + money(ratio(c.spend, c.visits)) + '/visita' : 'outros objetivos';
           return '<div class="camp"><div class="nm"><span>' + esc(c.name) + '</span><b>' + money(c.spend) + '</b></div>' +
             '<div class="track"><i style="width:' + Math.max(2, c.spend / maxC * 100) + '%;background:' + (c.type === 'outros' ? C.ink3 : colorOfType[c.type]) + '"></i></div>' +
@@ -559,7 +573,10 @@
         (camps.length > top.length ? '<small style="color:var(--ink-3)">+ ' + (camps.length - top.length) + ' campanhas menores</small>' : '') + '</div>' });
 
       return {
-        html: '<section class="kpis">' + cards + '</section>' + main + '<section class="duo">' + ring + list + '</section>',
+        html: summaryHtml(periodPhrase() + ', a conta investiu <b>' + money(t.spend) + '</b>: <b>' + pctOf(t.leadsSpend, t.spend) + '</b> em campanhas de leads, <b>' +
+            pctOf(t.segSpend, t.spend) + '</b> em seguidores e <b>' + pctOf(t.outrosSpend, t.spend) + '</b> em outras campanhas.' +
+            (p ? ' Em relação ao período anterior, o investimento ' + moveTxt(t.spend, p.spend, 'subiu {n}%', 'caiu {n}%', null, 'ficou estável') + '.' : ''), x) +
+          '<section class="kpis">' + cards + '</section>' + main + '<section class="duo">' + ring + list + '</section>',
         draw: function () {
           drawChart('c-main', x.buckets, {
             series: TYPES.map(function (ty) { return { data: x.buckets.map(function (b) { return b[ty.key]; }), color: ty.color }; }),
@@ -576,12 +593,12 @@
       var t = x.tot, p = x.prev, m = x.m, pm = x.pm;
       var cpl = ratio(t.leadsSpend, t.leads), pcpl = p && ratio(p.leadsSpend, p.leads);
       var cards =
-        kpi({ hero: true, icon: 'payments', label: 'Investimento / acumulado', value: money(t.leadsSpend), info: 'Gasto das campanhas de leads no período.', unit: x.nd + ' dias', badge: badgeHtml(t.leadsSpend, p && p.leadsSpend, false, x.cmp) }) +
+        kpi({ hero: true, icon: 'payments', label: 'Investido no período', value: money(t.leadsSpend), info: 'Gasto das campanhas de leads no período.', unit: 'em ' + x.nd + (x.nd === 1 ? ' dia' : ' dias'), badge: badgeHtml(t.leadsSpend, p && p.leadsSpend, null, x.cmp) }) +
         monthSpendCard(x, 'leadsSpend') +
-        kpi({ icon: 'person_add', label: 'Leads / acumulado', info: 'Leads que o Meta atribui aos anúncios (evento Lead do pixel). Pode diferir do CRM.', value: int.format(t.leads), unit: cpl != null ? 'CPL ' + money(cpl) : '', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
+        kpi({ icon: 'person_add', label: 'Leads no período', info: 'Leads que o Meta atribui aos anúncios (evento Lead do pixel). Pode diferir do CRM.', value: int.format(t.leads), unit: cpl != null ? money(cpl) + ' por lead' : '', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
         (x.monthIsPeriod
-          ? kpi({ icon: 'avg_pace', label: 'Leads / média diária', value: dec1.format(t.leads / x.nd), unit: 'por dia', badge: badgeHtml(t.leads / x.nd, p && p.leads / x.pnd, false, x.cmp) })
-          : kpi({ icon: 'event_available', label: 'Leads / mês', value: m ? int.format(m.leads) : '—', unit: m && m.leads ? 'CPL ' + money(m.leadsSpend / m.leads) : x.mLabel, badge: badgeHtml(m && m.leads, pm && pm.leads, false, x.cmpM) }));
+          ? kpi({ icon: 'avg_pace', label: 'Média de leads por dia', value: dec1.format(t.leads / x.nd), unit: 'por dia', badge: badgeHtml(t.leads / x.nd, p && p.leads / x.pnd, false, x.cmp) })
+          : kpi({ icon: 'event_available', label: 'Leads no mês', value: m ? int.format(m.leads) : '—', unit: m && m.leads ? money(m.leadsSpend / m.leads) + ' por lead' : x.mUnit, badge: badgeHtml(m && m.leads, pm && pm.leads, false, x.cmpM) }));
 
       x.buckets.forEach(function (b) { b._cpl = ratio(b.leadsSpend, b.leads); });
       var main = mainSpend(x, 'leadsSpend', 'Investimento e custo por lead por ' + x.gname, 'Custo por lead',
@@ -590,21 +607,27 @@
 
       var leadsCard = chartCard({ id: 'c-a', icon: 'person_add', label: 'Leads', legend: '<span><i class="blk"></i>Leads</span>',
         stats: stat(int.format(t.leads), 'Leads no período ', chgHtml(t.leads, p && p.leads)) + stat(dec1.format(x.buckets.length ? t.leads / x.buckets.length : 0), 'Média por ' + x.gname) });
-      var cplCard = chartCard({ id: 'c-b', icon: 'sell', label: 'Custo por lead', legend: '<span><i class="blk"></i>CPL</span><span><i class="org"></i>Melhor</span>',
-        stats: stat(money(cpl), 'CPL no período ', chgHtml(cpl, pcpl, true)) + stat(best ? money(best._cpl) : '—', 'Melhor ' + x.gname + (best ? ' · ' + bucketLabel(best, x.g) : ''), '', 'org') });
+      var cplCard = chartCard({ id: 'c-b', icon: 'sell', label: 'Custo por lead', legend: '<span><i class="blk"></i>Custo</span><span><i class="org"></i>Mais barato</span>',
+        stats: stat(money(cpl), 'Custo por lead no período ', chgHtml(cpl, pcpl, true)) + stat(best ? money(best._cpl) : '—', 'Mais barato · ' + (best ? bucketLabel(best, x.g) : '—'), '', 'org') });
 
       return {
-        html: '<section class="kpis">' + cards + '</section>' + main.html + '<section class="duo">' + leadsCard + cplCard + '</section>',
+        html: summaryHtml(periodPhrase() + ', você investiu <b>' + money(t.leadsSpend) + '</b> em campanhas de leads e recebeu <b>' + int.format(t.leads) + (t.leads === 1 ? ' lead' : ' leads') + '</b>' +
+            (cpl != null ? '. Cada lead custou, em média, <b>' + money(cpl) + '</b>.' : '.') +
+            (p ? ' Em relação ao período anterior, ' + joinParts([
+              (function (s) { return s && 'os leads ' + s; })(moveTxt(t.leads, p.leads, 'subiram {n}%', 'caíram {n}%', true, 'ficaram estáveis')),
+              (function (s) { return s && 'cada lead ' + s; })(moveTxt(cpl, pcpl, 'ficou {n}% mais caro', 'ficou {n}% mais barato', false, 'custou praticamente o mesmo')),
+            ]) + '.' : ''), x) +
+          '<section class="kpis">' + cards + '</section>' + main.html + '<section class="duo">' + leadsCard + cplCard + '</section>',
         draw: function () {
           main.draw();
           drawChart('c-a', x.buckets, {
             bars: x.buckets.map(function (b) { return b.leads; }), barColor: C.ink,
-            tip: function (b) { return [['Leads', int.format(b.leads)], ['CPL', b._cpl != null ? money(b._cpl) : '—']]; },
+            tip: function (b) { return [['Leads', int.format(b.leads)], ['Custo por lead', b._cpl != null ? money(b._cpl) : '—']]; },
           });
           drawChart('c-b', x.buckets, {
             bars: x.buckets.map(function (b) { return b._cpl; }), money: true, hoverColor: C.ink2,
             barColor: function (i) { return x.buckets[i] === best ? C.accent : C.ink; },
-            tip: function (b) { return [['CPL', b._cpl != null ? money(b._cpl) : 'sem leads'], ['Investimento', money(b.leadsSpend)]]; },
+            tip: function (b) { return [['Custo por lead', b._cpl != null ? money(b._cpl) : 'sem leads'], ['Investimento', money(b.leadsSpend)]]; },
           });
         },
       };
@@ -616,7 +639,7 @@
       var pcpf = p && p.followers ? p.segSpend / p.followers : null;
       var cpv = ratio(t.segSpend, t.visits), pcpv = p && ratio(p.segSpend, p.visits);
       var cards =
-        kpi({ hero: true, icon: 'payments', label: 'Investimento / acumulado', value: money(t.segSpend), info: 'Gasto das campanhas de seguidores no período.', unit: x.nd + ' dias', badge: badgeHtml(t.segSpend, p && p.segSpend, false, x.cmp) }) +
+        kpi({ hero: true, icon: 'payments', label: 'Investido no período', value: money(t.segSpend), info: 'Gasto das campanhas de seguidores no período.', unit: 'em ' + x.nd + (x.nd === 1 ? ' dia' : ' dias'), badge: badgeHtml(t.segSpend, p && p.segSpend, null, x.cmp) }) +
         kpi({ icon: 'favorite', label: 'Novos seguidores', info: 'Ganho de seguidores do Instagram no período, orgânico + pago. O Meta não informa quais vieram dos anúncios.', value: t.followers != null ? '+' + int.format(t.followers) : '—', unit: d.ig.total != null ? int.format(d.ig.total) + ' no total' : '', badge: badgeHtml(t.followers, p && p.followers, false, x.cmp) }) +
         kpi({ icon: 'sell', label: 'Custo por seguidor', info: 'Investimento em seguidores ÷ novos seguidores, só nos dias em que o Instagram já informou o dado.', value: money(cpf), unit: 'por seguidor', badge: badgeHtml(cpf, pcpf, true, x.cmp) }) +
         kpi({ icon: 'ads_click', label: 'Visitas ao perfil', info: 'Cliques dos anúncios de seguidores que levaram ao perfil. 100% atribuídos aos anúncios.', value: int.format(t.visits), unit: cpv != null ? money(cpv) + ' / visita' : '', badge: badgeHtml(t.visits, p && p.visits, false, x.cmp) });
@@ -629,11 +652,18 @@
       var folCard = chartCard({ id: 'c-a', icon: 'favorite', label: 'Novos seguidores', legend: '<span><i class="blk"></i>Seguidores</span>',
         stats: stat(t.followers != null ? '+' + int.format(t.followers) : '—', 'No período ', chgHtml(t.followers, p && p.followers)) +
                stat(d.ig.total != null ? int.format(d.ig.total) : '—', 'Total' + (d.ig.username ? ' · @' + esc(d.ig.username) : '')) });
-      var cpfCard = chartCard({ id: 'c-b', icon: 'sell', label: 'Custo por seguidor', legend: '<span><i class="blk"></i>Custo</span><span><i class="org"></i>Melhor</span>',
+      var cpfCard = chartCard({ id: 'c-b', icon: 'sell', label: 'Custo por seguidor', legend: '<span><i class="blk"></i>Custo</span><span><i class="org"></i>Mais barato</span>',
         stats: stat(money(cpf), 'Por seguidor ', chgHtml(cpf, pcpf, true)) + stat(money(cpv), 'Por visita ao perfil ', chgHtml(cpv, pcpv, true)) });
 
       return {
-        html: '<section class="kpis">' + cards + '</section>' + main.html + '<section class="duo">' + folCard + cpfCard + '</section>',
+        html: summaryHtml(periodPhrase() + ', você investiu <b>' + money(t.segSpend) + '</b> e levou <b>' + int.format(t.visits) + ' pessoas</b> ao perfil do Instagram' +
+            (cpv != null ? ' (<b>' + money(cpv) + '</b> por visita)' : '') + '. ' +
+            (t.followers != null
+              ? 'O perfil ganhou <b>+' + int.format(t.followers) + ' seguidores</b>' + (cpf != null ? ': dividindo o investimento, dá <b>' + money(cpf) + ' por seguidor</b>' : '') +
+                '. Esse número inclui quem seguiu sem ver anúncio, então o custo real do seguidor pago é um pouco maior.'
+              : 'O Instagram ainda não informou os seguidores desse período.') +
+            (p ? ' As visitas ao perfil ' + moveTxt(t.visits, p.visits, 'subiram {n}%', 'caíram {n}%', true, 'ficaram estáveis') + ' em relação ao período anterior.' : ''), x) +
+          '<section class="kpis">' + cards + '</section>' + main.html + '<section class="duo">' + folCard + cpfCard + '</section>',
         draw: function () {
           main.draw();
           drawChart('c-a', x.buckets, {
@@ -656,10 +686,10 @@
       var cpl = ratio(t.leadsSpend, t.leads);
 
       var cards =
-        kpi({ hero: true, icon: 'person_add', label: 'Leads', value: int.format(t.leads), info: 'Leads das campanhas de cadastro no período.', unit: cpl != null ? 'CPL ' + money(cpl) : '', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
-        kpi({ icon: 'ads_click', label: 'CTR', info: 'Cliques no link ÷ impressões. Mede o quanto o anúncio chama atenção.', value: pctTxt(r.ctr), unit: 'cliques ÷ impressões', badge: ppHtml(r.ctr, pr.ctr, true, x.cmp) }) +
-        kpi({ icon: 'link', label: 'Connect rate', info: 'Visualizações da página ÷ cliques. Mede quantos cliques viram visita de fato (velocidade da página, desistência).', value: pctTxt(r.con), unit: 'visualiz. ÷ cliques', badge: ppHtml(r.con, pr.con, true, x.cmp) }) +
-        kpi({ icon: 'conversion_path', label: 'Taxa de conversão', info: 'Leads ÷ visualizações da página. Mede o quanto a página convence.', value: pctTxt(r.conv), unit: 'leads ÷ visualiz.', badge: ppHtml(r.conv, pr.conv, true, x.cmp) });
+        kpi({ hero: true, icon: 'person_add', label: 'Leads', value: int.format(t.leads), info: 'Leads das campanhas de cadastro no período.', unit: cpl != null ? money(cpl) + ' por lead' : '', badge: badgeHtml(t.leads, p && p.leads, false, x.cmp) }) +
+        kpi({ icon: 'ads_click', label: 'CTR', info: 'Cliques no link ÷ impressões. Mede o quanto o anúncio chama atenção.', value: pctTxt(r.ctr), unit: 'de quem viu, clicou', badge: ppHtml(r.ctr, pr.ctr, true, x.cmp) }) +
+        kpi({ icon: 'link', label: 'Connect rate', info: 'Visualizações da página ÷ cliques. Mede quantos cliques viram visita de fato (velocidade da página, desistência).', value: pctTxt(r.con), unit: 'dos cliques abriram a página', badge: ppHtml(r.con, pr.con, true, x.cmp) }) +
+        kpi({ icon: 'conversion_path', label: 'Taxa de conversão', info: 'Leads ÷ visualizações da página. Mede o quanto a página convence.', value: pctTxt(r.conv), unit: 'das visitas viraram lead', badge: ppHtml(r.conv, pr.conv, true, x.cmp) });
 
       // larguras fixas decrescentes: os volumes vão de dezenas de milhares a dezenas,
       // então largura proporcional deixaria as últimas etapas invisíveis
@@ -671,13 +701,31 @@
       ];
       var rates = [['CTR', r.ctr, pr.ctr], ['Connect rate', r.con, pr.con], ['Taxa de conversão', r.conv, pr.conv]];
       var funnel = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>Funil de tráfego</span>' +
-        '<div class="legend"><span>' + esc(x.cmp ? 'variações ' + x.cmp : '') + '</span></div></div><div class="funnel">' +
+        '<div class="legend"><span>' + esc(x.cmp ? 'variações comparadas a ' + x.cmp.replace(/^vs /, '') : '') + '</span></div></div><div class="funnel">' +
         stages.map(function (s, i) {
           var bar = '<div class="fstage"><div class="fbar fs-' + i + '" style="width:' + s.w + '%;background:' + s.bg + ';color:' + s.fg + '"><span class="fl">' + s.l + '</span><b>' + int.format(s.v) + '</b></div></div>';
           if (i === stages.length - 1) return bar;
           var rt = rates[i];
-          return bar + '<div class="frate"><span class="ms">south</span>' + rt[0] + ' <b>' + pctTxt(rt[1]) + '</b>' + ppHtml(rt[1], rt[2], false) + '</div>';
+          return bar + '<div class="frate"><span class="ms" aria-hidden="true">south</span>' + rt[0] + ' <b>' + pctTxt(rt[1]) + '</b><span class="plain">' + perPeople(rt[1]) + '</span>' + ppHtml(rt[1], rt[2], false) + '</div>';
         }).join('') + '</div></section>';
+
+      // resumo: "de cada 1.000 que viram, 16 clicaram..." + o que mais melhorou e piorou
+      function funnelSummary(r, pr) {
+        if (r.ctr == null) return 'Ainda não há impressões neste período para montar o funil.';
+        var b1 = peopleBase(r.ctr);
+        var txt = 'De cada <b>' + int.format(b1) + ' pessoas</b> que viram os anúncios, <b>' + int.format(Math.round(r.ctr / 100 * b1)) + ' clicaram</b>.';
+        if (r.con != null) txt += ' De cada 100 cliques, <b>' + int.format(Math.round(Math.min(r.con, 100))) + ' abriram a página</b>.';
+        if (r.conv != null) txt += ' E de cada 100 visitas na página, <b>' + int.format(Math.round(r.conv)) + ' viraram lead</b>.';
+        var names = { ctr: 'a taxa de cliques (CTR)', con: 'a chegada na página (connect rate)', conv: 'a conversão da página' };
+        var moves = ['ctr', 'con', 'conv'].map(function (k) { return { k: k, d: change(r[k], pr[k]) }; }).filter(function (m) { return m.d != null; });
+        if (moves.length) {
+          moves.sort(function (a, b) { return a.d - b.d; });
+          var worst = moves[0], bestM = moves[moves.length - 1];
+          if (worst.d <= -5) txt += ' O que mais piorou foi ' + names[worst.k] + ': <b class="t-bad">de ' + pctTxt(pr[worst.k]) + ' para ' + pctTxt(r[worst.k]) + '</b>.';
+          if (bestM.d >= 5) txt += ' O que mais melhorou foi ' + names[bestM.k] + ': <b class="t-good">de ' + pctTxt(pr[bestM.k]) + ' para ' + pctTxt(r[bestM.k]) + '</b>.';
+        }
+        return txt;
+      }
 
       x.buckets.forEach(function (b) { b._ctr = rate(b.clicks, b.impr); b._con = rate(b.lpv, b.clicks); b._conv = rate(b.leads, b.lpv); });
       function rateCard(id, icon, label, key, cur, prev) {
@@ -700,7 +748,7 @@
         });
       }
       return {
-        html: '<section class="kpis">' + cards + '</section>' + funnel + trio,
+        html: summaryHtml(funnelSummary(r, pr), x) + '<section class="kpis">' + cards + '</section>' + funnel + trio,
         draw: function () {
           drawRate('c-ctr', '_ctr', 'Cliques', 'clicks', 'Impressões', 'impr');
           drawRate('c-con', '_con', 'Visualiz.', 'lpv', 'Cliques', 'clicks');
@@ -709,6 +757,39 @@
       };
     },
   };
+
+  /* ── frases do resumo ──────────────────────────────── */
+  function periodPhrase() {
+    var d = state.data;
+    if (state.period === 'dia') return 'Hoje';
+    if (state.period !== 'custom') return 'Nos últimos ' + WINDOW[state.period] + ' dias';
+    return 'De ' + longDate(d.since) + ' a ' + longDate(d.until);
+  }
+  // "subiram 93%" / "caíram 12%" em verde ou vermelho; goodWhenUp null = neutro
+  function moveTxt(cur, prev, up, down, goodWhenUp, stable) {
+    var d = change(cur, prev);
+    if (d == null) return null;
+    if (Math.abs(d) < 1) return stable;
+    var cls = goodWhenUp == null ? '' : ((d > 0) === goodWhenUp ? 't-good' : 't-bad');
+    return '<b class="' + cls + '">' + (d > 0 ? up : down).replace('{n}', int.format(Math.abs(d))) + '</b>';
+  }
+  function joinParts(parts) {
+    parts = parts.filter(Boolean);
+    if (parts.length <= 1) return parts.join('');
+    return parts.slice(0, -1).join(', ') + ' e ' + parts[parts.length - 1];
+  }
+  function summaryHtml(text, x) {
+    return '<section class="summary"><span class="ms" aria-hidden="true">lightbulb</span><div><p>' + text + '</p>' +
+      (x.d.prev ? '<small>As porcentagens comparam com ' + longDate(x.d.prev.since) + ' – ' + longDate(x.d.prev.until) + ', o período anterior de mesmo tamanho. Verde = melhorou, vermelho = piorou, cinza = só mudou (caso do investimento). Toque no <b>i</b> de cada card para ver o que ele mede.</small>' : '') +
+      '</div></section>';
+  }
+  // "≈ 16 de cada 1.000": escolhe a base para o número ficar legível
+  function peopleBase(pct) { return pct >= 5 ? 100 : pct >= 0.5 ? 1000 : 10000; }
+  function perPeople(pct) {
+    if (pct == null) return '';
+    var base = peopleBase(pct);
+    return '≈ ' + int.format(Math.round(pct / 100 * base)) + ' de cada ' + int.format(base);
+  }
 
   function pctOf(a, b) { return b ? Math.round(a / b * 100) + '%' : '0%'; }
 
@@ -846,6 +927,26 @@
     state.group = b.dataset.g; savePrefs(); render();
   });
   $('refresh').addEventListener('click', function () { load(true); });
+  // toque/clique no "i" mostra a explicação (no celular não existe "passar o mouse")
+  var hintPop = null;
+  function closeHint() { if (hintPop) { hintPop.remove(); hintPop = null; } }
+  document.addEventListener('click', function (e) {
+    var hEl = e.target.closest('.hint');
+    closeHint();
+    if (!hEl) return;
+    hintPop = document.createElement('div');
+    hintPop.className = 'hint-pop'; hintPop.setAttribute('role', 'tooltip');
+    hintPop.textContent = hEl.getAttribute('title');
+    document.body.appendChild(hintPop);
+    var rc = hEl.getBoundingClientRect(), w = hintPop.offsetWidth;
+    hintPop.style.left = Math.max(12, Math.min(window.innerWidth - w - 12, rc.left - w / 2 + rc.width / 2)) + 'px';
+    hintPop.style.top = (rc.bottom + 8) + 'px';
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeHint();
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('hint')) { e.preventDefault(); e.target.click(); }
+  });
+  window.addEventListener('scroll', closeHint, { passive: true });
   window.addEventListener('hashchange', function () { setView(location.hash.slice(1)); });
 
   if (!getToken()) location.href = '/login';

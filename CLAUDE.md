@@ -111,6 +111,11 @@
   seguidor a anúncio). A API só dá 30 dias, então cada acesso grava os dias na
   tabela D1 `ig_followers_daily` (migration 0009) e o histórico vai crescendo.
 - Design: fundo `#F5F6F8`, destaque `#FF5A1F`, texto `#0E0F11`, fonte Onest.
+- Linguagem: cada aba abre com um **resumo em português simples** (gerado dos
+  números) e os rótulos evitam jargão ("Investido no período", "R$ X por lead").
+  Cores das variações: verde = melhorou, vermelho = piorou, **cinza = investimento**
+  (gastar mais não é bom nem ruim). Em `tone()`: `lowerIsBetter` true = custo,
+  false = volume, null = neutro.
 - **Conta de anúncios em uso: `4038372153047790` ("Pacttus pet")** — trocada em
   2026-10-19. A antiga `1118060079685162` não tem mais acesso.
   `META_ADS_TOKEN` é de **usuário do sistema** ("Dashboardtoken", app "Analise de

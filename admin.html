@@ -1724,14 +1724,14 @@
         <div class="sub" id="statHojeDate">—</div>
       </div>
       <div class="stat-card">
-        <div class="stat-top"><span class="label">Faturamento predominante</span><span class="material-symbols-outlined stat-ico">payments</span></div>
+        <div class="stat-top"><span class="label">Faixa de faturamento mais comum</span><span class="material-symbols-outlined stat-ico">payments</span></div>
         <div class="value gold" id="statTop" style="font-size:1.1rem;padding-top:6px;">—</div>
         <div class="sub" id="statTopPct">—</div>
       </div>
       <div class="stat-card">
         <div class="stat-top"><span class="label">Com e-mail</span><span class="material-symbols-outlined stat-ico">mail</span></div>
         <div class="value" id="statEmail">0</div>
-        <div class="sub">leads com e-mail informado</div>
+        <div class="sub">deixaram o e-mail</div>
       </div>
     </div>
 
@@ -1765,7 +1765,7 @@
       </div>
       <div id="fatProgress" style="display:none; margin-top:14px; padding:14px 20px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-size:0.75rem;color:var(--mid);">Leads categorizados</span>
+          <span style="font-size:0.75rem;color:var(--mid);">Leads com faixa de faturamento definida</span>
           <span id="fatProgressLabel" style="font-size:0.75rem;font-weight:700;color:var(--white);"></span>
         </div>
         <div style="height:5px;background:var(--raise);border-radius:99px;overflow:hidden;">
@@ -3229,12 +3229,12 @@
     }
 
     var DASH_METRICS = [
-      { key: 'cpl',   label: 'Custo por Lead', color: '#FF5A1F', fmt: fmtBRL },
+      { key: 'cpl',   label: 'Custo por lead', color: '#FF5A1F', fmt: fmtBRL },
       { key: 'spend', label: 'Investimento',   color: '#5F656D', fmt: fmtBRL },
-      { key: 'leads', label: 'Resultados',     color: '#9AA0A8', fmt: fmtNum },
-      { key: 'ctr',   label: 'CTR %',          color: '#22A75A', fmt: fmtPct },
-      { key: 'cpm',   label: 'CPM',            color: '#E5484D', fmt: fmtBRL },
-      { key: 'freq',  label: 'Frequência',     color: '#12a4af', fmt: fmtDec },
+      { key: 'leads', label: 'Leads',     color: '#9AA0A8', fmt: fmtNum },
+      { key: 'ctr',   label: 'Taxa de cliques',          color: '#22A75A', fmt: fmtPct },
+      { key: 'cpm',   label: 'Custo por mil impressões',            color: '#E5484D', fmt: fmtBRL },
+      { key: 'freq',  label: 'Vezes que cada pessoa viu',     color: '#12a4af', fmt: fmtDec },
     ];
     var _dashActive = { cpl: true, spend: false, leads: true, ctr: false, cpm: false, freq: false };
 
@@ -3265,25 +3265,25 @@
       window._dashSeries = S;
 
       var html = '<div class="kpi-3">';
-      html += dashKpiCard('Leads do CRM',   fmtNum(m.crmLeads), 'cadastros no período', 'groups');
-      html += dashKpiCard('Custo por lead', fmtBRL(m.cpl),      'investido ÷ leads',    'sell');
+      html += dashKpiCard('Leads no CRM',   fmtNum(m.crmLeads), 'cadastros que entraram no período', 'groups');
+      html += dashKpiCard('Custo por lead', fmtBRL(m.cpl),      'quanto custou, em média, cada lead', 'sell');
       html += dashKpiCard('Valor investido', fmtBRL(m.spend),   periodo,                'account_balance_wallet');
       html += '</div>';
 
       // Gráfico multi-métrica por dia (chips + tooltip)
       html += '<div class="dash-card2">';
-      html += '<div class="dash-chart-head"><div class="dash-card2-title" style="margin-bottom:0">Variação por dia</div><div class="mchips" id="mchips"></div></div>';
+      html += '<div class="dash-chart-head"><div class="dash-card2-title" style="margin-bottom:0">Evolução dia a dia</div><div class="mchips" id="mchips"></div></div>';
       html += '<div class="mchart-wrap"><canvas id="cplCanvas" style="display:block;width:100%"></canvas><div id="cplTip" class="mtip" style="display:none"></div></div>';
-      html += '<p class="field-hint" style="margin-top:10px;margin-bottom:0">Passe o mouse para ver os valores do dia. Cada linha usa a própria escala — clique nos chips para ligar/desligar.</p>';
+      html += '<p class="field-hint" style="margin-top:10px;margin-bottom:0">Passe o mouse (ou toque) em um dia para ver os valores. Cada métrica tem sua própria escala: toque nos botões acima para mostrar ou esconder.</p>';
       html += '</div>';
 
       // Métricas secundárias (taxas e custos) — 2 colunas
-      html += '<div class="dash-card2"><div class="dash-card2-title">Métricas secundárias</div><div class="sec-grid">';
-      html += secItem('ads_click',  'CTR %',               fmtPct(m.ctrLink));
-      html += secItem('mouse',      'Custo por clique',    fmtBRL(m.cpcLink));
-      html += secItem('link',       'Connect Rate',        fmtPct(m.connectRate));
-      html += secItem('visibility', 'Custo por view page', fmtBRL(m.costLpv));
-      html += secItem('percent',    'Taxa de conversão %', fmtPct(m.regRate));
+      html += '<div class="dash-card2"><div class="dash-card2-title">Outras métricas dos anúncios</div><div class="sec-grid">';
+      html += secItem('ads_click',  'Taxa de cliques (CTR): de quem viu, quantos clicaram', fmtPct(m.ctrLink));
+      html += secItem('mouse',      'Custo por clique no link', fmtBRL(m.cpcLink));
+      html += secItem('link',       'Connect rate: dos cliques, quantos abriram a página', fmtPct(m.connectRate));
+      html += secItem('visibility', 'Custo por visita na página', fmtBRL(m.costLpv));
+      html += secItem('percent',    'Conversão: das visitas, quantas viraram lead', fmtPct(m.regRate));
       html += secItem('sell',       'Custo por lead',      fmtBRL(m.cpl));
       html += '</div></div>';
 
