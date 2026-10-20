@@ -557,8 +557,8 @@
       var cpv = ratio(t.segSpend, t.visits), pcpv = p && ratio(p.segSpend, p.visits);
       var cards =
         kpi({ hero: true, icon: 'payments', label: 'Investimento / acumulado', value: money(t.segSpend), unit: x.nd + ' dias', badge: badgeHtml(t.segSpend, p && p.segSpend, false, x.cmp) }) +
-        monthSpendCard(x, 'segSpend') +
-        kpi({ icon: 'favorite', label: 'Novos seguidores', value: t.followers != null ? '+' + int.format(t.followers) : '—', unit: cpf != null ? money(cpf) + ' / seg.' : '', badge: badgeHtml(t.followers, p && p.followers, false, x.cmp) }) +
+        kpi({ icon: 'favorite', label: 'Novos seguidores', value: t.followers != null ? '+' + int.format(t.followers) : '—', unit: d.ig.total != null ? int.format(d.ig.total) + ' no total' : '', badge: badgeHtml(t.followers, p && p.followers, false, x.cmp) }) +
+        kpi({ icon: 'sell', label: 'Custo por seguidor', value: money(cpf), unit: 'por seguidor', badge: badgeHtml(cpf, pcpf, true, x.cmp) }) +
         kpi({ icon: 'ads_click', label: 'Visitas ao perfil', value: int.format(t.visits), unit: cpv != null ? money(cpv) + ' / visita' : '', badge: badgeHtml(t.visits, p && p.visits, false, x.cmp) });
 
       x.buckets.forEach(function (b) { b._cpf = b.followers ? b.folSpend / b.followers : null; });
