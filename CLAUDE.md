@@ -106,7 +106,16 @@
   visualizações ÷ cliques; conversão = leads ÷ visualizações. Variações de taxa em
   **p.p.**. Connect rate diário pode passar de 100% (o Meta atribui a visualização
   à data do clique, recarregamentos etc.) — é dado do Meta, não bug.
-  Próximos passos combinados: funil comercial (CRM) e um terceiro juntando os dois.
+- **Funil comercial** (`#comercial`): investimento → leads (Meta, campanhas de
+  cadastro) → reuniões → fechamentos, com taxa de passagem e custo por etapa.
+  - Reuniões: planilha publicada do Google (CSV, colunas Cliente/Data/Status; conta
+    status "Concluída" ou "Fechou"). URL no código, trocável pela var
+    `COMERCIAL_SHEET_CSV`. API `functions/api/comercial.js`.
+  - Fechamentos: lançados na própria aba (data, cliente, valor opcional), tabela D1
+    `comercial_fechamentos` (migration 0011). Um registro por fechamento, para o
+    funil funcionar em qualquer período.
+  - A planilha não tem WhatsApp/e-mail: reunião e lead do CRM não são ligados um a
+    um (só por nome, para o selo "fechou").
 - Seguidores = `follower_count` do Instagram (orgânico + pago; o Meta não atribui
   seguidor a anúncio). A API só dá 30 dias, então cada acesso grava os dias na
   tabela D1 `ig_followers_daily` (migration 0009) e o histórico vai crescendo.

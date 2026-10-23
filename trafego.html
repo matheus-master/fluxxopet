@@ -149,8 +149,8 @@
       .fs-1{width:92%!important} .fs-2{width:84%!important} .fs-3{width:76%!important}
       /* barra de ícones e abas cabendo em 390px */
       .icons{gap:6px} .who{gap:6px} .ibtn{width:40px;height:40px} .avatar{display:none}
-      .views{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-      .view{padding:0 4px;font-size:.84rem} .view .ms{display:none}
+      .views{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}
+      .view{flex:none;padding:0 14px;font-size:.84rem} .view .ms{display:none}
     }
 
     /* ── experiência: foco, carregamento, vazio, ajuda ── */
@@ -179,6 +179,34 @@
     .frate .plain{color:var(--ink-3);font-size:.78rem}
     .hint-pop{position:fixed;z-index:300;max-width:280px;background:var(--ink);color:#fff;border-radius:10px;padding:10px 12px;font-size:.82rem;line-height:1.45;box-shadow:0 10px 30px rgba(14,15,17,.2)}
     @media (max-width:640px){ .summary{padding:16px} .summary p{font-size:.94rem} .frate{flex-wrap:wrap;justify-content:center;text-align:center} }
+
+    /* comercial */
+    .fbar small{display:block;font-size:.72rem;opacity:.7;margin-top:2px;font-weight:400;letter-spacing:0;text-transform:none}
+    .com-table{width:100%;border-collapse:collapse;font-size:.86rem;font-variant-numeric:tabular-nums}
+    .com-table th{font-weight:400;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);text-align:right;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+    .com-table td{text-align:right;padding:12px;border-bottom:1px solid var(--line);white-space:nowrap}
+    .com-table th:first-child,.com-table td:first-child{text-align:left}
+    .com-table tr:last-child td{border-bottom:none}
+    .com-table tfoot td{font-weight:600;border-top:1px solid var(--line)}
+    .com-table .muted{color:var(--ink-3)}
+    .table-scroll{overflow-x:auto}
+    .com-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:6px}
+    .com-form .cli,.com-form button{grid-column:1/-1}
+    .com-form input{height:44px;border-radius:8px;border:1px solid var(--line);background:#fff;padding:0 12px;font-size:.88rem;min-width:0;outline:none}
+    .com-form input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+    .com-form button{height:44px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;padding:0 16px;font-weight:500;cursor:pointer;white-space:nowrap}
+    .com-form button:disabled{opacity:.6;cursor:wait}
+    .com-err{color:var(--bad);font-size:.8rem;min-height:18px;margin-bottom:6px}
+    .com-list{display:flex;flex-direction:column}
+    .com-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+    .com-item:last-child{border-bottom:none}
+    .com-item .when{color:var(--ink-3);font-size:.78rem;width:64px;flex-shrink:0;font-variant-numeric:tabular-nums}
+    .com-item .who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .com-item .val{font-variant-numeric:tabular-nums;white-space:nowrap}
+    .com-item .won{font-size:.72rem;font-weight:500;color:#fff;background:var(--good);border-radius:4px;padding:2px 7px}
+    .com-item button{border:1px solid var(--line);background:none;border-radius:6px;padding:4px 10px;font-size:.76rem;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+    .com-item button.sure{border-color:var(--bad);color:#fff;background:var(--bad)}
+    .com-empty{color:var(--ink-3);font-size:.86rem;padding:18px 0}
 
     .foot{color:var(--ink-3);font-size:.76rem;margin-top:18px;line-height:1.5}
     .loading #content{opacity:.45;transition:opacity .2s}
@@ -230,6 +258,7 @@
         <button class="view" data-v="leads"><span class="ms">person_add</span>Leads</button>
         <button class="view" data-v="seguidores"><span class="ms">favorite</span>Seguidores</button>
         <button class="view" data-v="funil"><span class="ms">filter_alt</span>Funil</button>
+        <button class="view" data-v="comercial"><span class="ms">handshake</span>Comercial</button>
       </div>
     </div>
     <div class="filters">
@@ -261,8 +290,8 @@
 
 <script>
   /* ── estado ───────────────────────────────────────── */
-  var VIEWS = ['geral', 'leads', 'seguidores', 'funil'];
-  var state = { view: 'geral', period: 'mes', group: null, data: null };
+  var VIEWS = ['geral', 'leads', 'seguidores', 'funil', 'comercial'];
+  var state = { view: 'geral', period: 'mes', group: null, data: null, com: null };
   var charts = {};
   var C = { accent: '#FF5A1F', ink: '#0E0F11', ink2: '#5F656D', ink3: '#9AA0A8', bar: '#DADCE1', grid: '#ECEDF0' };
   var TYPES = [
@@ -759,7 +788,153 @@
         },
       };
     },
+
+    // funil comercial: investimento → leads (Meta, campanhas de cadastro) → reuniões (planilha) → fechamentos (lançados aqui)
+    comercial: function (x) {
+      var d = state.data, com = state.com;
+      if (!com) {
+        loadCom();
+        return { html: '<section class="kpis"><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div></section><div class="skel" style="height:420px"></div>', draw: function () {} };
+      }
+      var inR = function (ds, s, u) { return ds >= s && ds <= u; };
+      var reun = com.reunioes.filter(function (r) { return inR(r.data, d.since, d.until); });
+      var fech = com.fechamentos.filter(function (r) { return inR(r.data, d.since, d.until); });
+      var p = d.prev;
+      var pReun = p ? com.reunioes.filter(function (r) { return inR(r.data, p.since, p.until); }).length : null;
+      var pFech = p ? com.fechamentos.filter(function (r) { return inR(r.data, p.since, p.until); }).length : null;
+
+      var t = x.tot, spend = t.leadsSpend, leads = t.leads, nR = reun.length, nF = fech.length;
+      var receita = fech.reduce(function (a, r) { return a + (Number(r.valor) || 0); }, 0);
+      var temValor = fech.some(function (r) { return r.valor != null && r.valor !== ''; });
+      var cpl = ratio(spend, leads), cpr = ratio(spend, nR), cpf = ratio(spend, nF);
+      var rLR = rate(nR, leads), rRF = rate(nF, nR), rLF = rate(nF, leads);
+      var pr = p ? { lr: rate(pReun, p.leads), rf: rate(pFech, pReun), cpr: ratio(p.leadsSpend, pReun), cpf: ratio(p.leadsSpend, pFech) } : {};
+
+      // resumo
+      var txt = periodPhrase() + ', <b>' + money(spend) + '</b> em anúncios de leads geraram <b>' + int.format(leads) + ' leads</b>, <b>' +
+        int.format(nR) + (nR === 1 ? ' reunião' : ' reuniões') + '</b> e <b>' + int.format(nF) + (nF === 1 ? ' fechamento' : ' fechamentos') + '</b>.';
+      if (cpr != null) txt += ' Cada reunião custou <b>' + money(cpr) + '</b>' + (cpf != null ? ' e cada fechamento <b>' + money(cpf) + '</b>.' : '.');
+      if (rLR != null && nR) txt += ' De cada <b>100 leads</b>, cerca de <b>' + int.format(Math.round(rLR)) + '</b> viraram reunião.';
+      if (rRF != null && nF) txt += ' De cada <b>10 reuniões</b>, cerca de <b>' + dec1.format(rRF / 10).replace(/,0$/, '') + '</b> fecharam.';
+      if (!nF) txt += ' Ainda não há fechamentos lançados neste período: registre abaixo quando um cliente fechar.';
+      if (temValor) txt += ' Receita lançada: <b>' + money(receita) + '</b>' + (spend ? ' (<b>' + dec1.format(receita / spend) + 'x</b> o investimento)' : '') + '.';
+
+      var cards =
+        kpi({ hero: true, icon: 'payments', label: 'Investido em leads', value: money(spend), unit: 'em ' + x.nd + (x.nd === 1 ? ' dia' : ' dias'), badge: badgeHtml(spend, p && p.leadsSpend, null, x.cmp), info: 'Gasto das campanhas de cadastro do Meta no período.' }) +
+        kpi({ icon: 'person_add', label: 'Leads', value: int.format(leads), unit: cpl != null ? money(cpl) + ' por lead' : '', badge: badgeHtml(leads, p && p.leads, false, x.cmp), info: 'Leads que o Meta atribui aos anúncios de cadastro.' }) +
+        kpi({ icon: 'event_available', label: 'Reuniões', value: int.format(nR), unit: cpr != null ? money(cpr) + ' por reunião' : 'sem reuniões', badge: badgeHtml(nR, pReun, false, x.cmp), info: 'Reuniões concluídas, lidas da planilha de reuniões.' }) +
+        kpi({ icon: 'handshake', label: 'Fechamentos', value: int.format(nF), unit: cpf != null ? money(cpf) + ' por fechamento' : 'nenhum lançado', badge: badgeHtml(nF, pFech, false, x.cmp), info: 'Vendas registradas aqui no painel, na lista abaixo.' });
+
+      // funil visual
+      var stages = [
+        { l: 'Investimento', v: money(spend), w: 100, bg: '#ECEDF0', fg: C.ink },
+        { l: 'Leads', v: int.format(leads), w: 80, bg: '#BCC0C7', fg: C.ink, s: cpl != null ? money(cpl) + ' por lead' : '' },
+        { l: 'Reuniões', v: int.format(nR), w: 60, bg: C.ink, fg: '#fff', s: cpr != null ? money(cpr) + ' por reunião' : '' },
+        { l: 'Fechamentos', v: int.format(nF), w: 40, bg: C.accent, fg: '#fff', s: cpf != null ? money(cpf) + ' por fechamento' : '' },
+      ];
+      var steps = [
+        '<span class="ms" aria-hidden="true">south</span>Custo por lead <b>' + money(cpl) + '</b>',
+        '<span class="ms" aria-hidden="true">south</span>Leads → reunião <b>' + pctTxt(rLR) + '</b><span class="plain">' + perPeople(rLR) + '</span>' + ppHtml(rLR, pr.lr, false),
+        '<span class="ms" aria-hidden="true">south</span>Reunião → fechamento <b>' + pctTxt(rRF) + '</b><span class="plain">' + perPeople(rRF) + '</span>' + ppHtml(rRF, pr.rf, false),
+      ];
+      var funnel = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>Funil comercial</span>' +
+        '<div class="legend"><span>' + (rLF != null ? 'de lead a fechamento: <b>' + pctTxt(rLF) + '</b>' : '') + '</span></div></div><div class="funnel">' +
+        stages.map(function (s, i) {
+          var bar = '<div class="fstage"><div class="fbar fs-' + i + '" style="width:' + s.w + '%;background:' + s.bg + ';color:' + s.fg + '"><span class="fl">' + s.l + (s.s ? '<small>' + s.s + '</small>' : '') + '</span><b>' + s.v + '</b></div></div>';
+          return i === stages.length - 1 ? bar : bar + '<div class="frate">' + steps[i] + '</div>';
+        }).join('') + '</div></section>';
+
+      // mês a mês (meses do período)
+      var months = aggregate(d.daily, 'mes');
+      var rowsM = months.map(function (m) {
+        var ym = m.key, nr = com.reunioes.filter(function (r) { return r.data.slice(0, 7) === ym && inR(r.data, d.since, d.until); }).length;
+        var nf = com.fechamentos.filter(function (r) { return r.data.slice(0, 7) === ym && inR(r.data, d.since, d.until); }).length;
+        var part = m.first.slice(8) !== '01' || m.last !== lastDay(ym) ? ' <span class="muted">(parcial)</span>' : '';
+        return '<tr><td>' + MESES_L[+ym.slice(5) - 1] + ' ' + ym.slice(0, 4) + part + '</td><td>' + money(m.leadsSpend) + '</td><td>' + int.format(m.leads) + '</td><td>' + nr + '</td><td>' + nf +
+          '</td><td>' + pctTxt(rate(nr, m.leads)) + '</td><td>' + pctTxt(rate(nf, nr)) + '</td><td>' + (nr ? money(m.leadsSpend / nr) : '<span class="muted">—</span>') + '</td></tr>';
+      }).join('');
+      var table = chartCard({ icon: 'calendar_month', label: 'Mês a mês', legend: '',
+        body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Mês</th><th>Investido</th><th>Leads</th><th>Reuniões</th><th>Fechamentos</th><th>Lead → reunião</th><th>Reunião → fech.</th><th>Custo por reunião</th></tr></thead><tbody>' + rowsM +
+          '</tbody><tfoot><tr><td>Período</td><td>' + money(spend) + '</td><td>' + int.format(leads) + '</td><td>' + nR + '</td><td>' + nF + '</td><td>' + pctTxt(rLR) + '</td><td>' + pctTxt(rRF) + '</td><td>' + money(cpr) + '</td></tr></tfoot></table></div>' });
+
+      // fechamentos: formulário + lista
+      var clientes = {}; com.reunioes.forEach(function (r) { clientes[r.cliente] = 1; });
+      var closedNames = {}; com.fechamentos.forEach(function (r) { closedNames[r.cliente.toLowerCase()] = 1; });
+      var fechCard = chartCard({ icon: 'handshake', label: 'Fechamentos lançados', legend: '<span>' + nF + ' no período</span>',
+        body: '<form class="com-form" onsubmit="addFechamento(event)">' +
+          '<input class="cli" id="fCliente" list="fClientes" placeholder="Cliente (comece a digitar: sugere quem fez reunião)" aria-label="Cliente" required />' +
+          '<input type="date" id="fData" value="' + today() + '" max="' + today() + '" aria-label="Data do fechamento" required />' +
+          '<datalist id="fClientes">' + Object.keys(clientes).map(function (c) { return '<option value="' + esc(c) + '">'; }).join('') + '</datalist>' +
+          '<input id="fValor" inputmode="decimal" placeholder="Valor (opcional)" aria-label="Valor do fechamento em reais" />' +
+          '<button type="submit" id="fBtn">Registrar fechamento</button></form><div class="com-err" id="fErr" role="alert"></div>' +
+          '<div class="com-list">' + (fech.length ? fech.map(function (r) {
+            return '<div class="com-item"><span class="when">' + fmtShort(r.data) + '</span><span class="who">' + esc(r.cliente) + '</span>' +
+              (r.valor != null && r.valor !== '' ? '<span class="val">' + money(Number(r.valor)) + '</span>' : '') +
+              '<button type="button" onclick="delFechamento(this,' + r.id + ')" aria-label="Remover fechamento de ' + esc(r.cliente) + '">Remover</button></div>';
+          }).join('') : '<p class="com-empty">Nenhum fechamento neste período.</p>') + '</div>' });
+      var reunCard = chartCard({ icon: 'event_available', label: 'Reuniões do período', legend: '<span>da planilha</span>',
+        body: '<div class="com-list">' + (reun.length ? reun.slice().sort(function (a, b) { return b.data.localeCompare(a.data); }).map(function (r) {
+          return '<div class="com-item"><span class="when">' + fmtShort(r.data) + '</span><span class="who">' + esc(r.cliente) + '</span>' +
+            (closedNames[r.cliente.toLowerCase()] ? '<span class="won">fechou</span>' : '') + '</div>';
+        }).join('') : '<p class="com-empty">Nenhuma reunião concluída neste período.</p>') + '</div>' });
+
+      return {
+        html: summaryHtml(txt, x) + '<section class="kpis">' + cards + '</section>' + funnel + table + '<section class="duo" style="margin-top:10px">' + fechCard + reunCard + '</section>',
+        draw: function () {},
+      };
+    },
   };
+
+  /* ── comercial: dados e lançamentos ─────────────────── */
+  var comLoading = false;
+  async function loadCom() {
+    if (comLoading) return;
+    comLoading = true;
+    try {
+      var r = await api('/api/comercial');
+      if (r && r.ok) {
+        state.com = r;
+        if (r.reunioesErro) notice('Reuniões: ' + r.reunioesErro);
+        if (state.view === 'comercial') render();
+      } else if (r) notice('Não consegui carregar reuniões e fechamentos: ' + (r.error || 'erro no servidor') + '.', true);
+    } catch (e) { notice('Sem conexão para carregar reuniões e fechamentos.', true); }
+    finally { comLoading = false; }
+  }
+  async function apiSend(method, path, body) {
+    var t = getToken(); if (!t) { location.href = '/login'; return null; }
+    var r = await fetch(path, { method: method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t }, body: body ? JSON.stringify(body) : undefined });
+    if (r.status === 401) { location.href = '/login'; return null; }
+    try { return await r.json(); } catch (e) { return null; }
+  }
+  async function addFechamento(e) {
+    e.preventDefault();
+    var err = $('fErr'), btn = $('fBtn');
+    var valorTxt = $('fValor').value.trim().replace(/[R$\s.]/g, '').replace(',', '.');
+    var body = { data: $('fData').value, cliente: $('fCliente').value.trim(), valor: valorTxt === '' ? null : Number(valorTxt) };
+    if (!body.cliente) { err.textContent = 'Informe o cliente.'; return; }
+    if (body.valor !== null && !isFinite(body.valor)) { err.textContent = 'Valor inválido. Use só números, ex.: 1500 ou 1.500,00.'; return; }
+    btn.disabled = true; err.textContent = '';
+    try {
+      var r = await apiSend('POST', '/api/comercial', body);
+      if (!r || !r.ok) { err.textContent = (r && r.error) || 'Não consegui salvar. Tente de novo.'; return; }
+      state.com = null; await loadCom();
+    } catch (x) { err.textContent = 'Sem conexão. Tente de novo.'; }
+    finally { if ($('fBtn')) $('fBtn').disabled = false; }
+  }
+  // 1º clique pede confirmação, 2º remove
+  async function delFechamento(btn, id) {
+    if (!btn.classList.contains('sure')) {
+      btn.classList.add('sure'); btn.textContent = 'Confirmar';
+      setTimeout(function () { if (btn.isConnected) { btn.classList.remove('sure'); btn.textContent = 'Remover'; } }, 4000);
+      return;
+    }
+    btn.disabled = true;
+    var r = await apiSend('DELETE', '/api/comercial?id=' + id);
+    if (!r || !r.ok) { btn.disabled = false; notice('Não consegui remover o fechamento. Tente de novo.'); return; }
+    state.com = null; await loadCom();
+  }
+  function fmtShort(ymd) { return ymd.slice(8, 10) + '/' + ymd.slice(5, 7) + '/' + ymd.slice(2, 4); }
+  function lastDay(ym) { var dt = new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 0)); return dt.toISOString().slice(0, 10); }
 
   /* ── frases do resumo ──────────────────────────────── */
   function periodPhrase() {
@@ -789,7 +964,7 @@
   // "≈ 16 de cada 1.000": escolhe a base para o número ficar legível
   function peopleBase(pct) { return pct >= 5 ? 100 : pct >= 0.5 ? 1000 : 10000; }
   function perPeople(pct) {
-    if (pct == null) return '';
+    if (pct == null || pct === 0) return '';
     var base = peopleBase(pct);
     return '≈ ' + int.format(Math.round(pct / 100 * base)) + ' de cada ' + int.format(base);
   }
@@ -804,7 +979,7 @@
 
     // período sem veiculação: mensagem clara em vez de cards e gráficos zerados
     var spendKey = { geral: 'spend', leads: 'leadsSpend', seguidores: 'segSpend', funil: 'leadsSpend' }[state.view];
-    if (!x.tot[spendKey]) {
+    if (spendKey && !x.tot[spendKey]) {
       var what = { geral: 'na conta', leads: 'em campanhas de leads', seguidores: 'em campanhas de seguidores', funil: 'em campanhas de leads' }[state.view];
       $('content').innerHTML = '<div class="card empty-state"><span class="ms" aria-hidden="true">event_busy</span>' +
         '<b>Nenhum investimento ' + what + ' neste período</b>' +
@@ -837,6 +1012,7 @@
       leads: 'só campanhas com objetivo de cadastro · leads = evento Lead atribuído pelo Meta',
       seguidores: 'só campanhas otimizadas para visita ao perfil · seguidores = ganho diário do Instagram (orgânico + pago)',
       funil: 'só campanhas com objetivo de cadastro · CTR = cliques no link ÷ impressões · connect rate = visualizações da página ÷ cliques · conversão = leads ÷ visualizações',
+      comercial: 'investimento e leads = Meta (campanhas de cadastro) · reuniões = planilha de reuniões concluídas · fechamentos = lançados nesta aba',
     }[state.view];
     $('foot').textContent = 'Fonte: Meta Ads · ' + src + ' · comparação ' + (x.cmp || '—') +
       ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -929,7 +1105,7 @@
     var b = e.target.closest('.group button'); if (!b) return;
     state.group = b.dataset.g; savePrefs(); render();
   });
-  $('refresh').addEventListener('click', function () { load(true); });
+  $('refresh').addEventListener('click', function () { load(true); state.com = null; if (state.view === 'comercial') loadCom(); });
   // toque/clique no "i" mostra a explicação (no celular não existe "passar o mouse")
   var hintPop = null;
   function closeHint() { if (hintPop) { hintPop.remove(); hintPop = null; } }
