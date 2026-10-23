@@ -725,17 +725,20 @@
 
       // larguras fixas decrescentes: os volumes vão de dezenas de milhares a dezenas,
       // então largura proporcional deixaria as últimas etapas invisíveis
+      // custo de cada etapa (investimento das campanhas de leads ÷ volume da etapa)
+      var CO = function (o) { return o ? { cpm: o.impr ? o.leadsSpend / o.impr * 1000 : null, cpc: ratio(o.leadsSpend, o.clicks), cpv: ratio(o.leadsSpend, o.lpv), cpl: ratio(o.leadsSpend, o.leads) } : {}; };
+      var co = CO(t), pco = CO(p);
       var stages = [
-        { l: 'Impressões', v: t.impr, w: 100, bg: '#ECEDF0', fg: C.ink },
-        { l: 'Cliques no link', v: t.clicks, w: 80, bg: '#BCC0C7', fg: C.ink },
-        { l: 'Visualizações da página', v: t.lpv, w: 60, bg: C.ink, fg: '#fff' },
-        { l: 'Leads', v: t.leads, w: 40, bg: C.accent, fg: '#fff' },
+        { l: 'Impressões', v: t.impr, w: 100, bg: '#ECEDF0', fg: C.ink, s: co.cpm != null ? money(co.cpm) + ' por mil impressões' : '' },
+        { l: 'Cliques no link', v: t.clicks, w: 80, bg: '#BCC0C7', fg: C.ink, s: co.cpc != null ? money(co.cpc) + ' por clique' : '' },
+        { l: 'Visualizações da página', v: t.lpv, w: 60, bg: C.ink, fg: '#fff', s: co.cpv != null ? money(co.cpv) + ' por visita' : '' },
+        { l: 'Leads', v: t.leads, w: 40, bg: C.accent, fg: '#fff', s: co.cpl != null ? money(co.cpl) + ' por lead' : '' },
       ];
       var rates = [['CTR', r.ctr, pr.ctr], ['Connect rate', r.con, pr.con], ['Taxa de conversão', r.conv, pr.conv]];
       var funnel = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>Funil de tráfego</span>' +
         '<div class="legend"><span>' + esc(x.cmp ? 'variações comparadas a ' + x.cmp.replace(/^vs /, '') : '') + '</span></div></div><div class="funnel">' +
         stages.map(function (s, i) {
-          var bar = '<div class="fstage"><div class="fbar fs-' + i + '" style="width:' + s.w + '%;background:' + s.bg + ';color:' + s.fg + '"><span class="fl">' + s.l + '</span><b>' + int.format(s.v) + '</b></div></div>';
+          var bar = '<div class="fstage"><div class="fbar fs-' + i + '" style="width:' + s.w + '%;background:' + s.bg + ';color:' + s.fg + '"><span class="fl">' + s.l + (s.s ? '<small>' + s.s + '</small>' : '') + '</span><b>' + int.format(s.v) + '</b></div></div>';
           if (i === stages.length - 1) return bar;
           var rt = rates[i];
           return bar + '<div class="frate"><span class="ms" aria-hidden="true">south</span>' + rt[0] + ' <b>' + pctTxt(rt[1]) + '</b><span class="plain">' + perPeople(rt[1]) + '</span>' + ppHtml(rt[1], rt[2], false) + '</div>';
@@ -765,7 +768,19 @@
         return chartCard({ id: id, icon: icon, label: label + ' por ' + x.gname, legend: '<span><i class="blk"></i>Taxa</span><span><i class="org"></i>Melhor</span>',
           stats: stat(pctTxt(cur), 'No período ', ppHtml(cur, prev, false)) + stat(best ? pctTxt(best[key]) : '—', 'Melhor · ' + (best ? bucketLabel(best, x.g) : '—'), '', 'org') });
       }
-      var trio = '<section class="trio">' +
+      var costRows = [
+        ['Mil impressões (CPM)', co.cpm, pco.cpm, 'quanto custa mostrar o anúncio 1.000 vezes'],
+        ['Clique no link (CPC)', co.cpc, pco.cpc, 'quanto custa cada pessoa que clica'],
+        ['Visita na página', co.cpv, pco.cpv, 'quanto custa cada pessoa que de fato abre a página'],
+        ['Lead (CPL)', co.cpl, pco.cpl, 'quanto custa cada cadastro'],
+      ];
+      var costCard = chartCard({ icon: 'sell', label: 'Custo de cada etapa', legend: '<span>verde = ficou mais barato</span>',
+        body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Etapa</th><th>Custo no período</th><th>Período anterior</th><th>Variação</th><th>O que mede</th></tr></thead><tbody>' +
+          costRows.map(function (r) {
+            return '<tr><td>' + r[0] + '</td><td><b style="font-weight:600">' + money(r[1]) + '</b></td><td class="muted">' + money(r[2]) + '</td><td>' +
+              (badgeHtml(r[1], r[2], true, x.cmp) || '<span class="muted">—</span>') + '</td><td class="muted" style="text-align:left;white-space:normal;min-width:220px">' + r[3] + '</td></tr>';
+          }).join('') + '</tbody></table></div>' });
+      var trio = costCard + '<section class="trio">' +
         rateCard('c-ctr', 'ads_click', 'CTR', '_ctr', r.ctr, pr.ctr) +
         rateCard('c-con', 'link', 'Connect rate', '_con', r.con, pr.con) +
         rateCard('c-conv', 'conversion_path', 'Conversão', '_conv', r.conv, pr.conv) + '</section>';
@@ -780,7 +795,8 @@
         });
       }
       return {
-        html: summaryHtml(funnelSummary(r, pr), x) + '<section class="kpis">' + cards + '</section>' + funnel + trio,
+        html: summaryHtml(funnelSummary(r, pr) + (co.cpc != null ? ' Em custo: cada clique saiu por <b>' + money(co.cpc) + '</b>, cada visita na página por <b>' + money(co.cpv) + '</b> e cada lead por <b>' + money(co.cpl) + '</b>.' : ''), x) +
+          '<section class="kpis">' + cards + '</section>' + funnel + trio,
         draw: function () {
           drawRate('c-ctr', '_ctr', 'Cliques', 'clicks', 'Impressões', 'impr');
           drawRate('c-con', '_con', 'Visualiz.', 'lpv', 'Cliques', 'clicks');
