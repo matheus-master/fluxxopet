@@ -9,7 +9,25 @@ const GA4_EVENT_MAP = {
   ScrollDepth50:  'scroll_50',
   ScrollDepth75:  'scroll_75',
   ScrollDepth95:  'scroll_95',
+  VideoPlay:            'video_play',
+  CompleteRegistration: 'complete_registration',   // página /obrigado do quiz
+  ViewContent:          'view_resultado',           // página /resultado do simulador
 };
+
+// nome de evento GA4: mapa acima ou CamelCase → snake_case (nunca "videoplay" colado)
+function ga4Name(ev) {
+  return GA4_EVENT_MAP[ev] || String(ev).replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+}
+
+// session_id do GA4 vem do cookie _ga_<ID>: sem ele o evento do servidor não se liga
+// à visita e a origem (Meta, Google...) aparece como "(not set)" nos relatórios.
+// Formatos: "GS1.1.<sid>.<n>..." e "GS2.1.s<sid>$o<n>$g..."
+function ga4SessionId(cookies, measurementId) {
+  const raw = cookies['_ga_' + String(measurementId || '').replace(/^G-/, '')] || '';
+  if (raw.startsWith('GS1.')) return raw.split('.')[2] || '';
+  const m = raw.match(/[.$]s(\d+)/);
+  return m ? m[1] : '';
+}
 
 const CORS = {
   'Access-Control-Allow-Origin':  '*',
@@ -135,11 +153,17 @@ export async function onRequestPost(context) {
     // placeholder "GA4_ID_AQUI", que e truthy e passaria numa checagem simples.
     if (event_name !== 'PageView' &&
         (env.GA4_MEASUREMENT_ID || '').startsWith('G-') && env.GA4_API_SECRET) {
+      const sessionId = isCRM ? '' : ga4SessionId(cookies, env.GA4_MEASUREMENT_ID);
       const ga4Payload = {
         client_id: gaClientId,
         events: [{
-          name:   GA4_EVENT_MAP[event_name] || event_name.toLowerCase(),
-          params: { ...custom_data },
+          name:   ga4Name(event_name),
+          params: {
+            ...custom_data,
+            ...(sessionId  && { session_id: sessionId }),
+            ...(source_url && { page_location: source_url }),
+            engagement_time_msec: 100,   // sem isso o GA4 não mostra o evento no Tempo real
+          },
         }],
       };
       try {
