@@ -111,9 +111,13 @@
   - Reuniões: planilha publicada do Google (CSV, colunas Cliente/Data/Status; conta
     status "Concluída" ou "Fechou"). URL no código, trocável pela var
     `COMERCIAL_SHEET_CSV`. API `functions/api/comercial.js`.
-  - Fechamentos: lançados na própria aba (data, cliente, valor opcional), tabela D1
-    `comercial_fechamentos` (migration 0011). Um registro por fechamento, para o
-    funil funcionar em qualquer período.
+  - Fechamentos: **coluna Fechamentos do resumo mensal da mesma planilha** (Mês,
+    Reuniões, Fechamentos). São por mês, sem data: o período conta os meses que toca
+    **inteiros** (avisado na tela), célula em branco = "não informado" (não é zero), e
+    a variação de fechamentos só aparece se os dois períodos cobrem meses inteiros e
+    informados (senão o mesmo mês entraria nos dois lados).
+  - A tabela D1 `comercial_fechamentos` (migration 0011) ficou sem uso: o lançamento
+    pelo painel foi trocado pela planilha em 2026-10-23 (estava vazia).
   - A planilha não tem WhatsApp/e-mail: reunião e lead do CRM não são ligados um a
     um (só por nome, para o selo "fechou").
 - Seguidores = `follower_count` do Instagram (orgânico + pago; o Meta não atribui

@@ -188,7 +188,7 @@
     .com-table th:first-child,.com-table td:first-child{text-align:left}
     .com-table tr:last-child td{border-bottom:none}
     .com-table tfoot td{font-weight:600;border-top:1px solid var(--line)}
-    .com-table .muted{color:var(--ink-3)}
+    .com-table .muted,.com-item .muted{color:var(--ink-3)}
     .table-scroll{overflow-x:auto}
     .com-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:6px}
     .com-form .cli,.com-form button{grid-column:1/-1}
@@ -805,7 +805,7 @@
       };
     },
 
-    // funil comercial: investimento → leads (Meta, campanhas de cadastro) → reuniões (planilha) → fechamentos (lançados aqui)
+    // funil comercial: investimento → leads (Meta, campanhas de cadastro) → reuniões e fechamentos (planilha)
     comercial: function (x) {
       var d = state.data, com = state.com;
       if (!com) {
@@ -813,45 +813,60 @@
         return { html: '<section class="kpis"><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div></section><div class="skel" style="height:420px"></div>', draw: function () {} };
       }
       var inR = function (ds, s, u) { return ds >= s && ds <= u; };
-      var reun = com.reunioes.filter(function (r) { return inR(r.data, d.since, d.until); });
-      var fech = com.fechamentos.filter(function (r) { return inR(r.data, d.since, d.until); });
       var p = d.prev;
+      var reun = com.reunioes.filter(function (r) { return inR(r.data, d.since, d.until); });
       var pReun = p ? com.reunioes.filter(function (r) { return inR(r.data, p.since, p.until); }).length : null;
-      var pFech = p ? com.fechamentos.filter(function (r) { return inR(r.data, p.since, p.until); }).length : null;
 
-      var t = x.tot, spend = t.leadsSpend, leads = t.leads, nR = reun.length, nF = fech.length;
-      var receita = fech.reduce(function (a, r) { return a + (Number(r.valor) || 0); }, 0);
-      var temValor = fech.some(function (r) { return r.valor != null && r.valor !== ''; });
-      var cpl = ratio(spend, leads), cpr = ratio(spend, nR), cpf = ratio(spend, nF);
-      var rLR = rate(nR, leads), rRF = rate(nF, nR), rLF = rate(nF, leads);
-      var pr = p ? { lr: rate(pReun, p.leads), rf: rate(pFech, pReun), cpr: ratio(p.leadsSpend, pReun), cpf: ratio(p.leadsSpend, pFech) } : {};
+      // fechamentos da planilha são por mês: o período soma os meses que ele toca (inteiros)
+      var fm = {}; com.fechMensal.forEach(function (m) { fm[m.ym] = m.n; });
+      function fechIn(s, u) {
+        var o = { n: 0, informed: 0, missing: [], partial: [] };
+        for (var ym = s.slice(0, 7); ym <= u.slice(0, 7); ym = nextYm(ym)) {
+          if (fm[ym] == null) { o.missing.push(ym); continue; }
+          o.n += fm[ym]; o.informed++;
+          if (ym + '-01' < s || lastDay(ym) > u) o.partial.push(ym);
+        }
+        return o;
+      }
+      var F = fechIn(d.since, d.until), PF = p ? fechIn(p.since, p.until) : null;
+      // comparar fechamentos só se os dois períodos cobrem meses inteiros e informados;
+      // senão o mesmo mês entra nos dois lados (ex.: 30 dias × 30 dias anteriores) e o % engana
+      var fechComparable = PF && !F.partial.length && !PF.partial.length && !F.missing.length && !PF.missing.length;
+      var nF = F.informed ? F.n : null, pFech = fechComparable && PF.informed ? PF.n : null;
+
+      var t = x.tot, spend = t.leadsSpend, leads = t.leads, nR = reun.length;
+      var cpl = ratio(spend, leads), cpr = ratio(spend, nR), cpf = nF ? spend / nF : null;
+      var rLR = rate(nR, leads), rRF = nF != null ? rate(nF, nR) : null, rLF = nF != null ? rate(nF, leads) : null;
+      var pr = p ? { lr: rate(pReun, p.leads), rf: pFech != null ? rate(pFech, pReun) : null } : {};
+      var mName = function (ym) { return MESES_L[+ym.slice(5, 7) - 1].toLowerCase(); };
+      var listNames = function (arr) { return joinParts(arr.map(function (ym) { return '<b>' + mName(ym) + '</b>'; })); };
 
       // resumo
-      var txt = periodPhrase() + ', <b>' + money(spend) + '</b> em anúncios de leads geraram <b>' + int.format(leads) + ' leads</b>, <b>' +
-        int.format(nR) + (nR === 1 ? ' reunião' : ' reuniões') + '</b> e <b>' + int.format(nF) + (nF === 1 ? ' fechamento' : ' fechamentos') + '</b>.';
+      var txt = periodPhrase() + ', <b>' + money(spend) + '</b> em anúncios de leads geraram <b>' + int.format(leads) + ' leads</b> e <b>' +
+        int.format(nR) + (nR === 1 ? ' reunião' : ' reuniões') + '</b>' +
+        (nF != null ? ', com <b>' + int.format(nF) + (nF === 1 ? ' fechamento' : ' fechamentos') + '</b>.' : '.');
       if (cpr != null) txt += ' Cada reunião custou <b>' + money(cpr) + '</b>' + (cpf != null ? ' e cada fechamento <b>' + money(cpf) + '</b>.' : '.');
       if (rLR != null && nR) txt += ' De cada <b>100 leads</b>, cerca de <b>' + int.format(Math.round(rLR)) + '</b> viraram reunião.';
-      if (rRF != null && nF) txt += ' De cada <b>10 reuniões</b>, cerca de <b>' + dec1.format(rRF / 10).replace(/,0$/, '') + '</b> fecharam.';
-      if (!nF) txt += ' Ainda não há fechamentos lançados neste período: registre abaixo quando um cliente fechar.';
-      if (temValor) txt += ' Receita lançada: <b>' + money(receita) + '</b>' + (spend ? ' (<b>' + dec1.format(receita / spend) + 'x</b> o investimento)' : '') + '.';
+      if (F.partial.length) txt += ' Como a planilha registra fechamentos por mês, o período conta ' + listNames(F.partial) + ' inteiro' + (F.partial.length > 1 ? 's' : '') + '.';
+      if (F.missing.length) txt += ' ' + listNames(F.missing).replace(/^<b>(.)/, function (m0, c) { return '<b>' + c.toUpperCase(); }) + (F.missing.length > 1 ? ' ainda estão' : ' ainda está') + ' sem fechamentos na planilha.';
 
       var cards =
         kpi({ hero: true, icon: 'payments', label: 'Investido em leads', value: money(spend), unit: 'em ' + x.nd + (x.nd === 1 ? ' dia' : ' dias'), badge: badgeHtml(spend, p && p.leadsSpend, null, x.cmp), info: 'Gasto das campanhas de cadastro do Meta no período.' }) +
         kpi({ icon: 'person_add', label: 'Leads', value: int.format(leads), unit: cpl != null ? money(cpl) + ' por lead' : '', badge: badgeHtml(leads, p && p.leads, false, x.cmp), info: 'Leads que o Meta atribui aos anúncios de cadastro.' }) +
-        kpi({ icon: 'event_available', label: 'Reuniões', value: int.format(nR), unit: cpr != null ? money(cpr) + ' por reunião' : 'sem reuniões', badge: badgeHtml(nR, pReun, false, x.cmp), info: 'Reuniões concluídas, lidas da planilha de reuniões.' }) +
-        kpi({ icon: 'handshake', label: 'Fechamentos', value: int.format(nF), unit: cpf != null ? money(cpf) + ' por fechamento' : 'nenhum lançado', badge: badgeHtml(nF, pFech, false, x.cmp), info: 'Vendas registradas aqui no painel, na lista abaixo.' });
+        kpi({ icon: 'event_available', label: 'Reuniões', value: int.format(nR), unit: cpr != null ? money(cpr) + ' por reunião' : 'sem reuniões', badge: badgeHtml(nR, pReun, false, x.cmp), info: 'Reuniões concluídas, da lista de reuniões da planilha.' }) +
+        kpi({ icon: 'handshake', label: 'Fechamentos', value: nF != null ? int.format(nF) : '—', unit: nF == null ? 'não informado na planilha' : cpf != null ? money(cpf) + ' por fechamento' : 'nenhum no período', badge: nF != null ? badgeHtml(nF, pFech, false, x.cmp) : '', info: 'Coluna Fechamentos do resumo mensal da planilha. É por mês: se o período pega só parte de um mês, conta o mês inteiro.' });
 
       // funil visual
       var stages = [
         { l: 'Investimento', v: money(spend), w: 100, bg: '#ECEDF0', fg: C.ink },
         { l: 'Leads', v: int.format(leads), w: 80, bg: '#BCC0C7', fg: C.ink, s: cpl != null ? money(cpl) + ' por lead' : '' },
         { l: 'Reuniões', v: int.format(nR), w: 60, bg: C.ink, fg: '#fff', s: cpr != null ? money(cpr) + ' por reunião' : '' },
-        { l: 'Fechamentos', v: int.format(nF), w: 40, bg: C.accent, fg: '#fff', s: cpf != null ? money(cpf) + ' por fechamento' : '' },
+        { l: 'Fechamentos', v: nF != null ? int.format(nF) : '—', w: 40, bg: C.accent, fg: '#fff', s: cpf != null ? money(cpf) + ' por fechamento' : nF == null ? 'não informado na planilha' : '' },
       ];
       var steps = [
         '<span class="ms" aria-hidden="true">south</span>Custo por lead <b>' + money(cpl) + '</b>',
         '<span class="ms" aria-hidden="true">south</span>Leads → reunião <b>' + pctTxt(rLR) + '</b><span class="plain">' + perPeople(rLR) + '</span>' + ppHtml(rLR, pr.lr, false),
-        '<span class="ms" aria-hidden="true">south</span>Reunião → fechamento <b>' + pctTxt(rRF) + '</b><span class="plain">' + perPeople(rRF) + '</span>' + ppHtml(rRF, pr.rf, false),
+        '<span class="ms" aria-hidden="true">south</span>Reunião → fechamento <b>' + pctTxt(rRF) + '</b><span class="plain">' + (rRF != null && rRF <= 100 ? perPeople(rRF) : '') + '</span>' + ppHtml(rRF, pr.rf, false),
       ];
       var funnel = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>Funil comercial</span>' +
         '<div class="legend"><span>' + (rLF != null ? 'de lead a fechamento: <b>' + pctTxt(rLF) + '</b>' : '') + '</span></div></div><div class="funnel">' +
@@ -864,34 +879,30 @@
       var months = aggregate(d.daily, 'mes');
       var rowsM = months.map(function (m) {
         var ym = m.key, nr = com.reunioes.filter(function (r) { return r.data.slice(0, 7) === ym && inR(r.data, d.since, d.until); }).length;
-        var nf = com.fechamentos.filter(function (r) { return r.data.slice(0, 7) === ym && inR(r.data, d.since, d.until); }).length;
-        var part = m.first.slice(8) !== '01' || m.last !== lastDay(ym) ? ' <span class="muted">(parcial)</span>' : '';
-        return '<tr><td>' + MESES_L[+ym.slice(5) - 1] + ' ' + ym.slice(0, 4) + part + '</td><td>' + money(m.leadsSpend) + '</td><td>' + int.format(m.leads) + '</td><td>' + nr + '</td><td>' + nf +
-          '</td><td>' + pctTxt(rate(nr, m.leads)) + '</td><td>' + pctTxt(rate(nf, nr)) + '</td><td>' + (nr ? money(m.leadsSpend / nr) : '<span class="muted">—</span>') + '</td></tr>';
+        var part = m.first.slice(8) !== '01' || m.last !== lastDay(ym);
+        var nf = fm[ym];
+        return '<tr><td>' + MESES_L[+ym.slice(5) - 1] + ' ' + ym.slice(0, 4) + (part ? ' <span class="muted">(parcial)</span>' : '') + '</td><td>' + money(m.leadsSpend) + '</td><td>' + int.format(m.leads) + '</td><td>' + nr +
+          '</td><td>' + (nf != null ? nf + (part ? ' <span class="muted">(mês inteiro)</span>' : '') : '<span class="muted">não informado</span>') +
+          '</td><td>' + pctTxt(rate(nr, m.leads)) + '</td><td>' + (nf != null ? pctTxt(rate(nf, nr)) : '<span class="muted">—</span>') + '</td><td>' + (nr ? money(m.leadsSpend / nr) : '<span class="muted">—</span>') + '</td></tr>';
       }).join('');
-      var table = chartCard({ icon: 'calendar_month', label: 'Mês a mês', legend: '',
+      var table = chartCard({ icon: 'calendar_month', label: 'Mês a mês', legend: '<span>fechamentos de um mês podem vir de reuniões de meses anteriores</span>',
         body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Mês</th><th>Investido</th><th>Leads</th><th>Reuniões</th><th>Fechamentos</th><th>Lead → reunião</th><th>Reunião → fech.</th><th>Custo por reunião</th></tr></thead><tbody>' + rowsM +
-          '</tbody><tfoot><tr><td>Período</td><td>' + money(spend) + '</td><td>' + int.format(leads) + '</td><td>' + nR + '</td><td>' + nF + '</td><td>' + pctTxt(rLR) + '</td><td>' + pctTxt(rRF) + '</td><td>' + money(cpr) + '</td></tr></tfoot></table></div>' });
+          '</tbody><tfoot><tr><td>Período</td><td>' + money(spend) + '</td><td>' + int.format(leads) + '</td><td>' + nR + '</td><td>' + (nF != null ? nF : '—') + '</td><td>' + pctTxt(rLR) + '</td><td>' + pctTxt(rRF) + '</td><td>' + money(cpr) + '</td></tr></tfoot></table></div>' });
 
-      // fechamentos: formulário + lista
-      var clientes = {}; com.reunioes.forEach(function (r) { clientes[r.cliente] = 1; });
-      var closedNames = {}; com.fechamentos.forEach(function (r) { closedNames[r.cliente.toLowerCase()] = 1; });
-      var fechCard = chartCard({ icon: 'handshake', label: 'Fechamentos lançados', legend: '<span>' + nF + ' no período</span>',
-        body: '<form class="com-form" onsubmit="addFechamento(event)">' +
-          '<input class="cli" id="fCliente" list="fClientes" placeholder="Cliente (comece a digitar: sugere quem fez reunião)" aria-label="Cliente" required />' +
-          '<input type="date" id="fData" value="' + today() + '" max="' + today() + '" aria-label="Data do fechamento" required />' +
-          '<datalist id="fClientes">' + Object.keys(clientes).map(function (c) { return '<option value="' + esc(c) + '">'; }).join('') + '</datalist>' +
-          '<input id="fValor" inputmode="decimal" placeholder="Valor (opcional)" aria-label="Valor do fechamento em reais" />' +
-          '<button type="submit" id="fBtn">Registrar fechamento</button></form><div class="com-err" id="fErr" role="alert"></div>' +
-          '<div class="com-list">' + (fech.length ? fech.map(function (r) {
-            return '<div class="com-item"><span class="when">' + fmtShort(r.data) + '</span><span class="who">' + esc(r.cliente) + '</span>' +
-              (r.valor != null && r.valor !== '' ? '<span class="val">' + money(Number(r.valor)) + '</span>' : '') +
-              '<button type="button" onclick="delFechamento(this,' + r.id + ')" aria-label="Remover fechamento de ' + esc(r.cliente) + '">Remover</button></div>';
-          }).join('') : '<p class="com-empty">Nenhum fechamento neste período.</p>') + '</div>' });
+      // fechamentos por mês (planilha) + reuniões do período
+      var allYm = {}; com.fechMensal.forEach(function (m) { allYm[m.ym] = 1; });
+      for (var ym = d.since.slice(0, 7); ym <= d.until.slice(0, 7); ym = nextYm(ym)) allYm[ym] = 1;
+      var fechCard = chartCard({ icon: 'handshake', label: 'Fechamentos por mês', legend: '<span>da planilha</span>',
+        body: '<div class="com-list">' + Object.keys(allYm).sort().reverse().map(function (ym) {
+          var inP = ym >= d.since.slice(0, 7) && ym <= d.until.slice(0, 7);
+          var nr = com.reunioes.filter(function (r) { return r.data.slice(0, 7) === ym; }).length;
+          return '<div class="com-item"><span class="who">' + MESES_L[+ym.slice(5) - 1] + ' ' + ym.slice(0, 4) + (inP ? ' <span class="won" style="background:var(--accent)">no período</span>' : '') + '</span>' +
+            '<span class="muted" style="font-size:.8rem">' + nr + (nr === 1 ? ' reunião' : ' reuniões') + '</span>' +
+            '<span class="val"><b style="font-weight:600">' + (fm[ym] != null ? fm[ym] + (fm[ym] === 1 ? ' fechamento' : ' fechamentos') : '<span class="muted" style="font-weight:400">não informado</span>') + '</b></span></div>';
+        }).join('') + '</div><p class="com-empty" style="padding-bottom:0">Para atualizar, preencha a coluna <b>Fechamentos</b> do resumo mensal na planilha e toque em ⟳.</p>' });
       var reunCard = chartCard({ icon: 'event_available', label: 'Reuniões do período', legend: '<span>da planilha</span>',
         body: '<div class="com-list">' + (reun.length ? reun.slice().sort(function (a, b) { return b.data.localeCompare(a.data); }).map(function (r) {
-          return '<div class="com-item"><span class="when">' + fmtShort(r.data) + '</span><span class="who">' + esc(r.cliente) + '</span>' +
-            (closedNames[r.cliente.toLowerCase()] ? '<span class="won">fechou</span>' : '') + '</div>';
+          return '<div class="com-item"><span class="when">' + fmtShort(r.data) + '</span><span class="who">' + esc(r.cliente) + '</span></div>';
         }).join('') : '<p class="com-empty">Nenhuma reunião concluída neste período.</p>') + '</div>' });
 
       return {
@@ -901,7 +912,7 @@
     },
   };
 
-  /* ── comercial: dados e lançamentos ─────────────────── */
+  /* ── comercial: dados da planilha ─────────────────────── */
   var comLoading = false;
   async function loadCom() {
     if (comLoading) return;
@@ -910,45 +921,13 @@
       var r = await api('/api/comercial');
       if (r && r.ok) {
         state.com = r;
-        if (r.reunioesErro) notice('Reuniões: ' + r.reunioesErro);
+        if (r.erro) notice('Planilha comercial: ' + r.erro);
         if (state.view === 'comercial') render();
-      } else if (r) notice('Não consegui carregar reuniões e fechamentos: ' + (r.error || 'erro no servidor') + '.', true);
-    } catch (e) { notice('Sem conexão para carregar reuniões e fechamentos.', true); }
+      } else if (r) notice('Não consegui carregar a planilha comercial: ' + (r.error || 'erro no servidor') + '.', true);
+    } catch (e) { notice('Sem conexão para carregar a planilha comercial.', true); }
     finally { comLoading = false; }
   }
-  async function apiSend(method, path, body) {
-    var t = getToken(); if (!t) { location.href = '/login'; return null; }
-    var r = await fetch(path, { method: method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + t }, body: body ? JSON.stringify(body) : undefined });
-    if (r.status === 401) { location.href = '/login'; return null; }
-    try { return await r.json(); } catch (e) { return null; }
-  }
-  async function addFechamento(e) {
-    e.preventDefault();
-    var err = $('fErr'), btn = $('fBtn');
-    var valorTxt = $('fValor').value.trim().replace(/[R$\s.]/g, '').replace(',', '.');
-    var body = { data: $('fData').value, cliente: $('fCliente').value.trim(), valor: valorTxt === '' ? null : Number(valorTxt) };
-    if (!body.cliente) { err.textContent = 'Informe o cliente.'; return; }
-    if (body.valor !== null && !isFinite(body.valor)) { err.textContent = 'Valor inválido. Use só números, ex.: 1500 ou 1.500,00.'; return; }
-    btn.disabled = true; err.textContent = '';
-    try {
-      var r = await apiSend('POST', '/api/comercial', body);
-      if (!r || !r.ok) { err.textContent = (r && r.error) || 'Não consegui salvar. Tente de novo.'; return; }
-      state.com = null; await loadCom();
-    } catch (x) { err.textContent = 'Sem conexão. Tente de novo.'; }
-    finally { if ($('fBtn')) $('fBtn').disabled = false; }
-  }
-  // 1º clique pede confirmação, 2º remove
-  async function delFechamento(btn, id) {
-    if (!btn.classList.contains('sure')) {
-      btn.classList.add('sure'); btn.textContent = 'Confirmar';
-      setTimeout(function () { if (btn.isConnected) { btn.classList.remove('sure'); btn.textContent = 'Remover'; } }, 4000);
-      return;
-    }
-    btn.disabled = true;
-    var r = await apiSend('DELETE', '/api/comercial?id=' + id);
-    if (!r || !r.ok) { btn.disabled = false; notice('Não consegui remover o fechamento. Tente de novo.'); return; }
-    state.com = null; await loadCom();
-  }
+  function nextYm(ym) { var y = +ym.slice(0, 4), m = +ym.slice(5, 7) + 1; if (m > 12) { m = 1; y++; } return y + '-' + String(m).padStart(2, '0'); }
   function fmtShort(ymd) { return ymd.slice(8, 10) + '/' + ymd.slice(5, 7) + '/' + ymd.slice(2, 4); }
   function lastDay(ym) { var dt = new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 0)); return dt.toISOString().slice(0, 10); }
 
@@ -1028,7 +1007,7 @@
       leads: 'só campanhas com objetivo de cadastro · leads = evento Lead atribuído pelo Meta',
       seguidores: 'só campanhas otimizadas para visita ao perfil · seguidores = ganho diário do Instagram (orgânico + pago)',
       funil: 'só campanhas com objetivo de cadastro · CTR = cliques no link ÷ impressões · connect rate = visualizações da página ÷ cliques · conversão = leads ÷ visualizações',
-      comercial: 'investimento e leads = Meta (campanhas de cadastro) · reuniões = planilha de reuniões concluídas · fechamentos = lançados nesta aba',
+      comercial: 'investimento e leads = Meta (campanhas de cadastro) · reuniões e fechamentos = planilha comercial (fechamentos por mês)',
     }[state.view];
     $('foot').textContent = 'Fonte: Meta Ads · ' + src + ' · comparação ' + (x.cmp || '—') +
       ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });

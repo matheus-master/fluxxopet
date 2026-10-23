@@ -1,89 +1,66 @@
-// Funil comercial: reuniões (planilha publicada do Google) + fechamentos (lançados no painel, D1).
+// Funil comercial: reuniões e fechamentos lidos da planilha publicada do Google.
 // Protegido por JWT (middleware de /api).
 //
-// GET    /api/comercial              → { ok, reunioes: [{cliente, data}], fechamentos: [{id, data, cliente, valor}], reunioesErro }
-// POST   /api/comercial              { data: 'YYYY-MM-DD', cliente, valor? } → registra um fechamento
-// DELETE /api/comercial?id=123       → remove um fechamento
+// GET /api/comercial → { ok, reunioes: [{cliente, data}], fechMensal: [{ym, n}], erro }
 //
-// A planilha é a de "reuniões concluídas" (Cliente, Data, Status). Conta como reunião
-// a linha com data válida e status "Concluída" (ou "Fechou"/"Fechado", que também foi reunião).
-// URL pode ser trocada pelo secret/var COMERCIAL_SHEET_CSV.
+// A planilha tem dois blocos:
+//   • lista de reuniões: Cliente, Data, Status → conta a linha com data válida e status
+//     "Concluída" (ou "Fechou"/"Fechado", que também foi reunião);
+//   • resumo por mês: Mês, Reuniões, Fechamentos → os fechamentos vêm daqui (por mês,
+//     sem data; célula em branco = mês ainda não informado, não é zero).
+// O mês do resumo não tem ano: usa o ano das reuniões daquele mês (ou o ano corrente).
+// URL pode ser trocada pela var COMERCIAL_SHEET_CSV.
 
 const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTtck_-1HSKf8Ril9eiogMBCHQ5mviihUWTNUmeLCrNe2Chex_kf2fKIo3_YPqbIRp5lPOFGRJXrdgJ/pub?output=csv';
 const MESES = { jan: 1, fev: 2, mar: 3, abr: 4, mai: 5, jun: 6, jul: 7, ago: 8, set: 9, out: 10, nov: 11, dez: 12 };
 const YMD = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function onRequestGet({ env }) {
-  const [sheet, fech] = await Promise.all([readSheet(env), listFechamentos(env)]);
-  return json({ ok: true, reunioes: sheet.rows, reunioesErro: sheet.error || null, fechamentos: fech });
-}
-
-export async function onRequestPost({ env, request }) {
-  if (!env.DB) return json({ ok: false, error: 'Banco indisponível' }, 500);
-  let b;
-  try { b = await request.json(); } catch { return json({ ok: false, error: 'JSON inválido' }, 400); }
-  const data = String(b.data || '');
-  const cliente = String(b.cliente || '').trim().slice(0, 120);
-  const valor = b.valor === '' || b.valor == null ? null : Number(b.valor);
-  if (!YMD.test(data)) return json({ ok: false, error: 'Data inválida' }, 400);
-  if (!cliente) return json({ ok: false, error: 'Informe o cliente' }, 400);
-  if (valor !== null && (!isFinite(valor) || valor < 0)) return json({ ok: false, error: 'Valor inválido' }, 400);
-  await ensureTable(env.DB);
-  const r = await env.DB.prepare('INSERT INTO comercial_fechamentos (data, cliente, valor) VALUES (?, ?, ?)').bind(data, cliente, valor).run();
-  return json({ ok: true, id: r.meta?.last_row_id ?? null });
-}
-
-export async function onRequestDelete({ env, request }) {
-  if (!env.DB) return json({ ok: false, error: 'Banco indisponível' }, 500);
-  const id = parseInt(new URL(request.url).searchParams.get('id'), 10);
-  if (!id) return json({ ok: false, error: 'id inválido' }, 400);
-  await ensureTable(env.DB);
-  await env.DB.prepare('DELETE FROM comercial_fechamentos WHERE id = ?').bind(id).run();
-  return json({ ok: true });
-}
-
-// ── fechamentos ──────────────────────────────────────────
-async function listFechamentos(env) {
-  if (!env.DB) return [];
-  await ensureTable(env.DB);
-  const r = await env.DB.prepare('SELECT id, data, cliente, valor FROM comercial_fechamentos ORDER BY data DESC, id DESC').all();
-  return r.results || [];
-}
-
-// também em migrations/0011_comercial_fechamentos.sql
-async function ensureTable(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS comercial_fechamentos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT NOT NULL, cliente TEXT NOT NULL, valor REAL,
-    created_at TEXT DEFAULT (datetime('now')))`).run();
-}
-
-// ── planilha de reuniões ─────────────────────────────────
-async function readSheet(env) {
   try {
     const res = await fetch(env.COMERCIAL_SHEET_CSV || SHEET_CSV, { cf: { cacheTtl: 120 } });
-    if (!res.ok) return { rows: [], error: 'Planilha respondeu ' + res.status };
+    if (!res.ok) return json({ ok: true, reunioes: [], fechMensal: [], erro: 'A planilha respondeu ' + res.status });
     const lines = parseCSV(await res.text());
-    const head = (lines.shift() || []).map(s => s.trim().toLowerCase());
-    const iCli = head.indexOf('cliente'), iData = head.indexOf('data'), iSt = head.indexOf('status');
-    if (iCli < 0 || iData < 0) return { rows: [], error: 'Planilha sem as colunas Cliente e Data' };
-    const rows = [];
+    const head = (lines.shift() || []).map(s => norm(s));
+    const col = name => head.indexOf(name);
+    const iCli = col('cliente'), iData = col('data'), iSt = col('status');
+    const iMes = col('mes'), iFech = col('fechamentos');
+    if (iCli < 0 || iData < 0) return json({ ok: true, reunioes: [], fechMensal: [], erro: 'Planilha sem as colunas Cliente e Data' });
+
+    // reuniões
+    const reunioes = [];
     for (const l of lines) {
       const cliente = (l[iCli] || '').trim(), data = parseDate(l[iData]);
-      const status = iSt >= 0 ? (l[iSt] || '').toLowerCase() : 'concluída';
-      if (!cliente || !data) continue;
-      if (!/conclu|fech/.test(status)) continue;
-      rows.push({ cliente, data });
+      const status = iSt >= 0 ? norm(l[iSt]) : 'concluida';
+      if (cliente && data && /conclu|fech/.test(status)) reunioes.push({ cliente, data });
     }
-    return { rows };
+
+    // fechamentos por mês (bloco de resumo)
+    const fechMensal = [];
+    if (iMes >= 0 && iFech >= 0) {
+      const thisYear = new Date().getUTCFullYear(), thisMonth = new Date().getUTCMonth() + 1;
+      for (const l of lines) {
+        const m = MESES[norm(l[iMes]).slice(0, 3)];
+        const raw = (l[iFech] || '').trim();
+        if (!m || raw === '') continue;            // "Total" e meses em branco ficam de fora
+        const n = Number(raw.replace(',', '.'));
+        if (!isFinite(n)) continue;
+        const fromMeetings = reunioes.find(r => +r.data.slice(5, 7) === m);
+        const year = fromMeetings ? +fromMeetings.data.slice(0, 4) : (m > thisMonth ? thisYear - 1 : thisYear);
+        fechMensal.push({ ym: year + '-' + pad(m), n });
+      }
+    }
+    return json({ ok: true, reunioes, fechMensal, erro: null });
   } catch (e) {
-    return { rows: [], error: 'Não consegui ler a planilha: ' + e.message };
+    return json({ ok: true, reunioes: [], fechMensal: [], erro: 'Não consegui ler a planilha: ' + e.message });
   }
 }
 
+function norm(s) { return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+
 // "04 jul. 2026", "4/7/2026" ou "2026-07-04" → "2026-07-04"
 function parseDate(s) {
-  s = String(s || '').trim().toLowerCase();
-  let m = s.match(/^(\d{1,2})\s+([a-zç]{3})[a-zç]*\.?\s+(\d{4})$/);
+  s = norm(s);
+  let m = s.match(/^(\d{1,2})\s+([a-z]{3})[a-z]*\.?\s+(\d{4})$/);
   if (m && MESES[m[2]]) return m[3] + '-' + pad(MESES[m[2]]) + '-' + pad(m[1]);
   m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (m) return m[3] + '-' + pad(m[2]) + '-' + pad(m[1]);
