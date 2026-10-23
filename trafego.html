@@ -39,22 +39,24 @@
     .who b{display:block;font-weight:500;font-size:1.05rem}
     .who small{color:var(--ink-3);font-size:.78rem}
 
-    .head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:30px 0 26px;flex-wrap:wrap}
-    .title{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
-    h1{font-weight:300;font-size:3rem;letter-spacing:-.02em;line-height:1}
-    .views{display:flex;gap:6px}
-    .view{height:44px;padding:0 18px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:.9rem;display:flex;align-items:center;gap:7px}
-    .view .ms{font-size:18px;font-variation-settings:'FILL' 0,'wght' 300}
-    .view:hover{background:#fff}
-    .view.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .head{display:flex;justify-content:space-between;align-items:center;gap:12px 20px;margin:24px 0 20px;flex-wrap:wrap}
+    .title{display:flex;align-items:center;gap:18px;flex-wrap:wrap;min-width:0}
+    h1{font-weight:300;font-size:2.1rem;letter-spacing:-.02em;line-height:1}
+    /* abas e período: dois seletores discretos (aba ativa em preto, período em laranja) */
+    .views{display:inline-flex;gap:2px;padding:3px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+    .view{height:32px;padding:0 13px;border-radius:7px;border:none;background:transparent;color:var(--ink-2);cursor:pointer;font-size:.86rem;white-space:nowrap;transition:background .15s,color .15s}
+    .view:hover{color:var(--ink);background:var(--canvas)}
+    .view.on{background:var(--ink);color:#fff}
     .filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     /* seletor de período: uma caixa só, opção escolhida destacada dentro dela */
-    .tabs{display:inline-flex;gap:2px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto;max-width:100%;scrollbar-width:none}
-    .tab{height:34px;padding:0 14px;border-radius:7px;border:none;background:transparent;color:var(--ink-2);cursor:pointer;white-space:nowrap;font-size:.88rem;transition:background .15s,color .15s}
+    .tabs{display:inline-flex;gap:2px;padding:3px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+    .tab{height:32px;padding:0 12px;border-radius:7px;border:none;background:transparent;color:var(--ink-2);cursor:pointer;white-space:nowrap;font-size:.88rem;transition:background .15s,color .15s}
     .tab:hover{color:var(--ink);background:var(--canvas)}
     .tab.on{background:var(--accent);color:#fff;box-shadow:0 1px 3px rgba(255,90,31,.35)}
-    .box{height:44px;border-radius:8px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;gap:8px;padding:0 14px;font-size:.88rem}
-    .box input[type=date]{border:none;background:none;outline:none;font-size:.88rem;width:118px}
+    .box{height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;gap:6px;padding:0 12px;font-size:.86rem;transition:border-color .15s,box-shadow .15s}
+    .box.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}   /* datas em uso = período personalizado */
+    .box input[type=date]{border:none;background:none;outline:none;font-size:.86rem;width:112px;color:var(--ink-2)}
+    .box.on input[type=date]{color:var(--ink)}
     .box input[type=date]::-webkit-calendar-picker-indicator{opacity:.55;cursor:pointer}
     .box .arrow{color:var(--ink-3);font-size:16px}
 
@@ -150,8 +152,8 @@
       .fs-1{width:92%!important} .fs-2{width:84%!important} .fs-3{width:76%!important}
       /* barra de ícones e abas cabendo em 390px */
       .icons{gap:6px} .who{gap:6px} .ibtn{width:40px;height:40px} .avatar{display:none}
-      .views{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}
-      .view{flex:none;padding:0 14px;font-size:.84rem} .view .ms{display:none}
+      .views{display:flex;width:100%}
+      .view{flex:1 0 auto;padding:0 10px;font-size:.84rem}
     }
 
     /* ── experiência: foco, carregamento, vazio, ajuda ── */
@@ -216,7 +218,7 @@
     @media (max-width:1180px){ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .kpis-5 .kpi.hero{grid-column:1/-1} .duo{grid-template-columns:minmax(0,1fr)} }
     @media (max-width:640px){
       .frame{margin:0;border:none;border-radius:0;padding:16px 16px 28px}
-      h1{font-size:2.3rem}
+      h1{font-size:1.9rem}
       .title{gap:14px;width:100%}
       .views{width:100%} .view{flex:1;justify-content:center;padding:0 8px}
       .kpis{grid-template-columns:minmax(0,1fr)}
@@ -255,11 +257,11 @@
     <div class="title">
       <h1>Tráfego</h1>
       <div class="views" id="views">
-        <button class="view" data-v="geral"><span class="ms">dashboard</span>Geral</button>
-        <button class="view" data-v="leads"><span class="ms">person_add</span>Leads</button>
-        <button class="view" data-v="seguidores"><span class="ms">favorite</span>Seguidores</button>
-        <button class="view" data-v="funil"><span class="ms">filter_alt</span>Funil</button>
-        <button class="view" data-v="comercial"><span class="ms">handshake</span>Comercial</button>
+        <button class="view" data-v="geral">Geral</button>
+        <button class="view" data-v="leads">Leads</button>
+        <button class="view" data-v="seguidores">Seguidores</button>
+        <button class="view" data-v="funil">Funil</button>
+        <button class="view" data-v="comercial">Comercial</button>
       </div>
     </div>
     <div class="filters">
@@ -270,9 +272,8 @@
         <button class="tab" data-p="trimestre" title="Últimos 90 dias">Trimestre</button>
         <button class="tab" data-p="semestre" title="Últimos 180 dias">Semestre</button>
         <button class="tab" data-p="ano" title="Últimos 365 dias">Ano</button>
-        <button class="tab" data-p="custom">Personalizado</button>
       </div>
-      <label class="box" title="Período">
+      <label class="box" id="range" title="Escolha as datas para um período personalizado">
         <input type="date" id="since" />
         <span class="ms arrow">arrow_forward</span>
         <input type="date" id="until" />
@@ -954,7 +955,7 @@
   }
   function summaryHtml(text, x) {
     return '<section class="summary"><span class="ms" aria-hidden="true">lightbulb</span><div><p>' + text + '</p>' +
-      (x.d.prev ? '<small>As porcentagens comparam com ' + longDate(x.d.prev.since) + ' – ' + longDate(x.d.prev.until) + ', o período anterior de mesmo tamanho. Verde = melhorou, vermelho = piorou, cinza = só mudou (caso do investimento). Toque no <b>i</b> de cada card para ver o que ele mede.</small>' : '') +
+      (x.d.prev ? '<small title="Verde = melhorou, vermelho = piorou, cinza = só mudou (caso do investimento)">Comparado a ' + longDate(x.d.prev.since) + ' – ' + longDate(x.d.prev.until) + ' (mesmo número de dias, logo antes).</small>' : '') +
       '</div></section>';
   }
   // "≈ 16 de cada 1.000": escolhe a base para o número ficar legível
@@ -1067,6 +1068,7 @@
 
   function markTabs() {
     document.querySelectorAll('.tab').forEach(function (t) { var on = t.dataset.p === state.period; t.classList.toggle('on', on); t.setAttribute('aria-pressed', on); });
+    $('range').classList.toggle('on', state.period === 'custom');
   }
   function setPeriod(p, keepGroup) {
     state.period = p;
