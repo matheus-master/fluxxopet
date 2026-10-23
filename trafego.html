@@ -48,10 +48,11 @@
     .view:hover{background:#fff}
     .view.on{background:var(--ink);color:#fff;border-color:var(--ink)}
     .filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    .tabs{display:flex;gap:6px;overflow-x:auto;max-width:100%;scrollbar-width:none}
-    .tab{height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer;white-space:nowrap;font-size:.88rem}
-    .tab:hover{background:#fff}
-    .tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+    /* seletor de período: uma caixa só, opção escolhida destacada dentro dela */
+    .tabs{display:inline-flex;gap:2px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+    .tab{height:34px;padding:0 14px;border-radius:7px;border:none;background:transparent;color:var(--ink-2);cursor:pointer;white-space:nowrap;font-size:.88rem;transition:background .15s,color .15s}
+    .tab:hover{color:var(--ink);background:var(--canvas)}
+    .tab.on{background:var(--accent);color:#fff;box-shadow:0 1px 3px rgba(255,90,31,.35)}
     .box{height:44px;border-radius:8px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;gap:8px;padding:0 14px;font-size:.88rem}
     .box input[type=date]{border:none;background:none;outline:none;font-size:.88rem;width:118px}
     .box input[type=date]::-webkit-calendar-picker-indicator{opacity:.55;cursor:pointer}

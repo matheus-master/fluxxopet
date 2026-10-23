@@ -1524,12 +1524,17 @@
     .dash-card2-title { margin-bottom: 12px; }
 
     /* ── abas de período e datas ─────────────────────── */
-    .period-btn, .dash-period button {
-      height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--surface); color: var(--text); font-size: .82rem; font-weight: 400;
+    /* seletor de período: uma caixa só (igual ao /trafego) */
+    .period-btns, .dash-period {
+      display: inline-flex; gap: 2px; padding: 3px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; overflow-x: auto; max-width: 100%; scrollbar-width: none;
     }
-    .period-btn:hover, .dash-period button:hover { background: var(--surface2); }
-    .period-btn.active, .dash-period button.active { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 500; }
+    .period-btn, .dash-period button {
+      height: 30px; padding: 0 12px; border-radius: 7px; border: none;
+      background: transparent; color: var(--mid); font-size: .82rem; font-weight: 400; white-space: nowrap; flex: none;
+    }
+    .period-btn:hover, .dash-period button:hover { background: var(--raise); color: var(--text); }
+    .period-btn.active, .dash-period button.active { background: var(--gold); color: #fff; font-weight: 500; box-shadow: 0 1px 3px rgba(255,90,31,.35); }
     .dash-daterange input[type="date"] { height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 0 10px; }
     .mchip { border-radius: 8px; border-color: var(--border); }
 
