@@ -229,6 +229,36 @@
     .ac-check span{font-size:.76rem;color:var(--ink-2)}
     .ac-rules{list-style:none;display:flex;flex-direction:column;gap:6px;font-size:.84rem;color:var(--ink-2)}
     .ac-rules b{color:var(--ink);font-weight:500}
+    /* comercial simplificado: o caminho em 4 números */
+    .cflow-card{padding:22px 24px 24px;margin:10px 0}
+    .cflow-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+    .cflow-inv{font-size:.86rem;color:var(--ink-2)} .cflow-inv b{color:var(--ink);font-weight:500;font-size:1.05rem;margin-left:4px}
+    .cflow{display:grid;grid-template-columns:minmax(0,1fr) 112px minmax(0,1fr) 112px minmax(0,1fr) 112px minmax(0,1fr);align-items:stretch}
+    .cf-step{border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:4px}
+    .cf-step.end{background:var(--accent);border-color:var(--accent);color:#fff}
+    .cf-l{font-size:.8rem;color:var(--ink-2)} .cf-step.end .cf-l,.cf-step.end .cf-s{color:rgba(255,255,255,.85)}
+    .cf-v{font-size:2.6rem;font-weight:400;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+    .cf-s{font-size:.82rem;color:var(--ink-3)}
+    .cf-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;position:relative}
+    .cf-arrow::after{content:"→";color:var(--ink-3);font-size:1rem}
+    .cf-arrow b{font-size:1.25rem;font-weight:500;color:var(--accent);font-variant-numeric:tabular-nums}
+    .cf-arrow span{font-size:.74rem;color:var(--ink-2);line-height:1.25}
+    .cflow-note{margin-top:12px;font-size:.8rem;color:var(--ink-3)}
+    .com-more{margin-top:10px}
+    .com-more>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 18px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:500;font-size:.9rem}
+    .com-more>summary::-webkit-details-marker{display:none}
+    .com-more>summary::before{content:"+";width:20px;text-align:center;color:var(--accent);font-size:1.1rem}
+    .com-more[open]>summary::before{content:"–"}
+    .com-more>summary span{color:var(--ink-3);font-weight:400;font-size:.82rem}
+    .com-more[open]>summary{margin-bottom:10px}
+    @media (max-width:900px){
+      .cflow{grid-template-columns:minmax(0,1fr)}
+      .cf-step{flex-direction:row;align-items:baseline;flex-wrap:wrap;column-gap:12px}
+      .cf-l{flex:1 1 100%} .cf-v{font-size:2rem}
+      .cf-arrow{flex-direction:row;gap:8px;padding:8px 0}
+      .cf-arrow::after{content:"↓";order:-1}
+      .com-more>summary span{display:none}
+    }
     @media (max-width:640px){ .ac-st{grid-template-columns:minmax(0,1fr) auto} .ac-st .tr{grid-column:1/-1;order:3} .ac-check{grid-template-columns:repeat(2,minmax(0,1fr))} .fs-4{width:68%!important} }
 
     .foot{color:var(--ink-3);font-size:.76rem;margin-top:18px;line-height:1.5}
@@ -852,64 +882,49 @@
         return o;
       }
       var c = cont(d.since, d.until);
-      // o histórico do ActiveCampaign começa em ac.desde: antes disso não dá para comparar
-      var pc = p && p.since >= ac.desde ? cont(p.since, p.until) : null;
       var antes = d.since < ac.desde;
 
       var t = x.tot, spend = t.leadsSpend, leads = t.leads;
-      var comp = rate(c.real, c.real + c.ns), pComp = pc ? rate(pc.real, pc.real + pc.ns) : null;
-      var cpl = ratio(spend, leads), cpm = ratio(spend, c.marc), cpr = ratio(spend, c.real), cpf = ratio(spend, c.fech);
-      var rLM = rate(c.marc, leads), rRF = rate(c.fech, c.real), rLF = rate(c.fech, leads);
-      var pr = pc ? { lm: rate(pc.marc, p.leads), rf: rate(pc.fech, pc.real) } : {};
+      var comp = rate(c.real, c.real + c.ns);
+      var cpl = ratio(spend, leads), cpm = ratio(spend, c.marc), cpf = ratio(spend, c.fech);
+      var rLM = rate(c.marc, leads), rRF = rate(c.fech, c.real);
       var pl = function (n, um, varios) { return int.format(n) + ' ' + (n === 1 ? um : varios); };
+      // números redondos: nesta aba ninguém precisa de centavo nem de casa decimal
+      var p0 = function (v) { return v == null ? '—' : int.format(Math.round(v)) + '%'; };
+      var m0 = function (v) { return v == null ? '—' : 'R$ ' + int.format(Math.round(v)); };
 
-      // resumo
-      var txt = periodPhrase() + ', <b>' + money(spend) + '</b> em anúncios de leads geraram <b>' + pl(leads, 'lead', 'leads') + '</b>. ' +
-        'Foram <b>' + pl(c.marc, 'reunião marcada', 'reuniões marcadas') + '</b>: <b>' + int.format(c.real) + ' realizada' + (c.real === 1 ? '' : 's') + '</b>, ' +
-        '<b>' + int.format(c.ns) + ' no-show</b>' + (c.ag ? ' e ' + int.format(c.ag) + ' ainda por acontecer' : '') + '.';
-      if (comp != null) txt += ' O comparecimento foi de <b>' + pctTxt(comp) + '</b>.';
-      txt += ' <b>' + pl(c.fech, 'fechamento', 'fechamentos') + '</b>' + (cpf != null ? ', a <b>' + money(cpf) + '</b> cada.' : '.');
-      if (antes) txt += ' O histórico do ActiveCampaign começa em ' + longDate(ac.desde) + ': reuniões e fechamentos antes disso não entram.';
+      // uma frase só: quanto entrou e quanto custou cada cliente
+      var txt = periodPhrase() + ', <b>' + money(spend) + '</b> em anúncios viraram <b>' + pl(c.fech, 'cliente fechado', 'clientes fechados') + '</b>' +
+        (cpf != null ? ': <b>' + m0(cpf) + ' por cliente</b>.' : '.');
+      if (antes) txt += ' Reuniões e fechamentos só contam a partir de ' + longDate(ac.desde) + ', início do histórico do ActiveCampaign.';
+      var resumo = '<section class="summary"><span class="ms" aria-hidden="true">lightbulb</span><div><p>' + txt + '</p></div></section>';
 
-      var cards =
-        kpi({ hero: true, icon: 'payments', label: 'Investido em leads', value: money(spend), unit: 'em ' + x.nd + (x.nd === 1 ? ' dia' : ' dias'), badge: badgeHtml(spend, p && p.leadsSpend, null, x.cmp), info: 'Gasto das campanhas de cadastro do Meta no período.' }) +
-        kpi({ icon: 'person_add', label: 'Leads', value: int.format(leads), unit: cpl != null ? money(cpl) + ' por lead' : '', badge: badgeHtml(leads, p && p.leads, false, x.cmp), info: 'Leads que o Meta atribui aos anúncios de cadastro.' }) +
-        kpi({ icon: 'event_available', label: 'Reuniões realizadas', value: int.format(c.real), unit: int.format(c.marc) + ' marcadas · ' + int.format(c.ns) + ' no-show', badge: pc ? badgeHtml(c.real, pc.real, false, x.cmp) : '', info: 'Tarefas do tipo Reunião no ActiveCampaign, pela data marcada. Sem a nota "lead não compareceu" e com data passada = realizada; com a nota = no-show.' }) +
-        kpi({ icon: 'how_to_reg', label: 'Comparecimento', value: pctTxt(comp), unit: c.real + c.ns ? int.format(c.real) + ' de ' + int.format(c.real + c.ns) + ' compareceram' : 'sem reuniões passadas', badge: ppHtml(comp, pComp, true, x.cmp), info: 'Realizadas ÷ (realizadas + no-show). Reuniões com data futura não entram.' }) +
-        kpi({ icon: 'handshake', label: 'Fechamentos', value: int.format(c.fech), unit: cpf != null ? money(cpf) + ' por fechamento' : 'nenhum no período', badge: pc ? badgeHtml(c.fech, pc.fech, false, x.cmp) : '', info: 'Negócios que entraram na etapa Boas-vindas (ou posterior) no ActiveCampaign, pela data de entrada na etapa.' });
-
-      // funil visual
-      var stages = [
-        { l: 'Investimento', v: money(spend), w: 100, bg: '#ECEDF0', fg: C.ink },
-        { l: 'Leads', v: int.format(leads), w: 85, bg: '#BCC0C7', fg: C.ink, s: cpl != null ? money(cpl) + ' por lead' : '' },
-        { l: 'Reuniões marcadas', v: int.format(c.marc), w: 70, bg: '#5F656D', fg: '#fff', s: cpm != null ? money(cpm) + ' por reunião marcada' : '' },
-        { l: 'Realizadas', v: int.format(c.real), w: 55, bg: C.ink, fg: '#fff', s: cpr != null ? money(cpr) + ' por reunião realizada' : '' },
-        { l: 'Fechamentos', v: int.format(c.fech), w: 40, bg: C.accent, fg: '#fff', s: cpf != null ? money(cpf) + ' por fechamento' : '' },
+      // o caminho em 4 números, com a % que passa de um para o outro e o custo embaixo
+      var passos = [
+        { l: 'Leads', v: leads, s: cpl != null ? m0(cpl) + ' cada' : '' },
+        { l: 'Reuniões marcadas', v: c.marc, s: cpm != null ? m0(cpm) + ' cada' : '' },
+        { l: 'Compareceram', v: c.real, s: c.ns ? pl(c.ns, 'faltou', 'faltaram') : 'ninguém faltou' },
+        { l: 'Fechamentos', v: c.fech, s: cpf != null ? m0(cpf) + ' cada' : '' },
       ];
-      var steps = [
-        '<span class="ms" aria-hidden="true">south</span>Custo por lead <b>' + money(cpl) + '</b>',
-        '<span class="ms" aria-hidden="true">south</span>Lead → reunião marcada <b>' + pctTxt(rLM) + '</b><span class="plain">' + perPeople(rLM) + '</span>' + ppHtml(rLM, pr.lm, false),
-        '<span class="ms" aria-hidden="true">south</span>Comparecimento <b>' + pctTxt(comp) + '</b>' + ppHtml(comp, pComp, false) + (c.ag ? '<span class="plain">' + c.ag + ' ainda por acontecer</span>' : ''),
-        '<span class="ms" aria-hidden="true">south</span>Reunião → fechamento <b>' + pctTxt(rRF) + '</b><span class="plain">' + (rRF != null && rRF <= 100 ? perPeople(rRF) : '') + '</span>' + ppHtml(rRF, pr.rf, false),
-      ];
-      var funnel = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>Funil comercial</span>' +
-        '<div class="legend"><span>' + (rLF != null ? 'de lead a fechamento: <b>' + pctTxt(rLF) + '</b>' : '') + '</span></div></div><div class="funnel">' +
-        stages.map(function (s, i) {
-          var bar = '<div class="fstage"><div class="fbar fs-' + i + '" style="width:' + s.w + '%;background:' + s.bg + ';color:' + s.fg + '"><span class="fl">' + s.l + (s.s ? '<small>' + s.s + '</small>' : '') + '</span><b>' + s.v + '</b></div></div>';
-          return i === stages.length - 1 ? bar : bar + '<div class="frate">' + steps[i] + '</div>';
-        }).join('') + '</div></section>';
+      var setas = [[rLM, 'marcaram reunião'], [comp, 'compareceram'], [rRF, 'fecharam']];
+      var fluxo = '<section class="card cflow-card"><div class="cflow-top"><span class="label"><span class="ms">filter_alt</span>Do lead ao cliente</span>' +
+        '<span class="cflow-inv">Investido <b>' + m0(spend) + '</b></span></div><div class="cflow">' +
+        passos.map(function (s, i) {
+          var box = '<div class="cf-step' + (i === 3 ? ' end' : '') + '"><span class="cf-l">' + s.l + '</span><b class="cf-v">' + int.format(s.v) + '</b><span class="cf-s">' + s.s + '</span></div>';
+          return i < 3 ? box + '<div class="cf-arrow"><b>' + p0(setas[i][0]) + '</b><span>' + setas[i][1] + '</span></div>' : box;
+        }).join('') + '</div>' +
+        (c.ag ? '<p class="cflow-note">+ ' + pl(c.ag, 'reunião marcada que ainda vai acontecer', 'reuniões marcadas que ainda vão acontecer') + ' (fora do comparecimento)</p>' : '') + '</section>';
 
-      // mês a mês
+      // mês a mês, só o essencial
       var rowsM = aggregate(d.daily, 'mes').map(function (m) {
-        var ym = m.key, o = cont(m.first, m.last), cmp = rate(o.real, o.real + o.ns);
+        var ym = m.key, o = cont(m.first, m.last);
         var part = m.first.slice(8) !== '01' || m.last !== lastDay(ym);
-        return '<tr><td>' + MESES_L[+ym.slice(5) - 1] + ' ' + ym.slice(0, 4) + (part ? ' <span class="muted">(parcial)</span>' : '') + '</td><td>' + money(m.leadsSpend) + '</td><td>' + int.format(m.leads) +
-          '</td><td>' + o.marc + '</td><td>' + o.real + '</td><td>' + o.ns + '</td><td>' + pctTxt(cmp) + '</td><td>' + o.fech +
-          '</td><td>' + (o.real ? money(m.leadsSpend / o.real) : '<span class="muted">—</span>') + '</td><td>' + (o.fech ? money(m.leadsSpend / o.fech) : '<span class="muted">—</span>') + '</td></tr>';
+        return '<tr><td>' + MESES_L[+ym.slice(5) - 1] + (part ? ' <span class="muted">(parcial)</span>' : '') + '</td><td>' + m0(m.leadsSpend) +
+          '</td><td>' + o.marc + '</td><td>' + o.real + '</td><td><b style="font-weight:600">' + o.fech + '</b></td><td>' + (o.fech ? m0(m.leadsSpend / o.fech) : '<span class="muted">—</span>') + '</td></tr>';
       }).join('');
-      var table = chartCard({ icon: 'calendar_month', label: 'Mês a mês', legend: '<span>fechamentos de um mês podem vir de reuniões de meses anteriores</span>',
-        body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Mês</th><th>Investido</th><th>Leads</th><th>Marcadas</th><th>Realizadas</th><th>No-show</th><th>Comparec.</th><th>Fechamentos</th><th>Custo por reunião</th><th>Custo por fech.</th></tr></thead><tbody>' + rowsM +
-          '</tbody><tfoot><tr><td>Período</td><td>' + money(spend) + '</td><td>' + int.format(leads) + '</td><td>' + c.marc + '</td><td>' + c.real + '</td><td>' + c.ns + '</td><td>' + pctTxt(comp) + '</td><td>' + c.fech + '</td><td>' + money(cpr) + '</td><td>' + money(cpf) + '</td></tr></tfoot></table></div>' });
+      var table = chartCard({ icon: 'calendar_month', label: 'Mês a mês', legend: '',
+        body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Mês</th><th>Investido</th><th>Reuniões</th><th>Compareceram</th><th>Fechamentos</th><th>Custo por cliente</th></tr></thead><tbody>' + rowsM +
+          '</tbody><tfoot><tr><td>Total</td><td>' + m0(spend) + '</td><td>' + c.marc + '</td><td>' + c.real + '</td><td>' + c.fech + '</td><td>' + m0(cpf) + '</td></tr></tfoot></table></div>' });
 
       // onde estão os negócios agora, etapa por etapa (foto atual, não depende do período)
       var porFunil = {};
@@ -956,9 +971,10 @@
           '</ul>' });
 
       return {
-        html: summaryHtml(txt, x) + '<section class="kpis kpis-5">' + cards + '</section>' + funnel + table +
-          '<section class="duo" style="margin-top:10px">' + reunCard + fechCard + '</section>' +
-          '<section class="duo" style="margin-top:10px">' + stageCard + checkCard + '</section>',
+        html: resumo + fluxo + table +
+          '<details class="com-more"><summary>Ver detalhes <span>reuniões, fechamentos e etapas do ActiveCampaign</span></summary>' +
+          '<section class="duo">' + reunCard + fechCard + '</section>' +
+          '<section class="duo" style="margin-top:10px">' + stageCard + checkCard + '</section></details>',
         draw: function () {},
       };
     },
