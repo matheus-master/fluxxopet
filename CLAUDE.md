@@ -94,7 +94,7 @@
   **Mês = mês atual** (dia 1 até hoje, comparado com o mesmo trecho do mês anterior);
   o resto é **janela móvel** (Semana = 7 dias, Trimestre = 90, Semestre = 180, Ano = 365)
   + Personalizado, comparado com a janela anterior do mesmo tamanho. A lista "Escolher mês"
-  mostra um mês inteiro (Janeiro, Fevereiro…; 24 meses) comparado com o mês anterior inteiro.
+  mostra os meses de 2026 (janeiro até o atual, `ANO_LISTA`) e compara com o mês anterior inteiro.
   Mesmo login do `/admin` (JWT em `sessionStorage.vt_token`).
 - API única: `functions/api/meta-trafego.js` (insights por campanha/dia; o
   agrupamento por semana/mês/... é feito na página).
@@ -146,6 +146,8 @@
   datado pela entrada na etapa (`dealActivities`); sem histórico → `mdate`, marcado como aproximado.
 - Pages Functions limita subrequisições por chamada: tudo cabe em `ORCAMENTO` (45). Se a conta
   crescer, as leituras param e aparecem em `avisos` (exibidos na aba).
+- Valor dos fechamentos = `value` do negócio (centavos ÷ 100). Fechamento com o valor padrão do
+  site (`AC_DEAL_VALUE`) gera aviso: o comercial precisa atualizar o valor no ActiveCampaign.
 - Se a rota falhar, a aba volta a usar a planilha (`/api/comercial`) e mostra o motivo.
 
 ## CRM do admin (`/admin#crm`)

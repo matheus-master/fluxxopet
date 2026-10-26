@@ -239,6 +239,7 @@
     .cflow-card{padding:22px 24px 24px;margin:10px 0}
     .cflow-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
     .cflow-inv{font-size:.86rem;color:var(--ink-2)} .cflow-inv b{color:var(--ink);font-weight:500;font-size:1.05rem;margin-left:4px}
+    .cflow-inv .sep{margin:0 10px;color:var(--ink-3)} .cflow-inv b.ok{color:var(--good)}
     .cflow{display:grid;grid-template-columns:minmax(0,1fr) 112px minmax(0,1fr) 112px minmax(0,1fr) 112px minmax(0,1fr);align-items:stretch}
     .cf-step{border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:4px}
     .cf-step.end{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -894,13 +895,13 @@
       var d = state.data, ac = state.ac, p = d.prev;
       var inR = function (ds, s, u) { return ds >= s && ds <= u; };
       function cont(s, u) {
-        var o = { marc: 0, real: 0, ns: 0, ag: 0, fech: 0 };
+        var o = { marc: 0, real: 0, ns: 0, ag: 0, fech: 0, valor: 0 };
         ac.reunioes.forEach(function (r) {
           if (!inR(r.data, s, u)) return;
           o.marc++;
           if (r.st === 'realizada') o.real++; else if (r.st === 'noshow') o.ns++; else o.ag++;
         });
-        ac.fechamentos.forEach(function (f) { if (inR(f.data, s, u)) o.fech++; });
+        ac.fechamentos.forEach(function (f) { if (inR(f.data, s, u)) { o.fech++; o.valor += f.valor || 0; } });
         return o;
       }
       var c = cont(d.since, d.until);
@@ -916,8 +917,9 @@
       var m0 = function (v) { return v == null ? '—' : 'R$ ' + int.format(Math.round(v)); };
 
       // uma frase só: quanto entrou e quanto custou cada cliente
-      var txt = periodPhrase() + ', <b>' + money(spend) + '</b> em anúncios viraram <b>' + pl(c.fech, 'cliente fechado', 'clientes fechados') + '</b>' +
-        (cpf != null ? ': <b>' + m0(cpf) + ' por cliente</b>.' : '.');
+      var txt = periodPhrase() + ', <b>' + m0(spend) + '</b> em anúncios viraram <b>' + pl(c.fech, 'cliente fechado', 'clientes fechados') + '</b>' +
+        (c.valor ? ', que somam <b>' + m0(c.valor) + '</b> em contratos' : '') + '.' +
+        (cpf != null ? ' Cada cliente custou <b>' + m0(cpf) + '</b> em anúncio.' : '');
       if (antes) txt += ' Reuniões e fechamentos só contam a partir de ' + longDate(ac.desde) + ', início do histórico do ActiveCampaign.';
       var resumo = '<section class="summary"><span class="ms" aria-hidden="true">lightbulb</span><div><p>' + txt + '</p></div></section>';
 
@@ -926,11 +928,11 @@
         { l: 'Leads', v: leads, s: cpl != null ? m0(cpl) + ' cada' : '' },
         { l: 'Reuniões marcadas', v: c.marc, s: cpm != null ? m0(cpm) + ' cada' : '' },
         { l: 'Compareceram', v: c.real, s: c.ns ? pl(c.ns, 'faltou', 'faltaram') : 'ninguém faltou' },
-        { l: 'Fechamentos', v: c.fech, s: cpf != null ? m0(cpf) + ' cada' : '' },
+        { l: 'Fechamentos', v: c.fech, s: c.valor ? m0(c.valor) + ' em contratos' : cpf != null ? m0(cpf) + ' cada' : '' },
       ];
       var setas = [[rLM, 'marcaram reunião'], [comp, 'compareceram'], [rRF, 'fecharam']];
       var fluxo = '<section class="card cflow-card"><div class="cflow-top"><span class="label"><span class="ms">filter_alt</span>Do lead ao cliente</span>' +
-        '<span class="cflow-inv">Investido <b>' + m0(spend) + '</b></span></div><div class="cflow">' +
+        '<span class="cflow-inv">Investido <b>' + m0(spend) + '</b>' + (c.valor ? '<span class="sep">·</span>Fechado <b class="ok">' + m0(c.valor) + '</b>' : '') + '</span></div><div class="cflow">' +
         passos.map(function (s, i) {
           var box = '<div class="cf-step' + (i === 3 ? ' end' : '') + '"><span class="cf-l">' + s.l + '</span><b class="cf-v">' + int.format(s.v) + '</b><span class="cf-s">' + s.s + '</span></div>';
           return i < 3 ? box + '<div class="cf-arrow"><b>' + p0(setas[i][0]) + '</b><span>' + setas[i][1] + '</span></div>' : box;
@@ -942,11 +944,11 @@
         var ym = m.key, o = cont(m.first, m.last);
         var part = m.first.slice(8) !== '01' || m.last !== lastDay(ym);
         return '<tr><td>' + MESES_L[+ym.slice(5) - 1] + (part ? ' <span class="muted">(parcial)</span>' : '') + '</td><td>' + m0(m.leadsSpend) +
-          '</td><td>' + o.marc + '</td><td>' + o.real + '</td><td><b style="font-weight:600">' + o.fech + '</b></td><td>' + (o.fech ? m0(m.leadsSpend / o.fech) : '<span class="muted">—</span>') + '</td></tr>';
+          '</td><td>' + o.marc + '</td><td>' + o.real + '</td><td><b style="font-weight:600">' + o.fech + '</b></td><td>' + (o.valor ? m0(o.valor) : '<span class="muted">—</span>') + '</td><td>' + (o.fech ? m0(m.leadsSpend / o.fech) : '<span class="muted">—</span>') + '</td></tr>';
       }).join('');
       var table = chartCard({ icon: 'calendar_month', label: 'Mês a mês', legend: '',
-        body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Mês</th><th>Investido</th><th>Reuniões</th><th>Compareceram</th><th>Fechamentos</th><th>Custo por cliente</th></tr></thead><tbody>' + rowsM +
-          '</tbody><tfoot><tr><td>Total</td><td>' + m0(spend) + '</td><td>' + c.marc + '</td><td>' + c.real + '</td><td>' + c.fech + '</td><td>' + m0(cpf) + '</td></tr></tfoot></table></div>' });
+        body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Mês</th><th>Investido</th><th>Reuniões</th><th>Compareceram</th><th>Fechamentos</th><th>Valor fechado</th><th>Custo por cliente</th></tr></thead><tbody>' + rowsM +
+          '</tbody><tfoot><tr><td>Total</td><td>' + m0(spend) + '</td><td>' + c.marc + '</td><td>' + c.real + '</td><td>' + c.fech + '</td><td>' + (c.valor ? m0(c.valor) : '—') + '</td><td>' + m0(cpf) + '</td></tr></tfoot></table></div>' });
 
       // onde estão os negócios agora, etapa por etapa (foto atual, não depende do período)
       var porFunil = {};
@@ -973,9 +975,9 @@
           return '<div class="com-item"><span class="when">' + fmtShort(r.data) + '</span><span class="who">' + esc(r.cliente) + (r.etapa ? ' <span class="muted" style="font-size:.76rem">· ' + esc(r.etapa) + '</span>' : '') + '</span><span class="won ' + ST[r.st][0] + '">' + ST[r.st][1] + '</span></div>';
         }).join('') : '<p class="com-empty">Nenhuma reunião neste período.</p>') + '</div>' });
       var fech = ac.fechamentos.filter(function (f) { return inR(f.data, d.since, d.until); });
-      var fechCard = chartCard({ icon: 'handshake', label: 'Fechamentos do período', legend: '<span>' + pl(fech.length, 'fechamento', 'fechamentos') + '</span>',
+      var fechCard = chartCard({ icon: 'handshake', label: 'Fechamentos do período', legend: '<span>' + pl(fech.length, 'fechamento', 'fechamentos') + (c.valor ? ' · ' + m0(c.valor) : '') + '</span>',
         body: '<div class="com-list scroll">' + (fech.length ? fech.map(function (f) {
-          return '<div class="com-item"><span class="when"' + (f.aprox ? ' title="Data aproximada: última atualização do negócio"' : '') + '>' + (f.aprox ? '≈ ' : '') + fmtShort(f.data) + '</span><span class="who">' + esc(f.cliente) + (f.fat ? ' <span class="muted" style="font-size:.76rem">· ' + esc(f.fat) + '</span>' : '') + '</span><span class="won">' + esc(f.etapa || 'Fechado') + '</span></div>';
+          return '<div class="com-item"><span class="when"' + (f.aprox ? ' title="Data aproximada: última atualização do negócio"' : '') + '>' + (f.aprox ? '≈ ' : '') + fmtShort(f.data) + '</span><span class="who">' + esc(f.cliente) + (f.fat ? ' <span class="muted" style="font-size:.76rem">· ' + esc(f.fat) + '</span>' : '') + '</span>' + (f.valor ? '<span class="val">' + m0(f.valor) + '</span>' : '') + '<span class="won">' + esc(f.etapa || 'Fechado') + '</span></div>';
         }).join('') : '<p class="com-empty">Nenhum fechamento neste período.</p>') + '</div>' });
 
       // conferência: semana fechada anterior (seg–dom) para bater com o relatório do ActiveCampaign
@@ -1286,13 +1288,11 @@
     $('mbox').classList.toggle('on', sel);
     $('monthSel').value = sel ? state.month : '';
   }
-  // lista dos meses: do atual para trás, 24 meses
+  // lista dos meses de 2026, de janeiro até o mês atual (meses futuros ficam de fora)
+  var ANO_LISTA = 2026;
   function fillMonths() {
-    var t = today(), y = +t.slice(0, 4), m = +t.slice(5, 7), html = '<option value="">Escolher mês</option>';
-    for (var i = 0; i < 24; i++) {
-      html += '<option value="' + y + '-' + String(m).padStart(2, '0') + '">' + MESES_L[m - 1] + ' ' + y + '</option>';
-      if (--m === 0) { m = 12; y--; }
-    }
+    var t = today(), ate = +t.slice(0, 4) > ANO_LISTA ? 12 : +t.slice(5, 7), html = '<option value="">Escolher mês</option>';
+    for (var m = 1; m <= ate; m++) html += '<option value="' + ANO_LISTA + '-' + String(m).padStart(2, '0') + '">' + MESES_L[m - 1] + ' ' + ANO_LISTA + '</option>';
     $('monthSel').innerHTML = html;
   }
   function setPeriod(p, keepGroup) {

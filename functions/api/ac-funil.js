@@ -161,7 +161,9 @@ async function montar(env, desde) {
   // 8. fechamentos (com data de entrada na etapa, pelo histórico, enquanto houver orçamento)
   const fechDeals = deals.filter(d => fechStage.has(d.stage));
   const fechamentos = [];
-  let aprox = 0;
+  let aprox = 0, valorPadrao = 0;
+  // o site cria todo negócio com AC_DEAL_VALUE; se o comercial não atualiza, o valor não é real
+  const padrao = parseInt(env.AC_DEAL_VALUE || '0', 10) || 0;
   for (const d of fechDeals) {
     let data = null;
     if (usadas < ORCAMENTO) {
@@ -177,9 +179,13 @@ async function montar(env, desde) {
     if (data < desde) continue;
     if (semHistorico) aprox++;
     const l = leadDoContato(d.contact);
-    fechamentos.push({ data, aprox: semHistorico || undefined, cliente: d.title, deal: d.id, etapa: stageById[d.stage] ? stageById[d.stage].title : null, site: !!l, fat: l ? l.faturamento || null : null });
+    const centavos = +d.value || 0;
+    if (padrao && centavos === padrao) valorPadrao++;
+    // o ActiveCampaign guarda o valor em centavos
+    fechamentos.push({ data, valor: centavos / 100, aprox: semHistorico || undefined, cliente: d.title, deal: d.id, etapa: stageById[d.stage] ? stageById[d.stage].title : null, site: !!l, fat: l ? l.faturamento || null : null });
   }
   if (aprox) avisos.push(aprox + ' fechamento' + (aprox > 1 ? 's estão' : ' está') + ' com data aproximada (última atualização do negócio), sem histórico de etapa disponível.');
+  if (valorPadrao) avisos.push(valorPadrao + ' fechamento' + (valorPadrao > 1 ? 's estão' : ' está') + ' com o valor padrão do site (' + (padrao / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) + '): atualize o valor do negócio no ActiveCampaign para o total ficar certo.');
   fechamentos.sort((a, b) => b.data.localeCompare(a.data));
 
   return {
