@@ -937,12 +937,12 @@
       // o caminho em 4 números, com a % que passa de um para o outro e o custo embaixo
       var passos = [
         { l: 'Leads', v: leads, s: cpl != null ? m0(cpl) + ' cada' : '' },
-        { l: 'Oportunidades', v: c.op, s: c.op ? m0(spend / c.op) + ' cada' : '' },
+        { l: 'Oportunidades', v: c.andou, s: int.format(c.op) + ' acima de R$ 50 mil' },
         { l: 'Reuniões marcadas', v: c.marc, s: cpm != null ? m0(cpm) + ' cada' : '' },
         { l: 'Compareceram', v: c.real, s: c.ns ? pl(c.ns, 'faltou', 'faltaram') : 'ninguém faltou' },
         { l: 'Fechamentos', v: c.fech, s: c.valor ? m0(c.valor) + ' em contratos' : cpf != null ? m0(cpf) + ' cada' : '' },
       ];
-      var setas = [[rate(c.op, leads), 'viraram oportunidade'], [rate(c.marc, c.op), 'marcaram reunião'], [comp, 'compareceram'], [rRF, 'fecharam']];
+      var setas = [[rate(c.andou, leads), 'viraram oportunidade'], [rate(c.marc, c.andou), 'marcaram reunião'], [comp, 'compareceram'], [rRF, 'fecharam']];
       var fluxo = '<section class="card cflow-card"><div class="cflow-top"><span class="label"><span class="ms">filter_alt</span>Do lead ao cliente</span>' +
         '<span class="cflow-inv">Investido <b>' + m0(spend) + '</b>' + (c.valor ? '<span class="sep">·</span>Fechado <b class="ok">' + m0(c.valor) + '</b>' : '') +
         (roiP != null ? '<span class="sep">·</span>ROI <b class="' + (roiP >= 0 ? 'ok' : 'neg') + '">' + roiTxt(roiP) + '</b>' : '') + '</span></div><div class="cflow n5">' +
@@ -953,8 +953,8 @@
           var sv = setas[i][0], acima = sv != null && sv > 100;
           return box + '<div class="cf-arrow"' + (acima ? ' title="Inclui reuniões de oportunidades criadas antes do período"' : '') + '><b>' + (acima ? '—' : p0(sv)) + '</b><span>' + (acima ? 'inclui períodos anteriores' : setas[i][1]) + '</span></div>';
         }).join('') + '</div>' +
-        '<p class="cflow-note">Oportunidade = lead com faturamento <b>acima de R$ 50 mil</b> que <b>andou no funil</b> (Pré-Qualificação ou depois, ou reunião marcada). ' +
-        'No período: ' + pl(c.cri, 'negócio criado', 'negócios criados') + ', ' + int.format(c.f50) + ' acima de R$ 50 mil, ' + int.format(c.andou) + ' andaram no funil, <b>' + int.format(c.op) + ' com as duas coisas</b>.' +
+        '<p class="cflow-note">Oportunidades = negócios criados no período que <b>andaram no funil</b> do ActiveCampaign (Pré-Qualificação ou depois, ou reunião marcada): ' +
+        '<b>' + int.format(c.andou) + ' de ' + pl(c.cri, 'criado', 'criados') + '</b>, ' + int.format(c.op) + ' com faturamento acima de R$ 50 mil.' +
         (c.ag ? ' ' + pl(c.ag, 'reunião marcada ainda vai acontecer', 'reuniões marcadas ainda vão acontecer') + ' (fora do comparecimento).' : '') + '</p></section>';
 
       function roiCell(v) { return v == null ? '<span class="muted">—</span>' : '<span class="' + (v >= 0 ? 't-good' : 't-bad') + '">' + roiTxt(v) + '</span>'; }
@@ -963,11 +963,11 @@
         var ym = m.key, o = cont(m.first, m.last);
         var part = m.first.slice(8) !== '01' || m.last !== lastDay(ym);
         return '<tr><td>' + MESES_L[+ym.slice(5) - 1] + (part ? ' <span class="muted">(parcial)</span>' : '') + '</td><td>' + m0(m.leadsSpend) +
-          '</td><td>' + o.op + '</td><td>' + o.marc + '</td><td>' + o.real + '</td><td><b style="font-weight:600">' + o.fech + '</b></td><td>' + (o.valor ? m0(o.valor) : '<span class="muted">—</span>') + '</td><td>' + roiCell(roi(o.valor, m.leadsSpend)) + '</td><td>' + (o.fech ? m0(m.leadsSpend / o.fech) : '<span class="muted">—</span>') + '</td></tr>';
+          '</td><td>' + o.andou + '</td><td>' + o.marc + '</td><td>' + o.real + '</td><td><b style="font-weight:600">' + o.fech + '</b></td><td>' + (o.valor ? m0(o.valor) : '<span class="muted">—</span>') + '</td><td>' + roiCell(roi(o.valor, m.leadsSpend)) + '</td><td>' + (o.fech ? m0(m.leadsSpend / o.fech) : '<span class="muted">—</span>') + '</td></tr>';
       }).join('');
       var table = chartCard({ icon: 'calendar_month', label: 'Mês a mês', legend: '',
         body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Mês</th><th>Investido</th><th>Oportunidades</th><th>Reuniões</th><th>Compareceram</th><th>Fechamentos</th><th>Valor fechado</th><th>ROI</th><th>Custo por cliente</th></tr></thead><tbody>' + rowsM +
-          '</tbody><tfoot><tr><td>Total</td><td>' + m0(spend) + '</td><td>' + c.op + '</td><td>' + c.marc + '</td><td>' + c.real + '</td><td>' + c.fech + '</td><td>' + (c.valor ? m0(c.valor) : '—') + '</td><td>' + roiCell(roiP) + '</td><td>' + m0(cpf) + '</td></tr></tfoot></table></div>' });
+          '</tbody><tfoot><tr><td>Total</td><td>' + m0(spend) + '</td><td>' + c.andou + '</td><td>' + c.marc + '</td><td>' + c.real + '</td><td>' + c.fech + '</td><td>' + (c.valor ? m0(c.valor) : '—') + '</td><td>' + roiCell(roiP) + '</td><td>' + m0(cpf) + '</td></tr></tfoot></table></div>' });
 
       // onde estão os negócios agora, etapa por etapa (foto atual, não depende do período)
       var porFunil = {};

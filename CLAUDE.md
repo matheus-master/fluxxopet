@@ -146,7 +146,8 @@
   datado pela entrada na etapa (`dealActivities`); sem histórico → `mdate`, marcado como aproximado.
 - Pages Functions limita subrequisições por chamada: tudo cabe em `ORCAMENTO` (45). Se a conta
   crescer, as leituras param e aparecem em `avisos` (exibidos na aba).
-- Oportunidades = negócios criados no período (`cdate`) cujo lead do site tem faturamento ACIMA de
+- Oportunidades (número do funil) = negócios criados no período (`cdate`) que andaram no funil;
+  embaixo, o recorte com lead do site de faturamento ACIMA de
   R$ 50 mil E que andou no funil: "Pré-Qualificação" ou etapa posterior, ou tarefa de Reunião;
   fora "Desqualificado" ("Oportunidade" no AC é a etapa de entrada, todo negócio nasce nela)
   — coorte pela etapa atual. Taxa acima de 100% vira "—" (reuniões de coortes anteriores).
