@@ -93,7 +93,8 @@
 - Painel do Meta Ads com 4 abas (`#geral`, `#leads`, `#seguidores`, `#funil`). Períodos em
   **Mês = mês atual** (dia 1 até hoje, comparado com o mesmo trecho do mês anterior);
   o resto é **janela móvel** (Semana = 7 dias, Trimestre = 90, Semestre = 180, Ano = 365)
-  + Personalizado, comparado com a janela anterior do mesmo tamanho.
+  + Personalizado, comparado com a janela anterior do mesmo tamanho. A lista "Escolher mês"
+  mostra um mês inteiro (Janeiro, Fevereiro…; 24 meses) comparado com o mês anterior inteiro.
   Mesmo login do `/admin` (JWT em `sessionStorage.vt_token`).
 - API única: `functions/api/meta-trafego.js` (insights por campanha/dia; o
   agrupamento por semana/mês/... é feito na página).

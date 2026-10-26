@@ -57,6 +57,12 @@
     .box input[type=date]{border:none;background:none;outline:none;font-size:.88rem;width:118px}
     .box input[type=date]::-webkit-calendar-picker-indicator{opacity:.55;cursor:pointer}
     .box .arrow{color:var(--ink-3);font-size:16px}
+    /* escolher um mês fechado (janeiro, fevereiro…) */
+    .mbox{position:relative;padding:0 10px 0 12px;cursor:pointer}
+    .mbox .ms{font-size:18px;color:var(--ink-3)}
+    .mbox select{flex:1;min-width:0;border:none;background:none;outline:none;font:inherit;font-size:.88rem;color:var(--ink-2);cursor:pointer;padding-right:4px}
+    .mbox.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+    .mbox.on .ms,.mbox.on select{color:var(--accent);font-weight:500}
 
     .notice{border-radius:10px;padding:12px 16px;margin-bottom:12px;background:#FFF1EB;color:#9A3412;font-size:.84rem;display:flex;gap:8px;align-items:flex-start;line-height:1.5}
     .notice .ms{font-size:18px}
@@ -324,6 +330,10 @@
         <button class="tab" data-p="ano" title="Últimos 365 dias">Ano</button>
         <button class="tab" data-p="custom">Personalizado</button>
       </div>
+      <label class="box mbox" id="mbox" title="Ver um mês inteiro">
+        <span class="ms" aria-hidden="true">calendar_month</span>
+        <select id="monthSel" aria-label="Escolher mês"></select>
+      </label>
       <label class="box" title="Período">
         <input type="date" id="since" />
         <span class="ms arrow">arrow_forward</span>
@@ -382,6 +392,11 @@
   var WINDOW = { dia: 1, semana: 7, mes: 30, trimestre: 90, semestre: 180, ano: 365 };
   function periodRange(p) {
     var t = today();
+    // um mês escolhido na lista: o mês inteiro (até hoje, se for o atual) × o mês anterior inteiro
+    if (p === "mesSel" && state.month) {
+      var mi = state.month + "-01", ant = addDays(mi, -1);
+      return { since: mi, until: [lastDay(state.month), t].sort()[0], prevSince: ant.slice(0, 8) + "01", prevUntil: ant };
+    }
     if (p === "mes") {
       var ini = t.slice(0, 8) + "01", pIni = addDays(ini, -1).slice(0, 8) + "01";
       // dia 31 de hoje contra um mês de 30 dias: para no último dia do mês anterior
@@ -1128,6 +1143,7 @@
   function periodPhrase() {
     var d = state.data;
     if (state.period === 'dia') return 'Hoje';
+    if (state.period === 'mesSel') return 'Em ' + MESES_L[+state.month.slice(5) - 1].toLowerCase() + ' de ' + state.month.slice(0, 4) + (d.until === today() ? ' (até hoje)' : '');
     if (state.period === 'mes') return 'Em ' + MESES_L[+d.until.slice(5, 7) - 1].toLowerCase() + (d.until.slice(8) === '01' ? ' (só hoje, dia 1)' : ' (de 1 a ' + +d.until.slice(8) + ')');
     if (state.period !== 'custom') return 'Nos últimos ' + WINDOW[state.period] + ' dias';
     return 'De ' + longDate(d.since) + ' a ' + longDate(d.until);
@@ -1222,7 +1238,7 @@
   /* ── preferências (lembra período e agrupamento) ─── */
   var PREFS_KEY = 'trafego_prefs';
   function savePrefs() {
-    try { localStorage.setItem(PREFS_KEY, JSON.stringify({ period: state.period, group: state.group, since: $('since').value, until: $('until').value })); } catch (e) {}
+    try { localStorage.setItem(PREFS_KEY, JSON.stringify({ period: state.period, month: state.month, group: state.group, since: $('since').value, until: $('until').value })); } catch (e) {}
   }
   function readPrefs() {
     try { return JSON.parse(localStorage.getItem(PREFS_KEY) || 'null'); } catch (e) { return null; }
@@ -1266,6 +1282,18 @@
 
   function markTabs() {
     document.querySelectorAll('.tab').forEach(function (t) { var on = t.dataset.p === state.period; t.classList.toggle('on', on); t.setAttribute('aria-pressed', on); });
+    var sel = state.period === 'mesSel';
+    $('mbox').classList.toggle('on', sel);
+    $('monthSel').value = sel ? state.month : '';
+  }
+  // lista dos meses: do atual para trás, 24 meses
+  function fillMonths() {
+    var t = today(), y = +t.slice(0, 4), m = +t.slice(5, 7), html = '<option value="">Escolher mês</option>';
+    for (var i = 0; i < 24; i++) {
+      html += '<option value="' + y + '-' + String(m).padStart(2, '0') + '">' + MESES_L[m - 1] + ' ' + y + '</option>';
+      if (--m === 0) { m = 12; y--; }
+    }
+    $('monthSel').innerHTML = html;
   }
   function setPeriod(p, keepGroup) {
     state.period = p;
@@ -1286,6 +1314,10 @@
 
   /* ── eventos ──────────────────────────────────────── */
   $('tabs').addEventListener('click', function (e) { var b = e.target.closest('.tab'); if (b) setPeriod(b.dataset.p); });
+  $('monthSel').addEventListener('change', function () {
+    if (!this.value) { setPeriod('mes'); return; }
+    state.month = this.value; setPeriod('mesSel');
+  });
   $('views').addEventListener('click', function (e) { var b = e.target.closest('.view'); if (b) setView(b.dataset.v); });
   ['since', 'until'].forEach(function (id) {
     $(id).addEventListener('change', function () {
@@ -1326,6 +1358,7 @@
   if (!getToken()) location.href = '/login';
   else {
     $('until').max = today();
+    fillMonths();
     setView(location.hash.slice(1));
     // volta para o período e o agrupamento da última visita
     var pf = readPrefs();
@@ -1334,6 +1367,9 @@
       $('since').value = pf.since; $('until').value = pf.until;
       state.group = pf.group || defaultGroup(pf.since, pf.until);
       load();
+    } else if (pf && pf.period === 'mesSel' && /^\d{4}-\d{2}$/.test(pf.month || '')) {
+      state.month = pf.month; state.group = pf.group || null;
+      setPeriod('mesSel', !!pf.group);
     } else if (pf && WINDOW[pf.period]) {
       state.group = pf.group || null;
       setPeriod(pf.period, !!pf.group);
