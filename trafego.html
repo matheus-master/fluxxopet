@@ -239,7 +239,7 @@
     .cflow-card{padding:22px 24px 24px;margin:10px 0}
     .cflow-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
     .cflow-inv{font-size:.86rem;color:var(--ink-2)} .cflow-inv b{color:var(--ink);font-weight:500;font-size:1.05rem;margin-left:4px}
-    .cflow-inv .sep{margin:0 10px;color:var(--ink-3)} .cflow-inv b.ok{color:var(--good)}
+    .cflow-inv .sep{margin:0 10px;color:var(--ink-3)} .cflow-inv b.ok{color:var(--good)} .cflow-inv b.neg{color:var(--bad)}
     .cflow{display:grid;grid-template-columns:minmax(0,1fr) 112px minmax(0,1fr) 112px minmax(0,1fr) 112px minmax(0,1fr);align-items:stretch}
     .cf-step{border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:4px}
     .cf-step.end{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -915,11 +915,16 @@
       // números redondos: nesta aba ninguém precisa de centavo nem de casa decimal
       var p0 = function (v) { return v == null ? '—' : int.format(Math.round(v)) + '%'; };
       var m0 = function (v) { return v == null ? '—' : 'R$ ' + int.format(Math.round(v)); };
+      // ROI = (valor fechado − investido) ÷ investido; sem valor fechado ou sem investimento, não há ROI
+      var roi = function (valor, inv) { return valor && inv ? (valor - inv) / inv * 100 : null; };
+      var roiTxt = function (v) { return v == null ? '—' : (v > 0 ? '+' : '') + int.format(Math.round(v)) + '%'; };
+      var roiP = roi(c.valor, spend);
 
       // uma frase só: quanto entrou e quanto custou cada cliente
       var txt = periodPhrase() + ', <b>' + m0(spend) + '</b> em anúncios viraram <b>' + pl(c.fech, 'cliente fechado', 'clientes fechados') + '</b>' +
         (c.valor ? ', que somam <b>' + m0(c.valor) + '</b> em contratos' : '') + '.' +
-        (cpf != null ? ' Cada cliente custou <b>' + m0(cpf) + '</b> em anúncio.' : '');
+        (cpf != null ? ' Cada cliente custou <b>' + m0(cpf) + '</b> em anúncio.' : '') +
+        (roiP != null ? ' <b class="' + (roiP >= 0 ? 't-good' : 't-bad') + '">ROI de ' + roiTxt(roiP) + '</b>: cada R$ 1 em anúncio voltou <b>' + brl.format(c.valor / spend) + '</b>.' : '');
       if (antes) txt += ' Reuniões e fechamentos só contam a partir de ' + longDate(ac.desde) + ', início do histórico do ActiveCampaign.';
       var resumo = '<section class="summary"><span class="ms" aria-hidden="true">lightbulb</span><div><p>' + txt + '</p></div></section>';
 
@@ -932,23 +937,25 @@
       ];
       var setas = [[rLM, 'marcaram reunião'], [comp, 'compareceram'], [rRF, 'fecharam']];
       var fluxo = '<section class="card cflow-card"><div class="cflow-top"><span class="label"><span class="ms">filter_alt</span>Do lead ao cliente</span>' +
-        '<span class="cflow-inv">Investido <b>' + m0(spend) + '</b>' + (c.valor ? '<span class="sep">·</span>Fechado <b class="ok">' + m0(c.valor) + '</b>' : '') + '</span></div><div class="cflow">' +
+        '<span class="cflow-inv">Investido <b>' + m0(spend) + '</b>' + (c.valor ? '<span class="sep">·</span>Fechado <b class="ok">' + m0(c.valor) + '</b>' : '') +
+        (roiP != null ? '<span class="sep">·</span>ROI <b class="' + (roiP >= 0 ? 'ok' : 'neg') + '">' + roiTxt(roiP) + '</b>' : '') + '</span></div><div class="cflow">' +
         passos.map(function (s, i) {
           var box = '<div class="cf-step' + (i === 3 ? ' end' : '') + '"><span class="cf-l">' + s.l + '</span><b class="cf-v">' + int.format(s.v) + '</b><span class="cf-s">' + s.s + '</span></div>';
           return i < 3 ? box + '<div class="cf-arrow"><b>' + p0(setas[i][0]) + '</b><span>' + setas[i][1] + '</span></div>' : box;
         }).join('') + '</div>' +
         (c.ag ? '<p class="cflow-note">+ ' + pl(c.ag, 'reunião marcada que ainda vai acontecer', 'reuniões marcadas que ainda vão acontecer') + ' (fora do comparecimento)</p>' : '') + '</section>';
 
+      function roiCell(v) { return v == null ? '<span class="muted">—</span>' : '<span class="' + (v >= 0 ? 't-good' : 't-bad') + '">' + roiTxt(v) + '</span>'; }
       // mês a mês, só o essencial
       var rowsM = aggregate(d.daily, 'mes').map(function (m) {
         var ym = m.key, o = cont(m.first, m.last);
         var part = m.first.slice(8) !== '01' || m.last !== lastDay(ym);
         return '<tr><td>' + MESES_L[+ym.slice(5) - 1] + (part ? ' <span class="muted">(parcial)</span>' : '') + '</td><td>' + m0(m.leadsSpend) +
-          '</td><td>' + o.marc + '</td><td>' + o.real + '</td><td><b style="font-weight:600">' + o.fech + '</b></td><td>' + (o.valor ? m0(o.valor) : '<span class="muted">—</span>') + '</td><td>' + (o.fech ? m0(m.leadsSpend / o.fech) : '<span class="muted">—</span>') + '</td></tr>';
+          '</td><td>' + o.marc + '</td><td>' + o.real + '</td><td><b style="font-weight:600">' + o.fech + '</b></td><td>' + (o.valor ? m0(o.valor) : '<span class="muted">—</span>') + '</td><td>' + roiCell(roi(o.valor, m.leadsSpend)) + '</td><td>' + (o.fech ? m0(m.leadsSpend / o.fech) : '<span class="muted">—</span>') + '</td></tr>';
       }).join('');
       var table = chartCard({ icon: 'calendar_month', label: 'Mês a mês', legend: '',
-        body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Mês</th><th>Investido</th><th>Reuniões</th><th>Compareceram</th><th>Fechamentos</th><th>Valor fechado</th><th>Custo por cliente</th></tr></thead><tbody>' + rowsM +
-          '</tbody><tfoot><tr><td>Total</td><td>' + m0(spend) + '</td><td>' + c.marc + '</td><td>' + c.real + '</td><td>' + c.fech + '</td><td>' + (c.valor ? m0(c.valor) : '—') + '</td><td>' + m0(cpf) + '</td></tr></tfoot></table></div>' });
+        body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Mês</th><th>Investido</th><th>Reuniões</th><th>Compareceram</th><th>Fechamentos</th><th>Valor fechado</th><th>ROI</th><th>Custo por cliente</th></tr></thead><tbody>' + rowsM +
+          '</tbody><tfoot><tr><td>Total</td><td>' + m0(spend) + '</td><td>' + c.marc + '</td><td>' + c.real + '</td><td>' + c.fech + '</td><td>' + (c.valor ? m0(c.valor) : '—') + '</td><td>' + roiCell(roiP) + '</td><td>' + m0(cpf) + '</td></tr></tfoot></table></div>' });
 
       // onde estão os negócios agora, etapa por etapa (foto atual, não depende do período)
       var porFunil = {};

@@ -146,7 +146,8 @@
   datado pela entrada na etapa (`dealActivities`); sem histórico → `mdate`, marcado como aproximado.
 - Pages Functions limita subrequisições por chamada: tudo cabe em `ORCAMENTO` (45). Se a conta
   crescer, as leituras param e aparecem em `avisos` (exibidos na aba).
-- Valor dos fechamentos = `value` do negócio (centavos ÷ 100). Fechamento com o valor padrão do
+- Valor dos fechamentos = `value` do negócio (centavos ÷ 100). ROI = (valor fechado − investido em
+  leads) ÷ investido em leads. Fechamento com o valor padrão do
   site (`AC_DEAL_VALUE`) gera aviso: o comercial precisa atualizar o valor no ActiveCampaign.
 - Se a rota falhar, a aba volta a usar a planilha (`/api/comercial`) e mostra o motivo.
 
