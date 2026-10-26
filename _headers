@@ -21,3 +21,7 @@
 
 /diagnostico
   Cache-Control: no-store, must-revalidate
+
+# Fontes servidas daqui (Satoshi): o nome do arquivo nao muda, cache longo
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
