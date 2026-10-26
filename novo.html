@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <meta name="description" content="Descubra quanto seu Pet Shop está pagando de imposto indevido. Análise fiscal gratuita." />
+  <title>Análise Fiscal Gratuita – Fluxxo Pet</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,701&display=swap" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:   #E53030;
+      --blue:  #1232C8;
+      --dark:  #091040;
+      --mid:   #0D1B6B;
+      --sage:  #7A87B8;
+      --white: #ffffff;
+      --light: #f0f3ff;
+    }
+
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    body {
+      background: var(--white);
+      color: var(--dark);
+      font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── TIPOGRAFIA DE TÍTULO ──
+       Tudo em Satoshi, caixa baixa. A Anton foi removida da página em
+       2026-08-06: display condensada em CAIXA ALTA dava ar de cartaz.  */
+    .hero-title, .sec-title, .split-h, .how-title, .cta-title,
+    .bc h3, .step-t, .t-name, .nav-logo, .footer-logo {
+      font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 70px;
+      background: rgba(255,255,255,0.93);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(9,16,64,0.08);
+      z-index: 100;
+      display: flex; align-items: center;
+      padding: 0 32px;
+    }
+    .nav-in {
+      width: 100%; max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 1.22rem; letter-spacing: -0.01em;
+      color: var(--dark); text-decoration: none;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .nav-logo .dot { color: var(--red); }
+    .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 0.87rem; font-weight: 500; color: rgba(9,16,64,0.6); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--dark); }
+    .nav-right { display: flex; align-items: center; gap: 18px; }
+    .nav-login { font-size: 0.87rem; font-weight: 500; color: rgba(9,16,64,0.55); text-decoration: none; }
+    .nav-cta {
+      background: var(--blue); color: var(--white);
+      font-family: 'Satoshi', sans-serif; font-size: 0.84rem; font-weight: 700;
+      padding: 9px 20px; border-radius: 999px; border: none; cursor: pointer;
+      text-decoration: none; transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: var(--red); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero-wrap { padding-top: 70px; }
+    .hero {
+      min-height: calc(100svh - 70px);
+      display: grid; grid-template-columns: 1fr 420px;
+      gap: 64px; align-items: center;
+      padding: 80px 32px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 24px;
+    }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--red); flex-shrink: 0;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.5; transform:scale(1.4); }
+    }
+    .hero-title {
+      font-size: clamp(2.3rem, 3.6vw, 3.5rem);
+      line-height: 1.1; color: var(--blue);
+      margin-bottom: 26px; max-width: 620px;
+    }
+    .hero-title .t-red { color: var(--dark); }
+
+    /* ── HERO VIDEO ── */
+    .hero-video {
+      position: relative;
+      width: 100%; max-width: 500px;
+      aspect-ratio: 16 / 9;
+      margin-bottom: 32px;
+      border-radius: 12px; overflow: hidden;
+      background: var(--dark);
+      box-shadow: 0 8px 24px rgba(9,16,64,0.10);
+    }
+    .hero-video iframe {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      border: 0; display: block;
+    }
+    .hero-video.is-placeholder {
+      display: flex; align-items: center; justify-content: center;
+      background: var(--light); box-shadow: none;
+      border: 2px dashed rgba(18,50,200,0.32);
+      color: var(--sage); text-align: center; padding: 20px;
+      font-size: 0.86rem; font-weight: 500; line-height: 1.5;
+    }
+
+    /* capa clicável: o player do YouTube só carrega no clique */
+    .vid-play {
+      position: absolute; inset: 0; width: 100%; padding: 0;
+      border: none; cursor: pointer; background: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .vid-play img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .vid-play::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(9,16,64,0.30), rgba(9,16,64,0) 55%);
+    }
+    .vid-play-btn {
+      position: relative; z-index: 1;
+      width: 74px; height: 74px; border-radius: 50%;
+      background: rgba(9,16,64,0.55);
+      backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .vid-play:hover .vid-play-btn { background: var(--red); transform: scale(1.07); }
+    .vid-play-btn svg { width: 26px; height: 26px; fill: var(--white); margin-left: 4px; }
+
+    .vid-cap { max-width: 500px; text-align: center; margin: -6px 0 30px; }
+    .vid-cap strong {
+      display: block; font-style: italic; font-weight: 700;
+      font-size: 0.97rem; color: var(--blue); margin-bottom: 3px;
+    }
+    .vid-cap span { font-size: 0.87rem; color: rgba(9,16,64,0.6); }
+    /* ── STATS (faixa limpa, sem card) ──
+       Cada rótulo cabe em uma linha na largura disponível, então as três
+       colunas terminam na mesma altura sem precisar de truque de grid.  */
+    .hero-stats { display: flex; align-items: stretch; max-width: 620px; }
+    .h-stat { padding: 0 24px; border-left: 1px solid rgba(9,16,64,0.13); }
+    .h-stat:first-child { padding-left: 0; border-left: none; }
+    .h-stat strong {
+      display: block; font-family: 'Satoshi', sans-serif; font-weight: 700;
+      font-size: 1.6rem; color: var(--blue); line-height: 1; margin-bottom: 5px;
+    }
+    .h-stat b {
+      display: block; font-size: 0.79rem; font-weight: 700;
+      color: var(--dark); line-height: 1.25;
+    }
+    .h-stat span {
+      display: block; font-size: 0.72rem; color: var(--sage); line-height: 1.3;
+    }
+    .stats-note { font-size: 0.66rem; color: var(--sage); margin-top: 13px; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border: 1px solid rgba(18,50,200,0.18);
+      border-top: 4px solid var(--blue);
+      border-radius: 12px; padding: 40px 36px;
+      box-shadow: 0 10px 28px rgba(9,16,64,0.09);
+    }
+    .card-title {
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
+      font-size: 1.65rem; line-height: 1.05; color: var(--dark); margin-bottom: 4px;
+    }
+    .card-title .red { color: var(--blue); }
+    .card-sub { font-size: 0.81rem; color: var(--sage); margin-bottom: 26px; }
+
+    .field { margin-bottom: 14px; }
+    .field input {
+      width: 100%; background: var(--white);
+      border: 1px solid rgba(9,16,64,0.16); border-radius: 12px;
+      padding: 15px 17px; font-family: 'Satoshi', sans-serif;
+      font-size: 0.92rem; color: var(--dark); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(18,50,200,0.09); }
+    .field input::placeholder { color: var(--sage); }
+    .hint { font-size: 0.69rem; color: var(--sage); margin-top: 4px; padding-left: 2px; }
+
+    .btn-sub {
+      width: 100%; background: var(--red); color: var(--white);
+      font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1rem;
+      letter-spacing: 0.04em;
+      border: none; border-radius: 10px; padding: 15px 20px;
+      cursor: pointer; margin-top: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-sub:hover  { background: #c42020; transform: translateY(-2px); }
+    .btn-sub:active { transform: translateY(0); }
+
+    /* ── Formulário do diagnóstico: tudo em um passo ──
+       Todos os campos visíveis, rótulo acima de cada um e o faturamento como
+       opções de clique. Um envio só salva o lead (CRM + ActiveCampaign) antes
+       de qualquer evento de conversão. */
+    .dform .field { margin-bottom: 12px; }
+    .dform label, .dform legend {
+      display: block; font-size: 0.78rem; font-weight: 600; color: var(--dark);
+      margin: 0 0 6px 2px; padding: 0;
+    }
+    .dform .field input { padding: 13px 15px; }
+    .dform fieldset { border: none; padding: 0; margin: 4px 0 14px; min-width: 0; }
+    .fat-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .fat-chip { position: relative; }
+    .fat-chip input { position: absolute; opacity: 0; pointer-events: none; }
+    .fat-chip span {
+      display: flex; align-items: center; justify-content: center; text-align: center;
+      min-height: 44px; padding: 8px 10px; border-radius: 10px; cursor: pointer;
+      border: 1px solid rgba(9,16,64,0.16); background: var(--white);
+      font-family: 'Satoshi', sans-serif; font-size: 0.86rem; color: var(--dark);
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .fat-chip span:hover { border-color: rgba(18,50,200,0.4); background: rgba(18,50,200,0.04); }
+    .fat-chip input:checked + span { border-color: var(--blue); background: rgba(18,50,200,0.08); font-weight: 700; box-shadow: inset 0 0 0 1px var(--blue); }
+    .fat-chip input:focus-visible + span { box-shadow: 0 0 0 3px rgba(18,50,200,0.25); }
+    .dform fieldset.bad .fat-chip span { border-color: var(--red); }
+    /* ── etapa de qualificação (depois do cadastro) ── */
+    .q-head { text-align: center; margin-bottom: 18px; }
+    .q-title { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.3rem; color: var(--dark); line-height: 1.2; }
+    .q-sub { font-size: 0.86rem; color: var(--sage); margin-top: 6px; line-height: 1.45; }
+    .q-block { border: none; padding: 0; margin: 0 0 18px; min-width: 0; }
+    .q-block legend, .q-block > label { display: block; font-weight: 700; font-size: 0.92rem; color: var(--dark); margin-bottom: 10px; padding: 0; }
+    .q-block legend small, .q-block > label small { font-weight: 400; color: var(--sage); font-size: 0.78rem; }
+    .q-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .q-opt { position: relative; }
+    .q-opt input { position: absolute; opacity: 0; pointer-events: none; }
+    .q-opt span {
+      display: flex; align-items: center; gap: 9px; min-height: 48px; padding: 10px 12px; border-radius: 12px; cursor: pointer;
+      border: 1px solid rgba(9,16,64,0.16); background: var(--white); font-size: 0.9rem; color: var(--dark);
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .q-opt span i { font-style: normal; font-size: 1.1rem; line-height: 1; }
+    .q-opt:last-child { grid-column: 1 / -1; }
+    .q-opt span:hover { border-color: rgba(18,50,200,0.4); background: rgba(18,50,200,0.04); }
+    .q-opt input:checked + span { border-color: var(--blue); background: rgba(18,50,200,0.08); box-shadow: inset 0 0 0 1px var(--blue); font-weight: 700; }
+    .q-opt input:focus-visible + span, .q-scale input:focus-visible + span { box-shadow: 0 0 0 3px rgba(18,50,200,0.25); }
+    .q-scale { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }
+    .q-scale label { position: relative; }
+    .q-scale input { position: absolute; opacity: 0; pointer-events: none; }
+    .q-scale span {
+      display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 10px; cursor: pointer;
+      border: 1px solid rgba(9,16,64,0.16); background: var(--white); font-weight: 700; font-size: 0.92rem; color: var(--dark);
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .q-scale span:hover { border-color: rgba(18,50,200,0.4); }
+    .q-scale label.fill span { background: rgba(229,48,48,0.10); border-color: rgba(229,48,48,0.35); }
+    .q-scale input:checked + span { background: var(--red); border-color: var(--red); color: var(--white); }
+    .q-ends { display: flex; justify-content: space-between; font-size: 0.74rem; color: var(--sage); margin-top: 6px; }
+    .q-hint { font-size: 0.82rem; color: var(--dark); margin-top: 8px; min-height: 1.2em; font-weight: 600; }
+    .q-text { width: 100%; min-height: 84px; resize: vertical; border: 1px solid rgba(9,16,64,0.16); border-radius: 12px; padding: 12px 14px;
+      font-family: 'Satoshi', sans-serif; font-size: 0.9rem; color: var(--dark); outline: none; }
+    .q-text:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(18,50,200,0.09); }
+    .q-count { font-size: 0.72rem; color: var(--sage); text-align: right; margin-top: 4px; }
+    .q-block.bad .q-opt span, .q-block.bad .q-scale span { border-color: var(--red); }
+    @media (max-width: 420px) {
+      .q-scale { grid-template-columns: repeat(5, minmax(0, 1fr)); row-gap: 6px; }
+      .q-opts { grid-template-columns: 1fr; }
+    }
+    .email-fix { font-size: 0.78rem; color: var(--dark); margin: 6px 0 0 2px; }
+    .email-fix button { background: none; border: none; padding: 0; font: inherit; font-weight: 700; color: var(--blue); text-decoration: underline; cursor: pointer; }
+    .field-msg { font-size: 0.74rem; color: var(--red); margin: 5px 0 0 2px; }
+    /* barra fixa no celular enquanto o formulário está fora da tela */
+    .m-cta { display: none; }
+    @media (max-width: 900px) {
+      .m-cta {
+        display: flex; position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+        z-index: 90; transform: translateY(140%); transition: transform 0.25s ease;
+      }
+      .m-cta.show { transform: translateY(0); }
+      .m-cta a {
+        flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px;
+        background: var(--red); color: var(--white); border-radius: 12px; text-decoration: none;
+        font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1rem; box-shadow: 0 10px 24px rgba(229,48,48,0.35);
+      }
+    }
+    @media (prefers-reduced-motion: reduce) { .m-cta { transition: none; } }
+    .ferr { display: none; font-size: 0.8rem; color: var(--red); margin: 2px 0 10px; line-height: 1.4; }
+    .ferr.show { display: block; }
+    .field.bad input { border-color: var(--red); }
+    .btn-sub[disabled], .btn-dark[disabled] { opacity: 0.7; cursor: wait; transform: none; }
+    .btn-sub .spin, .btn-dark .spin {
+      width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.45);
+      border-top-color: #fff; animation: fspin 0.7s linear infinite;
+    }
+    @keyframes fspin { to { transform: rotate(360deg); } }
+    @keyframes formIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) { .btn-sub .spin, .btn-dark .spin { animation: none; } }
+
+    .trust {
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      font-size: 0.71rem; color: var(--sage); margin-top: 14px;
+    }
+    .trust svg { width: 11px; height: 11px; stroke: var(--sage); }
+
+    /* ── PROOF BAR ── */
+    .proof-bar { background: var(--blue); padding: 26px 32px; }
+    /* Era flex-wrap com as divisorias em elementos .pv soltos: ao quebrar
+       linha sobrava divisoria orfa pendurada na ponta. Virou grid de colunas
+       fixas, com a divisoria desenhada pelo border-left do proprio item —
+       assim ela nunca existe sem um item do lado. */
+    .proof-bar-in {
+      max-width: 1080px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      align-items: center;
+    }
+    .pv { display: none; }
+    .proof-item {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      padding: 2px 20px;
+      border-left: 1px solid rgba(255,255,255,0.18);
+    }
+    .proof-item:first-child { border-left: none; }
+    .proof-item strong { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.4rem; color: var(--white); line-height: 1; white-space: nowrap; }
+    .proof-item span { font-size: 0.76rem; color: rgba(255,255,255,0.66); font-weight: 500; max-width: 94px; line-height: 1.3; }
+
+    /* ── SPLIT ── */
+    .split { display: grid; grid-template-columns: 1fr 1fr; }
+    .split-l { background: var(--dark); padding: 80px 60px; }
+    .split-r { background: var(--blue); padding: 80px 60px; border-left: 4px solid var(--red); }
+    .split-lbl {
+      font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 0.72rem;
+      letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 28px;
+    }
+    .split-l .split-lbl { color: rgba(255,255,255,0.64); }
+    .split-r .split-lbl { color: rgba(255,255,255,0.75); }
+    .split-h {
+      font-size: clamp(1.9rem, 3vw, 2.6rem);
+      line-height: 1.12; margin-bottom: 34px;
+    }
+    .split-l .split-h { color: rgba(255,255,255,0.86); }
+    .split-r .split-h { color: var(--white); }
+    .split-items { display: flex; flex-direction: column; gap: 16px; }
+    .split-item { display: flex; align-items: flex-start; gap: 13px; font-size: 0.9rem; line-height: 1.55; }
+    .split-l .split-item { color: rgba(255,255,255,0.84); }
+    .split-r .split-item { color: rgba(255,255,255,0.92); }
+    .ico-x, .ico-ck {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+    /* #E53030 sobre marinho fica escuro demais e o circulo vira uma mancha.
+       Coral mais claro le como "erro" sem sumir no fundo. */
+    .ico-x  { background: rgba(255,107,107,0.16); }
+    .ico-x  svg { width: 10px; height: 10px; stroke: #FF6B6B; }
+    .ico-ck { background: rgba(255,255,255,0.15); }
+    .ico-ck svg { width: 10px; height: 10px; stroke: white; }
+
+    /* ── BENTO ── */
+    .bento-wrap { padding: 96px 32px; max-width: 1200px; margin: 0 auto; }
+    .sec-lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+    .sec-title {
+      font-size: clamp(2rem, 3.2vw, 2.9rem);
+      line-height: 1.12;
+      color: var(--dark); margin-bottom: 46px;
+    }
+    .sec-title .red { color: var(--blue); }
+
+    .bento { display: grid; grid-template-columns: repeat(3,1fr); grid-auto-rows: 280px; gap: 14px; }
+    .bc {
+      border-radius: 12px; padding: 34px 30px; overflow: hidden;
+      position: relative;
+      transition: transform 300ms cubic-bezier(0.4,0,0.2,1), box-shadow 300ms cubic-bezier(0.4,0,0.2,1);
+    }
+    .bc:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(9,16,64,0.08); }
+    .bc.lt { background: var(--light); border: 1px solid rgba(9,16,64,0.08); }
+    .bc.dk { background: var(--dark); }
+    .bc.bl { background: var(--blue); }
+    .bc.s2 { grid-column: span 2; }
+
+    .b-ico { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+    .lt .b-ico { background: rgba(18,50,200,0.10); }
+    .dk .b-ico { background: rgba(255,255,255,0.10); }
+    .bl .b-ico { background: rgba(255,255,255,0.15); }
+    .b-ico svg { width: 20px; height: 20px; }
+    .lt .b-ico svg { stroke: var(--blue); }
+    .dk .b-ico svg, .bl .b-ico svg { stroke: white; }
+
+    .bc h3 { font-size: 1.22rem; line-height: 1.2; margin-bottom: 10px; }
+    .lt h3 { color: var(--dark); }
+    .dk h3, .bl h3 { color: var(--white); }
+    .bc p { font-size: 0.84rem; line-height: 1.6; }
+    .lt p { color: rgba(9,16,64,0.58); }
+    .dk p { color: rgba(255,255,255,0.48); }
+    .bl p { color: rgba(255,255,255,0.72); }
+
+    .b-tag {
+      position: absolute; top: 26px; right: 26px;
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 999px;
+    }
+    .lt .b-tag { background: rgba(229,48,48,0.10); color: var(--red); border: 1px solid rgba(229,48,48,0.22); }
+    .dk .b-tag, .bl .b-tag { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15); }
+
+    /* mockup inside bento */
+    .b-mockup {
+      position: absolute; bottom: -16px; right: -8px;
+      width: 52%; background: white;
+      border-radius: 12px 12px 0 0;
+      border: 1px solid rgba(9,16,64,0.09);
+      box-shadow: 0 -8px 36px rgba(9,16,64,0.09);
+      overflow: hidden;
+    }
+    .m-bar { background: #f0f3ff; padding: 8px 12px; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid rgba(9,16,64,0.06); }
+    .m-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .m-body { padding: 12px; }
+    .m-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; margin-bottom: 5px; font-size: 0.71rem; }
+    .m-row.g { background: rgba(34,197,94,0.10); color: #15803d; font-weight: 600; }
+    .m-row.b { background: rgba(18,50,200,0.07); color: var(--blue); font-weight: 500; }
+    .m-row.s { background: rgba(9,16,64,0.04); color: var(--sage); }
+
+    /* ── HOW IT WORKS ── */
+    .how-wrap { background: var(--dark); padding: 96px 32px; }
+    .how-in { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 80px; align-items: start; }
+    .how-sticky { position: sticky; top: 90px; }
+    .how-lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
+    .how-title { font-size: clamp(2.2rem, 3.6vw, 3.2rem); line-height: 1.1; color: var(--white); }
+    .how-title .red { color: var(--blue); }
+
+    .steps { display: flex; flex-direction: column; }
+    .step { padding: 36px 0; border-top: 1px solid rgba(255,255,255,0.14); display: grid; grid-template-columns: 72px 1fr; gap: 28px; align-items: start; }
+    .step:last-child { border-bottom: 1px solid rgba(255,255,255,0.14); }
+    .step-n { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 4.5rem; line-height: 1; color: rgba(229,48,48,0.55); transition: color 0.3s; text-align: center; }
+    .step:hover .step-n { color: var(--red); }
+    .step-t { font-size: 1.22rem; color: var(--white); margin-bottom: 8px; line-height: 1.25; }
+    .step-d { font-size: 0.88rem; color: rgba(255,255,255,0.68); line-height: 1.65; }
+
+    /* ── TESTIMONIALS ── */
+    .testi-wrap { padding: 96px 32px; max-width: 1200px; margin: 0 auto; }
+    .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; align-items: center; }
+    .tc {
+      border-radius: 12px; padding: 30px 26px;
+      transition: transform 300ms cubic-bezier(0.4,0,0.2,1), box-shadow 300ms cubic-bezier(0.4,0,0.2,1);
+    }
+    .tc:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(9,16,64,0.07); }
+    .tc.lite { background: white; border: 1px solid rgba(9,16,64,0.08); }
+    .tc.dark { background: var(--dark); transform: translateY(14px); }
+    .tc.dark:hover { transform: translateY(10px); }
+    .stars { display: flex; gap: 2px; margin-bottom: 16px; }
+    .stars svg { width: 15px; height: 15px; fill: var(--red); }
+    .t-body { font-size: 0.9rem; line-height: 1.72; margin-bottom: 22px; font-weight: 500; }
+    .lite .t-body { color: rgba(9,16,64,0.72); }
+    .dark .t-body { color: rgba(255,255,255,0.78); }
+    .t-author { display: flex; align-items: center; gap: 12px; }
+    .t-av {
+      width: 42px; height: 42px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 0.82rem; flex-shrink: 0;
+    }
+    .lite .t-av { background: var(--light); color: var(--blue); }
+    .dark .t-av { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
+    .t-name { font-size: 0.95rem; }
+    .lite .t-name { color: var(--dark); }
+    .dark .t-name { color: var(--white); }
+    .t-role { font-size: 0.73rem; color: var(--sage); }
+
+    /* ── FINAL CTA ── */
+    .cta-sec { background: var(--dark); padding: 100px 32px; position: relative; overflow: hidden; }
+    .cta-deco {
+      position: absolute;
+      font-family: 'Satoshi', sans-serif; font-weight: 700;
+      font-size: 20vw; letter-spacing: -0.03em;
+      color: rgba(255,255,255,0.07); line-height: 0.85;
+      pointer-events: none; user-select: none; white-space: nowrap;
+    }
+    .cta-deco.t { top: -10px; left: -10px; }
+    .cta-deco.b { bottom: -10px; right: -10px; }
+    .cta-in { max-width: 680px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
+    .cta-title { font-size: clamp(2.1rem, 4vw, 3.2rem); line-height: 1.12; color: var(--white); margin-bottom: 18px; }
+    .cta-sub { font-size: 1.05rem; color: rgba(255,255,255,0.78); max-width: 460px; margin: 0 auto 44px; line-height: 1.65; }
+    .cta-card { background: white; border-radius: 12px; padding: 36px 32px; box-shadow: 0 12px 32px rgba(0,0,0,0.14); text-align: left; }
+    .cta-card-title { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.25rem; color: var(--dark); margin-bottom: 20px; }
+    .btn-dark {
+      width: 100%; background: var(--red); color: var(--white);
+      font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.04em; border: none; border-radius: 10px; padding: 15px 20px;
+      cursor: pointer; margin-top: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-dark:hover { background: #c42020; transform: translateY(-2px) scale(1.02); }
+
+    /* ── SIMULATOR / RESULT ── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .sim-panel, .result-panel { animation: fadeUp 0.35s ease; }
+    .sim-title { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.25rem; color:var(--dark); text-align:center; margin-bottom:4px; letter-spacing:0.02em; }
+    .sim-greeting { font-size:0.8rem; color:var(--sage); text-align:center; margin-bottom:20px; line-height:1.5; }
+    .sim-lbl { font-size:0.77rem; font-weight:600; color:var(--dark); margin-bottom:6px; display:flex; align-items:center; gap:5px; }
+    .diag-card { background:var(--mid); border-radius:12px; padding:22px 18px; margin-bottom:12px; }
+    .diag-title { font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.95rem; color:var(--white); margin-bottom:14px; display:flex; align-items:center; gap:8px; letter-spacing:0.03em; line-height:1.2; }
+    .diag-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.15); font-size:0.8rem; }
+    .diag-row:last-of-type { border-bottom:none; }
+    .dlbl { color:rgba(255,255,255,0.9); display:flex; align-items:center; gap:5px; }
+    .dval { font-weight:700; color:var(--white); white-space:nowrap; font-variant-numeric:tabular-nums; flex-shrink:0; }
+    .diag-total { display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.22); border-radius:8px; padding:11px 14px; margin-top:10px; gap:8px; }
+    .diag-total .dlbl { font-size:0.84rem; color:rgba(255,255,255,0.9); font-weight:600; }
+    .diag-total .dval { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.1rem; }
+    .diag-anual { display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.32); border:1.5px solid rgba(255,208,0,0.45); border-radius:9px; padding:12px 14px; margin-top:8px; gap:8px; }
+    .diag-anual .dlbl { font-size:0.84rem; color:rgba(255,255,255,0.95); font-weight:700; }
+    .diag-anual .dval { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.3rem; color:#FFD000; }
+    .diag-msg { text-align:center; margin-top:14px; }
+    .diag-msg p { font-size:0.79rem; color:rgba(255,255,255,0.92); font-weight:600; line-height:1.55; }
+    .diag-msg .hl-gold { color:#FFD000; margin-top:3px; }
+    .wa-card { background:var(--light); border:1px solid rgba(9,16,64,0.08); border-radius:12px; padding:18px 16px; text-align:center; }
+    .wa-card-title { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1rem; color:var(--dark); margin-bottom:5px; line-height:1.2; }
+    .wa-card-sub { font-size:0.76rem; color:var(--sage); margin-bottom:14px; line-height:1.5; }
+    .btn-wa { width:100%; background:#25D366; color:var(--white); font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.88rem; letter-spacing:0.04em; border:none; border-radius:10px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.2s,transform 0.15s; text-decoration:none; }
+    .btn-wa:hover { background:#1ebe5c; transform:translateY(-2px); }
+
+    /* ── FOOTER ── */
+    .footer { background: var(--dark); padding: 26px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-logo { font-size: 0.98rem; color: rgba(255,255,255,0.38); display: flex; align-items: center; gap: 8px; }
+    .footer-copy { font-size: 0.77rem; color: rgba(255,255,255,0.26); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; gap: 40px; padding: 52px 20px; min-height: unset; }
+      .bento-wrap { padding: 64px 20px; }
+      .how-wrap { padding: 64px 20px; }
+      .how-in { grid-template-columns: 1fr; gap: 40px; }
+      .how-sticky { position: static; }
+      .testi-wrap { padding: 64px 20px; }
+      .cta-sec { padding: 64px 20px; }
+      .split { grid-template-columns: 1fr; }
+      .split-l, .split-r { padding: 52px 28px; }
+      .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
+      .bc.s2 { grid-column: span 2; }
+      .bc { min-height: 200px; }
+      .b-mockup { display: none; }
+      .testi-grid { grid-template-columns: 1fr; }
+      .tc.dark { transform: translateY(0); }
+      .tc.dark:hover { transform: translateY(-4px); }
+      .hero-stats { max-width: none; }
+      .h-stat { padding: 0 18px; }
+      .hero-video { max-width: none; margin-bottom: 28px; border-radius: 12px; }
+      .vid-cap { max-width: none; }
+      .split-h { margin-bottom: 26px; }
+
+      /* 4 colunas nao cabem no tablet: vira 2x2. Os itens sao os filhos
+         1,3,5,7 (as .pv escondidas contam), entao o 5 abre a 2a linha e
+         perde a divisoria da esquerda. */
+      .proof-bar-in { grid-template-columns: repeat(2, 1fr); row-gap: 24px; }
+      .proof-item:nth-child(5) { border-left: none; }
+
+      /* No mobile o formulario so aparecia depois dos 3 stats: o card e a
+         segunda coluna inteira do grid, e as colunas empilham. display:contents
+         dissolve o wrapper da coluna 1, os filhos viram itens do grid e ai da
+         pra ordenar um por um. Com gap:0 o espacamento volta a vir das margens
+         que esses elementos ja tinham. Desktop nao e afetado. */
+      .hero { gap: 0; }
+      .hero > div:not(.card) { display: contents; }
+      .hero .badge      { order: 1; justify-self: start; }
+      .hero .hero-title { order: 2; }
+      .hero .hero-video { order: 3; }
+      .hero .vid-cap    { order: 4; }
+      .hero > .card     { order: 5; margin-bottom: 40px; }
+      .hero .hero-stats { order: 6; }
+      .hero .stats-note { order: 7; }
+    }
+    @media (max-width: 560px) {
+      .nav { padding: 0 18px; }
+      .nav-logo { font-size: 1.05rem; white-space: nowrap; }
+      .nav-cta { padding: 8px 14px; font-size: 0.8rem; white-space: nowrap; }
+      .hero { padding: 44px 18px; }
+      .hero-title { font-size: clamp(1.9rem, 7.4vw, 2.4rem); }
+      /* empilha: divisoria vira linha horizontal */
+      .hero-stats { flex-direction: column; }
+      .h-stat { padding: 13px 0 0; border-left: none; border-top: 1px solid rgba(9,16,64,0.13); }
+      .h-stat:first-child { padding-top: 0; }
+      .h-stat strong { margin-bottom: 3px; }
+      .vid-play-btn { width: 60px; height: 60px; }
+      .vid-play-btn svg { width: 21px; height: 21px; }
+      .bento { grid-template-columns: 1fr; }
+      .bc.s2 { grid-column: span 1; }
+      .split-l, .split-r { padding: 44px 18px; }
+      .proof-bar { padding: 22px 14px; }
+      .proof-item { padding: 2px 10px; }
+      .proof-item strong { font-size: 1.2rem; }
+      .proof-item span { font-size: 0.72rem; max-width: 84px; }
+      .card, .cta-card { padding: 26px 18px; }
+      .bento-wrap, .testi-wrap { padding: 52px 18px; }
+      .how-wrap { padding: 52px 18px; }
+      .cta-sec { padding: 52px 18px; }
+      .cta-title { font-size: clamp(2.2rem, 10vw, 3rem); }
+      .cta-deco { display: none; }
+      .footer { padding: 20px 18px; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+    }
+
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; z-index: 1000;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .overlay.active { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--white); border: 1px solid rgba(9,16,64,0.10);
+      border-radius: 12px; width: 100%; max-width: 460px; overflow: hidden auto; max-height: 92vh;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.28s cubic-bezier(.22,.68,0,1.2);
+    }
+    .overlay.active .modal { transform: translateY(0) scale(1); }
+    .modal-progress { padding: 20px 28px 0; }
+    .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .progress-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); }
+    .progress-pct { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--blue); }
+    .progress-track { width: 100%; height: 4px; background: var(--light); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 90%; background: var(--blue); border-radius: 99px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+    .modal-body { padding: 22px 28px 28px; }
+    .modal-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); margin-bottom: 6px; }
+    .modal-question { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.45rem; line-height: 1.1; color: var(--dark); margin-bottom: 18px; }
+    .options { display: flex; flex-direction: column; gap: 8px; }
+    .opt {
+      background: var(--light); border: 1px solid rgba(9,16,64,0.10); border-radius: 10px;
+      padding: 12px 16px; font-family: 'Satoshi', sans-serif; font-size: 0.9rem; font-weight: 500;
+      color: rgba(9,16,64,0.68); text-align: left; cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+    .opt::before { content: ''; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--sage); flex-shrink: 0; transition: border-color 0.15s, background 0.15s; }
+    .opt:hover { border-color: rgba(18,50,200,0.35); background: rgba(18,50,200,0.05); color: var(--dark); }
+    .opt:hover::before { border-color: var(--blue); }
+    .opt.selected { border-color: var(--blue); background: rgba(18,50,200,0.08); color: var(--dark); }
+    .opt.selected::before { border-color: var(--blue); background: var(--blue); box-shadow: inset 0 0 0 3px var(--light); }
+    .modal-success { display: none; flex-direction: column; align-items: center; text-align: center; padding: 8px 0 4px; gap: 12px; }
+    .success-ico { width: 52px; height: 52px; border-radius: 50%; background: rgba(18,50,200,0.09); border: 1px solid rgba(18,50,200,0.2); display: flex; align-items: center; justify-content: center; }
+    .success-ico svg { width: 24px; height: 24px; stroke: var(--blue); }
+    .success-title { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.45rem; color: var(--dark); }
+    .success-desc { color: var(--sage); font-size: 0.84rem; line-height: 1.6; max-width: 320px; }
+
+    /* ════════════ REDESENHO 2026-10 — layout escuro da referência, tons de azul da marca ════════════
+       Fica no fim para sobrepor as regras antigas. Cores chapadas, sem brilho nem degradê:
+       a hierarquia vem da tipografia e do espaço, não de efeito. */
+    :root {
+      --bg-d:   #070B1E;    /* fundo escuro */
+      --panel:  #0E1430;    /* superfícies escuras */
+      --line-d: rgba(255,255,255,0.10);
+      --glow:   #5277FF;    /* azul de destaque (texto sobre o escuro) */
+      --blue2:  #2B54F0;    /* azul dos botões */
+      --soft:   #EEF1FA;    /* seções claras */
+      --mute-d: rgba(255,255,255,0.62);
+    }
+    body { background: var(--bg-d); color: #fff; }
+    .hl { color: var(--glow); }
+    .container { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+
+    /* rótulo de seção */
+    .chip-sec {
+      display: inline-block; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line-d);
+      font-size: 0.8rem; font-weight: 500; color: var(--mute-d);
+    }
+    .on-light .chip-sec { border-color: rgba(9,16,64,0.18); color: rgba(9,16,64,0.6); }
+
+    /* botão principal: pílula azul chapada com a seta num círculo branco */
+    .btn-pill, .btn-sub, .btn-dark {
+      display: inline-flex; align-items: center; justify-content: center; gap: 14px;
+      background: var(--blue2); color: #fff;
+      font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0; text-transform: none;
+      border: none; border-radius: 999px; padding: 7px 7px 7px 24px; min-height: 54px; cursor: pointer; text-decoration: none;
+      box-shadow: none; transition: background 0.15s;
+    }
+    .btn-pill:hover, .btn-sub:hover, .btn-dark:hover { background: #2245D1; transform: none; }
+    .btn-pill .arr, .btn-sub .arr, .btn-dark .arr {
+      width: 40px; height: 40px; border-radius: 50%; background: #fff; color: var(--blue2);
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .btn-pill .arr svg, .btn-sub .arr svg, .btn-dark .arr svg { width: 16px; height: 16px; stroke: currentColor; }
+    .btn-sub, .btn-dark { width: 100%; margin-top: 8px; justify-content: space-between; }
+    .btn-sub[disabled], .btn-dark[disabled] { opacity: 0.75; cursor: wait; justify-content: center; }
+
+    /* ── NAV ── */
+    .nav { background: rgba(7,11,30,0.9); border-bottom: 1px solid var(--line-d); }
+    .nav-logo { color: #fff; }
+    .nav-logo svg { fill: #fff; }
+    .nav-logo .dot { color: var(--glow); }
+    .nav-links a { color: var(--mute-d); }
+    .nav-links a:hover { color: #fff; }
+    .nav-cta { background: var(--blue2); }
+    .nav-cta:hover { background: #2245D1; }
+
+    /* ── HERO ── */
+    .hero-wrap { padding-top: 70px; }
+    .hero {
+      max-width: 1160px; margin: 0 auto; padding: 64px 32px 140px;
+      display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 72px; align-items: start; min-height: 0;
+    }
+    .badge {
+      margin-bottom: 0; padding: 0; letter-spacing: 0; text-transform: none;
+      font-size: 0.9rem; font-weight: 500; color: var(--mute-d);
+    }
+    .badge-dot { background: var(--glow); animation: none; }
+    .hero-title { font-size: clamp(2.2rem, 4vw, 3.3rem); line-height: 1.08; color: #fff; margin: 18px 0 32px; letter-spacing: -0.03em; max-width: 640px; }
+    .hero-title .t-red { color: var(--glow); }
+    .vid-wrap { position: relative; max-width: 600px; }
+    .hero .hero-video { max-width: none; margin-bottom: 16px; border-radius: 14px; box-shadow: none; }
+    .hero .hero-video.is-placeholder { background: var(--panel); color: var(--mute-d); border-color: var(--line-d); }
+    .hero .vid-cap { max-width: 600px; text-align: left; margin: 0 0 40px; }
+    .hero .vid-cap strong { color: #fff; font-style: normal; font-size: 0.95rem; }
+    .hero .vid-cap span { color: var(--mute-d); }
+    .vid-play:hover .vid-play-btn { background: var(--blue2); }
+
+    .hero-stats { display: flex; max-width: 600px; padding-top: 28px; border-top: 1px solid var(--line-d); }
+    .h-stat { flex: 1; padding: 0 22px; border-left: 1px solid var(--line-d); }
+    .h-stat:first-child { padding-left: 0; border-left: none; }
+    .h-stat strong { color: #fff; font-size: 1.7rem; margin-bottom: 8px; }
+    .h-stat b { color: #fff; }
+    .h-stat span { color: var(--mute-d); }
+    .stats-note { color: rgba(255,255,255,0.4); }
+
+    /* card do formulário */
+    .hero .card, .form-card {
+      position: relative; background: var(--panel); border: 1px solid var(--line-d); border-radius: 20px;
+      padding: 32px 28px 24px; box-shadow: none; color: #fff;
+    }
+    .hero .card { position: sticky; top: 94px; }
+    .card-title { color: #fff; font-size: 1.5rem; }
+    .card-title .red { color: var(--glow); }
+    .card-sub { color: var(--mute-d); }
+    .hero .card .trust, .form-card .trust { color: var(--mute-d); }
+    .hero .card .trust svg, .form-card .trust svg { stroke: var(--mute-d); }
+
+    /* campos no card escuro */
+    .hero .card .dform label, .hero .card .dform legend, .form-card .dform label, .form-card .dform legend { color: rgba(255,255,255,0.85); font-weight: 500; }
+    .hero .card .field input, .form-card .field input {
+      background: #fff; border: 1px solid transparent; color: var(--dark); border-radius: 10px;
+    }
+    .hero .card .field input::placeholder, .form-card .field input::placeholder { color: #8A93B5; }
+    .hero .card .field input:focus, .form-card .field input:focus { border-color: var(--glow); box-shadow: 0 0 0 3px rgba(82,119,255,0.35); }
+    .hero .card .hint, .form-card .hint { color: rgba(255,255,255,0.5); }
+    .hero .card .fat-chip span, .form-card .fat-chip span { background: transparent; border-color: rgba(255,255,255,0.2); color: #fff; border-radius: 10px; font-weight: 500; }
+    .hero .card .fat-chip span:hover, .form-card .fat-chip span:hover { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.04); }
+    .hero .card .fat-chip input:checked + span, .form-card .fat-chip input:checked + span { background: #fff; border-color: #fff; color: var(--dark); font-weight: 700; box-shadow: none; }
+    .hero .card .email-fix, .form-card .email-fix { color: rgba(255,255,255,0.8); }
+    .hero .card .email-fix button, .form-card .email-fix button { color: #A9BCFF; }
+    .hero .card .ferr, .form-card .ferr, .hero .card .field-msg, .form-card .field-msg { color: #FF8A8A; }
+    .hero .card .field.bad input, .form-card .field.bad input { border-color: #FF6B6B; }
+    .hero .card fieldset.bad .fat-chip span, .form-card fieldset.bad .fat-chip span { border-color: #FF6B6B; }
+
+    /* ── CARD CLARO "Agora você deve estar pensando" ── */
+    .pain-wrap { position: relative; z-index: 2; margin-top: -80px; padding: 0 24px; }
+    .pain { max-width: 1112px; margin: 0 auto; background: var(--soft); color: var(--dark); border-radius: 28px; padding: 64px; }
+    .pain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: end; }
+    .pain-kicker { font-weight: 500; color: rgba(9,16,64,0.55); font-size: 1rem; margin-bottom: 10px; }
+    .pain-quote { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: clamp(1.7rem, 3vw, 2.3rem); line-height: 1.15; letter-spacing: -0.025em; color: var(--dark); }
+    .pain-quote span { color: var(--blue); }
+    .pain-text { font-size: 1.05rem; line-height: 1.7; color: rgba(9,16,64,0.7); }
+    .pain-text b { color: var(--dark); }
+
+    /* comparação */
+    .cmp { margin-top: 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-radius: 18px; overflow: hidden; }
+    .cmp-col { padding: 32px 30px; }
+    .cmp-col.old { background: #fff; }
+    .cmp-col.new { background: var(--blue); color: #fff; }
+    .cmp-lbl { font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; }
+    .old .cmp-lbl { color: rgba(9,16,64,0.5); }
+    .new .cmp-lbl { color: rgba(255,255,255,0.7); }
+    .cmp-h { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.3rem; line-height: 1.2; margin-bottom: 22px; letter-spacing: -0.01em; }
+    .old .cmp-h { color: var(--dark); }
+    .cmp .split-items { gap: 14px; }
+    .cmp .split-item { font-size: 0.95rem; }
+    .old .split-item { color: rgba(9,16,64,0.72); }
+    .new .split-item { color: rgba(255,255,255,0.92); }
+    .old .ico-x { background: rgba(229,48,48,0.10); }
+    .old .ico-x svg { stroke: var(--red); }
+    .new .ico-ck { background: rgba(255,255,255,0.18); }
+
+    /* ── seções escuras ── */
+    .sec { padding: 120px 0; }
+    .sec-head { margin-bottom: 48px; max-width: 640px; }
+    .sec-h2 { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: clamp(1.8rem, 3.2vw, 2.6rem); line-height: 1.12; letter-spacing: -0.03em; color: #fff; margin-top: 16px; }
+    .plus-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .plus-chips span { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line-d); font-size: 0.95rem; color: rgba(255,255,255,0.85); }
+    .plus-chips b { color: var(--glow); margin-right: 3px; }
+
+    /* processo 01..05 + card de CTA */
+    .proc { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line-d); border-left: 1px solid var(--line-d); }
+    .proc > div { padding: 32px 30px 36px; border-right: 1px solid var(--line-d); border-bottom: 1px solid var(--line-d); }
+    .proc-n { display: block; font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--glow); }
+    .proc h3 { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.2rem; line-height: 1.25; color: #fff; margin: 40px 0 10px; letter-spacing: -0.01em; }
+    .proc p { color: var(--mute-d); font-size: 0.95rem; line-height: 1.6; }
+    .proc > .proc-cta { background: var(--soft); display: flex; flex-direction: column; justify-content: space-between; gap: 24px; }
+    .proc-cta p { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.5rem; line-height: 1.2; letter-spacing: -0.02em; color: var(--dark); }
+    .proc-cta p span { color: var(--blue); }
+    .proc-cta .btn-pill { align-self: flex-start; }
+
+    /* vantagens */
+    .adv { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.3fr); gap: 72px; align-items: start; }
+    .adv-left { position: sticky; top: 110px; }
+    .adv-left .sec-h2 { margin-bottom: 30px; }
+    .adv-cards { display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px; }
+    .adv-card { display: flex; gap: 14px; align-items: flex-start; padding: 24px 0; border-top: 1px solid var(--line-d); font-size: 0.98rem; line-height: 1.6; color: var(--mute-d); }
+    .adv-card b { display: block; color: #fff; font-size: 1.05rem; margin-bottom: 4px; }
+    .adv-card .ck { width: 22px; height: 22px; border-radius: 50%; background: var(--blue2); display: grid; place-items: center; flex-shrink: 0; margin-top: 2px; }
+    .adv-card .ck svg { width: 12px; height: 12px; stroke: #fff; }
+    .adv .b-mockup { position: static; width: auto; margin-top: 40px; background: var(--panel); border: 1px solid var(--line-d); border-radius: 14px; overflow: hidden; box-shadow: none; }
+    .adv .m-bar { display: flex; gap: 6px; padding: 12px 14px; border-bottom: 1px solid var(--line-d); background: transparent; }
+    .adv .m-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .adv .m-body { padding: 6px 14px 10px; }
+    .adv .m-row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.86rem; padding: 10px 0; margin: 0; border-radius: 0; background: none; color: rgba(255,255,255,0.8); border-bottom: 1px solid var(--line-d); font-weight: 400; }
+    .adv .m-row:last-child { border-bottom: none; }
+    .adv .m-row span:last-child { font-weight: 700; }
+    .adv .m-row.g span:last-child { color: #6EE7A8; }
+    .adv .m-row.b span:last-child { color: #A9BCFF; }
+    .adv .m-row.s span:last-child { color: rgba(255,255,255,0.45); }
+
+    /* depoimentos */
+    .testi { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .t-card { background: var(--panel); border-radius: 18px; padding: 30px 28px; display: flex; flex-direction: column; gap: 20px; }
+    .t-card .stars { display: flex; gap: 3px; margin: 0; }
+    .t-card .stars svg { width: 15px; height: 15px; fill: #F5B83D; }
+    .t-card .t-body { color: rgba(255,255,255,0.88); font-size: 1.02rem; line-height: 1.65; flex: 1; margin: 0; font-weight: 400; }
+    .t-card .t-author { display: flex; align-items: center; gap: 12px; padding-top: 20px; border-top: 1px solid var(--line-d); }
+    .t-card .t-av { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 0.82rem; }
+    .t-card .t-name { color: #fff; font-weight: 700; font-size: 0.95rem; }
+    .t-card .t-role { color: var(--mute-d); font-size: 0.8rem; }
+
+    /* faixa em movimento */
+    .marquee { display: block; text-decoration: none; background: var(--blue2); overflow: hidden; padding: 16px 0; }
+    .marquee-track { display: flex; width: max-content; animation: marq 32s linear infinite; }
+    .marquee-track span { display: inline-flex; align-items: center; gap: 10px; padding-right: 40px; font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff; white-space: nowrap; }
+    .marquee-track span i { font-style: normal; opacity: 0.7; }
+    @keyframes marq { to { transform: translateX(-50%); } }
+
+    /* formulário final (seção clara) */
+    .final { background: var(--soft); color: var(--dark); padding: 110px 0; }
+    .final-grid { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 80px; align-items: center; }
+    .final .on-light h2 { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: clamp(2rem, 3.6vw, 2.8rem); line-height: 1.1; letter-spacing: -0.03em; color: var(--dark); margin: 16px 0 16px; }
+    .final .on-light h2 span { color: var(--blue); }
+    .final p.lead { font-size: 1.08rem; line-height: 1.7; color: rgba(9,16,64,0.66); max-width: 440px; }
+    .final-list { list-style: none; margin-top: 28px; display: flex; flex-direction: column; gap: 12px; }
+    .final-list li { display: flex; align-items: center; gap: 12px; font-weight: 500; color: var(--dark); }
+    .final-list .ck { width: 22px; height: 22px; border-radius: 50%; background: var(--blue2); display: grid; place-items: center; flex-shrink: 0; }
+    .final-list .ck svg { width: 12px; height: 12px; stroke: #fff; }
+    .final .form-card { background: var(--bg-d); border-color: transparent; }
+    .final .form-card .card-title { color: #fff; font-size: 1.5rem; line-height: 1.1; letter-spacing: -0.01em; margin: 0 0 6px; }
+    .final .form-card .card-title span { color: var(--glow); }
+    .form-card .form-intro { color: var(--mute-d); font-size: 0.9rem; line-height: 1.5; margin-bottom: 22px; }
+    .form-card .form-intro b { color: #fff; font-weight: 500; }
+
+    /* rodapé */
+    .footer { background: var(--bg-d); border-top: 1px solid var(--line-d); padding: 30px 32px; }
+    .footer-logo { color: rgba(255,255,255,0.5); }
+
+    /* barra fixa no celular e modal no mesmo padrão */
+    .m-cta a { background: var(--blue2); border-radius: 999px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    /* ── janela pós-cadastro (qualificação, simulador, sucesso) no visual da página ── */
+    .overlay { background: rgba(3,6,18,0.72); }
+    .modal { background: var(--panel); color: #fff; border: 1px solid var(--line-d); border-radius: 20px; max-width: 480px; }
+    .modal-progress { padding: 22px 28px 0; }
+    .progress-label { color: var(--mute-d); letter-spacing: 0; text-transform: none; font-size: 0.82rem; font-weight: 500; }
+    .progress-pct { color: #fff; font-size: 0.82rem; font-weight: 500; }
+    .progress-track { background: rgba(255,255,255,0.1); height: 3px; }
+    .progress-fill { background: var(--glow); }
+    .modal-body { padding: 20px 28px 28px; }
+    #qForm [hidden] { display: none !important; }
+    .q-top { min-height: 26px; margin-bottom: 8px; display: flex; align-items: center; }
+    .q-ok { display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 500; color: #8EE3B5; }
+    .q-ok svg { width: 16px; height: 16px; stroke: currentColor; }
+    .q-back { background: none; border: none; padding: 4px 0; font: inherit; font-size: 0.88rem; color: var(--mute-d); cursor: pointer; }
+    .q-back:hover { color: #fff; }
+    .qs { border: none; padding: 0; margin: 0; min-width: 0; animation: qIn 0.22s ease; }
+    @keyframes qIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+    .q-q { display: block; padding: 0; font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.35rem; line-height: 1.25; letter-spacing: -0.02em; color: #fff; margin-bottom: 18px; }
+    .q-list { display: flex; flex-direction: column; gap: 8px; }
+    .q-row { position: relative; display: block; }
+    .q-row input { position: absolute; opacity: 0; pointer-events: none; }
+    .q-row span { display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+    .q-row b { font-size: 0.98rem; color: #fff; }
+    .q-row small { font-size: 0.83rem; color: var(--mute-d); line-height: 1.35; }
+    .q-row span:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.03); }
+    .q-row input:checked + span { background: #fff; border-color: #fff; }
+    .q-row input:checked + span b { color: var(--dark); }
+    .q-row input:checked + span small { color: rgba(9,16,64,0.6); }
+    .q-row input:focus-visible + span, .modal .q-scale input:focus-visible + span { box-shadow: 0 0 0 3px rgba(82,119,255,0.55); }
+    .modal .q-scale { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; }
+    .modal .q-scale span { height: 54px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.16); background: transparent; color: #fff; font-size: 1rem; }
+    .modal .q-scale label:first-child span { border-radius: 12px 6px 6px 12px; }
+    .modal .q-scale label:last-child span { border-radius: 6px 12px 12px 6px; }
+    .modal .q-scale span:hover { border-color: rgba(255,255,255,0.45); }
+    .modal .q-scale label.fill span { background: rgba(82,119,255,0.25); border-color: rgba(82,119,255,0.4); }
+    .modal .q-scale input:checked + span { background: #fff; border-color: #fff; color: var(--dark); }
+    .modal .q-ends { color: var(--mute-d); font-size: 0.82rem; margin-top: 8px; }
+    .modal .q-hint { color: #fff; font-size: 1rem; text-align: center; margin-top: 18px; min-height: 1.5em; }
+    .q-note { color: var(--mute-d); font-size: 0.88rem; margin: -10px 0 14px; }
+    .modal .q-text { background: #fff; border: 1px solid transparent; border-radius: 12px; min-height: 96px; color: var(--dark); }
+    .modal .q-text:focus { border-color: var(--glow); box-shadow: 0 0 0 3px rgba(82,119,255,0.35); }
+    .modal .q-count { color: var(--mute-d); margin-bottom: 12px; }
+    .modal .q-next { margin-top: 18px; justify-content: center; padding: 14px 20px; }
+    .q-skip { display: block; width: 100%; margin-top: 8px; background: none; border: none; padding: 10px; font: inherit; font-size: 0.9rem; color: var(--mute-d); cursor: pointer; }
+    .q-skip:hover { color: #fff; text-decoration: underline; }
+    .modal .ferr { color: #FF8A8A; margin-top: 12px; }
+    .qs.bad .q-row span, .qs.bad .q-scale span { border-color: #FF6B6B; }
+    .success-ico { background: rgba(110,231,168,0.12); border-color: rgba(110,231,168,0.3); }
+    .success-ico svg { stroke: #6EE7A8; }
+    .success-title { color: #fff; }
+    .success-desc { color: var(--mute-d); }
+    .success-desc strong { color: #fff; }
+    .sim-title { color: #fff; font-size: 1.35rem; letter-spacing: -0.01em; text-align: left; }
+    .sim-greeting { color: var(--mute-d); font-size: 0.9rem; text-align: left; }
+    .sim-lbl { color: rgba(255,255,255,0.85); font-weight: 500; }
+    .modal .field input { border-color: transparent; border-radius: 10px; }
+    @media (max-width: 560px) {
+      .overlay { align-items: flex-end; padding: 0; }
+      .modal { max-width: none; border-radius: 20px 20px 0 0; border-bottom: none; max-height: 94vh; padding-bottom: env(safe-area-inset-bottom); }
+      .modal-progress { padding: 18px 20px 0; }
+      .modal-body { padding: 16px 20px 22px; }
+      .q-q { font-size: 1.2rem; margin-bottom: 14px; }
+      .modal .q-scale span { height: 50px; font-size: 0.95rem; }
+    }
+
+    @media (max-width: 1100px) {
+      .proc { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .adv { grid-template-columns: 1fr; gap: 40px; }
+      .adv-left { position: static; }
+      .testi { grid-template-columns: 1fr; max-width: 640px; }
+    }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; gap: 0; padding: 40px 20px 120px; }
+      .hero .card { position: static; }
+      .hero .badge { justify-self: start; }
+      .hero .vid-wrap { order: 3; max-width: none; }
+      .hero .vid-cap { max-width: none; margin-bottom: 28px; }
+      .hero > .card { margin-bottom: 36px; }
+      .hero-stats { max-width: none; }
+      .pain { padding: 44px 26px; border-radius: 22px; }
+      .pain-grid { grid-template-columns: 1fr; gap: 20px; }
+      .cmp { grid-template-columns: 1fr; }
+      .final-grid { grid-template-columns: 1fr; gap: 40px; }
+      .sec { padding: 88px 0; }
+      .container { padding: 0 20px; }
+    }
+    @media (max-width: 640px) {
+      .hero { padding: 32px 18px 110px; }
+      .hero-title { margin-bottom: 24px; }
+      .hero .hero-video { border-radius: 12px; }
+      .hero-stats { flex-direction: column; gap: 14px; padding-top: 22px; }
+      .h-stat, .h-stat:first-child { display: grid; grid-template-columns: 96px 1fr; column-gap: 12px; align-items: center; padding: 0; border-left: none; border-top: none; }
+      .h-stat strong { grid-row: span 2; margin: 0; font-size: 1.35rem; }
+      .hero .card, .form-card { padding: 24px 18px 20px; border-radius: 18px; }
+      .pain-wrap { padding: 0 10px; }
+      .pain { padding: 34px 20px; }
+      .cmp-col { padding: 26px 20px; }
+      .proc { grid-template-columns: 1fr; }
+      .proc > div { padding: 26px 22px 28px; }
+      .proc h3 { margin-top: 20px; }
+      .adv-cards { grid-template-columns: 1fr; }
+      .final { padding: 76px 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+
+  </style>
+
+  <script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init','1338198531534558');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1338198531534558&ev=PageView&noscript=1"/></noscript>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3L4M9LVX7W"></script>
+  <script>
+  window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+  gtag('js',new Date());gtag('config','G-3L4M9LVX7W');
+  </script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-in">
+      <a href="#" class="nav-logo">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <ellipse cx="8" cy="6" rx="2.3" ry="2.9" opacity=".9"/>
+          <ellipse cx="13" cy="5" rx="2.3" ry="2.9" opacity=".9"/>
+          <ellipse cx="18" cy="7" rx="2.1" ry="2.6" opacity=".9"/>
+          <ellipse cx="5.2" cy="11.5" rx="1.9" ry="2.4" opacity=".9"/>
+          <path d="M8.5 13 C6 17 7 21.5 12.5 22 C18 21.5 19 17 16.5 13 C14.8 10 10.2 10 8.5 13Z" opacity=".9"/>
+        </svg>
+        FLUXXO PET<span class="dot">.</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#how">Como Funciona</a></li>
+        <li><a href="#benefits">Benefícios</a></li>
+        <li><a href="#leadForm">Análise</a></li>
+      </ul>
+      <div class="nav-right">
+        <a href="#leadForm" class="nav-cta">Fazer análise</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero-wrap">
+    <div class="hero">
+      <div>
+        <div class="badge"><span class="badge-dot"></span>Contabilidade especializada para pets</div>
+        <h1 class="hero-title">
+          Seu pet shop paga imposto que não deve?<br>
+          <span class="t-red">Veja o que aconteceu com esta pet.</span>
+        </h1>
+
+        <!-- VÍDEO — o ID do YouTube fica em YT_ID, no script do fim da página -->
+        <div class="vid-wrap">
+          <div class="hero-video" id="heroVideo"></div>
+        </div>
+        <p class="vid-cap">
+          <strong>Histórias reais. Resultados reais.</strong>
+          <span>Assista ao depoimento de quem recuperou dinheiro e ganhou tranquilidade.</span>
+        </p>
+
+        <div class="hero-stats">
+          <div class="h-stat">
+            <strong>R$2.400</strong>
+            <b>de economia média</b>
+            <span>por mês para nossos clientes</span>
+          </div>
+          <div class="h-stat">
+            <strong>800+</strong>
+            <b>pet shops e clínicas</b>
+            <span>atendidos em todo o Brasil</span>
+          </div>
+          <div class="h-stat">
+            <strong>0</strong>
+            <b>risco e 100% legal</b>
+            <span>atuamos dentro da lei</span>
+          </div>
+        </div>
+        <p class="stats-note">*Resultados médios com base em análises realizadas.</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Análise <span class="red">Gratuita</span></h2>
+        <p class="card-sub">4 campos e 1 clique &bull; leva menos de 30 segundos</p>
+
+        <form id="leadForm" class="dform" onsubmit="submitLead(event,'')" novalidate>
+          <div class="field">
+            <label for="nome">Seu nome</label>
+            <input type="text" id="nome" placeholder="Nome e sobrenome" autocomplete="name" autocapitalize="words" enterkeyhint="next" />
+          </div>
+          <div class="field">
+            <label for="whatsapp">WhatsApp com DDD</label>
+            <input type="tel" id="whatsapp" placeholder="(11) 99999-9999" autocomplete="tel" inputmode="numeric" enterkeyhint="next" />
+            <p class="hint">A análise chega por lá</p>
+          </div>
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" placeholder="voce@email.com" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" />
+            <p class="email-fix" id="emailFix" hidden></p>
+          </div>
+          <div class="field">
+            <label for="petshop">Nome do pet shop</label>
+            <input type="text" id="petshop" placeholder="Ex.: Pet Feliz" autocomplete="organization" autocapitalize="words" enterkeyhint="done" />
+          </div>
+          <fieldset id="fatBox">
+            <legend>Faturamento mensal</legend>
+            <div class="fat-chips" data-name="fat" role="radiogroup"></div>
+          </fieldset>
+          <p class="ferr" id="ferr" role="alert"></p>
+          <button type="submit" class="btn-sub" id="btnSend">Ver minha análise <span class="arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span></button>
+        </form>
+        <p class="trust" id="heroTrust">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          100% gratuito &bull; Sem spam &bull; Dados protegidos
+        </p>
+
+        <!-- (simulador agora abre no modal — ver #modalSimulator) -->
+      </div>
+    </div>
+  </div>
+
+  <!-- "AGORA VOCÊ DEVE ESTAR PENSANDO" — card claro sobreposto ao hero -->
+  <div class="pain-wrap">
+    <div class="pain">
+      <div class="pain-grid">
+        <div>
+          <p class="pain-kicker">Agora você deve estar pensando:</p>
+          <p class="pain-quote">“Meu contador já cuida disso…” <span>Será mesmo?</span></p>
+        </div>
+        <p class="pain-text">A maioria dos contadores usa um regime tributário genérico e <b>nunca olha as isenções do setor pet</b>. Ração e medicamentos veterinários têm benefício fiscal, e mesmo assim muito pet shop paga imposto cheio todo mês. E <b>ninguém recupera o que já foi pago a mais.</b></p>
+      </div>
+      <div class="cmp">
+        <div class="cmp-col old">
+          <p class="cmp-lbl">O jeito antigo</p>
+          <h2 class="cmp-h">Seu contador genérico</h2>
+          <div class="split-items">
+            <div class="split-item"><div class="ico-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Usa regime tributário genérico sem olhar isenções do setor pet</div>
+            <div class="split-item"><div class="ico-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Nunca falou que ração e medicamentos têm isenção fiscal</div>
+            <div class="split-item"><div class="ico-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Você paga tributos que não deveria pagar todo mês</div>
+            <div class="split-item"><div class="ico-x"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Não recupera os valores pagos indevidamente nos meses anteriores</div>
+          </div>
+        </div>
+        <div class="cmp-col new">
+          <p class="cmp-lbl">O jeito Fluxxo Pet</p>
+          <h2 class="cmp-h">Contabilidade especializada</h2>
+          <div class="split-items">
+            <div class="split-item"><div class="ico-ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Especializado 100% em pet shops: conhece cada isenção do setor</div>
+            <div class="split-item"><div class="ico-ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Identifica todos os produtos com benefício fiscal no seu estoque</div>
+            <div class="split-item"><div class="ico-ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Você para de pagar o que não deve a partir do primeiro mês</div>
+            <div class="split-item"><div class="ico-ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>Recupera os impostos pagos a mais nos últimos meses</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROCESSO (como funciona) -->
+  <section class="sec" id="how">
+    <div class="container">
+      <div class="sec-head">
+        <span class="chip-sec">Processo</span>
+        <h2 class="sec-h2">Como funciona a sua análise</h2>
+        <div class="plus-chips"><span><b>+</b>Isenções</span><span><b>+</b>Economia</span><span><b>+</b>Dinheiro de volta</span></div>
+      </div>
+      <div class="proc">
+        <div>
+          <span class="proc-n">01</span>
+          <h3>Faça a análise</h3>
+          <p>Preencha o formulário em 30 segundos com os dados básicos do seu pet shop. Sem burocracia.</p>
+        </div>
+        <div>
+          <span class="proc-n">02</span>
+          <h3>Receba o relatório em 24h</h3>
+          <p>Nosso especialista analisa seu caso e envia pelo WhatsApp um relatório completo em até 24h.</p>
+        </div>
+        <div>
+          <span class="proc-n">03</span>
+          <h3>Recupere seu dinheiro</h3>
+          <p>Começamos a trabalhar para você imediatamente: você para de pagar o que não deve e recupera o histórico.</p>
+        </div>
+        <div>
+          <span class="proc-n">04</span>
+          <h3>Relatórios claros todo mês</h3>
+          <p>Todo mês você recebe um relatório simples mostrando quanto economizou e o que foi recuperado.</p>
+        </div>
+        <div>
+          <span class="proc-n">05</span>
+          <h3>Contador dedicado</h3>
+          <p>Um especialista em pet shops cuida do seu negócio exclusivamente. Sem fila, sem robôs.</p>
+        </div>
+        <div class="proc-cta">
+          <p>Pronto para <span>parar de pagar a mais?</span></p>
+          <a href="#analise" class="btn-pill">Fazer minha análise <span class="arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VANTAGENS -->
+  <section class="sec" id="benefits" style="padding-top:0;">
+    <div class="container adv">
+      <div class="adv-left">
+        <span class="chip-sec">Vantagens</span>
+        <h2 class="sec-h2">Tudo que seu pet shop <span class="hl">precisa</span> para parar de pagar a mais</h2>
+        <a href="#analise" class="btn-pill">Quero minha análise <span class="arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span></a>
+        <div class="b-mockup" aria-label="Exemplo de análise fiscal">
+          <div class="m-bar"><div class="m-dot" style="background:#ff5f57"></div><div class="m-dot" style="background:#ffbd2e"></div><div class="m-dot" style="background:#28c840"></div></div>
+          <div class="m-body">
+            <div class="m-row g"><span>✓ Ração para cães e gatos</span><span>Isento</span></div>
+            <div class="m-row g"><span>✓ Medicamentos veterinários</span><span>Isento</span></div>
+            <div class="m-row b"><span>~ Produtos de higiene</span><span>Verificar</span></div>
+            <div class="m-row s"><span>Acessórios pet</span><span>Tributado</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="adv-cards">
+        <div class="adv-card"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div><b>Análise fiscal completa</b>Mapeamos o seu estoque e identificamos os produtos com isenção garantida por lei.</div></div>
+        <div class="adv-card"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div><b>Recuperação retroativa</b>Recuperamos os impostos pagos a mais nos últimos 5 anos. Seu dinheiro de volta.</div></div>
+        <div class="adv-card"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div><b>Especialistas em pet</b>Atendemos só pet shops e clínicas, então conhecemos cada isenção do setor.</div></div>
+        <div class="adv-card"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div><b>Economia já no 1º mês</b>Você para de pagar o que não deve a partir do primeiro mês.</div></div>
+        <div class="adv-card"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div><b>100% dentro da lei</b>Zero risco para o seu negócio, tudo com base na legislação.</div></div>
+        <div class="adv-card"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><div><b>Economia garantida</b>Se não identificarmos nenhuma isenção, a análise é 100% gratuita.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEPOIMENTOS -->
+  <section class="sec" style="padding-top:0;">
+    <div class="container">
+      <div class="sec-head">
+        <span class="chip-sec">Depoimentos</span>
+        <h2 class="sec-h2">Quem já <span class="hl">recuperou</span></h2>
+      </div>
+      <div class="testi">
+        <div class="t-card">
+          <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+          <p class="t-body">"Meu contador de 10 anos nunca me falou sobre isso. Em 2 semanas a Fluxxo Pet identificou R$1.800 que eu pagava todo mês sem precisar."</p>
+          <div class="t-author"><div class="t-av">MF</div><div><p class="t-name">Marcos Ferreira</p><p class="t-role">Pet Shop Amigos do Bicho — SP</p></div></div>
+        </div>
+        <div class="t-card">
+          <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+          <p class="t-body">"O diagnóstico foi em 30 segundos mesmo. Resultado: R$3.200 por mês que eu jogava fora. Recuperei também os últimos 18 meses. Inacreditável."</p>
+          <div class="t-author"><div class="t-av">AC</div><div><p class="t-name">Ana Costa</p><p class="t-role">VetShop Premium — RJ</p></div></div>
+        </div>
+        <div class="t-card">
+          <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+          <p class="t-body">"Faturamento de R$85 mil por mês e pagava R$2.100 de imposto indevido. A Fluxxo Pet resolveu em uma semana. Recomendo demais."</p>
+          <div class="t-author"><div class="t-av">RL</div><div><p class="t-name">Ricardo Lima</p><p class="t-role">Casa dos Animais — MG</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAIXA EM MOVIMENTO -->
+  <a class="marquee" href="#analise" aria-label="Fazer minha análise gratuita">
+    <div class="marquee-track" aria-hidden="true"><span>FAÇA SUA ANÁLISE GRATUITA <i>↗</i></span><span>PARE DE PAGAR IMPOSTO A MAIS <i>↗</i></span><span>FAÇA SUA ANÁLISE GRATUITA <i>↗</i></span><span>PARE DE PAGAR IMPOSTO A MAIS <i>↗</i></span><span>FAÇA SUA ANÁLISE GRATUITA <i>↗</i></span><span>PARE DE PAGAR IMPOSTO A MAIS <i>↗</i></span><span>FAÇA SUA ANÁLISE GRATUITA <i>↗</i></span><span>PARE DE PAGAR IMPOSTO A MAIS <i>↗</i></span><span>FAÇA SUA ANÁLISE GRATUITA <i>↗</i></span><span>PARE DE PAGAR IMPOSTO A MAIS <i>↗</i></span><span>FAÇA SUA ANÁLISE GRATUITA <i>↗</i></span><span>PARE DE PAGAR IMPOSTO A MAIS <i>↗</i></span><span>FAÇA SUA ANÁLISE GRATUITA <i>↗</i></span><span>PARE DE PAGAR IMPOSTO A MAIS <i>↗</i></span><span>FAÇA SUA ANÁLISE GRATUITA <i>↗</i></span><span>PARE DE PAGAR IMPOSTO A MAIS <i>↗</i></span></div>
+  </a>
+
+  <!-- FORMULÁRIO FINAL -->
+  <section class="final" id="analise">
+    <div class="container final-grid">
+      <div class="on-light">
+        <span class="chip-sec">Análise gratuita</span>
+        <h2>Descubra quanto você pode <span>recuperar</span></h2>
+        <p class="lead">É grátis. Leva 30 segundos. Pode mudar o caixa do seu negócio para sempre.</p>
+        <ul class="final-list">
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Resultado em até 24h pelo WhatsApp</li>
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Sem compromisso e sem custo</li>
+          <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Seus dados ficam protegidos</li>
+        </ul>
+      </div>
+      <div class="form-card">
+        <h2 class="card-title">Fazer análise <span class="red">gratuita</span></h2>
+        <p class="form-intro">Preencha e receba a sua análise <b>direto no WhatsApp</b>.</p>
+        <form id="leadFormB" class="dform" onsubmit="submitLead(event,'B')" novalidate>
+          <div class="field"><label for="nomeB">Seu nome</label><input type="text" id="nomeB" placeholder="Nome e sobrenome" autocomplete="name" autocapitalize="words" enterkeyhint="next" /></div>
+          <div class="field"><label for="whatsappB">WhatsApp com DDD</label><input type="tel" id="whatsappB" placeholder="(11) 99999-9999" autocomplete="tel" inputmode="numeric" enterkeyhint="next" /></div>
+          <div class="field"><label for="emailB">E-mail</label><input type="email" id="emailB" placeholder="voce@email.com" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" /><p class="email-fix" id="emailFixB" hidden></p></div>
+          <div class="field"><label for="petshopB">Nome do pet shop</label><input type="text" id="petshopB" placeholder="Ex.: Pet Feliz" autocomplete="organization" autocapitalize="words" enterkeyhint="done" /></div>
+          <fieldset id="fatBoxB">
+            <legend>Faturamento mensal</legend>
+            <div class="fat-chips" data-name="fatB" role="radiogroup"></div>
+          </fieldset>
+          <p class="ferr" id="ferrB" role="alert"></p>
+          <button type="submit" class="btn-dark" id="btnSendB">Ver minha análise <span class="arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span></button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- barra fixa no celular: aparece enquanto nenhum formulário está na tela -->
+  <div class="m-cta" id="mCta" aria-hidden="true"><a href="#leadForm" tabindex="-1">Fazer minha análise gratuita &rarr;</a></div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-logo">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="rgba(255,255,255,0.38)">
+        <ellipse cx="8" cy="6" rx="2.3" ry="2.9"/><ellipse cx="13" cy="5" rx="2.3" ry="2.9"/>
+        <ellipse cx="18" cy="7" rx="2.1" ry="2.6"/><ellipse cx="5.2" cy="11.5" rx="1.9" ry="2.4"/>
+        <path d="M8.5 13 C6 17 7 21.5 12.5 22 C18 21.5 19 17 16.5 13 C14.8 10 10.2 10 8.5 13Z"/>
+      </svg>
+      FLUXXO PET
+    </div>
+    <span class="footer-copy">© 2025 Fluxxo Pet — Contabilidade para pets</span>
+  </div>
+
+  <!-- MODAL -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-progress">
+        <div class="progress-meta">
+          <span class="progress-label">Análise em andamento</span>
+          <span class="progress-pct" id="progressPct">90%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <div class="modal-body" id="modalQuestion" style="display:none;"><!-- pergunta de faturamento agora fica no próprio formulário --></div>
+      <div class="modal-body" id="modalSuccess" style="display:none;">
+        <div class="modal-success" style="display:flex;">
+          <div class="success-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="success-title">Análise confirmada!</p>
+          <p class="success-desc">Recebemos suas informações, <strong id="successName"></strong>. Enviaremos o resultado pelo WhatsApp em instantes.</p>
+        </div>
+      </div>
+      <div class="modal-body" id="modalQualify" style="display:none;">
+        <!-- uma pergunta por tela: tocar numa resposta já leva para a próxima -->
+        <form id="qForm" onsubmit="submitQualify(event)" novalidate>
+          <div class="q-top">
+            <p class="q-ok" id="qTitle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Cadastro recebido<span id="qName"></span></span></p>
+            <button type="button" class="q-back" id="qBack" hidden>&larr; Voltar</button>
+          </div>
+          <fieldset class="qs" data-step="1" id="qDifBox">
+            <legend class="q-q">Qual é a sua maior dificuldade hoje?</legend>
+            <div class="q-list" role="radiogroup">
+              <label class="q-row"><input type="radio" name="qdif" value="Falta de lucro" /><span><b>Falta de lucro</b><small>Vendo bem, mas sobra pouco no fim do mês</small></span></label>
+              <label class="q-row"><input type="radio" name="qdif" value="Imposto alto" /><span><b>Imposto alto</b><small>Sinto que pago imposto demais</small></span></label>
+              <label class="q-row"><input type="radio" name="qdif" value="Contador genérico" /><span><b>Contador genérico</b><small>Meu contador não entende de pet shop</small></span></label>
+              <label class="q-row"><input type="radio" name="qdif" value="Folha errada" /><span><b>Folha de pagamento errada</b><small>Erros ou custo alto com funcionários</small></span></label>
+              <label class="q-row"><input type="radio" name="qdif" value="Precificação" /><span><b>Precificação</b><small>Não sei se o preço dos produtos está certo</small></span></label>
+            </div>
+            <button type="button" class="btn-sub q-next" data-to="2" hidden>Continuar</button>
+          </fieldset>
+          <fieldset class="qs" data-step="2" id="qUrgBox" hidden>
+            <legend class="q-q">De 1 a 10, o quanto você quer resolver isso ainda este mês?</legend>
+            <div class="q-scale" role="radiogroup" id="qScale"></div>
+            <div class="q-ends"><span>Sem pressa</span><span>É urgente</span></div>
+            <p class="q-hint" id="qUrgHint" aria-live="polite"></p>
+            <button type="button" class="btn-sub q-next" data-to="3" hidden>Continuar</button>
+          </fieldset>
+          <div class="qs" data-step="3" hidden>
+            <label class="q-q" for="qSobre">Quer contar mais alguma coisa sobre o seu negócio?</label>
+            <p class="q-note">Opcional. Ajuda o especialista a chegar preparado.</p>
+            <textarea id="qSobre" class="q-text" maxlength="500" rows="3" placeholder="Ex.: tenho 2 lojas, troquei de contador há pouco…"></textarea>
+            <p class="q-count"><span id="qCount">0</span>/500</p>
+            <button type="submit" class="btn-sub" id="qBtn">Enviar respostas <span class="arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span></button>
+            <button type="submit" class="q-skip" id="qSkip">Pular esta pergunta</button>
+          </div>
+          <p class="ferr" id="qErr" role="alert"></p>
+        </form>
+      </div>
+      <div class="modal-body" id="modalSimulator" style="display:none;">
+        <p class="sim-title">Simulador de impostos</p>
+        <p class="sim-greeting" id="simGreeting">Preencha os dados — leva menos de 1 minuto</p>
+        <div class="field">
+          <p class="sim-lbl">Faturamento mensal total (R$)</p>
+          <input type="tel" id="simFat" placeholder="Ex: 50000" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <p class="sim-lbl">Vendas de ração por mês (R$)</p>
+          <input type="tel" id="simRacao" placeholder="Ex: 20000" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <p class="sim-lbl">Vendas de medicamentos e higiene por mês (R$)</p>
+          <input type="tel" id="simMed" placeholder="Ex: 10000" inputmode="numeric" />
+        </div>
+        <button class="btn-sub" onclick="calcSimulator()">Calcular quanto pago a mais <span class="arr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var leadData = {};
+    var REVENUE_EVENTS = { 'Até R$30 mil':'Lead30k','R$50 mil':'Lead50k','R$100 mil':'Lead100k','R$200 mil':'Lead200k','Mais de R$200 mil':'Lead200kMais' };
+
+    function genEventId() { return Date.now().toString(36) + Math.random().toString(36).substr(2,9); }
+    function getCookie(n) { var m=document.cookie.match(new RegExp('(?:^|;)\\s*'+n+'=([^;]*)')); return m?decodeURIComponent(m[1]):''; }
+
+    function track(eventName, userData, customData) {
+      var eid = genEventId();
+      var std = ['PageView','Lead'].indexOf(eventName) !== -1;
+      if (typeof fbq !== 'undefined') { std ? fbq('track',eventName,customData||{},{eventID:eid}) : fbq('trackCustom',eventName,customData||{},{eventID:eid}); }
+      fetch('/tracker',{ method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ event_name:eventName, event_id:eid, user_data:userData||{}, custom_data:customData||{},
+          source_url:window.location.href, fbp:getCookie('_fbp'), fbc:getCookie('_fbc'), session_id:getCookie('_krob_sid') })
+      }).catch(function(){});
+    }
+
+    track('PageView',{},{});
+
+    (function(){
+      var th=[25,50,75,95], fired={};
+      function sc(){
+        var st=window.pageYOffset||document.documentElement.scrollTop;
+        var wh=window.innerHeight||document.documentElement.clientHeight;
+        var dh=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,document.body.offsetHeight,document.documentElement.offsetHeight);
+        var p=Math.round((st+wh)/dh*100);
+        th.forEach(function(t){ if(!fired[t]&&p>=t){fired[t]=true;track('ScrollDepth'+t,{},{percent:t});} });
+      }
+      window.addEventListener('scroll',sc,{passive:true});
+    })();
+
+    /* ── VÍDEO DA PRIMEIRA DOBRA ──────────────────────────────────────────
+       Cole aqui o ID do vídeo do YouTube (só o ID, não a URL inteira).
+       Ex.: https://www.youtube.com/watch?v=dQw4w9WgXcQ  ->  'dQw4w9WgXcQ'
+       Enquanto estiver vazio, a página mostra um placeholder no lugar.     */
+    var YT_ID = 'zEh5PWSN5Qw';
+
+    (function(){
+      var box = document.getElementById('heroVideo');
+      if (!box) return;
+
+      if (!YT_ID) {
+        box.classList.add('is-placeholder');
+        box.innerHTML = '<p>▶ Vídeo da primeira dobra<br>defina <b>YT_ID</b> no script para publicar</p>';
+        return;
+      }
+
+      /* capa estática — o player do YouTube só é carregado no clique,
+         então a dobra não paga o peso do embed em quem nem assiste */
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'vid-play';
+      btn.setAttribute('aria-label','Assistir ao depoimento');
+      btn.innerHTML =
+        '<img src="https://i.ytimg.com/vi/' + YT_ID + '/maxresdefault.jpg" alt="Depoimento de cliente da Fluxxo Pet" ' +
+        'onerror="this.src=\'https://i.ytimg.com/vi/' + YT_ID + '/hqdefault.jpg\'">' +
+        '<span class="vid-play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>';
+      box.appendChild(btn);
+
+      btn.addEventListener('click', function(){
+        var params = [
+          'autoplay=1','playsinline=1','rel=0','modestbranding=1',
+          'cc_load_policy=1','cc_lang_pref=pt'
+        ].join('&');
+        var f = document.createElement('iframe');
+        f.src = 'https://www.youtube-nocookie.com/embed/' + YT_ID + '?' + params;
+        f.title = 'Depoimento de cliente da Fluxxo Pet';
+        f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+        f.setAttribute('allowfullscreen','');
+        box.innerHTML = '';
+        box.appendChild(f);
+        track('VideoPlay',{},{});
+      });
+    })();
+
+    var TAX_RATES = [
+      {ate:180000,   pisCofins:0.0062, icms:0.0136},
+      {ate:360000,   pisCofins:0.0113, icms:0.0248},
+      {ate:720000,   pisCofins:0.0147, icms:0.0318},
+      {ate:1800000,  pisCofins:0.0166, icms:0.0358},
+      {ate:3600000,  pisCofins:0.0222, icms:0.0479},
+      {ate:Infinity, pisCofins:0.0654, icms:0.0479}
+    ];
+
+    function fmtBRL(v) {
+      return 'R$ ' + v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+    }
+
+    function showSimulator() {
+      document.getElementById('progressFill').style.width = '95%';
+      document.getElementById('progressPct').textContent = 'Passo 3 de 3';
+      document.getElementById('modalQuestion').style.display = 'none';
+      document.getElementById('modalSuccess').style.display = 'none';
+      document.getElementById('modalQualify').style.display = 'none';
+      document.getElementById('modalSimulator').style.display = 'block';
+      document.getElementById('simGreeting').textContent = 'Recebemos seus dados, ' + leadData.nome.split(' ')[0] + '! Agora calcule quanto você paga a mais — leva menos de 1 minuto';
+      document.getElementById('overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function calcSimulator() {
+      var fat = parseFloat((document.getElementById('simFat').value||'').replace(/\D/g,''))||0;
+      var racao = parseFloat((document.getElementById('simRacao').value||'').replace(/\D/g,''))||0;
+      var med = parseFloat((document.getElementById('simMed').value||'').replace(/\D/g,''))||0;
+      if (!fat) { document.getElementById('simFat').focus(); return; }
+      var fatAnual = fat * 12;
+      var bracket = TAX_RATES.find(function(b){ return fatAnual <= b.ate; }) || TAX_RATES[TAX_RATES.length-1];
+      var perdaICMS = racao * bracket.icms;
+      var perdaPIS = med * bracket.pisCofins;
+      var mensal = perdaICMS + perdaPIS;
+      var anual = mensal * 12;
+      if (leadData.id) {
+        fetch('/api/submit',{ method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ id:leadData.id, sim_fat:fat, sim_racao:racao, sim_med:med, perda_icms:perdaICMS, perda_pis:perdaPIS, perda_mensal:mensal, perda_anual:anual })
+        }).catch(function(){});
+      }
+      sessionStorage.setItem('sim_result', JSON.stringify({
+        nome: leadData.nome, petshop: leadData.petshop,
+        email: leadData.email||'', whatsapp: leadData.whatsapp||'',
+        icms: perdaICMS, pis: perdaPIS, mensal: mensal, anual: anual
+      }));
+      window.location.href = '/resultado';
+    }
+
+    // ── Formulário do diagnóstico em um passo ────────────────────────────────
+    // Antes eram 4 passos (botão que revelava o form → nome+e-mail → WhatsApp+pet
+    // shop → modal de faturamento) e o lead só era salvo no último. Quem fechava o
+    // modal virava "Lead" no Meta sem entrar no CRM. Agora: um envio, o lead é
+    // salvo primeiro e só depois sai o evento de conversão.
+    // sfx = '' (card do topo) ou 'B' (formulário do rodapé).
+    // [valor gravado no CRM, texto mostrado]. "Até R$30 mil" saiu em 2026-10-26.
+    var FAT_OPTS = [['R$50 mil', 'Até R$50 mil'], ['R$100 mil', 'R$100 mil'], ['R$200 mil', 'R$200 mil'], ['Mais de R$200 mil', 'Mais de R$200 mil']];
+    var GA4 = 'G-3L4M9LVX7W';
+    function ga(ev, params) { try { gtag('event', ev, Object.assign({ send_to: GA4 }, params || {})); } catch (e) {} }
+
+    function fdigitos(v) {
+      var d = (v || '').replace(/\D/g, '');
+      // Quem digita "+55 11 99999-9999" seria barrado por ter 13 digitos.
+      if (d.length > 11 && d.slice(0, 2) === '55') d = d.slice(2);
+      return d;
+    }
+    // Máscara do telefone: descarta o que não é dígito e limita a 11, então colar
+    // "+55 (71) 98234-6881" nunca trava o campo.
+    function mascaraTelefone(v) {
+      var d = fdigitos(v).slice(0, 11);
+      if (d.length <= 2)  return d.length ? '(' + d : '';
+      if (d.length <= 6)  return '(' + d.slice(0,2) + ') ' + d.slice(2);
+      if (d.length <= 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+      return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
+    }
+    function fval(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+    function fmark(id, ok) {
+      var el = document.getElementById(id);
+      var box = el && (el.closest('.field') || el.closest('fieldset'));
+      if (box) box.classList.toggle('bad', !ok);
+      return ok;
+    }
+    function fmsg(sfx, texto) {
+      var b = document.getElementById('ferr' + sfx);
+      if (!b) return;
+      b.textContent = texto || '';
+      b.classList.toggle('show', !!texto);
+    }
+
+    // monta as opções de faturamento e liga máscara, "começou a preencher" e limpeza de erro
+    function setupForm(sfx) {
+      var form = document.getElementById(sfx ? 'leadFormB' : 'leadForm');
+      if (!form) return;
+      var chips = form.querySelector('.fat-chips');
+      chips.innerHTML = FAT_OPTS.map(function (o) {
+        return '<label class="fat-chip"><input type="radio" name="fat' + sfx + '" value="' + o[0] + '" /><span>' + o[1] + '</span></label>';
+      }).join('');
+      var w = document.getElementById('whatsapp' + sfx);
+      if (w) w.addEventListener('input', function () { this.value = mascaraTelefone(this.value); });
+      var started = false;
+      form.addEventListener('focusin', function () {
+        if (started) return; started = true;
+        ga('form_start', { form_id: sfx ? 'cta_leadForm' : 'hero_leadForm' });
+      });
+      form.addEventListener('input', function (e) {
+        var box = e.target.closest('.field') || e.target.closest('fieldset');
+        if (box) box.classList.remove('bad');
+        if (!form.querySelector('.bad')) fmsg(sfx, '');
+      });
+    }
+    setupForm(''); setupForm('B');
+
+    // ── e-mail digitado errado: sugere o provedor certo (maria@gmial.com → gmail.com) ──
+    var EMAIL_DOMS = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com.br', 'yahoo.com', 'icloud.com', 'live.com', 'bol.com.br', 'uol.com.br', 'terra.com.br'];
+    function lev(a, b) {
+      var m = [], i, j;
+      for (i = 0; i <= b.length; i++) m[i] = [i];
+      for (j = 0; j <= a.length; j++) m[0][j] = j;
+      for (i = 1; i <= b.length; i++) for (j = 1; j <= a.length; j++)
+        m[i][j] = b[i-1] === a[j-1] ? m[i-1][j-1] : Math.min(m[i-1][j-1] + 1, m[i][j-1] + 1, m[i-1][j] + 1);
+      return m[b.length][a.length];
+    }
+    function emailSuggest(v) {
+      var at = v.lastIndexOf('@'); if (at < 1) return '';
+      var dom = v.slice(at + 1).toLowerCase(); if (!dom || EMAIL_DOMS.indexOf(dom) >= 0) return '';
+      var best = '', bd = 3;
+      EMAIL_DOMS.forEach(function (d) { var x = lev(dom, d); if (x < bd) { bd = x; best = d; } });
+      return best ? v.slice(0, at + 1) + best : '';
+    }
+    ['', 'B'].forEach(function (sfx) {
+      var inp = document.getElementById('email' + sfx), box = document.getElementById('emailFix' + sfx);
+      if (!inp || !box) return;
+      function check() {
+        var s = emailSuggest(inp.value.trim());
+        if (!s) { box.hidden = true; return; }
+        box.innerHTML = 'Você quis dizer <button type="button">' + s.replace(/</g, '&lt;') + '</button>?';
+        box.hidden = false;
+        box.querySelector('button').onclick = function () { inp.value = s; box.hidden = true; saveDraft(sfx); inp.focus(); };
+      }
+      inp.addEventListener('blur', check);
+      inp.addEventListener('input', function () { if (!box.hidden) check(); });
+    });
+
+    // ── aviso no próprio campo ao sair dele (só se já digitou algo) ──
+    var FIELD_RULES = {
+      nome:     [function (v) { return v.length >= 3; }, 'Digite seu nome e sobrenome.'],
+      whatsapp: [function (v) { var n = fdigitos(v).length; return n === 10 || n === 11; }, 'Confira o número: DDD + celular.'],
+      email:    [function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }, 'Confira o e-mail.'],
+      petshop:  [function (v) { return v.length >= 2; }, 'Digite o nome do pet shop.'],
+    };
+    ['', 'B'].forEach(function (sfx) {
+      Object.keys(FIELD_RULES).forEach(function (k) {
+        var el = document.getElementById(k + sfx); if (!el) return;
+        var box = el.closest('.field');
+        function msg(t) {
+          var p = box.querySelector('.field-msg');
+          if (!t) { if (p) p.remove(); return; }
+          if (!p) { p = document.createElement('p'); p.className = 'field-msg'; box.appendChild(p); }
+          p.textContent = t;
+        }
+        el.addEventListener('blur', function () {
+          var v = el.value.trim();
+          if (!v) return;
+          var ok = FIELD_RULES[k][0](v);
+          box.classList.toggle('bad', !ok); msg(ok ? '' : FIELD_RULES[k][1]);
+        });
+        el.addEventListener('input', function () { msg(''); });
+      });
+    });
+
+    // ── rascunho: o que foi digitado sobrevive a recarregar/voltar (até o envio) ──
+    function draftKey(sfx) { return 'analise_rascunho' + sfx; }
+    function saveDraft(sfx) {
+      try {
+        var fat = document.querySelector('input[name="fat' + sfx + '"]:checked');
+        sessionStorage.setItem(draftKey(sfx), JSON.stringify({ nome: fval('nome' + sfx), whatsapp: fval('whatsapp' + sfx), email: fval('email' + sfx), petshop: fval('petshop' + sfx), fat: fat ? fat.value : '' }));
+      } catch (e) {}
+    }
+    function loadDraft(sfx) {
+      try {
+        var d = JSON.parse(sessionStorage.getItem(draftKey(sfx)) || 'null'); if (!d) return;
+        ['nome', 'whatsapp', 'email', 'petshop'].forEach(function (k) { var el = document.getElementById(k + sfx); if (el && d[k] && !el.value) el.value = d[k]; });
+        if (d.fat) { var r = document.querySelector('input[name="fat' + sfx + '"][value="' + d.fat + '"]'); if (r) r.checked = true; }
+      } catch (e) {}
+    }
+    function clearDraft(sfx) { try { sessionStorage.removeItem(draftKey(sfx)); } catch (e) {} }
+    ['', 'B'].forEach(function (sfx) {
+      loadDraft(sfx);
+      var form = document.getElementById(sfx ? 'leadFormB' : 'leadForm');
+      if (form) { form.addEventListener('input', function () { saveDraft(sfx); }); form.addEventListener('change', function () { saveDraft(sfx); }); }
+    });
+
+    // ── barra fixa no celular: aparece depois que a pessoa passou do formulário do topo
+    //    e some sempre que algum formulário está na tela ──
+    (function () {
+      var bar = document.getElementById('mCta'); if (!bar) return;
+      var heroCard = document.querySelector('.hero .card'), formB = document.getElementById('leadFormB');
+      function onScreen(el) {
+        if (!el) return false;
+        var r = el.getBoundingClientRect(), vh = window.innerHeight;
+        return r.top < vh * 0.85 && r.bottom > vh * 0.15;
+      }
+      var ticking = false;
+      function update() {
+        ticking = false;
+        var passedHero = heroCard && heroCard.getBoundingClientRect().bottom < 0;
+        bar.classList.toggle('show', !!passedHero && !onScreen(heroCard) && !onScreen(formB));
+      }
+      window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+      bar.querySelector('a').addEventListener('click', function (e) {
+        e.preventDefault();
+        var card = document.querySelector('.hero .card');
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(function () { var n = document.getElementById('nome'); if (n && !n.value) n.focus({ preventScroll: true }); }, 500);
+      });
+    })();
+
+    // valida tudo de uma vez e aponta o primeiro campo com problema
+    function validar(sfx) {
+      var nome = fval('nome' + sfx), email = fval('email' + sfx), whats = fval('whatsapp' + sfx), pet = fval('petshop' + sfx);
+      var fatEl = document.querySelector('input[name="fat' + sfx + '"]:checked');
+      var nd = fdigitos(whats).length;
+      var checks = [
+        ['nome' + sfx,     nome.length >= 3,                             'seu nome'],
+        ['whatsapp' + sfx, nd === 10 || nd === 11,                       'um WhatsApp válido com DDD'],
+        ['email' + sfx,    /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email), 'um e-mail válido'],
+        ['petshop' + sfx,  pet.length >= 2,                              'o nome do pet shop'],
+      ];
+      var faltando = [], first = null;
+      checks.forEach(function (c) { if (!fmark(c[0], c[1])) { faltando.push(c[2]); if (!first) first = c[0]; } });
+      var fatBox = document.getElementById('fatBox' + sfx);
+      if (fatBox) fatBox.classList.toggle('bad', !fatEl);
+      if (!fatEl) { faltando.push('o faturamento mensal'); if (!first) first = (document.querySelector('input[name="fat' + sfx + '"]') || {}).id || null; }
+      return { ok: !faltando.length, faltando: faltando, first: first,
+               data: { nome: nome, email: email, whatsapp: whats, petshop: pet, faturamento: fatEl ? fatEl.value : '' } };
+    }
+
+    async function submitLead(e, sfx) {
+      e.preventDefault();
+      var btn = document.getElementById('btnSend' + sfx);
+      if (btn.disabled) return;                              // evita envio duplo
+      var v = validar(sfx);
+      if (!v.ok) {
+        fmsg(sfx, 'Falta preencher ' + v.faltando.join(', ').replace(/, ([^,]*)$/, ' e $1') + '.');
+        var firstEl = v.first && document.getElementById(v.first);
+        if (firstEl) firstEl.focus(); else { var r0 = document.querySelector('input[name="fat' + sfx + '"]'); if (r0) r0.focus(); }
+        ga('form_error', { form_id: sfx ? 'cta_leadForm' : 'hero_leadForm', campos: v.faltando.join(', ') });
+        return;
+      }
+      fmsg(sfx, '');
+      var label = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin" aria-hidden="true"></span> Enviando…';
+
+      // 1º salva o lead (CRM + ActiveCampaign); só depois sai o evento de conversão
+      var res = null;
+      try {
+        var ctrl = new AbortController(), t = setTimeout(function () { ctrl.abort(); }, 10000);
+        var r = await fetch('/api/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(v.data), signal: ctrl.signal });
+        clearTimeout(t);
+        res = await r.json();
+      } catch (err) { res = null; }
+      if (!res || !res.ok) {
+        btn.disabled = false; btn.innerHTML = label;
+        fmsg(sfx, 'Não conseguimos enviar agora. Confira sua internet e toque em "Ver minha análise" de novo — seus dados continuam aqui.');
+        ga('form_api_error', { form_id: sfx ? 'cta_leadForm' : 'hero_leadForm' });
+        return;
+      }
+
+      clearDraft(sfx);
+      leadData = Object.assign({}, v.data, { id: res.id, _formSource: sfx ? 'cta' : 'hero' });
+      var ud = { em: leadData.email, ph: leadData.whatsapp, fn: leadData.nome };
+      track('Lead', ud, { currency: 'BRL', faturamento: leadData.faturamento });
+      var rev = REVENUE_EVENTS[leadData.faturamento];
+      if (rev) track(rev, ud, { faturamento: leadData.faturamento, currency: 'BRL' });
+
+      btn.innerHTML = label; btn.disabled = false;
+      if (sfx) sessionStorage.setItem('lead_data', JSON.stringify({
+        nome: leadData.nome, petshop: leadData.petshop, whatsapp: leadData.whatsapp, email: leadData.email, faturamento: leadData.faturamento
+      }));
+      showQualify(sfx ? 'obrigado' : 'simulador');
+    }
+
+    // ── Etapa "Só mais 2 perguntas" (logo depois do cadastro) ───────────────
+    // O lead já está salvo; aqui só enriquecemos com dificuldade, urgência e observação.
+    var URG_TXT = ['', 'Sem pressa nenhuma', 'Sem pressa', 'Pode esperar um pouco', 'Quero ver com calma', 'Seria bom resolver logo',
+      'Quero resolver logo', 'Quero resolver este mês', 'Prioridade este mês', 'Prioridade máxima', 'Urgente: preciso resolver já'];
+    var qNext = 'simulador';
+    // Uma pergunta por tela. Com toque/clique a resposta já avança; pelo teclado
+    // (setas mudam o rádio sem querer "responder") aparece o botão Continuar.
+    var qPointer = false;
+    function qGo(n) {
+      document.querySelectorAll('#qForm .qs').forEach(function (s) { s.hidden = +s.getAttribute('data-step') !== n; });
+      document.getElementById('qBack').hidden = n === 1;
+      document.getElementById('qTitle').hidden = n !== 1;
+      document.getElementById('progressFill').style.width = Math.round(n / 3 * 100) + '%';
+      document.getElementById('progressPct').textContent = 'Pergunta ' + n + ' de 3';
+      showQErr('');
+      // só o campo de texto recebe foco, e só no desktop: focar uma opção a fazia
+      // parecer já marcada, e no celular abriria o teclado
+      if (n === 3 && window.innerWidth >= 900) document.getElementById('qSobre').focus({ preventScroll: true });
+    }
+    function qStepAtual() { var s = document.querySelector('#qForm .qs:not([hidden])'); return s ? +s.getAttribute('data-step') : 1; }
+    (function () {
+      var sc = document.getElementById('qScale'); if (!sc) return;
+      var form = document.getElementById('qForm');
+      var html = '';
+      for (var i = 1; i <= 10; i++) html += '<label><input type="radio" name="qurg" value="' + i + '" aria-label="' + i + ' de 10: ' + URG_TXT[i] + '" /><span>' + i + '</span></label>';
+      sc.innerHTML = html;
+      form.addEventListener('pointerdown', function () { qPointer = true; });
+      form.addEventListener('keydown', function (e) {
+        qPointer = false;
+        if (e.key === 'Enter' && e.target.type === 'radio') { e.preventDefault(); qGo(e.target.name === 'qdif' ? 2 : 3); }
+      });
+      form.addEventListener('change', function (e) {
+        var box = e.target.closest('.qs');
+        if (e.target.name === 'qurg') {
+          var v = +e.target.value;
+          sc.querySelectorAll('label').forEach(function (l, i) { l.classList.toggle('fill', i < v - 1); });
+          document.getElementById('qUrgHint').textContent = v + '/10 · ' + URG_TXT[v];
+        }
+        if (e.target.name !== 'qdif' && e.target.name !== 'qurg') return;
+        box.classList.remove('bad'); showQErr('');
+        box.querySelector('.q-next').hidden = false;
+        // pausa curta para a pessoa ver a resposta marcada antes de trocar de tela
+        if (qPointer) setTimeout(function () { if (qStepAtual() === +box.getAttribute('data-step')) qGo(e.target.name === 'qdif' ? 2 : 3); }, e.target.name === 'qdif' ? 280 : 650);
+      });
+      form.querySelectorAll('.q-next').forEach(function (b) { b.addEventListener('click', function () { qGo(+b.getAttribute('data-to')); }); });
+      document.getElementById('qBack').addEventListener('click', function () { qGo(Math.max(1, qStepAtual() - 1)); });
+      var t = document.getElementById('qSobre');
+      t.addEventListener('input', function () { document.getElementById('qCount').textContent = t.value.length; });
+    })();
+    function showQErr(t) { var b = document.getElementById('qErr'); b.textContent = t || ''; b.classList.toggle('show', !!t); }
+
+    function showQualify(next) {
+      qNext = next;
+      var primeiro = (leadData.nome || '').trim().split(' ')[0];
+      document.getElementById('qName').textContent = primeiro ? ', ' + primeiro.charAt(0).toUpperCase() + primeiro.slice(1).toLowerCase() : '';
+      ['modalQuestion', 'modalSuccess', 'modalSimulator'].forEach(function (id) { document.getElementById(id).style.display = 'none'; });
+      document.getElementById('modalQualify').style.display = 'block';
+      document.getElementById('overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+      ga('qualificacao_inicio', { form_id: next === 'simulador' ? 'hero_leadForm' : 'cta_leadForm' });
+      qGo(1);
+    }
+
+    async function submitQualify(e) {
+      e.preventDefault();
+      var btn = document.getElementById('qBtn'), skip = document.getElementById('qSkip');
+      if (btn.disabled) return;
+      var dif = document.querySelector('input[name="qdif"]:checked');
+      var urg = document.querySelector('input[name="qurg"]:checked');
+      document.getElementById('qDifBox').classList.toggle('bad', !dif);
+      document.getElementById('qUrgBox').classList.toggle('bad', !urg);
+      if (!dif || !urg) {
+        qGo(!dif ? 1 : 2);
+        showQErr(!dif ? 'Escolha a sua maior dificuldade.' : 'Escolha de 1 a 10 o quanto quer resolver este mês.');
+        return;
+      }
+      showQErr('');
+      // "Pular" envia sem o texto opcional, mesmo que algo tenha sido digitado
+      var sobre = e.submitter === skip ? '' : document.getElementById('qSobre').value.trim();
+      var label = btn.innerHTML;
+      btn.disabled = true; skip.disabled = true; btn.innerHTML = '<span class="spin" aria-hidden="true"></span> Salvando…';
+      var payload = { id: leadData.id, whatsapp: leadData.whatsapp, qualificacao: { dificuldade: dif.value, urgencia: +urg.value, sobre_negocio: sobre } };
+      var ok = false;
+      try {
+        var ctrl = new AbortController(), t = setTimeout(function () { ctrl.abort(); }, 10000);
+        var r = await fetch('/api/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: ctrl.signal });
+        clearTimeout(t);
+        var j = await r.json(); ok = !!(j && j.ok);
+      } catch (err) { ok = false; }
+      if (!ok) {
+        btn.disabled = false; skip.disabled = false; btn.innerHTML = label;
+        showQErr('Não conseguimos salvar agora. Toque em "Enviar respostas" de novo — suas respostas continuam aqui.');
+        return;
+      }
+      leadData.dificuldade = dif.value; leadData.urgencia = +urg.value;
+      ga('qualificacao_concluida', { dificuldade: dif.value, urgencia: +urg.value, com_texto: !!sobre });
+      btn.disabled = false; skip.disabled = false; btn.innerHTML = label;
+      if (qNext === 'simulador') { showSimulator(); return; }
+      document.getElementById('successName').textContent = leadData.nome;
+      document.getElementById('modalQualify').style.display = 'none';
+      document.getElementById('modalSuccess').style.display = 'block';
+      document.getElementById('progressFill').style.width = '100%';
+      document.getElementById('progressPct').textContent = '100%';
+      setTimeout(function () { window.location.href = '/obrigado'; }, 1600);
+    }
+
+    function closeModal() {
+      if (qNext === 'obrigado' && document.getElementById('modalQualify').style.display === 'block') { window.location.href = '/obrigado'; return; }
+      document.getElementById('overlay').classList.remove('active'); document.body.style.overflow='';
+    }
+    document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      a.addEventListener('click',function(e){
+        var href = a.getAttribute('href');
+        // href="#" puro (o logo) quebrava aqui: querySelector('#') lanca excecao
+        if (!href || href === '#') return;
+
+        // Os links "Diagnostico" apontam pro formulario, que agora comeca
+        // fechado. Abre antes, senao rola ate um elemento invisivel.
+        if (href === '#leadForm') {
+          var card = document.querySelector('.hero .card');
+          if (card) {
+            e.preventDefault(); card.scrollIntoView({behavior:'smooth', block:'center'});
+            if (window.innerWidth >= 900) setTimeout(function(){ var n = document.getElementById('nome'); if (n) n.focus({ preventScroll: true }); }, 450);
+            return;
+          }
+        }
+
+        var el = document.querySelector(href);
+        if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
+      });
+    });
+  </script>
+</body>
+</html>

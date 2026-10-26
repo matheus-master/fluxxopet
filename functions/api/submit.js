@@ -4,6 +4,28 @@ export async function onRequestPost(context) {
   let body = {};
   try { body = await request.json(); } catch {}
 
+  // Modo qualificação: respostas da etapa "Só mais 2 perguntas" (depois do cadastro).
+  // Exige id + WhatsApp do próprio lead, para ninguém alterar lead alheio só trocando o id.
+  if (body.id && body.qualificacao) {
+    const q = body.qualificacao || {};
+    const dificuldade = DIFICULDADES.includes(q.dificuldade) ? q.dificuldade : null;
+    const urgencia = Number.isInteger(q.urgencia) && q.urgencia >= 1 && q.urgencia <= 10 ? q.urgencia : null;
+    const sobre = String(q.sobre_negocio || '').trim().slice(0, 500);
+    if (!dificuldade || !urgencia) return json({ ok: false, error: 'Responda as duas perguntas obrigatórias' }, 400);
+    const run = () => env.DB.prepare(
+      "UPDATE leads SET dificuldade = ?, urgencia = ?, sobre_negocio = ?, updated_at = datetime('now') WHERE id = ? AND whatsapp = ?"
+    ).bind(dificuldade, urgencia, sobre, body.id, String(body.whatsapp || '')).run();
+    let r;
+    try { r = await run(); }
+    catch (e) {
+      if (!/no such column/i.test(e.message)) throw e;
+      await ensureQualColumns(env.DB);   // banco ainda sem a migration 0012
+      r = await run();
+    }
+    if (!r.meta || !r.meta.changes) return json({ ok: false, error: 'Lead não encontrado' }, 404);
+    return json({ ok: true });
+  }
+
   // Modo atualização: enriquece um lead existente com os dados do simulador (diagnóstico)
   if (body.id) {
     await env.DB.prepare(
@@ -109,6 +131,15 @@ function acLog(env, lead, result) {
 function num(v) {
   const n = parseFloat(v);
   return isNaN(n) ? null : n;
+}
+
+const DIFICULDADES = ['Falta de lucro', 'Imposto alto', 'Contador genérico', 'Folha errada', 'Precificação'];
+
+// mesmas colunas de migrations/0012_qualificacao.sql (ignora as que já existem)
+async function ensureQualColumns(db) {
+  for (const sql of ['ALTER TABLE leads ADD COLUMN dificuldade TEXT', 'ALTER TABLE leads ADD COLUMN urgencia INTEGER', 'ALTER TABLE leads ADD COLUMN sobre_negocio TEXT']) {
+    try { await db.prepare(sql).run(); } catch (e) { if (!/duplicate column/i.test(e.message)) throw e; }
+  }
 }
 
 function json(body, status = 200) {

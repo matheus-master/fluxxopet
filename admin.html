@@ -1651,6 +1651,15 @@
     .kc-badges { display: flex; flex-wrap: wrap; gap: 4px; }
     .kc-badges .badge-fat, .kc-badges .card-tag { font-size: .66rem; padding: 2px 7px; border-radius: 4px; }
     .kc-badges .more { font-size: .66rem; color: var(--dim); padding: 2px 4px; }
+    .kc-qual { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: .76rem; color: var(--mid); }
+    .kc-qual .urg { font-weight: 600; }
+    .qualif { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+    .qualif-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .qualif label { display: block; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); margin-bottom: 4px; }
+    .qualif b { font-size: .95rem; font-weight: 600; color: var(--text); }
+    .urg-bar { display: block; height: 5px; border-radius: 99px; background: var(--raise); margin-top: 6px; overflow: hidden; }
+    .urg-bar i { display: block; height: 100%; border-radius: 99px; }
+    .qualif-note p { font-size: .86rem; color: var(--text); line-height: 1.5; white-space: pre-wrap; }
     .kc-meta { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: .74rem; color: var(--dim); font-variant-numeric: tabular-nums; }
     .kc-fu { display: inline-flex; align-items: center; gap: 5px; align-self: flex-start; font-size: .74rem; font-weight: 500; padding: 3px 8px; border-radius: 6px; }
     .kc-fu .material-symbols-outlined { font-size: 15px; }
@@ -2388,6 +2397,9 @@
         perdaPis:    l.perda_pis,
         perdaMensal: l.perda_mensal,
         perdaAnual:  l.perda_anual,
+        dificuldade: l.dificuldade || '',
+        urgencia:    l.urgencia != null && l.urgencia !== '' ? +l.urgencia : null,
+        sobreNegocio: l.sobre_negocio || '',
         etapaRaw:    l.etapa || '',
         etapa:       (l.etapa && l.etapa !== 'Sem contato') ? l.etapa : firstStage(),
         ultContato:  l.ult_contato  || '',
@@ -3015,6 +3027,10 @@
                 : 'Follow-up ' + (s.d === 1 ? 'amanhã' : 'em ' + s.d + ' dias') + ' (' + fmtDateShort(lead.proxContato) + ')';
         h += '<span class="kc-fu ' + s.k + '"><span class="material-symbols-outlined" aria-hidden="true">' + (s.k === 'late' ? 'warning' : 'schedule') + '</span>' + lbl + '</span>';
       }
+      if (lead.dificuldade || lead.urgencia != null) {
+        h += '<div class="kc-qual">' + (lead.dificuldade ? '<span>' + esc(lead.dificuldade) + '</span>' : '') +
+          (lead.urgencia != null ? '<span class="urg" style="color:' + urgColor(lead.urgencia) + '" title="Quanto quer resolver este mês">' + (lead.urgencia >= 8 ? '🔥 ' : '') + 'Urgência ' + lead.urgencia + '/10</span>' : '') + '</div>';
+      }
       h += '<div class="kc-meta"><span>' + esc(fmtPhone(lead.whatsapp)) + '</span><span>' + agoTxt(lead.timestamp) + '</span></div>';
       if (lead.comentarios) {
         h += '<div class="kc-note"><span class="material-symbols-outlined" aria-hidden="true">sticky_note_2</span><span>' + esc(lead.comentarios.split('\n')[0].slice(0, 120)) + '</span></div>';
@@ -3102,6 +3118,20 @@
     }
     function int0(n) { return Number(n || 0).toLocaleString('pt-BR'); }
 
+    // respostas da etapa "Só mais 2 perguntas" (depois do cadastro na página)
+    function urgColor(u) { return u >= 8 ? 'var(--red)' : u >= 5 ? 'var(--amber)' : 'var(--mid)'; }
+    function buildQualifHTML(lead) {
+      if (!lead.dificuldade && lead.urgencia == null && !lead.sobreNegocio) return '';
+      return '<div class="qualif">' +
+        '<div class="qualif-row">' +
+          (lead.dificuldade ? '<div><label>Maior dificuldade</label><b>' + esc(lead.dificuldade) + '</b></div>' : '') +
+          (lead.urgencia != null ? '<div><label>Quer resolver este mês</label><b style="color:' + urgColor(lead.urgencia) + '">' + lead.urgencia + '/10</b>' +
+            '<span class="urg-bar"><i style="width:' + (lead.urgencia * 10) + '%;background:' + urgColor(lead.urgencia) + '"></i></span></div>' : '') +
+        '</div>' +
+        (lead.sobreNegocio ? '<div class="qualif-note"><label>Sobre o negócio</label><p>' + esc(lead.sobreNegocio) + '</p></div>' : '') +
+      '</div>';
+    }
+
     function buildRespostasHTML(lead) {
       function money(v) {
         if (v === null || v === undefined || v === '') return null;
@@ -3163,6 +3193,7 @@
             (lead.petshop ? '<div class="dfield"><label>Pet Shop</label><span>'+esc(lead.petshop)+'</span></div>' : '') +
             '<div class="dfield"><label>Cadastro</label><span>'+fmtDate(lead.timestamp)+'</span></div>' +
           '</div>' +
+          buildQualifHTML(lead) +
           '<div class="drawer-row">' +
             '<div class="half"><label class="field-lbl">Etapa CRM</label><select id="dEtapa" class="d-select">'+stageOpts+'</select></div>' +
             '<div class="half"><label class="field-lbl">Faturamento</label><select id="dFat" class="d-select">'+fatOpts+'</select></div>' +

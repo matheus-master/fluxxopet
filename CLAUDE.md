@@ -33,6 +33,7 @@
 | `/` | `index.html` | Quiz de diagnóstico — **é o link do bot e dos anúncios do Meta** |
 | `/obrigado` | `obrigado.html` | Obrigado do quiz |
 | `/resultado` | `resultado.html` | Resultado do simulador |
+| `/novo` | `novo.html` | Quiz com o **layout novo** (escuro, qualificação em 3 passos), link alternativo para teste — `noindex`, mesmo pixel e mesma `/api/submit`; leads saem com `source_url` …/novo |
 
 **Funil do GOOGLE** (gtag `AW-18311780308` + GA4, zero pixel do Meta):
 
