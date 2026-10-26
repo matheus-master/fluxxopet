@@ -135,6 +135,17 @@
   Dados Pactus Pet"), não expira. Ele também enxerga a página e o IG @fluxxopet
   (`17841468174480500`) — dá pra puxar seguidores.
 
+## Aba Comercial ← ActiveCampaign (`functions/api/ac-funil.js`)
+- `GET /api/ac-funil` (JWT): lê funis, etapas, negócios, contatos e tarefas do tipo "Reunião" desde
+  2026-07-01 com `AC_API_URL`/`AC_API_TOKEN`; cruza o contato de cada negócio com `leads` por e-mail
+  e, se não bater, WhatsApp (DDD + 8 dígitos). Cache de 10 min; `?fresh=1` (botão ⟳) ignora.
+- Regras: nota "lead não compareceu" na tarefa = no-show; sem a nota e data passada = realizada;
+  data futura = agendada. Fechamento = negócio em "Boas-vindas" ou etapa posterior do mesmo funil,
+  datado pela entrada na etapa (`dealActivities`); sem histórico → `mdate`, marcado como aproximado.
+- Pages Functions limita subrequisições por chamada: tudo cabe em `ORCAMENTO` (45). Se a conta
+  crescer, as leituras param e aparecem em `avisos` (exibidos na aba).
+- Se a rota falhar, a aba volta a usar a planilha (`/api/comercial`) e mostra o motivo.
+
 ## CRM do admin (`/admin#crm`)
 - Kanban com busca, filtros (faixa, tag, follow-up atrasado/hoje/sem próximo contato,
   salvos no `localStorage` como `crm_filters`), faixa do funil no topo, botão de

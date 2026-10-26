@@ -208,6 +208,28 @@
     .com-item button{border:1px solid var(--line);background:none;border-radius:6px;padding:4px 10px;font-size:.76rem;color:var(--ink-2);cursor:pointer;white-space:nowrap}
     .com-item button.sure{border-color:var(--bad);color:#fff;background:var(--bad)}
     .com-empty{color:var(--ink-3);font-size:.86rem;padding:18px 0}
+    /* ActiveCampaign: status da reunião e etapas do funil */
+    .com-item .won.st-ok{background:var(--good)} .com-item .won.st-ns{background:var(--bad)} .com-item .won.st-ag{background:var(--ink-3)}
+    .ac-funil-t{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin:14px 0 6px}
+    .ac-funil-t:first-child{margin-top:4px}
+    .ac-st{display:grid;grid-template-columns:minmax(150px,220px) minmax(0,1fr) 96px;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+    .ac-st:last-child{border-bottom:none}
+    .ac-st .nm{min-width:0}
+    .ac-st .nm small{display:block;color:var(--ink-3);font-size:.74rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .com-list.scroll{max-height:560px;overflow-y:auto;padding-right:6px}
+    .ac-st .tr{height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+    .ac-st .tr i{display:block;height:100%;background:var(--ink);border-radius:5px}
+    .ac-st.fech .tr i{background:var(--accent)}
+    .ac-st .ct{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+    .ac-st .ct small{display:block;color:var(--ink-3);font-size:.74rem}
+    @media (max-width:640px){ .com-list.scroll{max-height:420px} }
+    .ac-check{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:6px 0 14px}
+    .ac-check div{border:1px solid var(--line);border-radius:10px;padding:12px}
+    .ac-check b{display:block;font-size:1.5rem;font-weight:400;font-variant-numeric:tabular-nums}
+    .ac-check span{font-size:.76rem;color:var(--ink-2)}
+    .ac-rules{list-style:none;display:flex;flex-direction:column;gap:6px;font-size:.84rem;color:var(--ink-2)}
+    .ac-rules b{color:var(--ink);font-weight:500}
+    @media (max-width:640px){ .ac-st{grid-template-columns:minmax(0,1fr) auto} .ac-st .tr{grid-column:1/-1;order:3} .ac-check{grid-template-columns:repeat(2,minmax(0,1fr))} .fs-4{width:68%!important} }
 
     .foot{color:var(--ink-3);font-size:.76rem;margin-top:18px;line-height:1.5}
     .loading #content{opacity:.45;transition:opacity .2s}
@@ -806,8 +828,143 @@
       };
     },
 
-    // funil comercial: investimento → leads (Meta, campanhas de cadastro) → reuniões e fechamentos (planilha)
+    // funil comercial: reuniões e fechamentos vêm do ActiveCampaign; se ele falhar, da planilha
     comercial: function (x) {
+      if (state.ac === undefined) {
+        loadAc();
+        return { html: '<section class="kpis kpis-5"><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div><div class="skel" style="height:118px"></div></section><div class="skel" style="height:420px"></div>', draw: function () {} };
+      }
+      return state.ac && state.ac.ok ? RENDER.comercialAC(x) : RENDER.comercialPlanilha(x);
+    },
+
+    // investimento → leads (Meta) → reuniões marcadas → realizadas → fechamentos (ActiveCampaign)
+    comercialAC: function (x) {
+      var d = state.data, ac = state.ac, p = d.prev;
+      var inR = function (ds, s, u) { return ds >= s && ds <= u; };
+      function cont(s, u) {
+        var o = { marc: 0, real: 0, ns: 0, ag: 0, fech: 0 };
+        ac.reunioes.forEach(function (r) {
+          if (!inR(r.data, s, u)) return;
+          o.marc++;
+          if (r.st === 'realizada') o.real++; else if (r.st === 'noshow') o.ns++; else o.ag++;
+        });
+        ac.fechamentos.forEach(function (f) { if (inR(f.data, s, u)) o.fech++; });
+        return o;
+      }
+      var c = cont(d.since, d.until);
+      // o histórico do ActiveCampaign começa em ac.desde: antes disso não dá para comparar
+      var pc = p && p.since >= ac.desde ? cont(p.since, p.until) : null;
+      var antes = d.since < ac.desde;
+
+      var t = x.tot, spend = t.leadsSpend, leads = t.leads;
+      var comp = rate(c.real, c.real + c.ns), pComp = pc ? rate(pc.real, pc.real + pc.ns) : null;
+      var cpl = ratio(spend, leads), cpm = ratio(spend, c.marc), cpr = ratio(spend, c.real), cpf = ratio(spend, c.fech);
+      var rLM = rate(c.marc, leads), rRF = rate(c.fech, c.real), rLF = rate(c.fech, leads);
+      var pr = pc ? { lm: rate(pc.marc, p.leads), rf: rate(pc.fech, pc.real) } : {};
+      var pl = function (n, um, varios) { return int.format(n) + ' ' + (n === 1 ? um : varios); };
+
+      // resumo
+      var txt = periodPhrase() + ', <b>' + money(spend) + '</b> em anúncios de leads geraram <b>' + pl(leads, 'lead', 'leads') + '</b>. ' +
+        'Foram <b>' + pl(c.marc, 'reunião marcada', 'reuniões marcadas') + '</b>: <b>' + int.format(c.real) + ' realizada' + (c.real === 1 ? '' : 's') + '</b>, ' +
+        '<b>' + int.format(c.ns) + ' no-show</b>' + (c.ag ? ' e ' + int.format(c.ag) + ' ainda por acontecer' : '') + '.';
+      if (comp != null) txt += ' O comparecimento foi de <b>' + pctTxt(comp) + '</b>.';
+      txt += ' <b>' + pl(c.fech, 'fechamento', 'fechamentos') + '</b>' + (cpf != null ? ', a <b>' + money(cpf) + '</b> cada.' : '.');
+      if (antes) txt += ' O histórico do ActiveCampaign começa em ' + longDate(ac.desde) + ': reuniões e fechamentos antes disso não entram.';
+
+      var cards =
+        kpi({ hero: true, icon: 'payments', label: 'Investido em leads', value: money(spend), unit: 'em ' + x.nd + (x.nd === 1 ? ' dia' : ' dias'), badge: badgeHtml(spend, p && p.leadsSpend, null, x.cmp), info: 'Gasto das campanhas de cadastro do Meta no período.' }) +
+        kpi({ icon: 'person_add', label: 'Leads', value: int.format(leads), unit: cpl != null ? money(cpl) + ' por lead' : '', badge: badgeHtml(leads, p && p.leads, false, x.cmp), info: 'Leads que o Meta atribui aos anúncios de cadastro.' }) +
+        kpi({ icon: 'event_available', label: 'Reuniões realizadas', value: int.format(c.real), unit: int.format(c.marc) + ' marcadas · ' + int.format(c.ns) + ' no-show', badge: pc ? badgeHtml(c.real, pc.real, false, x.cmp) : '', info: 'Tarefas do tipo Reunião no ActiveCampaign, pela data marcada. Sem a nota "lead não compareceu" e com data passada = realizada; com a nota = no-show.' }) +
+        kpi({ icon: 'how_to_reg', label: 'Comparecimento', value: pctTxt(comp), unit: c.real + c.ns ? int.format(c.real) + ' de ' + int.format(c.real + c.ns) + ' compareceram' : 'sem reuniões passadas', badge: ppHtml(comp, pComp, true, x.cmp), info: 'Realizadas ÷ (realizadas + no-show). Reuniões com data futura não entram.' }) +
+        kpi({ icon: 'handshake', label: 'Fechamentos', value: int.format(c.fech), unit: cpf != null ? money(cpf) + ' por fechamento' : 'nenhum no período', badge: pc ? badgeHtml(c.fech, pc.fech, false, x.cmp) : '', info: 'Negócios que entraram na etapa Boas-vindas (ou posterior) no ActiveCampaign, pela data de entrada na etapa.' });
+
+      // funil visual
+      var stages = [
+        { l: 'Investimento', v: money(spend), w: 100, bg: '#ECEDF0', fg: C.ink },
+        { l: 'Leads', v: int.format(leads), w: 85, bg: '#BCC0C7', fg: C.ink, s: cpl != null ? money(cpl) + ' por lead' : '' },
+        { l: 'Reuniões marcadas', v: int.format(c.marc), w: 70, bg: '#5F656D', fg: '#fff', s: cpm != null ? money(cpm) + ' por reunião marcada' : '' },
+        { l: 'Realizadas', v: int.format(c.real), w: 55, bg: C.ink, fg: '#fff', s: cpr != null ? money(cpr) + ' por reunião realizada' : '' },
+        { l: 'Fechamentos', v: int.format(c.fech), w: 40, bg: C.accent, fg: '#fff', s: cpf != null ? money(cpf) + ' por fechamento' : '' },
+      ];
+      var steps = [
+        '<span class="ms" aria-hidden="true">south</span>Custo por lead <b>' + money(cpl) + '</b>',
+        '<span class="ms" aria-hidden="true">south</span>Lead → reunião marcada <b>' + pctTxt(rLM) + '</b><span class="plain">' + perPeople(rLM) + '</span>' + ppHtml(rLM, pr.lm, false),
+        '<span class="ms" aria-hidden="true">south</span>Comparecimento <b>' + pctTxt(comp) + '</b>' + ppHtml(comp, pComp, false) + (c.ag ? '<span class="plain">' + c.ag + ' ainda por acontecer</span>' : ''),
+        '<span class="ms" aria-hidden="true">south</span>Reunião → fechamento <b>' + pctTxt(rRF) + '</b><span class="plain">' + (rRF != null && rRF <= 100 ? perPeople(rRF) : '') + '</span>' + ppHtml(rRF, pr.rf, false),
+      ];
+      var funnel = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>Funil comercial</span>' +
+        '<div class="legend"><span>' + (rLF != null ? 'de lead a fechamento: <b>' + pctTxt(rLF) + '</b>' : '') + '</span></div></div><div class="funnel">' +
+        stages.map(function (s, i) {
+          var bar = '<div class="fstage"><div class="fbar fs-' + i + '" style="width:' + s.w + '%;background:' + s.bg + ';color:' + s.fg + '"><span class="fl">' + s.l + (s.s ? '<small>' + s.s + '</small>' : '') + '</span><b>' + s.v + '</b></div></div>';
+          return i === stages.length - 1 ? bar : bar + '<div class="frate">' + steps[i] + '</div>';
+        }).join('') + '</div></section>';
+
+      // mês a mês
+      var rowsM = aggregate(d.daily, 'mes').map(function (m) {
+        var ym = m.key, o = cont(m.first, m.last), cmp = rate(o.real, o.real + o.ns);
+        var part = m.first.slice(8) !== '01' || m.last !== lastDay(ym);
+        return '<tr><td>' + MESES_L[+ym.slice(5) - 1] + ' ' + ym.slice(0, 4) + (part ? ' <span class="muted">(parcial)</span>' : '') + '</td><td>' + money(m.leadsSpend) + '</td><td>' + int.format(m.leads) +
+          '</td><td>' + o.marc + '</td><td>' + o.real + '</td><td>' + o.ns + '</td><td>' + pctTxt(cmp) + '</td><td>' + o.fech +
+          '</td><td>' + (o.real ? money(m.leadsSpend / o.real) : '<span class="muted">—</span>') + '</td><td>' + (o.fech ? money(m.leadsSpend / o.fech) : '<span class="muted">—</span>') + '</td></tr>';
+      }).join('');
+      var table = chartCard({ icon: 'calendar_month', label: 'Mês a mês', legend: '<span>fechamentos de um mês podem vir de reuniões de meses anteriores</span>',
+        body: '<div class="table-scroll"><table class="com-table"><thead><tr><th>Mês</th><th>Investido</th><th>Leads</th><th>Marcadas</th><th>Realizadas</th><th>No-show</th><th>Comparec.</th><th>Fechamentos</th><th>Custo por reunião</th><th>Custo por fech.</th></tr></thead><tbody>' + rowsM +
+          '</tbody><tfoot><tr><td>Período</td><td>' + money(spend) + '</td><td>' + int.format(leads) + '</td><td>' + c.marc + '</td><td>' + c.real + '</td><td>' + c.ns + '</td><td>' + pctTxt(comp) + '</td><td>' + c.fech + '</td><td>' + money(cpr) + '</td><td>' + money(cpf) + '</td></tr></tfoot></table></div>' });
+
+      // onde estão os negócios agora, etapa por etapa (foto atual, não depende do período)
+      var porFunil = {};
+      ac.etapas.forEach(function (e) { (porFunil[e.group] = porFunil[e.group] || []).push(e); });
+      var maxN = Math.max.apply(null, ac.etapas.map(function (e) { return e.n; }).concat([1]));
+      var stagesHtml = ac.funis.filter(function (g) { return porFunil[g.id]; }).map(function (g) {
+        return '<p class="ac-funil-t">' + esc(g.title) + '</p>' + porFunil[g.id].map(function (e) {
+          var fats = Object.keys(e.fat || {}).sort(function (a, b) { return e.fat[b] - e.fat[a]; }).map(function (k) { return k + ': ' + e.fat[k]; }).join(' · ');
+          return '<div class="ac-st' + (e.fech ? ' fech' : '') + '"' + (fats ? ' title="Faturamento dos leads do site nesta etapa — ' + esc(fats) + '"' : '') + '>' +
+            '<span class="nm">' + esc(e.title) + (e.fech ? ' <span class="muted" style="font-size:.74rem">· fechamento</span>' : '') + (fats ? '<small>' + esc(fats) + '</small>' : '') + '</span>' +
+            '<span class="tr"><i style="width:' + (e.n / maxN * 100) + '%"></i></span>' +
+            '<span class="ct">' + pl(e.n, 'negócio', 'negócios') + '<small>' + int.format(e.site) + ' do site</small></span></div>';
+        }).join('');
+      }).join('');
+      var cz = ac.cruzamento;
+      var stageCard = chartCard({ icon: 'view_kanban', label: 'Onde estão os negócios agora', legend: '<span>ActiveCampaign · ' + int.format(cz.comLeadDoSite) + ' de ' + int.format(cz.negocios) + ' cruzados com leads do site</span>',
+        body: stagesHtml || '<p class="com-empty">Nenhuma etapa encontrada no ActiveCampaign.</p>' });
+
+      // listas do período
+      var reun = ac.reunioes.filter(function (r) { return inR(r.data, d.since, d.until); });
+      var ST = { realizada: ['st-ok', 'Realizada'], noshow: ['st-ns', 'No-show'], agendada: ['st-ag', 'Agendada'] };
+      var reunCard = chartCard({ icon: 'event_available', label: 'Reuniões do período', legend: '<span>' + pl(reun.length, 'reunião', 'reuniões') + '</span>',
+        body: '<div class="com-list scroll">' + (reun.length ? reun.map(function (r) {
+          return '<div class="com-item"><span class="when">' + fmtShort(r.data) + '</span><span class="who">' + esc(r.cliente) + (r.etapa ? ' <span class="muted" style="font-size:.76rem">· ' + esc(r.etapa) + '</span>' : '') + '</span><span class="won ' + ST[r.st][0] + '">' + ST[r.st][1] + '</span></div>';
+        }).join('') : '<p class="com-empty">Nenhuma reunião neste período.</p>') + '</div>' });
+      var fech = ac.fechamentos.filter(function (f) { return inR(f.data, d.since, d.until); });
+      var fechCard = chartCard({ icon: 'handshake', label: 'Fechamentos do período', legend: '<span>' + pl(fech.length, 'fechamento', 'fechamentos') + '</span>',
+        body: '<div class="com-list scroll">' + (fech.length ? fech.map(function (f) {
+          return '<div class="com-item"><span class="when"' + (f.aprox ? ' title="Data aproximada: última atualização do negócio"' : '') + '>' + (f.aprox ? '≈ ' : '') + fmtShort(f.data) + '</span><span class="who">' + esc(f.cliente) + (f.fat ? ' <span class="muted" style="font-size:.76rem">· ' + esc(f.fat) + '</span>' : '') + '</span><span class="won">' + esc(f.etapa || 'Fechado') + '</span></div>';
+        }).join('') : '<p class="com-empty">Nenhum fechamento neste período.</p>') + '</div>' });
+
+      // conferência: semana fechada anterior (seg–dom) para bater com o relatório do ActiveCampaign
+      var hoje = new Date(), dow = (hoje.getDay() + 6) % 7;
+      var seg = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - dow - 7), dom = new Date(seg.getFullYear(), seg.getMonth(), seg.getDate() + 6);
+      var ymd = function (dt) { return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0'); };
+      var w = cont(ymd(seg), ymd(dom)), cf = ac.conferencia;
+      var checkCard = chartCard({ icon: 'fact_check', label: 'Conferência com o ActiveCampaign', legend: '<span>semana ' + fmtShort(ymd(seg)).slice(0, 5) + ' – ' + fmtShort(ymd(dom)).slice(0, 5) + '</span>',
+        body: '<div class="ac-check"><div><b>' + w.marc + '</b><span>reuniões marcadas</span></div><div><b>' + w.real + '</b><span>realizadas</span></div><div><b>' + w.ns + '</b><span>no-show</span></div><div><b>' + w.fech + '</b><span>fechamentos</span></div></div>' +
+          '<ul class="ac-rules">' +
+          '<li>Tipo de tarefa lido como reunião: <b>' + esc(cf.tipoReuniao.join(', ') || 'nenhum encontrado') + '</b></li>' +
+          '<li>Etapas que contam como fechamento: <b>' + esc(cf.etapasFechamento.join(', ') || 'nenhuma encontrada') + '</b></li>' +
+          '<li>Reuniões com a nota "lead não compareceu": <b>' + cf.notasNoShow + '</b> de ' + cf.tarefasLidas + ' desde ' + longDate(ac.desde) + '</li>' +
+          '<li>Negócios lidos: <b>' + int.format(cz.negocios) + '</b> · cruzados com leads do site: <b>' + int.format(cz.comLeadDoSite) + '</b> (por e-mail ou WhatsApp)</li>' +
+          '</ul>' });
+
+      return {
+        html: summaryHtml(txt, x) + '<section class="kpis kpis-5">' + cards + '</section>' + funnel + table +
+          '<section class="duo" style="margin-top:10px">' + reunCard + fechCard + '</section>' +
+          '<section class="duo" style="margin-top:10px">' + stageCard + checkCard + '</section>',
+        draw: function () {},
+      };
+    },
+
+    // versão antiga, pela planilha (usada se o ActiveCampaign não responder)
+    comercialPlanilha: function (x) {
       var d = state.data, com = state.com;
       if (!com) {
         loadCom();
@@ -928,6 +1085,18 @@
     } catch (e) { notice('Sem conexão para carregar a planilha comercial.', true); }
     finally { comLoading = false; }
   }
+  /* ── comercial: ActiveCampaign (reuniões, no-show, fechamentos e etapas) ─── */
+  var acLoading = false;
+  async function loadAc(fresh) {
+    if (acLoading) return;
+    acLoading = true;
+    try {
+      var r = await api('/api/ac-funil' + (fresh ? '?fresh=1' : ''));
+      state.ac = r && r.ok ? r : { ok: false, error: (r && r.error) || 'erro no servidor' };
+    } catch (e) { state.ac = { ok: false, error: 'sem conexão' }; }
+    finally { acLoading = false; }
+    if (state.view === 'comercial') render();
+  }
   function nextYm(ym) { var y = +ym.slice(0, 4), m = +ym.slice(5, 7) + 1; if (m > 12) { m = 1; y++; } return y + '-' + String(m).padStart(2, '0'); }
   function fmtShort(ymd) { return ymd.slice(8, 10) + '/' + ymd.slice(5, 7) + '/' + ymd.slice(2, 4); }
   function lastDay(ym) { var dt = new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 0)); return dt.toISOString().slice(0, 10); }
@@ -999,6 +1168,10 @@
           '. O Instagram só guarda 30 dias e leva 1–2 dias para consolidar; o painel salva cada dia e o histórico vai crescendo.']);
       }
     }
+    if (state.view === 'comercial' && state.ac) {
+      if (!state.ac.ok) notes.push(['error', 'ActiveCampaign indisponível (' + state.ac.error + '). Mostrando reuniões e fechamentos da planilha.']);
+      else (state.ac.avisos || []).forEach(function (a) { notes.push(['info', 'ActiveCampaign: ' + a]); });
+    }
     $('notice').innerHTML = notes.map(function (n) {
       return '<div class="notice ' + (n[0] === 'info' ? 'info' : '') + '"><span class="ms">' + (n[0] === 'info' ? 'info' : 'error') + '</span><span>' + esc(n[1]) + '</span></div>';
     }).join('');
@@ -1008,7 +1181,9 @@
       leads: 'só campanhas com objetivo de cadastro · leads = evento Lead atribuído pelo Meta',
       seguidores: 'só campanhas otimizadas para visita ao perfil · seguidores = ganho diário do Instagram (orgânico + pago)',
       funil: 'só campanhas com objetivo de cadastro · CTR = cliques no link ÷ impressões · connect rate = visualizações da página ÷ cliques · conversão = leads ÷ visualizações',
-      comercial: 'investimento e leads = Meta (campanhas de cadastro) · reuniões e fechamentos = planilha comercial (fechamentos por mês)',
+      comercial: state.ac && state.ac.ok
+        ? 'investimento e leads = Meta (campanhas de cadastro) · reuniões, no-show, fechamentos e etapas = ActiveCampaign (atualiza a cada 10 min; ⟳ força)'
+        : 'investimento e leads = Meta (campanhas de cadastro) · reuniões e fechamentos = planilha comercial (fechamentos por mês)',
     }[state.view];
     $('foot').textContent = 'Fonte: Meta Ads · ' + src + ' · comparação ' + (x.cmp || '—') +
       ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -1101,7 +1276,7 @@
     var b = e.target.closest('.group button'); if (!b) return;
     state.group = b.dataset.g; savePrefs(); render();
   });
-  $('refresh').addEventListener('click', function () { load(true); state.com = null; if (state.view === 'comercial') loadCom(); });
+  $('refresh').addEventListener('click', function () { load(true); state.com = null; state.ac = undefined; if (state.view === 'comercial') loadAc(true); });
   // toque/clique no "i" mostra a explicação (no celular não existe "passar o mouse")
   var hintPop = null;
   function closeHint() { if (hintPop) { hintPop.remove(); hintPop = null; } }
