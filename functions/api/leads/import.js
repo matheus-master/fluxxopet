@@ -15,7 +15,7 @@ export async function onRequestPost(context) {
     l.whatsapp    || '',
     l.email       || '',
     l.faturamento || '',
-    l.etapa       || 'Contato inicial',
+    l.etapa       || 'Sem contato',   // sem etapa = entrada; o painel mostra na 1ª etapa do CRM
     l.timestamp
       ? new Date(l.timestamp).toISOString().replace('T', ' ').slice(0, 19)
       : new Date().toISOString().replace('T', ' ').slice(0, 19)

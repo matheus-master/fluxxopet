@@ -5,6 +5,7 @@
 // GET /api/crm-config → { ok, stages: [...] | null, tags: [...] | null }
 //   null = ainda não salvo no banco (o painel faz a migração na 1ª abertura)
 // PUT /api/crm-config  { stages?: [...], tags?: [...] } → grava o que vier
+//   + rename?: { from, to } → renomeia a etapa e move os leads dela, na mesma transação
 
 const KEYS = ['stages', 'tags'];
 const MAX_ITEMS = 50;
@@ -37,11 +38,25 @@ export async function onRequestPut({ env, request }) {
   }
   if (!writes.length) return json({ ok: false, error: 'Nada para salvar' }, 400);
 
+  // renomear etapa: valida e atualiza os leads junto com a lista (tudo ou nada)
+  let rename = null;
+  if (body.rename !== undefined) {
+    const from = String(body.rename?.from ?? '').trim(), to = String(body.rename?.to ?? '').trim();
+    const newStages = body.stages && cleanList(body.stages);
+    if (!from || !to || to.length > MAX_LEN || from === to) return json({ ok: false, error: 'Nome de etapa inválido' }, 400);
+    if (to.toLowerCase() === 'sem contato') return json({ ok: false, error: '"Sem contato" é reservado' }, 400);
+    if (!newStages || !newStages.includes(to) || newStages.includes(from)) return json({ ok: false, error: 'A lista de etapas não confere com a renomeação' }, 400);
+    rename = { from, to };
+  }
+
   await ensureTable(env.DB);
   const up = env.DB.prepare(`INSERT INTO crm_config (key, value) VALUES (?, ?)
     ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')`);
-  await env.DB.batch(writes.map(([k, v]) => up.bind(k, v)));
-  return json({ ok: true });
+  const stmts = writes.map(([k, v]) => up.bind(k, v));
+  if (rename) stmts.push(env.DB.prepare(`UPDATE leads SET etapa = ?, updated_at = datetime('now') WHERE etapa = ?`).bind(rename.to, rename.from));
+  const res = await env.DB.batch(stmts);
+  const moved = rename ? (res?.[res.length - 1]?.meta?.changes ?? null) : undefined;
+  return json({ ok: true, ...(rename && { moved }) });
 }
 
 // a tabela também está em migrations/0010_crm_config.sql; criar aqui evita depender de rodar a migration

@@ -148,6 +148,12 @@
   Na 1ª abertura com o banco vazio, o painel sobe as etapas/tags daquele navegador
   **somadas às já usadas nos leads** (recupera etapas criadas em outros aparelhos).
   Leads com etapa que não está na lista ainda aparecem em "Outras etapas".
+- **Renomear etapa** (lápis no topo da coluna ou duplo clique no nome): o PUT de
+  `/api/crm-config` com `rename: {from, to}` troca o nome na lista **e** faz
+  `UPDATE leads SET etapa` na mesma transação (D1 batch).
+- Lead sem etapa (o site grava `'Sem contato'`, default da coluna) aparece sempre na
+  **1ª etapa** da lista, qualquer que seja o nome dela. Não fixar "Contato inicial"
+  no código: usar `firstStage()`.
 - Ficam no navegador só preferências pessoais: tema (`vt_theme`) e filtros do CRM
   (`crm_filters`). Regra combinada: **dado compartilhado sempre no banco**.
 

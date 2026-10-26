@@ -2167,6 +2167,9 @@
         if (await pushCrmConfig(seed, 'a configuração do CRM')) toast('Etapas e tags do CRM agora ficam salvas no servidor.');
       }
       cacheLocalList('vt_stages', _stages); cacheLocalList('vt_tags', _tags);
+      // leads de entrada (sem etapa) acompanham a 1ª etapa, mesmo se ela tiver sido renomeada
+      var first = _stages[0];
+      _leads.forEach(function(l) { if (!l.etapaRaw || l.etapaRaw === 'Sem contato') l.etapa = first; });
     }
 
     function getTags() { return (_tags || readLocalList('vt_tags') || DEFAULT_TAGS).slice(); }
@@ -2307,12 +2310,12 @@
         var msg = document.getElementById('uiMsg');
         msg.textContent = o.msg || ''; msg.style.display = o.msg ? '' : 'none';
         var inp = document.getElementById('uiInput');
-        inp.style.display = o.input ? '' : 'none'; inp.value = ''; inp.placeholder = o.placeholder || '';
+        inp.style.display = o.input ? '' : 'none'; inp.value = o.value || ''; inp.placeholder = o.placeholder || '';
         var ok = document.getElementById('uiOk');
         ok.textContent = o.ok || 'OK'; ok.classList.toggle('danger', !!o.danger);
         document.getElementById('uiCancel').style.display = o.cancel === false ? 'none' : '';
         document.getElementById('uiDialog').classList.add('active');
-        setTimeout(function() { (o.input ? inp : ok).focus(); }, 30);
+        setTimeout(function() { (o.input ? inp : ok).focus(); if (o.input && o.value) inp.select(); }, 30);
       });
     }
     function uiClose(val) {
@@ -2385,7 +2388,8 @@
         perdaPis:    l.perda_pis,
         perdaMensal: l.perda_mensal,
         perdaAnual:  l.perda_anual,
-        etapa:       (l.etapa && l.etapa !== 'Sem contato') ? l.etapa : 'Contato inicial',
+        etapaRaw:    l.etapa || '',
+        etapa:       (l.etapa && l.etapa !== 'Sem contato') ? l.etapa : firstStage(),
         ultContato:  l.ult_contato  || '',
         proxContato: l.prox_contato || '',
         comentarios: l.comentarios  || '',
@@ -2795,6 +2799,7 @@
     /* ── CRM ─────────────────────────────────────────── */
     // etapas vêm do banco (loadCrmConfig); o localStorage é só cópia de segurança
     function getStages() { return (_stages || readLocalList('vt_stages') || DEFAULT_STAGES).slice(); }
+    function firstStage() { return getStages()[0]; }
 
     function saveStages(s) {
       _stages = s.slice();
@@ -3073,12 +3078,13 @@
         var lim = _crmShow[c.key] || CRM_PAGE;
         var drop = c.idx >= 0 ? ' ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropOn(event,' + c.idx + ')"' : '';
         html += '<section class="kanban-col" style="--stage:' + c.color + '"' + drop + ' aria-label="Etapa ' + esc(c.name) + ', ' + sl.length + ' leads">';
-        html += '<header class="kanban-col-header"><div class="col-title"><span class="col-name">' + esc(c.name) + '</span>' +
+        html += '<header class="kanban-col-header"><div class="col-title"><span class="col-name"' + (c.idx >= 0 ? ' ondblclick="renameStage(' + c.idx + ')" title="Duplo clique para renomear"' : '') + '>' + esc(c.name) + '</span>' +
           '<span class="col-sub">' + (filtering ? sl.length + ' de ' + all + ' no filtro' : (total ? Math.round(sl.length / total * 100) + '% dos leads' : '—')) +
           (c.key === OTHER_STAGE ? ' · etapas que não existem neste aparelho' : '') + '</span></div>' +
           '<span class="col-count">' + int0(sl.length) + '</span>';
         if (c.idx >= 0) {
           html += '<button type="button" class="col-btn" onclick="crmNewIn(\'' + esc(c.key).replace(/'/g, "\\'") + '\')" title="Novo contato nesta etapa" aria-label="Novo contato em ' + esc(c.name) + '"><span class="material-symbols-outlined" aria-hidden="true">add</span></button>';
+          html += '<button type="button" class="col-btn" onclick="renameStage(' + c.idx + ')" title="Renomear etapa" aria-label="Renomear etapa ' + esc(c.name) + '"><span class="material-symbols-outlined" aria-hidden="true">edit</span></button>';
           html += '<button type="button" class="col-btn del" onclick="removeStage(' + c.idx + ')" title="Remover etapa" aria-label="Remover etapa ' + esc(c.name) + '"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>';
         }
         html += '</header><div class="kanban-col-body">';
@@ -3271,6 +3277,35 @@
       else { _stages = before; cacheLocalList('vt_stages', before); renderKanban(); }
     }
 
+    // renomeia a etapa: troca o nome na lista e move os leads dela, numa transação só no servidor
+    async function renameStage(si) {
+      var stages = getStages(), old = stages[si];
+      if (old == null) return;
+      var name = await uiDialog({ title: 'Renomear etapa', msg: 'Os leads desta etapa continuam nela; só o nome muda, para todos os aparelhos.',
+        input: true, value: old, placeholder: old, ok: 'Renomear' });
+      if (name == null) return;
+      name = String(name).trim().slice(0, 60);
+      if (!name || name === old) return;
+      if (name.toLowerCase() === 'sem contato') { toast('"Sem contato" é um nome reservado. Escolha outro.', 'error'); return; }
+      if (stages.some(function(s, i) { return i !== si && s.toLowerCase() === name.toLowerCase(); })) { toast('Já existe uma etapa com esse nome.', 'error'); return; }
+
+      var before = stages.slice();
+      var affected = _leads.filter(function(l) { return l.etapa === old; });
+      stages[si] = name;
+      _stages = stages; affected.forEach(function(l) { l.etapa = name; });
+      renderKanban();
+
+      var r = await api('PUT', '/api/crm-config', { stages: stages, rename: { from: old, to: name } });
+      if (!r || !r.ok) {
+        _stages = before; affected.forEach(function(l) { l.etapa = old; });
+        renderKanban();
+        toast('Não consegui renomear a etapa. ' + ((r && r.error) || 'Tente de novo.'), 'error');
+        return;
+      }
+      cacheLocalList('vt_stages', stages);
+      toast('Etapa renomeada para "' + name + '"' + (affected.length ? ' (' + affected.length + (affected.length === 1 ? ' lead)' : ' leads)') : '') + '.');
+    }
+
     async function removeStage(si) {
       var stages = getStages();
       var name   = stages[si];
@@ -3323,7 +3358,7 @@
             email:       String(r[4] || '').trim() || '—',
             faturamento: '',
             timestamp:   parseXLSXTimestamp(r[0], r[1]),
-            etapa:       'Contato inicial',
+            etapa:       firstStage(),
             ultContato:  '',
             proxContato: '',
             comentarios: '',
