@@ -10,6 +10,8 @@
 //   • fechamento = negócio na etapa "Boas-vindas" ou em etapa posterior do mesmo funil.
 //       A data é a da entrada na etapa (histórico do negócio); sem histórico, usa a
 //       última atualização do negócio e marca como aproximada.
+//   • oportunidade = negócio criado no período que está em "Oportunidade" ou etapa posterior
+//       (coorte pela data de criação, usando a etapa atual — não precisa do histórico);
 //   • cruzamento: contato do negócio × lead do site, por e-mail e, se não bater, WhatsApp.
 //
 // Pages Functions tem limite de subrequisições por chamada: as leituras ficam dentro
@@ -20,6 +22,7 @@ const ORCAMENTO = 45;
 const CACHE_S = 600;
 const NOSHOW = /(nao|n)\s*compareceu|no[\s-]?show|nao apareceu|faltou/;
 const BOAS_VINDAS = /boas[\s-]*vindas/;
+const OPORTUNIDADE = /oportunidade/;
 const REUNIAO = /reuni/;
 
 export async function onRequestGet({ request, env, waitUntil }) {
@@ -88,6 +91,12 @@ async function montar(env, desde) {
   if (!bv.length) avisos.push('Nenhuma etapa "Boas-vindas" encontrada. Etapas: ' + etapas.map(s => s.title).join(', ') + '.');
   bv.forEach(b => etapas.forEach(s => { if (s.group === b.group && (+s.order || 0) >= (+b.order || 0)) fechStage.add(s.id); }));
 
+  // oportunidade: negócio na etapa "Oportunidade" ou em qualquer etapa posterior do mesmo funil
+  const opStage = new Set(), opGroups = new Set();
+  const op = etapas.filter(s => OPORTUNIDADE.test(norm(s.title)));
+  if (!op.length) avisos.push('Nenhuma etapa "Oportunidade" encontrada. Etapas: ' + etapas.map(s => s.title).join(', ') + '.');
+  op.forEach(o => { opGroups.add(o.group); etapas.forEach(s => { if (s.group === o.group && (+s.order || 0) >= (+o.order || 0)) opStage.add(s.id); }); });
+
   // 2. negócios (todos os funis)
   const deals = await todas('deals?orders[cdate]=DESC', 'deals', 22);
 
@@ -127,6 +136,11 @@ async function montar(env, desde) {
     const c = contatos[cid]; if (!c) return null;
     return (c.email && porEmail[c.email]) || (c.fone && porFone[c.fone]) || null;
   };
+
+  // 5b. negócios criados desde a data inicial nos funis que têm "Oportunidade":
+  //     data de criação + se já chegou a oportunidade (pela etapa atual)
+  const criados = deals.filter(d => opGroups.has(d.group) && dia(d.cdate) >= desde)
+    .map(d => ({ data: dia(d.cdate), op: opStage.has(d.stage) ? 1 : 0, site: leadDoContato(d.contact) ? 1 : 0 }));
 
   // 6. etapa atual de cada negócio × lead do site
   const hoje = new Date().toISOString().slice(0, 10);
@@ -194,8 +208,9 @@ async function montar(env, desde) {
     etapas: Object.values(stageById).sort((a, b) => (a.group - b.group) || (a.order - b.order))
       .map(s => Object.assign({}, s, porEtapa[s.id] || { n: 0, site: 0, abertos: 0, fat: {} }, { fech: fechStage.has(s.id) })),
     reunioes, fechamentos,
+    criados,
     cruzamento: { negocios: deals.length, comLeadDoSite: comLead, leadsDoSite: leads.length, contatosLidos: Object.keys(contatos).length },
-    conferencia: { tipoReuniao: tipoReuniao.map(t => t.title), etapasFechamento: [...fechStage].map(id => stageById[id] && stageById[id].title), tarefasLidas: tarefas.length, notasNoShow: comNotaNoShow, requisicoes: usadas },
+    conferencia: { tipoReuniao: tipoReuniao.map(t => t.title), etapasFechamento: [...fechStage].map(id => stageById[id] && stageById[id].title), etapasOportunidade: [...opStage].map(id => stageById[id] && stageById[id].title), tarefasLidas: tarefas.length, notasNoShow: comNotaNoShow, requisicoes: usadas },
     avisos,
   };
 }
