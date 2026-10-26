@@ -32,7 +32,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
   if (!env.AC_API_URL || !env.AC_API_TOKEN) return json({ ok: false, error: 'ActiveCampaign não configurado (AC_API_URL / AC_API_TOKEN)' });
 
   // "v" muda quando a regra muda, para não servir resposta antiga do cache
-  const cacheKey = new Request(u.origin + '/__cache/ac-funil?v=2&desde=' + desde);
+  const cacheKey = new Request(u.origin + '/__cache/ac-funil?v=3&desde=' + desde);
   const cache = caches.default;
   if (u.searchParams.get('fresh') !== '1') {
     const hit = await cache.match(cacheKey);
@@ -143,8 +143,9 @@ async function montar(env, desde) {
 
   // 5b. negócios criados desde a data inicial nos funis que têm "Oportunidade":
   //     data de criação + se já chegou a oportunidade (pela etapa atual)
-  const criados = deals.filter(d => opGroups.has(d.group) && dia(d.cdate) >= desde)
-    .map(d => ({ data: dia(d.cdate), op: opStage.has(d.stage) ? 1 : 0, site: leadDoContato(d.contact) ? 1 : 0 }));
+  // todos os funis: se a etapa de referência não existir, o painel ainda mostra quantos foram criados
+  const criados = deals.filter(d => dia(d.cdate) >= desde)
+    .map(d => ({ data: dia(d.cdate), op: opStage.has(d.stage) ? 1 : 0, site: leadDoContato(d.contact) ? 1 : 0, st: stageById[d.stage] ? stageById[d.stage].title : 'Etapa ' + d.stage }));
 
   // 6. etapa atual de cada negócio × lead do site
   const hoje = new Date().toISOString().slice(0, 10);

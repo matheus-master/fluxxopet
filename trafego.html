@@ -899,7 +899,8 @@
       var inR = function (ds, s, u) { return ds >= s && ds <= u; };
       function cont(s, u) {
         var o = { marc: 0, real: 0, ns: 0, ag: 0, fech: 0, valor: 0, cri: 0, op: 0 };
-        (ac.criados || []).forEach(function (n) { if (inR(n.data, s, u)) { o.cri++; o.op += n.op; } });
+        o.porEtapa = {};
+        (ac.criados || []).forEach(function (n) { if (inR(n.data, s, u)) { o.cri++; o.op += n.op; o.porEtapa[n.st] = (o.porEtapa[n.st] || 0) + 1; } });
         ac.reunioes.forEach(function (r) {
           if (!inR(r.data, s, u)) return;
           o.marc++;
@@ -951,7 +952,7 @@
           var sv = setas[i][0], acima = sv != null && sv > 100;
           return box + '<div class="cf-arrow"' + (acima ? ' title="Inclui reuniões de oportunidades criadas antes do período"' : '') + '><b>' + (acima ? '—' : p0(sv)) + '</b><span>' + (acima ? 'inclui períodos anteriores' : setas[i][1]) + '</span></div>';
         }).join('') + '</div>' +
-        '<p class="cflow-note">Oportunidades = negócios criados no período que já estão em Pré-Qualificação ou numa etapa depois dela no ActiveCampaign (desqualificados não contam).' +
+        '<p class="cflow-note">Oportunidades: <b>' + int.format(c.op) + ' de ' + pl(c.cri, 'negócio criado', 'negócios criados') + '</b> no período já estão em Pré-Qualificação ou numa etapa depois dela no ActiveCampaign (desqualificados não contam).' +
         (c.ag ? ' ' + pl(c.ag, 'reunião marcada ainda vai acontecer', 'reuniões marcadas ainda vão acontecer') + ' (fora do comparecimento).' : '') + '</p></section>';
 
       function roiCell(v) { return v == null ? '<span class="muted">—</span>' : '<span class="' + (v >= 0 ? 't-good' : 't-bad') + '">' + roiTxt(v) + '</span>'; }
@@ -1006,6 +1007,7 @@
           '<ul class="ac-rules">' +
           '<li>Tipo de tarefa lido como reunião: <b>' + esc(cf.tipoReuniao.join(', ') || 'nenhum encontrado') + '</b></li>' +
           '<li>Etapas que contam como oportunidade: <b>' + esc((cf.etapasOportunidade || []).join(', ') || 'nenhuma encontrada') + '</b></li>' +
+          '<li>Negócios criados no período, pela etapa em que estão hoje: <b>' + (Object.keys(c.porEtapa).length ? Object.keys(c.porEtapa).sort(function (a, b) { return c.porEtapa[b] - c.porEtapa[a]; }).map(function (k) { return esc(k) + ' ' + c.porEtapa[k]; }).join(' · ') : 'nenhum') + '</b></li>' +
           '<li>Etapas que contam como fechamento: <b>' + esc(cf.etapasFechamento.join(', ') || 'nenhuma encontrada') + '</b></li>' +
           '<li>Reuniões com a nota "lead não compareceu": <b>' + cf.notasNoShow + '</b> de ' + cf.tarefasLidas + ' desde ' + longDate(ac.desde) + '</li>' +
           '<li>Negócios lidos: <b>' + int.format(cz.negocios) + '</b> · cruzados com leads do site: <b>' + int.format(cz.comLeadDoSite) + '</b> (por e-mail ou WhatsApp)</li>' +
