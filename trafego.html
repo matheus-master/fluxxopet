@@ -951,7 +951,7 @@
           var sv = setas[i][0], acima = sv != null && sv > 100;
           return box + '<div class="cf-arrow"' + (acima ? ' title="Inclui reuniões de oportunidades criadas antes do período"' : '') + '><b>' + (acima ? '—' : p0(sv)) + '</b><span>' + (acima ? 'inclui períodos anteriores' : setas[i][1]) + '</span></div>';
         }).join('') + '</div>' +
-        '<p class="cflow-note">Oportunidades = negócios criados no período que já passaram da etapa Lead no ActiveCampaign.' +
+        '<p class="cflow-note">Oportunidades = negócios criados no período que já estão em Pré-Qualificação ou numa etapa depois dela no ActiveCampaign (desqualificados não contam).' +
         (c.ag ? ' ' + pl(c.ag, 'reunião marcada ainda vai acontecer', 'reuniões marcadas ainda vão acontecer') + ' (fora do comparecimento).' : '') + '</p></section>';
 
       function roiCell(v) { return v == null ? '<span class="muted">—</span>' : '<span class="' + (v >= 0 ? 't-good' : 't-bad') + '">' + roiTxt(v) + '</span>'; }

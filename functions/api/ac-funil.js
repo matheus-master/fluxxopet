@@ -10,8 +10,8 @@
 //   • fechamento = negócio na etapa "Boas-vindas" ou em etapa posterior do mesmo funil.
 //       A data é a da entrada na etapa (histórico do negócio); sem histórico, usa a
 //       última atualização do negócio e marca como aproximada.
-//   • oportunidade = negócio criado no período que está em "Oportunidade" ou etapa posterior
-//       (coorte pela data de criação, usando a etapa atual — não precisa do histórico);
+//   • oportunidade = negócio criado no período que está em "Pré-Qualificação" ou etapa posterior,
+//       fora "Desqualificado" (coorte pela data de criação, usando a etapa atual);
 //   • cruzamento: contato do negócio × lead do site, por e-mail e, se não bater, WhatsApp.
 //
 // Pages Functions tem limite de subrequisições por chamada: as leituras ficam dentro
@@ -22,7 +22,8 @@ const ORCAMENTO = 45;
 const CACHE_S = 600;
 const NOSHOW = /(nao|n)\s*compareceu|no[\s-]?show|nao apareceu|faltou/;
 const BOAS_VINDAS = /boas[\s-]*vindas/;
-const OPORTUNIDADE = /oportunidade/;
+const PRE_QUALIF = /pre[\s-]*qualifica/;
+const DESQUALIF = /desqualif/;
 const REUNIAO = /reuni/;
 
 export async function onRequestGet({ request, env, waitUntil }) {
@@ -30,7 +31,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
   const desde = /^\d{4}-\d{2}-\d{2}$/.test(u.searchParams.get('desde') || '') ? u.searchParams.get('desde') : DESDE;
   if (!env.AC_API_URL || !env.AC_API_TOKEN) return json({ ok: false, error: 'ActiveCampaign não configurado (AC_API_URL / AC_API_TOKEN)' });
 
-  const cacheKey = new Request(u.origin + '/__cache/ac-funil?desde=' + desde);
+  // "v" muda quando a regra muda, para não servir resposta antiga do cache
+  const cacheKey = new Request(u.origin + '/__cache/ac-funil?v=2&desde=' + desde);
   const cache = caches.default;
   if (u.searchParams.get('fresh') !== '1') {
     const hit = await cache.match(cacheKey);
@@ -91,11 +93,13 @@ async function montar(env, desde) {
   if (!bv.length) avisos.push('Nenhuma etapa "Boas-vindas" encontrada. Etapas: ' + etapas.map(s => s.title).join(', ') + '.');
   bv.forEach(b => etapas.forEach(s => { if (s.group === b.group && (+s.order || 0) >= (+b.order || 0)) fechStage.add(s.id); }));
 
-  // oportunidade: negócio na etapa "Oportunidade" ou em qualquer etapa posterior do mesmo funil
+  // oportunidade (lead qualificado): negócio em "Pré-Qualificação" ou etapa posterior do mesmo funil,
+  // nunca em "Desqualificado". No ActiveCampaign a etapa "Oportunidade" é a de entrada (todo negócio
+  // nasce nela), por isso ela não serve de marco.
   const opStage = new Set(), opGroups = new Set();
-  const op = etapas.filter(s => OPORTUNIDADE.test(norm(s.title)));
-  if (!op.length) avisos.push('Nenhuma etapa "Oportunidade" encontrada. Etapas: ' + etapas.map(s => s.title).join(', ') + '.');
-  op.forEach(o => { opGroups.add(o.group); etapas.forEach(s => { if (s.group === o.group && (+s.order || 0) >= (+o.order || 0)) opStage.add(s.id); }); });
+  const op = etapas.filter(s => PRE_QUALIF.test(norm(s.title)));
+  if (!op.length) avisos.push('Nenhuma etapa "Pré-Qualificação" encontrada. Etapas: ' + etapas.map(s => s.title).join(', ') + '.');
+  op.forEach(o => { opGroups.add(o.group); etapas.forEach(s => { if (s.group === o.group && (+s.order || 0) >= (+o.order || 0) && !DESQUALIF.test(norm(s.title))) opStage.add(s.id); }); });
 
   // 2. negócios (todos os funis)
   const deals = await todas('deals?orders[cdate]=DESC', 'deals', 22);
