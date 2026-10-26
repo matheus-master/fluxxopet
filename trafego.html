@@ -318,7 +318,7 @@
       <div class="tabs" id="tabs">
         <button class="tab" data-p="dia" title="Hoje">Dia</button>
         <button class="tab" data-p="semana" title="Últimos 7 dias">Semana</button>
-        <button class="tab on" data-p="mes" title="Últimos 30 dias">Mês</button>
+        <button class="tab on" data-p="mes" title="Mês atual, do dia 1 até hoje">Mês</button>
         <button class="tab" data-p="trimestre" title="Últimos 90 dias">Trimestre</button>
         <button class="tab" data-p="semestre" title="Últimos 180 dias">Semestre</button>
         <button class="tab" data-p="ano" title="Últimos 365 dias">Ano</button>
@@ -376,11 +376,18 @@
   function dow(d) { return new Date(d + 'T00:00:00Z').getUTCDay(); }
   function monday(d) { return addDays(d, -((dow(d) + 6) % 7)); }
 
-  // janela móvel: cada aba conta N dias para trás a partir de hoje (inclusive);
-  // a comparação é com a janela imediatamente anterior, do mesmo tamanho
+  // "Mês" = mês atual, do dia 1 até hoje, comparado com o mesmo trecho do mês anterior
+  // (1–26/out × 1–26/set). As outras abas são janela móvel: N dias para trás a partir de
+  // hoje (inclusive), comparados com a janela imediatamente anterior, do mesmo tamanho.
   var WINDOW = { dia: 1, semana: 7, mes: 30, trimestre: 90, semestre: 180, ano: 365 };
   function periodRange(p) {
-    var t = today(), n = WINDOW[p], s = addDays(t, -(n - 1));
+    var t = today();
+    if (p === "mes") {
+      var ini = t.slice(0, 8) + "01", pIni = addDays(ini, -1).slice(0, 8) + "01";
+      // dia 31 de hoje contra um mês de 30 dias: para no último dia do mês anterior
+      return { since: ini, until: t, prevSince: pIni, prevUntil: [addDays(pIni, diffDays(ini, t)), addDays(ini, -1)].sort()[0] };
+    }
+    var n = WINDOW[p], s = addDays(t, -(n - 1));
     return { since: s, until: t, prevSince: addDays(s, -n), prevUntil: addDays(s, -1) };
   }
   function defaultGroup(since, until) {
@@ -1121,6 +1128,7 @@
   function periodPhrase() {
     var d = state.data;
     if (state.period === 'dia') return 'Hoje';
+    if (state.period === 'mes') return 'Em ' + MESES_L[+d.until.slice(5, 7) - 1].toLowerCase() + (d.until.slice(8) === '01' ? ' (só hoje, dia 1)' : ' (de 1 a ' + +d.until.slice(8) + ')');
     if (state.period !== 'custom') return 'Nos últimos ' + WINDOW[state.period] + ' dias';
     return 'De ' + longDate(d.since) + ' a ' + longDate(d.until);
   }
