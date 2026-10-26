@@ -10,8 +10,10 @@
 //   • fechamento = negócio na etapa "Boas-vindas" ou em etapa posterior do mesmo funil.
 //       A data é a da entrada na etapa (histórico do negócio); sem histórico, usa a
 //       última atualização do negócio e marca como aproximada.
-//   • oportunidade = negócio criado no período que está em "Pré-Qualificação" ou etapa posterior,
-//       fora "Desqualificado" (coorte pela data de criação, usando a etapa atual);
+//   • oportunidade = negócio criado no período cujo lead do site informou faturamento ACIMA de
+//       R$ 50 mil E que andou no funil: está em "Pré-Qualificação" ou etapa posterior (fora
+//       "Desqualificado") ou tem tarefa de Reunião. Coorte pela data de criação, etapa atual.
+//       Negócio sem lead do site (ex.: bot) não tem faturamento e não conta;
 //   • cruzamento: contato do negócio × lead do site, por e-mail e, se não bater, WhatsApp.
 //
 // Pages Functions tem limite de subrequisições por chamada: as leituras ficam dentro
@@ -32,7 +34,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
   if (!env.AC_API_URL || !env.AC_API_TOKEN) return json({ ok: false, error: 'ActiveCampaign não configurado (AC_API_URL / AC_API_TOKEN)' });
 
   // "v" muda quando a regra muda, para não servir resposta antiga do cache
-  const cacheKey = new Request(u.origin + '/__cache/ac-funil?v=3&desde=' + desde);
+  const cacheKey = new Request(u.origin + '/__cache/ac-funil?v=4&desde=' + desde);
   const cache = caches.default;
   if (u.searchParams.get('fresh') !== '1') {
     const hit = await cache.match(cacheKey);
@@ -144,8 +146,16 @@ async function montar(env, desde) {
   // 5b. negócios criados desde a data inicial nos funis que têm "Oportunidade":
   //     data de criação + se já chegou a oportunidade (pela etapa atual)
   // todos os funis: se a etapa de referência não existir, o painel ainda mostra quantos foram criados
-  const criados = deals.filter(d => dia(d.cdate) >= desde)
-    .map(d => ({ data: dia(d.cdate), op: opStage.has(d.stage) ? 1 : 0, site: leadDoContato(d.contact) ? 1 : 0, st: stageById[d.stage] ? stageById[d.stage].title : 'Etapa ' + d.stage }));
+  const comReuniao = new Set();
+  tarefas.forEach(t => {
+    if (String(t.reltype).toLowerCase() === 'deal') comReuniao.add(String(t.relid));
+    else deals.forEach(d => { if (String(d.contact) === String(t.relid)) comReuniao.add(String(d.id)); });
+  });
+  const criados = deals.filter(d => dia(d.cdate) >= desde).map(d => {
+    const l = leadDoContato(d.contact), f50 = l && acima50(l.faturamento) ? 1 : 0;
+    const andou = (opStage.has(d.stage) || comReuniao.has(String(d.id))) ? 1 : 0;
+    return { data: dia(d.cdate), op: f50 && andou ? 1 : 0, f50, andou, site: l ? 1 : 0, st: stageById[d.stage] ? stageById[d.stage].title : 'Etapa ' + d.stage };
+  });
 
   // 6. etapa atual de cada negócio × lead do site
   const hoje = new Date().toISOString().slice(0, 10);
@@ -223,6 +233,14 @@ async function montar(env, desde) {
 function dia(s) { return String(s || '').slice(0, 10); }
 function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
 // telefone comparável: só dígitos, sem 55 e sem o 9 extra do celular → DDD + 8 dígitos
+// faixa do formulário acima de R$ 50 mil: "R$100 mil", "R$200 mil", "Mais de R$200 mil"
+// ("Até R$50 mil" e "Até R$30 mil" ficam de fora)
+function acima50(f) {
+  const s = norm(f);
+  if (/mais de/.test(s)) return true;
+  const n = +((s.match(/(\d+)\s*mil/) || [])[1] || 0);
+  return n > 50;
+}
 function fone(v) {
   let d = String(v || '').replace(/\D/g, '');
   if (d.length > 11 && d.startsWith('55')) d = d.slice(2);

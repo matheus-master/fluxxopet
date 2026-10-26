@@ -900,7 +900,8 @@
       function cont(s, u) {
         var o = { marc: 0, real: 0, ns: 0, ag: 0, fech: 0, valor: 0, cri: 0, op: 0 };
         o.porEtapa = {};
-        (ac.criados || []).forEach(function (n) { if (inR(n.data, s, u)) { o.cri++; o.op += n.op; o.porEtapa[n.st] = (o.porEtapa[n.st] || 0) + 1; } });
+        o.f50 = 0; o.andou = 0;
+        (ac.criados || []).forEach(function (n) { if (inR(n.data, s, u)) { o.cri++; o.op += n.op; o.f50 += n.f50 || 0; o.andou += n.andou || 0; o.porEtapa[n.st] = (o.porEtapa[n.st] || 0) + 1; } });
         ac.reunioes.forEach(function (r) {
           if (!inR(r.data, s, u)) return;
           o.marc++;
@@ -952,7 +953,8 @@
           var sv = setas[i][0], acima = sv != null && sv > 100;
           return box + '<div class="cf-arrow"' + (acima ? ' title="Inclui reuniões de oportunidades criadas antes do período"' : '') + '><b>' + (acima ? '—' : p0(sv)) + '</b><span>' + (acima ? 'inclui períodos anteriores' : setas[i][1]) + '</span></div>';
         }).join('') + '</div>' +
-        '<p class="cflow-note">Oportunidades: <b>' + int.format(c.op) + ' de ' + pl(c.cri, 'negócio criado', 'negócios criados') + '</b> no período já estão em Pré-Qualificação ou numa etapa depois dela no ActiveCampaign (desqualificados não contam).' +
+        '<p class="cflow-note">Oportunidade = lead com faturamento <b>acima de R$ 50 mil</b> que <b>andou no funil</b> (Pré-Qualificação ou depois, ou reunião marcada). ' +
+        'No período: ' + pl(c.cri, 'negócio criado', 'negócios criados') + ', ' + int.format(c.f50) + ' acima de R$ 50 mil, ' + int.format(c.andou) + ' andaram no funil, <b>' + int.format(c.op) + ' com as duas coisas</b>.' +
         (c.ag ? ' ' + pl(c.ag, 'reunião marcada ainda vai acontecer', 'reuniões marcadas ainda vão acontecer') + ' (fora do comparecimento).' : '') + '</p></section>';
 
       function roiCell(v) { return v == null ? '<span class="muted">—</span>' : '<span class="' + (v >= 0 ? 't-good' : 't-bad') + '">' + roiTxt(v) + '</span>'; }
