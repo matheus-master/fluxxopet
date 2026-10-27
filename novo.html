@@ -1397,6 +1397,17 @@
 
     track('PageView',{},{});
 
+    // Etapas do cadastro (aba Funil do /trafego): cada etapa uma vez por visitante.
+    // Só grava no D1 por /api/etapa — não vai para o pixel do Meta nem para o GA4.
+    function etapa(e) {
+      try { var k = 'etapa:' + location.pathname + ':' + e; if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); } catch (x) {}
+      if (navigator.webdriver) return;
+      var b = JSON.stringify({ etapa: e, pagina: location.pathname, sid: getCookie('_krob_sid') });
+      try { if (navigator.sendBeacon && navigator.sendBeacon('/api/etapa', new Blob([b], { type: 'application/json' }))) return; } catch (x) {}
+      fetch('/api/etapa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: b, keepalive: true }).catch(function () {});
+    }
+    etapa('visita');
+
     (function(){
       var th=[25,50,75,95], fired={};
       function sc(){
@@ -1555,6 +1566,7 @@
       var started = false;
       form.addEventListener('focusin', function () {
         if (started) return; started = true;
+        etapa('inicio');
         ga('form_start', { form_id: sfx ? 'cta_leadForm' : 'hero_leadForm' });
       });
       form.addEventListener('input', function (e) {
@@ -1728,6 +1740,7 @@
       leadData = Object.assign({}, v.data, { id: res.id, _formSource: sfx ? 'cta' : 'hero' });
       var ud = { em: leadData.email, ph: leadData.whatsapp, fn: leadData.nome };
       track('Lead', ud, { currency: 'BRL', faturamento: leadData.faturamento });
+      etapa('lead');
       var rev = REVENUE_EVENTS[leadData.faturamento];
       if (rev) track(rev, ud, { faturamento: leadData.faturamento, currency: 'BRL' });
 
@@ -1747,6 +1760,8 @@
     // (setas mudam o rádio sem querer "responder") aparece o botão Continuar.
     var qPointer = false;
     function qGo(n) {
+      if (n >= 2) etapa('qualif_dif');
+      if (n >= 3) etapa('qualif_urg');
       document.querySelectorAll('#qForm .qs').forEach(function (s) { s.hidden = +s.getAttribute('data-step') !== n; });
       document.getElementById('qBack').hidden = n === 1;
       document.getElementById('qTitle').hidden = n !== 1;
@@ -1833,6 +1848,7 @@
         return;
       }
       leadData.dificuldade = dif.value; leadData.urgencia = +urg.value;
+      etapa('qualif_fim');
       ga('qualificacao_concluida', { dificuldade: dif.value, urgencia: +urg.value, com_texto: !!sobre });
       btn.disabled = false; skip.disabled = false; btn.innerHTML = label;
       if (qNext === 'simulador') { showSimulator(); return; }

@@ -109,6 +109,16 @@
   visualizações ÷ cliques; conversão = leads ÷ visualizações. Variações de taxa em
   **p.p.**. Connect rate diário pode passar de 100% (o Meta atribui a visualização
   à data do clique, recarregamentos etc.) — é dado do Meta, não bug.
+- **Etapas do cadastro na página** (card na aba Funil): contagem do próprio site, por
+  página (`/` = atual, `/novo` = layout novo), visitantes únicos (`_krob_sid`).
+  - As páginas chamam `etapa('...')` → `POST /api/etapa` (pública, no SKIP_AUTH; só grava
+    na tabela `funil_etapas` do D1, **não** vai ao pixel nem ao GA4; robôs e
+    `navigator.webdriver` ficam de fora; cada etapa 1× por visitante).
+  - Etapas: `visita`, `inicio` (abriu o form / focou campo), `etapa1` e `dados` (só `/`,
+    form em 2 passos), `lead` (lead salvo: faturamento escolhido em `/`, envio em `/novo`),
+    `qualif_dif`, `qualif_urg`, `qualif_fim` (só `/novo`). Lista fixa em `functions/api/etapa.js`.
+  - Leitura: `GET /api/funil-pagina?since&until` (JWT, datas de Brasília). Medição começou em 2026-10-27.
+  - Visitas incluem tráfego fora dos anúncios: não batem com `landing_page_view` do Meta.
 - **Funil comercial** (`#comercial`): investimento → leads (Meta, campanhas de
   cadastro) → reuniões → fechamentos, com taxa de passagem e custo por etapa.
   - Reuniões: planilha publicada do Google (CSV, colunas Cliente/Data/Status; conta

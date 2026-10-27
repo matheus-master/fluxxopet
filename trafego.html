@@ -196,6 +196,8 @@
     .com-table tr:last-child td{border-bottom:none}
     .com-table tfoot td{font-weight:600;border-top:1px solid var(--line)}
     .com-table .muted,.com-item .muted{color:var(--ink-3)}
+    .fp-table td:first-child{white-space:normal;min-width:130px}
+    @media (max-width:640px){ .fp-table th,.fp-table td{padding:10px 6px;white-space:normal} .fp-table td:first-child{min-width:0} .fp-table th{white-space:normal;font-size:.62rem} .fp-table .fp-pv{display:none} }
     .table-scroll{overflow-x:auto}
     .com-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:6px}
     .com-form .cli,.com-form button{grid-column:1/-1}
@@ -875,7 +877,7 @@
       }
       return {
         html: summaryHtml(funnelSummary(r, pr) + (co.cpc != null ? ' Em custo: cada clique saiu por <b>' + money(co.cpc) + '</b>, cada visita na página por <b>' + money(co.cpv) + '</b> e cada lead por <b>' + money(co.cpl) + '</b>.' : ''), x) +
-          '<section class="kpis">' + cards + '</section>' + funnel + trio,
+          '<section class="kpis">' + cards + '</section>' + funnel + '<div style="margin-bottom:10px">' + etapasCard() + '</div>' + trio,
         draw: function () {
           drawRate('c-ctr', '_ctr', 'Cliques', 'clicks', 'Impressões', 'impr');
           drawRate('c-con', '_con', 'Visualiz.', 'lpv', 'Cliques', 'clicks');
@@ -1158,6 +1160,73 @@
     finally { acLoading = false; }
     if (state.view === 'comercial') render();
   }
+  /* ── funil: etapas do cadastro nas páginas do quiz (/api/funil-pagina) ── */
+  var fpLoading = null;
+  async function loadFp(since, until) {
+    var k = since + '|' + until;
+    if (fpLoading === k) return;
+    fpLoading = k;
+    try {
+      var r = await api('/api/funil-pagina?since=' + since + '&until=' + until);
+      state.fp = r && r.ok ? Object.assign(r, { k: k }) : { k: k, ok: false, error: (r && r.error) || 'erro no servidor' };
+    } catch (e) { state.fp = { k: k, ok: false, error: 'sem conexão' }; }
+    finally { fpLoading = null; }
+    if (state.view === 'funil') render();
+  }
+  // etapas na ordem; "so" = só existe naquela página (a atual tem 2 passos, a nova tem qualificação)
+  var FP_ETAPAS = [
+    { k: 'visita', l: 'Visitaram a página' },
+    { k: 'inicio', l: 'Começaram o formulário' },
+    { k: 'etapa1', l: 'Passaram do nome e e-mail', so: 'atual' },
+    { k: 'dados', l: 'Preencheram WhatsApp e pet shop', so: 'atual' },
+    { k: 'lead', l: 'Viraram lead', d: 'lead salvo no CRM' },
+    { k: 'qualif_dif', l: 'Responderam a dificuldade', so: 'novo' },
+    { k: 'qualif_urg', l: 'Responderam a urgência', so: 'novo' },
+    { k: 'qualif_fim', l: 'Concluíram a qualificação', so: 'novo' },
+  ];
+  var FP_PAG = { atual: 'Página atual (/)', novo: 'Layout novo (/novo)' };
+  function etapasCard() {
+    var d = state.data, k = d.since + '|' + d.until, fp = state.fp;
+    var head = { icon: 'checklist', label: 'Etapas do cadastro na página', legend: '<span>visitantes únicos</span>' };
+    if (!fp || fp.k !== k) { loadFp(d.since, d.until); return chartCard(Object.assign(head, { body: '<p class="cflow-note">Carregando…</p>' })); }
+    if (!fp.ok) return chartCard(Object.assign(head, { body: '<p class="cflow-note">Não consegui carregar as etapas (' + esc(fp.error) + ').</p>' }));
+    var pags = ['atual', 'novo'].filter(function (p) { return fp.paginas[p] && fp.paginas[p].visita; });
+    var desde = fp.inicio ? ' A medição começou em ' + fmtShort(fp.inicio) + '.' : '';
+    if (!pags.length) return chartCard(Object.assign(head, { body: '<p class="cflow-note">Nenhuma visita registrada neste período.' + desde + '</p>' }));
+
+    // resumo por página: de cada 100 visitas quantas começam e quantas viram lead + onde mais perde
+    var frases = pags.map(function (p) {
+      var e = fp.paginas[p], vis = e.visita, prev = null, pior = null;
+      FP_ETAPAS.forEach(function (s) {
+        if (s.so && s.so !== p) return;
+        var n = e[s.k] || 0;
+        if (prev && prev.n) { var perda = 100 - n / prev.n * 100; if (!pior || perda > pior.perda) pior = { perda: perda, de: prev.l, para: s.l }; }
+        prev = { n: n, l: s.l };
+      });
+      return '<b>' + FP_PAG[p] + ':</b> de cada 100 visitas, ' + Math.round((e.inicio || 0) / vis * 100) + ' começam o formulário e <b>' + Math.round((e.lead || 0) / vis * 100) + ' viram lead</b>.' +
+        (pior && pior.perda > 0 ? ' A maior perda é entre “' + pior.de.toLowerCase() + '” e “' + pior.para.toLowerCase() + '”: <b class="t-bad">' + Math.round(pior.perda) + '% param ali</b>.' : '');
+    });
+
+    var rows = FP_ETAPAS.filter(function (s) { return !s.so || pags.indexOf(s.so) !== -1; }).map(function (s) {
+      return '<tr><td>' + s.l + (s.d ? ' <span class="muted">(' + s.d + ')</span>' : '') + '</td>' + pags.map(function (p) {
+        if (s.so && s.so !== p) return '<td class="muted">—</td>';
+        var e = fp.paginas[p], n = e[s.k] || 0;
+        // etapa anterior que existe nesta página, para a taxa de passagem
+        var i = FP_ETAPAS.indexOf(s), ant = null;
+        while (--i >= 0) { if (!FP_ETAPAS[i].so || FP_ETAPAS[i].so === p) { ant = FP_ETAPAS[i]; break; } }
+        var pass = ant && e[ant.k] ? Math.round(n / e[ant.k] * 100) : null;
+        return '<td><b style="font-weight:600">' + int.format(n) + '</b> <span class="muted fp-pv">' + (s.k === 'visita' ? '' : pctOf(n, e.visita) + ' das visitas') + '</span>' +
+          (pass != null ? '<br><small class="muted">' + pass + '% da etapa anterior</small>' : '') + '</td>';
+      }).join('') + '</tr>';
+    }).join('');
+
+    return chartCard(Object.assign(head, {
+      body: '<p class="cflow-note" style="margin:0 0 12px">' + frases.join('<br>') + '</p>' +
+        '<div class="table-scroll"><table class="com-table fp-table"><thead><tr><th>Etapa</th>' + pags.map(function (p) { return '<th>' + FP_PAG[p] + '</th>'; }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<p class="cflow-note">Contagem do próprio site (cada visitante conta uma vez por etapa; robôs ficam de fora). Visitas incluem quem chega fora dos anúncios, por isso não batem com as visualizações do Meta.' + desde + '</p>',
+    }));
+  }
+
   function nextYm(ym) { var y = +ym.slice(0, 4), m = +ym.slice(5, 7) + 1; if (m > 12) { m = 1; y++; } return y + '-' + String(m).padStart(2, '0'); }
   function fmtShort(ymd) { return ymd.slice(8, 10) + '/' + ymd.slice(5, 7) + '/' + ymd.slice(2, 4); }
   function lastDay(ym) { var dt = new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 0)); return dt.toISOString().slice(0, 10); }
@@ -1353,7 +1422,7 @@
     var b = e.target.closest('.group button'); if (!b) return;
     state.group = b.dataset.g; savePrefs(); render();
   });
-  $('refresh').addEventListener('click', function () { load(true); state.com = null; state.ac = undefined; if (state.view === 'comercial') loadAc(true); });
+  $('refresh').addEventListener('click', function () { load(true); state.com = null; state.ac = undefined; state.fp = null; if (state.view === 'comercial') loadAc(true); });
   // toque/clique no "i" mostra a explicação (no celular não existe "passar o mouse")
   var hintPop = null;
   function closeHint() { if (hintPop) { hintPop.remove(); hintPop = null; } }
