@@ -244,5 +244,23 @@
 
   <a href="/" class="back">← Voltar para a página inicial</a>
 
+  <script>
+  (function () {
+    // Etapas do funil (/api/etapa) da página onde a pessoa se cadastrou: a / grava "fx_pag"
+    // no sessionStorage ao salvar o lead. Sem ela (chegou por outro caminho), não conta.
+    function fxEtapa(e) {
+      var pag; try { pag = sessionStorage.getItem('fx_pag'); } catch (x) {}
+      if (!pag || navigator.webdriver) return;
+      try { var k = 'etapa:' + pag + ':' + e; if (sessionStorage.getItem(k)) return; sessionStorage.setItem(k, '1'); } catch (x) {}
+      var m = document.cookie.match('(^|;)\\s*_krob_sid\\s*=\\s*([^;]+)');
+      var b = JSON.stringify({ etapa: e, pagina: pag, sid: m ? m.pop() : '' });
+      try { if (navigator.sendBeacon && navigator.sendBeacon('/api/etapa', new Blob([b], { type: 'application/json' }))) return; } catch (x) {}
+      fetch('/api/etapa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: b, keepalive: true }).catch(function () {});
+    }
+    fxEtapa('obrigado');
+    document.querySelectorAll('a[href*="wa.me"]').forEach(function (a) { a.addEventListener('click', function () { fxEtapa('wa_obrigado'); }); });
+  })();
+  </script>
+
 </body>
 </html>

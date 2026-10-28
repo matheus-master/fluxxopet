@@ -1037,6 +1037,7 @@
     }
 
     function showSimulator() {
+      etapa('simulador');
       document.getElementById('progressFill').style.width = '95%';
       document.getElementById('progressPct').textContent = '95%';
       document.getElementById('modalQuestion').style.display = 'none';
@@ -1210,6 +1211,8 @@
       document.querySelectorAll('.opt').forEach(function(b){b.disabled=true;});
       leadData.faturamento = value;
       etapa('lead');
+      // /obrigado e /resultado contam as etapas seguintes no funil desta página
+      try { sessionStorage.setItem('fx_pag', location.pathname); } catch (x) {}
       var rev = REVENUE_EVENTS[value];
       if (rev) track(rev,{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{faturamento:value,currency:'BRL'});
       fetch('/api/submit',{ method:'POST', headers:{'Content-Type':'application/json'},

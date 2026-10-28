@@ -7,6 +7,8 @@
 //   dias     [{ d, pagina, etapa, n }]                — por dia (data em que o visitante chegou à etapa)
 //   prev     { pagina: { etapa: n } } | null          — período de comparação
 //   origens  { pagina: { meta|google|outros: { etapa: n } } } — origem pela sessão (cookie _krob_sid)
+//   etapa "bot" (em dias/origens/prev) = lead cujo e-mail chegou depois pelo webhook do BotConversa
+//            (webhook_log), ligado pela sessão em leads.session_id
 //   histDias [{ d, etapa, o, n }] / histPrev [{ etapa, o, n }] / histMes [{ m, etapa, o, n }]
 //            — histórico da página atual (/) desde jun/2026, antes da medição nova, pela tabela
 //              events (/tracker): rolou = ScrollDepth25, dados = Lead (WhatsApp e pet shop),
@@ -18,6 +20,11 @@ const ORIGEM = `CASE
   WHEN s.gclid != '' OR lower(s.utm_source) LIKE 'google%' THEN 'google'
   ELSE 'outros' END`;
 const DIA = "date(f.created_at, '-3 hours')";
+// leads da medição nova que deixaram o e-mail no bot: um por visitante, no dia do 1º webhook
+const BOT = `(SELECT f.sid, f.pagina, date(MIN(w.created_at), '-3 hours') AS d FROM funil_etapas f
+  JOIN leads l ON l.session_id = f.sid AND l.email != ''
+  JOIN webhook_log w ON lower(trim(w.email)) = lower(trim(l.email)) AND w.result LIKE '200%' AND w.created_at >= f.created_at
+  WHERE f.etapa = 'lead' GROUP BY f.sid, f.pagina) b`;
 
 // histórico pelos eventos do /tracker, só da raiz (com ou sem ?fbclid/utm)
 const RAIZ = 'https://diagnostico.fluxxopet.com.br/';
@@ -51,6 +58,17 @@ export async function onRequestGet({ request, env }) {
     r = await consultas();
   }
   const [rDias, rOrig, rPrev] = r;
+  // etapa "bot": se falhar, o resto continua
+  try {
+    const [a, b, c] = await Promise.all([
+      env.DB.prepare(`SELECT b.d, b.pagina, 'bot' AS etapa, COUNT(*) AS n FROM ${BOT} WHERE b.d BETWEEN ? AND ? GROUP BY 1, 2`).bind(since, until).all(),
+      env.DB.prepare(`SELECT b.pagina, 'bot' AS etapa, ${ORIGEM} AS o, COUNT(*) AS n FROM ${BOT} LEFT JOIN sessions s ON s.sid = b.sid WHERE b.d BETWEEN ? AND ? GROUP BY 1, 3`).bind(since, until).all(),
+      temPrev ? env.DB.prepare(`SELECT b.pagina, 'bot' AS etapa, COUNT(*) AS n FROM ${BOT} WHERE b.d BETWEEN ? AND ? GROUP BY 1`).bind(prevSince, prevUntil).all() : null,
+    ]);
+    rDias.results = (rDias.results || []).concat(a.results || []);
+    rOrig.results = (rOrig.results || []).concat(b.results || []);
+    if (rPrev && c) rPrev.results = (rPrev.results || []).concat(c.results || []);
+  } catch {}
 
   // histórico (tabela events): se falhar, o resto da resposta continua valendo
   let histDias = [], histPrev = null, histMes = [];

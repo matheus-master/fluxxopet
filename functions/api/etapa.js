@@ -5,7 +5,9 @@
 // A aba Funil do /trafego lê isso por /api/funil-pagina.
 
 const PAGINAS = { '/': 'atual', '/novo': 'novo' };
-const ETAPAS = ['visita', 'inicio', 'etapa1', 'dados', 'lead', 'qualif_dif', 'qualif_urg', 'qualif_fim'];
+// simulador … wa_resultado vêm das telas depois do cadastro (/obrigado, /resultado), no funil da página de origem
+const ETAPAS = ['visita', 'inicio', 'etapa1', 'dados', 'lead', 'qualif_dif', 'qualif_urg', 'qualif_fim',
+  'simulador', 'resultado', 'obrigado', 'wa_resultado', 'wa_obrigado'];
 
 export async function onRequestPost(context) {
   const { request, env } = context;

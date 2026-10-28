@@ -930,7 +930,7 @@
       var npior = v ? pior(PG, e) : null;
       var funilNovo = v
         ? funilHtml('Funil completo · medição nova', (d.since < MED ? 'só a partir de ' + fmtShort(MED) + ' · ' : '') + 'todas as origens, visitantes únicos', PG, e, pn, npior, 'visita')
-        : chartCard({ icon: 'filter_alt', label: 'Funil completo · medição nova', legend: '', body: '<p class="cflow-note" style="margin:0">As 5 etapas (incluindo quem começa o formulário e passa do nome e e-mail) são medidas desde ' + fmtShort(MED) + '. Escolha um período que inclua essa data.</p>' });
+        : chartCard({ icon: 'filter_alt', label: 'Funil completo · medição nova', legend: '', body: '<p class="cflow-note" style="margin:0">As etapas (incluindo quem começa o formulário e passa do nome e e-mail) são medidas desde ' + fmtShort(MED) + '. Escolha um período que inclua essa data.</p>' });
 
       // ── resumo ──
       var r100 = function (o, a, b) { var z = hr(o, a, b); return z == null ? 0 : Math.round(z); };
@@ -968,7 +968,7 @@
 
       return {
         html: summaryHtml(txt, prv ? x : { d: {} }) + '<section class="kpis">' + cards + '</section>' + funilHist +
-          '<div style="margin-bottom:10px">' + funilNovo + '</div>' + chart + '<div style="margin-bottom:10px">' + mesCard + '</div>' + orgCard,
+          '<div style="margin-bottom:10px">' + funilNovo + '</div>' + (v ? '<div style="margin-bottom:10px">' + depoisCard(fp) + '</div>' : '') + chart + '<div style="margin-bottom:10px">' + mesCard + '</div>' + orgCard,
         draw: function () {
           drawChart('c-pag', x.buckets, {
             bars: x.buckets.map(function (b) { return b.lpv; }), barColor: C.bar, hoverColor: C.ink, thick: 12,
@@ -1344,6 +1344,31 @@
     { k: 'dados', l: 'Preencheram WhatsApp e pet shop', t: 'WhatsApp e pet shop', a: 'Preencheram WhatsApp e pet shop', w: 54, bg: C.ink, fg: '#fff' },
     { k: 'lead', l: 'Viraram lead', t: 'Leads', a: 'Escolheram o faturamento', w: 42, bg: C.accent, fg: '#fff' },
   ];
+  // depois do cadastro: os dois caminhos até o WhatsApp (formulário do topo → simulador; de baixo → obrigado).
+  // Só dias desde WA_DESDE (início da medição), para leads antigos não puxarem as taxas para baixo.
+  function depoisCard(fp) {
+    var d = state.data, de = d.since > WA_DESDE ? d.since : WA_DESDE, e = {};
+    if (d.until < WA_DESDE) return '';
+    (fp.dias || []).forEach(function (r) { if (r.pagina === 'atual' && r.d >= de) e[r.etapa] = (e[r.etapa] || 0) + r.n; });
+    e.wa = (e.wa_obrigado || 0) + (e.wa_resultado || 0);
+    var head = { icon: 'chat', label: 'Depois do cadastro · caminho até o WhatsApp', legend: '<span>visitantes únicos · desde ' + fmtShort(de) + '</span>' };
+    if (!e.lead) return chartCard(Object.assign(head, { body: '<p class="cflow-note" style="margin:0">Nenhum lead na página desde ' + fmtShort(de) + '. Os cliques no WhatsApp são medidos desde ' + fmtShort(WA_DESDE) + '.</p>' }));
+    var sub = function (n, b, de) { return '<td><b style="font-weight:600">' + int.format(n || 0) + '</b>' + (b != null ? '<br><small class="muted">' + pctOf(n || 0, b) + ' ' + de + '</small>' : '') + '</td>'; };
+    var row = function (l, n, b, de, ind) { return '<tr><td' + (ind ? ' style="padding-left:26px"' : '') + '>' + l + '</td>' + sub(n, b, de) + '</tr>'; };
+    var rows =
+      row('<b>Viraram lead</b>', e.lead) +
+      row('Formulário do topo: viram o simulador', e.simulador, e.lead, 'dos leads') +
+      row('Fizeram a simulação', e.resultado, e.simulador, 'de quem viu o simulador', true) +
+      row('Clicaram no WhatsApp', e.wa_resultado, e.resultado, 'de quem simulou', true) +
+      row('Formulário de baixo: chegaram no obrigado', e.obrigado, e.lead, 'dos leads') +
+      row('Clicaram no WhatsApp', e.wa_obrigado, e.obrigado, 'de quem chegou', true) +
+      row('<b>Clicaram no WhatsApp (total)</b>', e.wa, e.lead, 'dos leads') +
+      row('<b>Deixaram o e-mail no bot</b>', e.bot, e.wa, 'de quem clicou');
+    return chartCard(Object.assign(head, {
+      body: '<div class="table-scroll"><table class="com-table fp-table"><thead><tr><th>Etapa</th><th>Visitantes</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<p class="cflow-note">Cliques medidos desde ' + fmtShort(WA_DESDE) + '; leads de antes disso não têm essas etapas. “Deixaram o e-mail no bot” liga o e-mail do cadastro ao aviso do BotConversa — quem clicou mas não mandou a mensagem, ou não deixou o e-mail, não entra.</p>' }));
+  }
+  var WA_DESDE = '2026-10-28';
   var FP_PAG = { atual: 'Página atual (/)', novo: 'Layout novo (/novo)' };
   function etapasCard() {
     var d = state.data, k = d.since + '|' + d.until, fp = state.fp;

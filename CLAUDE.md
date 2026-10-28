@@ -117,6 +117,12 @@
   - Etapas: `visita`, `inicio` (abriu o form / focou campo), `etapa1` e `dados` (só `/`,
     form em 2 passos), `lead` (lead salvo: faturamento escolhido em `/`, envio em `/novo`),
     `qualif_dif`, `qualif_urg`, `qualif_fim` (só `/novo`). Lista fixa em `functions/api/etapa.js`.
+  - Depois do cadastro (desde 2026-10-28, só `/`): ao salvar o lead a `/` grava `fx_pag` no
+    sessionStorage; `/obrigado` e `/resultado` usam isso (`fxEtapa`) para contar no funil da `/`:
+    `simulador` (form do topo abriu o simulador), `resultado`, `wa_resultado` (clique em qualquer
+    `.js-wa`), `obrigado`, `wa_obrigado`. Sem `fx_pag` (ex.: veio da `/simulacao`) não conta.
+    `bot` não vem do site: a `/api/funil-pagina` liga o lead (`leads.session_id` + e-mail) ao
+    `webhook_log` do BotConversa (resultado 200, depois do lead).
   - Leitura: `GET /api/funil-pagina?since&until[&prevSince&prevUntil]` (JWT, datas de Brasília):
     totais, por dia, período anterior e origem (join com `sessions`: Meta = fbclid ou utm
     facebook/fb/ig/instagram/meta; Google = gclid ou utm google*; resto = Outros). Medição começou em 2026-10-27.
@@ -129,6 +135,9 @@
     rolaram 1/4 (`ScrollDepth25`) → WhatsApp e pet shop (`Lead`) → lead (`Lead<faixa>`), eventos
     da tabela `events` da raiz, só sessões do Meta (fbclid/utm). Tabela mês a mês desde junho
     (busca o Meta desde 2026-06-01). Começou o formulário / nome e e-mail só existem desde 27/10 (GA4 tem desde ago).
+  - **Depois do cadastro · caminho até o WhatsApp:** leads → simulador → simulação → clique, e
+    leads → obrigado → clique; total de cliques e quem deixou o e-mail no bot. Usa só dias desde
+    2026-10-28 (`WA_DESDE`), para leads antigos sem essas etapas não puxarem as taxas.
 - **Funil comercial** (`#comercial`): investimento → leads (Meta, campanhas de
   cadastro) → reuniões → fechamentos, com taxa de passagem e custo por etapa.
   - Reuniões: planilha publicada do Google (CSV, colunas Cliente/Data/Status; conta
