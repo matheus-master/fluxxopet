@@ -197,7 +197,7 @@
     .com-table tfoot td{font-weight:600;border-top:1px solid var(--line)}
     .com-table .muted,.com-item .muted{color:var(--ink-3)}
     .fp-table td:first-child{white-space:normal;min-width:130px}
-    @media (max-width:640px){ .fp-table th,.fp-table td{padding:10px 6px;white-space:normal} .fp-table td:first-child{min-width:0} .fp-table th{white-space:normal;font-size:.62rem} .fp-table .fp-pv{display:none} }
+    @media (max-width:640px){ .fp-table th,.fp-table td{padding:10px 6px;white-space:normal} .fp-table td:first-child{min-width:0} .fp-table th{white-space:normal;font-size:.62rem} .fp-table .fp-pv{display:none} .fp-table .pg-hide{display:none} }
     .table-scroll{overflow-x:auto}
     .com-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:6px}
     .com-form .cli,.com-form button{grid-column:1/-1}
@@ -323,6 +323,7 @@
         <button class="view" data-v="leads"><span class="ms">person_add</span>Leads</button>
         <button class="view" data-v="seguidores"><span class="ms">favorite</span>Seguidores</button>
         <button class="view" data-v="funil"><span class="ms">filter_alt</span>Funil</button>
+        <button class="view" data-v="pagina"><span class="ms">web</span>Página</button>
         <button class="view" data-v="comercial"><span class="ms">handshake</span>Comercial</button>
       </div>
     </div>
@@ -359,7 +360,7 @@
 
 <script>
   /* ── estado ───────────────────────────────────────── */
-  var VIEWS = ['geral', 'leads', 'seguidores', 'funil', 'comercial'];
+  var VIEWS = ['geral', 'leads', 'seguidores', 'funil', 'pagina', 'comercial'];
   var state = { view: 'geral', period: 'mes', group: null, data: null, com: null };
   var charts = {};
   var C = { accent: '#FF5A1F', ink: '#0E0F11', ink2: '#5F656D', ink3: '#9AA0A8', bar: '#DADCE1', grid: '#ECEDF0' };
@@ -886,6 +887,89 @@
       };
     },
 
+    // página atual (/): visitas → começou o formulário → nome e e-mail → WhatsApp e pet shop → lead.
+    // Contagem do próprio site (/api/funil-pagina), não do Meta.
+    pagina: function (x) {
+      var d = state.data, k = d.since + '|' + d.until, fp = state.fp, nada = function () {};
+      var vazio = function (icon, t, s) { return { html: '<div class="card empty-state"><span class="ms" aria-hidden="true">' + icon + '</span><b>' + t + '</b>' + (s ? '<span>' + s + '</span>' : '') + '</div>', draw: nada }; };
+      if (!fp || fp.k !== k) { loadFp(d.since, d.until); return vazio('hourglass_empty', 'Carregando as etapas da página…'); }
+      if (!fp.ok) return vazio('error', 'Não consegui carregar as etapas da página', esc(fp.error));
+      var desde = 'A medição começou em ' + fmtShort(fp.inicio || '2026-10-27') + '.';
+      var e = fp.paginas.atual || {}, v = e.visita || 0;
+      if (!v) return vazio('web', 'Nenhuma visita registrada na página neste período', longDate(d.since) + ' – ' + longDate(d.until) + '. ' + desde);
+
+      // comparação só se o período anterior inteiro já estava sendo medido
+      var p = fp.prev && fp.inicio && d.prev && d.prev.since >= fp.inicio ? (fp.prev.atual || {}) : null;
+      var cmp = p ? x.cmp : '';
+      var pv = function (o, kk) { return o && o.visita ? (o[kk] || 0) / o.visita * 100 : null; };
+      var pass = function (o, i) { var a = o && o[PG[i - 1].k]; return a ? (o[PG[i].k] || 0) / a * 100 : null; };
+
+      var cards =
+        kpi({ hero: true, icon: 'web', label: 'Visitas na página', value: int.format(v), info: 'Pessoas diferentes que abriram a página no período (robôs ficam de fora).', unit: 'visitantes únicos', badge: badgeHtml(v, p && p.visita, false, cmp) }) +
+        kpi({ icon: 'edit_note', label: 'Começaram o formulário', info: 'Clicaram para abrir o formulário ou entraram num campo, ÷ visitas.', value: pctTxt(pv(e, 'inicio')), unit: int.format(e.inicio || 0) + ' pessoas', badge: ppHtml(pv(e, 'inicio'), pv(p, 'inicio'), true, cmp) }) +
+        kpi({ icon: 'person_add', label: 'Viraram lead', info: 'Chegaram ao fim: escolheram o faturamento e o lead foi salvo.', value: int.format(e.lead || 0), unit: 'leads salvos', badge: badgeHtml(e.lead || 0, p && p.lead, false, cmp) }) +
+        kpi({ icon: 'conversion_path', label: 'Conversão da página', info: 'Leads ÷ visitas.', value: pctTxt(pv(e, 'lead')), unit: 'das visitas viraram lead', badge: ppHtml(pv(e, 'lead'), pv(p, 'lead'), true, cmp) });
+
+      // funil das 5 etapas; entre elas, quantos passaram da anterior
+      var pior = null;
+      PG.forEach(function (s, i) { if (i) { var t = pass(e, i); if (t != null && (!pior || t < pior.t)) pior = { t: t, i: i }; } });
+      var funnel = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>Etapas do cadastro</span>' +
+        '<div class="legend"><span>' + esc(cmp ? 'variações comparadas a ' + cmp.replace(/^vs /, '') : 'visitantes únicos') + '</span></div></div><div class="funnel">' +
+        PG.map(function (s, i) {
+          var n = e[s.k] || 0;
+          var bar = '<div class="fstage"><div class="fbar fs-' + i + '" style="width:' + s.w + '%;background:' + s.bg + ';color:' + s.fg + '"><span class="fl">' + s.l +
+            '<small>' + (i ? pctOf(n, v) + ' das visitas' : 'visitantes únicos') + '</small></span><b>' + int.format(n) + '</b></div></div>';
+          if (i === PG.length - 1) return bar;
+          var t = pass(e, i + 1);
+          return bar + '<div class="frate"><span class="ms" aria-hidden="true">south</span>' + PG[i + 1].a + ' <b' + (pior && pior.i === i + 1 ? ' class="t-bad"' : '') + '>' + pctTxt(t) + '</b>' +
+            '<span class="plain">' + (t != null ? '≈ ' + Math.round(t) + ' de cada 100' : '') + '</span>' + ppHtml(t, pass(p, i + 1), false) + '</div>';
+        }).join('') + '</div></section>';
+
+      var txt = periodPhrase() + ', <b>' + int.format(v) + ' ' + (v === 1 ? 'pessoa abriu' : 'pessoas abriram') + ' a página</b>. De cada 100, <b>' + Math.round(pv(e, 'inicio')) + ' começaram o formulário</b>, ' +
+        Math.round(pv(e, 'etapa1')) + ' passaram do nome e e-mail, ' + Math.round(pv(e, 'dados')) + ' preencheram WhatsApp e pet shop e <b>' + Math.round(pv(e, 'lead')) + ' viraram lead</b>.';
+      if (pior && pior.t < 100) txt += ' Onde mais se perde gente: entre “' + PG[pior.i - 1].l.toLowerCase() + '” e “' + PG[pior.i].l.toLowerCase() + '”, <b class="t-bad">' + Math.round(100 - pior.t) + '% param ali</b>.';
+      var mv = p ? moveTxt(pv(e, 'lead'), pv(p, 'lead'), 'subiu {n}%', 'caiu {n}%', true, 'ficou estável') : null;
+      if (mv) txt += ' A conversão da página ' + mv + ' em relação ao período anterior.';
+
+      // de onde vêm as visitas
+      var org = (fp.origens && fp.origens.atual) || {};
+      var p1 = function (t) { return t == null ? '—' : dec1.format(t) + '%'; };
+      var ORG = [['meta', 'Anúncios do Meta'], ['google', 'Google'], ['outros', 'Outros']];
+      var orgRows = ORG.filter(function (o) { return org[o[0]] && org[o[0]].visita; }).map(function (o) {
+        var z = org[o[0]];
+        return '<tr><td>' + o[1] + '</td><td><b style="font-weight:600">' + int.format(z.visita) + '</b> <span class="muted fp-pv">' + pctOf(z.visita, v) + '</span></td><td class="pg-hide">' + p1(pv(z, 'inicio')) + '</td><td>' + int.format(z.lead || 0) + '</td><td><b style="font-weight:600">' + p1(pv(z, 'lead')) + '</b></td></tr>';
+      }).join('');
+      var orgCard = chartCard({ icon: 'travel_explore', label: 'De onde vêm as visitas', legend: '<span>origem pela sessão do visitante</span>',
+        body: '<div class="table-scroll"><table class="com-table fp-table"><thead><tr><th>Origem</th><th>Visitas</th><th class="pg-hide">Começaram</th><th>Leads</th><th>Conversão</th></tr></thead><tbody>' + orgRows + '</tbody></table></div>' +
+          '<p class="cflow-note">Meta = chegou por anúncio do Facebook/Instagram (fbclid ou utm). Outros = quem veio pelo link do bot, digitou o endereço ou chegou sem identificação.</p>' });
+
+      // por dia/semana: barras = visitas, linha = leads
+      var by = {};
+      (fp.dias || []).forEach(function (r) { if (r.pagina === 'atual') (by[r.d] = by[r.d] || {})[r.etapa] = r.n; });
+      var bk = [], idx = {};
+      for (var dt = [d.since, fp.inicio || d.since].sort()[1]; dt <= d.until; dt = addDays(dt, 1)) {
+        var kk = bucketKey(dt, x.g), b = idx[kk];
+        if (!b) { b = idx[kk] = { key: kk, first: dt, last: dt }; PG.forEach(function (s) { b[s.k] = 0; }); bk.push(b); }
+        b.last = dt;
+        PG.forEach(function (s) { b[s.k] += (by[dt] && by[dt][s.k]) || 0; });
+      }
+      var chart = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">monitoring</span>Visitas e leads por ' + x.gname + '</span>' +
+        '<div class="legend"><span><i class="dot"></i>Visitas</span><span><i class="ring"></i>Leads</span><div class="group">' +
+        GROUPS.map(function (g) { return '<button class="' + (g.k === x.g ? 'on' : '') + '" data-g="' + g.k + '">' + g.l + '</button>'; }).join('') +
+        '</div></div></div><div class="plot"><canvas id="c-pag"></canvas><div class="tip" id="tip-c-pag"></div></div></section>';
+
+      return {
+        html: summaryHtml(txt + ' <small style="display:inline">' + desde + '</small>', p ? x : { d: {} }) + '<section class="kpis">' + cards + '</section>' + funnel + chart + orgCard,
+        draw: function () {
+          drawChart('c-pag', bk, {
+            bars: bk.map(function (b) { return b.visita; }), barColor: C.bar, hoverColor: C.ink, thick: 12,
+            line: bk.map(function (b) { return b.lead; }), lineColor: C.accent, spanGaps: true,
+            tip: function (b) { return PG.map(function (s) { return [s.t, int.format(b[s.k])]; }).concat([['Conversão', pctTxt(rate(b.lead, b.visita))]]); },
+          });
+        },
+      };
+    },
+
     // funil comercial: reuniões e fechamentos vêm do ActiveCampaign; se ele falhar, da planilha
     comercial: function (x) {
       if (state.ac === undefined) {
@@ -1167,11 +1251,12 @@
     if (fpLoading === k) return;
     fpLoading = k;
     try {
-      var r = await api('/api/funil-pagina?since=' + since + '&until=' + until);
+      var pv = state.data && state.data.prev;
+      var r = await api('/api/funil-pagina?since=' + since + '&until=' + until + (pv ? '&prevSince=' + pv.since + '&prevUntil=' + pv.until : ''));
       state.fp = r && r.ok ? Object.assign(r, { k: k }) : { k: k, ok: false, error: (r && r.error) || 'erro no servidor' };
     } catch (e) { state.fp = { k: k, ok: false, error: 'sem conexão' }; }
     finally { fpLoading = null; }
-    if (state.view === 'funil') render();
+    if (state.view === 'funil' || state.view === 'pagina') render();
   }
   // etapas na ordem; "so" = só existe naquela página (a atual tem 2 passos, a nova tem qualificação)
   var FP_ETAPAS = [
@@ -1183,6 +1268,13 @@
     { k: 'qualif_dif', l: 'Responderam a dificuldade', so: 'novo' },
     { k: 'qualif_urg', l: 'Responderam a urgência', so: 'novo' },
     { k: 'qualif_fim', l: 'Concluíram a qualificação', so: 'novo' },
+  ];
+  var PG = [
+    { k: 'visita', l: 'Visitaram a página', t: 'Visitas', w: 100, bg: '#ECEDF0', fg: C.ink },
+    { k: 'inicio', l: 'Começaram o formulário', t: 'Começaram', a: 'Começaram o formulário', w: 84, bg: '#D5D8DD', fg: C.ink },
+    { k: 'etapa1', l: 'Passaram do nome e e-mail', t: 'Nome e e-mail', a: 'Passaram do nome e e-mail', w: 68, bg: '#BCC0C7', fg: C.ink },
+    { k: 'dados', l: 'Preencheram WhatsApp e pet shop', t: 'WhatsApp e pet shop', a: 'Preencheram WhatsApp e pet shop', w: 54, bg: C.ink, fg: '#fff' },
+    { k: 'lead', l: 'Viraram lead', t: 'Leads', a: 'Escolheram o faturamento', w: 42, bg: C.accent, fg: '#fff' },
   ];
   var FP_PAG = { atual: 'Página atual (/)', novo: 'Layout novo (/novo)' };
   function etapasCard() {
@@ -1312,12 +1404,13 @@
       geral: 'conta inteira; tipos pelo objetivo da campanha (Leads = cadastro, Seguidores = visita ao perfil)',
       leads: 'só campanhas com objetivo de cadastro · leads = evento Lead atribuído pelo Meta',
       seguidores: 'só campanhas otimizadas para visita ao perfil · seguidores = ganho diário do Instagram (orgânico + pago)',
+      pagina: 'contagem do próprio site na página atual (/) · cada visitante conta 1× por etapa · robôs ficam de fora · origem pela sessão (fbclid/utm)',
       funil: 'só campanhas com objetivo de cadastro · CTR = cliques no link ÷ impressões · connect rate = visualizações da página ÷ cliques · conversão = leads ÷ visualizações',
       comercial: state.ac && state.ac.ok
         ? 'investimento e leads = Meta (campanhas de cadastro) · reuniões, no-show, fechamentos e etapas = ActiveCampaign (atualiza a cada 10 min; ⟳ força)'
         : 'investimento e leads = Meta (campanhas de cadastro) · reuniões e fechamentos = planilha comercial (fechamentos por mês)',
     }[state.view];
-    $('foot').textContent = 'Fonte: Meta Ads · ' + src + ' · comparação ' + (x.cmp || '—') +
+    $('foot').textContent = (state.view === 'pagina' ? 'Fonte: site · ' : 'Fonte: Meta Ads · ') + src + ' · comparação ' + (x.cmp || '—') +
       ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 

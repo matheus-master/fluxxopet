@@ -91,7 +91,7 @@
   offline no Ads a partir disso.
 
 ## Dashboard de Tráfego (`/trafego` → `trafego.html`)
-- Painel do Meta Ads com 4 abas (`#geral`, `#leads`, `#seguidores`, `#funil`). Períodos em
+- Painel com 6 abas (`#geral`, `#leads`, `#seguidores`, `#funil`, `#pagina`, `#comercial`). Períodos em
   **Mês = mês atual** (dia 1 até hoje, comparado com o mesmo trecho do mês anterior);
   o resto é **janela móvel** (Semana = 7 dias, Trimestre = 90, Semestre = 180, Ano = 365)
   + Personalizado, comparado com a janela anterior do mesmo tamanho. A lista "Escolher mês"
@@ -117,8 +117,14 @@
   - Etapas: `visita`, `inicio` (abriu o form / focou campo), `etapa1` e `dados` (só `/`,
     form em 2 passos), `lead` (lead salvo: faturamento escolhido em `/`, envio em `/novo`),
     `qualif_dif`, `qualif_urg`, `qualif_fim` (só `/novo`). Lista fixa em `functions/api/etapa.js`.
-  - Leitura: `GET /api/funil-pagina?since&until` (JWT, datas de Brasília). Medição começou em 2026-10-27.
+  - Leitura: `GET /api/funil-pagina?since&until[&prevSince&prevUntil]` (JWT, datas de Brasília):
+    totais, por dia, período anterior e origem (join com `sessions`: Meta = fbclid ou utm
+    facebook/fb/ig/instagram/meta; Google = gclid ou utm google*; resto = Outros). Medição começou em 2026-10-27.
   - Visitas incluem tráfego fora dos anúncios: não batem com `landing_page_view` do Meta.
+- **Aba Página** (`#pagina`): só a página atual (`/`), as 5 etapas (visita → começou →
+  nome e e-mail → WhatsApp e pet shop → lead). Resumo, 4 KPIs, funil com passagem entre
+  etapas, visitas × leads por dia/semana e tabela de origem. Comparação com o período
+  anterior só aparece se ele inteiro já estava sendo medido.
 - **Funil comercial** (`#comercial`): investimento → leads (Meta, campanhas de
   cadastro) → reuniões → fechamentos, com taxa de passagem e custo por etapa.
   - Reuniões: planilha publicada do Google (CSV, colunas Cliente/Data/Status; conta
