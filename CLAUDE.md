@@ -125,6 +125,10 @@
   nome e e-mail → WhatsApp e pet shop → lead). Resumo, 4 KPIs, funil com passagem entre
   etapas, visitas × leads por dia/semana e tabela de origem. Comparação com o período
   anterior só aparece se ele inteiro já estava sendo medido.
+  - **Histórico (desde 17/06):** funil dos anúncios = visualizações da página (Meta, `lpv`) →
+    rolaram 1/4 (`ScrollDepth25`) → WhatsApp e pet shop (`Lead`) → lead (`Lead<faixa>`), eventos
+    da tabela `events` da raiz, só sessões do Meta (fbclid/utm). Tabela mês a mês desde junho
+    (busca o Meta desde 2026-06-01). Começou o formulário / nome e e-mail só existem desde 27/10 (GA4 tem desde ago).
 - **Funil comercial** (`#comercial`): investimento → leads (Meta, campanhas de
   cadastro) → reuniões → fechamentos, com taxa de passagem e custo por etapa.
   - Reuniões: planilha publicada do Google (CSV, colunas Cliente/Data/Status; conta

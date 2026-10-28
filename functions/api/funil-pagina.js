@@ -7,6 +7,10 @@
 //   dias     [{ d, pagina, etapa, n }]                — por dia (data em que o visitante chegou à etapa)
 //   prev     { pagina: { etapa: n } } | null          — período de comparação
 //   origens  { pagina: { meta|google|outros: { etapa: n } } } — origem pela sessão (cookie _krob_sid)
+//   histDias [{ d, etapa, o, n }] / histPrev [{ etapa, o, n }] / histMes [{ m, etapa, o, n }]
+//            — histórico da página atual (/) desde jun/2026, antes da medição nova, pela tabela
+//              events (/tracker): rolou = ScrollDepth25, dados = Lead (WhatsApp e pet shop),
+//              lead = Lead<faixa> (escolheu o faturamento). o = meta | outros. histMes ignora o período.
 
 // origem da visita pela tabela sessions (gravada pelo _middleware na chegada)
 const ORIGEM = `CASE
@@ -14,6 +18,17 @@ const ORIGEM = `CASE
   WHEN s.gclid != '' OR lower(s.utm_source) LIKE 'google%' THEN 'google'
   ELSE 'outros' END`;
 const DIA = "date(f.created_at, '-3 hours')";
+
+// histórico pelos eventos do /tracker, só da raiz (com ou sem ?fbclid/utm)
+const RAIZ = 'https://diagnostico.fluxxopet.com.br/';
+const HDIA = "date(e.created_at, '-3 hours')";
+const HETAPA = "CASE WHEN e.event_name = 'ScrollDepth25' THEN 'rolou' WHEN e.event_name = 'Lead' THEN 'dados' ELSE 'lead' END";
+const HORIG = `CASE WHEN s.fbclid != '' OR lower(s.utm_source) IN ('facebook','fb','ig','instagram','meta') OR e.source_url LIKE '%fbclid=%' THEN 'meta' ELSE 'outros' END`;
+const HFROM = `FROM events e LEFT JOIN sessions s ON s.sid = e.session_id
+  WHERE (e.event_name IN ('ScrollDepth25', 'Lead') OR e.event_name GLOB 'Lead[0-9]*')
+    AND (e.source_url = '${RAIZ}' OR e.source_url LIKE '${RAIZ}?%' OR e.source_url LIKE '${RAIZ}#%')`;
+const hist = (db, sel, grp, extra, binds) =>
+  db.prepare(`SELECT ${sel}${HETAPA} AS etapa, ${HORIG} AS o, COUNT(DISTINCT e.session_id) AS n ${HFROM}${extra} GROUP BY ${grp}`).bind(...binds).all();
 
 export async function onRequestGet({ request, env }) {
   const u = new URL(request.url);
@@ -36,6 +51,17 @@ export async function onRequestGet({ request, env }) {
     r = await consultas();
   }
   const [rDias, rOrig, rPrev] = r;
+
+  // histórico (tabela events): se falhar, o resto da resposta continua valendo
+  let histDias = [], histPrev = null, histMes = [];
+  try {
+    const [a, b, c] = await Promise.all([
+      hist(env.DB, `${HDIA} AS d, `, '1, 2, 3', ` AND ${HDIA} BETWEEN ? AND ?`, [since, until]),
+      temPrev ? hist(env.DB, '', '1, 2', ` AND ${HDIA} BETWEEN ? AND ?`, [prevSince, prevUntil]) : null,
+      hist(env.DB, `substr(${HDIA}, 1, 7) AS m, `, '1, 2, 3', ` AND ${HDIA} >= '2026-06-01'`, []),
+    ]);
+    histDias = a.results || []; histPrev = b ? b.results || [] : null; histMes = c.results || [];
+  } catch {}
   const dias = rDias.results || [];
   const paginas = {};
   dias.forEach(x => { const p = paginas[x.pagina] = paginas[x.pagina] || {}; p[x.etapa] = (p[x.etapa] || 0) + x.n; });
@@ -46,7 +72,7 @@ export async function onRequestGet({ request, env }) {
 
   let inicio = null;
   try { inicio = (await env.DB.prepare("SELECT date(MIN(created_at), '-3 hours') AS d FROM funil_etapas").first()).d; } catch {}
-  return json({ ok: true, since, until, inicio, paginas, dias, prev, origens });
+  return json({ ok: true, since, until, inicio, paginas, dias, prev, origens, histDias, histPrev, histMes });
 }
 
 // (cópia da de etapa.js) mesma estrutura de migrations/0013_funil_etapas.sql

@@ -151,7 +151,7 @@
     .trio .stats{gap:28px}
     @media (max-width:1180px){ .trio{grid-template-columns:minmax(0,1fr)} }
     @media (max-width:640px){
-      .fbar{min-width:0;padding:0 14px;height:56px} .fbar b{font-size:1.25rem} .fbar .fl{font-size:.64rem}
+      .fbar{min-width:0;padding:0 14px;height:56px} .fbar b{font-size:1.25rem} .fbar .fl{font-size:.64rem;white-space:normal;line-height:1.25;min-width:0}
       /* no celular o funil afunila menos, para os rótulos caberem */
       .fs-1{width:92%!important} .fs-2{width:84%!important} .fs-3{width:76%!important}
       /* barra de ícones e abas cabendo em 390px */
@@ -889,82 +889,91 @@
 
     // página atual (/): visitas → começou o formulário → nome e e-mail → WhatsApp e pet shop → lead.
     // Contagem do próprio site (/api/funil-pagina), não do Meta.
+    // página atual (/). Dois níveis de detalhe:
+    //  • histórico (desde jun/2026), só tráfego dos anúncios do Meta: visualizações da página (Meta)
+    //    → rolaram 1/4 da página → WhatsApp e pet shop → lead (eventos do /tracker);
+    //  • medição nova (desde 27/10, /api/etapa): as 5 etapas, incluindo começar o formulário e nome/e-mail.
     pagina: function (x) {
       var d = state.data, k = d.since + '|' + d.until, fp = state.fp, nada = function () {};
       var vazio = function (icon, t, s) { return { html: '<div class="card empty-state"><span class="ms" aria-hidden="true">' + icon + '</span><b>' + t + '</b>' + (s ? '<span>' + s + '</span>' : '') + '</div>', draw: nada }; };
       if (!fp || fp.k !== k) { loadFp(d.since, d.until); return vazio('hourglass_empty', 'Carregando as etapas da página…'); }
       if (!fp.ok) return vazio('error', 'Não consegui carregar as etapas da página', esc(fp.error));
-      var desde = 'A medição começou em ' + fmtShort(fp.inicio || '2026-10-27') + '.';
-      var e = fp.paginas.atual || {}, v = e.visita || 0;
-      if (!v) return vazio('web', 'Nenhuma visita registrada na página neste período', longDate(d.since) + ' – ' + longDate(d.until) + '. ' + desde);
-
-      // comparação só se o período anterior inteiro já estava sendo medido
-      var p = fp.prev && fp.inicio && d.prev && d.prev.since >= fp.inicio ? (fp.prev.atual || {}) : null;
-      var cmp = p ? x.cmp : '';
+      var MED = fp.inicio || '2026-10-27';
       var pv = function (o, kk) { return o && o.visita ? (o[kk] || 0) / o.visita * 100 : null; };
-      var pass = function (o, i) { var a = o && o[PG[i - 1].k]; return a ? (o[PG[i].k] || 0) / a * 100 : null; };
+
+      // ── histórico: Meta (visualizações) + eventos do site de quem veio do anúncio ──
+      var H = somaHist(fp.histDias, 'meta'), HT = somaHist(fp.histDias), t = x.tot, pT = x.prev;
+      var cur = { lpv: t.lpv, rolou: H.rolou, dados: H.dados, lead: H.lead };
+      var prv = pT && fp.histPrev ? Object.assign({ lpv: pT.lpv }, somaHist(fp.histPrev, 'meta')) : null;
+      var cmp = prv ? x.cmp : '';
+      var hr = function (o, a, b) { return o && o[a] ? (o[b] || 0) / o[a] * 100 : null; };
+      var conv = hr(cur, 'lpv', 'lead'), pconv = hr(prv, 'lpv', 'lead');
 
       var cards =
-        kpi({ hero: true, icon: 'web', label: 'Visitas na página', value: int.format(v), info: 'Pessoas diferentes que abriram a página no período (robôs ficam de fora).', unit: 'visitantes únicos', badge: badgeHtml(v, p && p.visita, false, cmp) }) +
-        kpi({ icon: 'edit_note', label: 'Começaram o formulário', info: 'Clicaram para abrir o formulário ou entraram num campo, ÷ visitas.', value: pctTxt(pv(e, 'inicio')), unit: int.format(e.inicio || 0) + ' pessoas', badge: ppHtml(pv(e, 'inicio'), pv(p, 'inicio'), true, cmp) }) +
-        kpi({ icon: 'person_add', label: 'Viraram lead', info: 'Chegaram ao fim: escolheram o faturamento e o lead foi salvo.', value: int.format(e.lead || 0), unit: 'leads salvos', badge: badgeHtml(e.lead || 0, p && p.lead, false, cmp) }) +
-        kpi({ icon: 'conversion_path', label: 'Conversão da página', info: 'Leads ÷ visitas.', value: pctTxt(pv(e, 'lead')), unit: 'das visitas viraram lead', badge: ppHtml(pv(e, 'lead'), pv(p, 'lead'), true, cmp) });
+        kpi({ hero: true, icon: 'web', label: 'Visitas pelo anúncio', value: int.format(t.lpv), info: 'Visualizações da página contadas pelo Meta (campanhas de cadastro): quem clicou no anúncio e a página abriu.', unit: 'visualizações da página (Meta)', badge: badgeHtml(t.lpv, prv && prv.lpv, false, cmp) }) +
+        kpi({ icon: 'person_add', label: 'Leads do anúncio', info: 'Quem veio do anúncio do Meta e terminou o cadastro (escolheu o faturamento).', value: int.format(H.lead), unit: 'leads salvos', badge: badgeHtml(H.lead, prv && prv.lead, false, cmp) }) +
+        kpi({ icon: 'conversion_path', label: 'Conversão da página', info: 'Leads do anúncio ÷ visitas pelo anúncio.', value: pctTxt(conv), unit: 'das visitas viraram lead', badge: ppHtml(conv, pconv, true, cmp) }) +
+        kpi({ icon: 'groups', label: 'Leads de outras origens', info: 'Cadastros na página de quem não veio de anúncio do Meta (link do bot, endereço digitado, orgânico).', value: int.format(HT.lead - H.lead), unit: 'fora dos anúncios', badge: '' });
 
-      // funil das 5 etapas; entre elas, quantos passaram da anterior
-      var pior = null;
-      PG.forEach(function (s, i) { if (i) { var t = pass(e, i); if (t != null && (!pior || t < pior.t)) pior = { t: t, i: i }; } });
-      var funnel = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>Etapas do cadastro</span>' +
-        '<div class="legend"><span>' + esc(cmp ? 'variações comparadas a ' + cmp.replace(/^vs /, '') : 'visitantes únicos') + '</span></div></div><div class="funnel">' +
-        PG.map(function (s, i) {
-          var n = e[s.k] || 0;
-          var bar = '<div class="fstage"><div class="fbar fs-' + i + '" style="width:' + s.w + '%;background:' + s.bg + ';color:' + s.fg + '"><span class="fl">' + s.l +
-            '<small>' + (i ? pctOf(n, v) + ' das visitas' : 'visitantes únicos') + '</small></span><b>' + int.format(n) + '</b></div></div>';
-          if (i === PG.length - 1) return bar;
-          var t = pass(e, i + 1);
-          return bar + '<div class="frate"><span class="ms" aria-hidden="true">south</span>' + PG[i + 1].a + ' <b' + (pior && pior.i === i + 1 ? ' class="t-bad"' : '') + '>' + pctTxt(t) + '</b>' +
-            '<span class="plain">' + (t != null ? '≈ ' + Math.round(t) + ' de cada 100' : '') + '</span>' + ppHtml(t, pass(p, i + 1), false) + '</div>';
-        }).join('') + '</div></section>';
+      var HS = [
+        { k: 'lpv', l: 'Visitas pelo anúncio', s: 'visualizações da página (Meta)', w: 100, bg: '#ECEDF0', fg: C.ink },
+        { k: 'rolou', l: 'Rolaram a página', a: 'Rolaram pelo menos 1/4 da página', w: 80, bg: '#BCC0C7', fg: C.ink },
+        { k: 'dados', l: 'Preencheram WhatsApp e pet shop', a: 'Passaram pelo formulário até o WhatsApp e pet shop', w: 60, bg: C.ink, fg: '#fff' },
+        { k: 'lead', l: 'Viraram lead', a: 'Escolheram o faturamento', w: 42, bg: C.accent, fg: '#fff' },
+      ];
+      var hpior = pior(HS, cur);
+      var funilHist = funilHtml('Funil dos anúncios', cmp ? 'variações comparadas a ' + cmp.replace(/^vs /, '') : 'só quem veio de anúncio do Meta', HS, cur, prv, hpior, 'lpv');
 
-      var txt = periodPhrase() + ', <b>' + int.format(v) + ' ' + (v === 1 ? 'pessoa abriu' : 'pessoas abriram') + ' a página</b>. De cada 100, <b>' + Math.round(pv(e, 'inicio')) + ' começaram o formulário</b>, ' +
-        Math.round(pv(e, 'etapa1')) + ' passaram do nome e e-mail, ' + Math.round(pv(e, 'dados')) + ' preencheram WhatsApp e pet shop e <b>' + Math.round(pv(e, 'lead')) + ' viraram lead</b>.';
-      if (pior && pior.t < 100) txt += ' Onde mais se perde gente: entre “' + PG[pior.i - 1].l.toLowerCase() + '” e “' + PG[pior.i].l.toLowerCase() + '”, <b class="t-bad">' + Math.round(100 - pior.t) + '% param ali</b>.';
-      var mv = p ? moveTxt(pv(e, 'lead'), pv(p, 'lead'), 'subiu {n}%', 'caiu {n}%', true, 'ficou estável') : null;
+      // ── medição nova: as 5 etapas (só dias a partir de 27/10) ──
+      var e = fp.paginas.atual || {}, v = e.visita || 0;
+      var pn = fp.prev && d.prev && d.prev.since >= MED ? (fp.prev.atual || {}) : null;
+      var npior = v ? pior(PG, e) : null;
+      var funilNovo = v
+        ? funilHtml('Funil completo · medição nova', (d.since < MED ? 'só a partir de ' + fmtShort(MED) + ' · ' : '') + 'todas as origens, visitantes únicos', PG, e, pn, npior, 'visita')
+        : chartCard({ icon: 'filter_alt', label: 'Funil completo · medição nova', legend: '', body: '<p class="cflow-note" style="margin:0">As 5 etapas (incluindo quem começa o formulário e passa do nome e e-mail) são medidas desde ' + fmtShort(MED) + '. Escolha um período que inclua essa data.</p>' });
+
+      // ── resumo ──
+      var r100 = function (o, a, b) { var z = hr(o, a, b); return z == null ? 0 : Math.round(z); };
+      var txt = cur.lpv
+        ? periodPhrase() + ', <b>' + int.format(cur.lpv) + ' visitas</b> chegaram pelos anúncios. De cada 100, <b>' + r100(cur, 'lpv', 'rolou') + ' rolaram a página</b>, ' +
+          r100(cur, 'lpv', 'dados') + ' preencheram WhatsApp e pet shop e <b>' + r100(cur, 'lpv', 'lead') + ' viraram lead</b>.'
+        : periodPhrase() + ', não houve visitas pelos anúncios.';
+      if (hpior && hpior.t < 100) txt += ' Onde mais se perde gente: entre “' + HS[hpior.i - 1].l.toLowerCase() + '” e “' + HS[hpior.i].l.toLowerCase() + '”, <b class="t-bad">' + Math.round(100 - hpior.t) + '% param ali</b>.';
+      var mv = prv ? moveTxt(conv, pconv, 'subiu {n}%', 'caiu {n}%', true, 'ficou estável') : null;
       if (mv) txt += ' A conversão da página ' + mv + ' em relação ao período anterior.';
+      if (v) txt += ' Na medição nova (desde ' + fmtShort(MED) + '), de cada 100 visitas <b>' + Math.round(pv(e, 'inicio')) + ' começam o formulário</b> e ' + Math.round(pv(e, 'etapa1')) + ' passam do nome e e-mail.';
 
-      // de onde vêm as visitas
+      // ── gráfico: visitas pelo anúncio (barras) × leads do anúncio (linha) ──
+      var hb = {};
+      (fp.histDias || []).forEach(function (r) { if (r.o === 'meta' && r.etapa === 'lead') { var kk = bucketKey(r.d, x.g); hb[kk] = (hb[kk] || 0) + r.n; } });
+      var chart = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">monitoring</span>Visitas e leads do anúncio por ' + x.gname + '</span>' +
+        '<div class="legend"><span><i class="dot"></i>Visitas</span><span><i class="ring"></i>Leads</span><div class="group">' +
+        GROUPS.map(function (g) { return '<button class="' + (g.k === x.g ? 'on' : '') + '" data-g="' + g.k + '">' + g.l + '</button>'; }).join('') +
+        '</div></div></div><div class="plot"><canvas id="c-pag"></canvas><div class="tip" id="tip-c-pag"></div></div></section>';
+
+      // ── mês a mês desde junho ──
+      var mesCard = mesAMes(fp, MED);
+
+      // ── origem (medição nova) ──
       var org = (fp.origens && fp.origens.atual) || {};
-      var p1 = function (t) { return t == null ? '—' : dec1.format(t) + '%'; };
+      var p1 = function (z) { return z == null ? '—' : dec1.format(z) + '%'; };
       var ORG = [['meta', 'Anúncios do Meta'], ['google', 'Google'], ['outros', 'Outros']];
       var orgRows = ORG.filter(function (o) { return org[o[0]] && org[o[0]].visita; }).map(function (o) {
         var z = org[o[0]];
         return '<tr><td>' + o[1] + '</td><td><b style="font-weight:600">' + int.format(z.visita) + '</b> <span class="muted fp-pv">' + pctOf(z.visita, v) + '</span></td><td class="pg-hide">' + p1(pv(z, 'inicio')) + '</td><td>' + int.format(z.lead || 0) + '</td><td><b style="font-weight:600">' + p1(pv(z, 'lead')) + '</b></td></tr>';
       }).join('');
-      var orgCard = chartCard({ icon: 'travel_explore', label: 'De onde vêm as visitas', legend: '<span>origem pela sessão do visitante</span>',
+      var orgCard = orgRows ? chartCard({ icon: 'travel_explore', label: 'De onde vêm as visitas · medição nova', legend: '<span>origem pela sessão do visitante</span>',
         body: '<div class="table-scroll"><table class="com-table fp-table"><thead><tr><th>Origem</th><th>Visitas</th><th class="pg-hide">Começaram</th><th>Leads</th><th>Conversão</th></tr></thead><tbody>' + orgRows + '</tbody></table></div>' +
-          '<p class="cflow-note">Meta = chegou por anúncio do Facebook/Instagram (fbclid ou utm). Outros = quem veio pelo link do bot, digitou o endereço ou chegou sem identificação.</p>' });
-
-      // por dia/semana: barras = visitas, linha = leads
-      var by = {};
-      (fp.dias || []).forEach(function (r) { if (r.pagina === 'atual') (by[r.d] = by[r.d] || {})[r.etapa] = r.n; });
-      var bk = [], idx = {};
-      for (var dt = [d.since, fp.inicio || d.since].sort()[1]; dt <= d.until; dt = addDays(dt, 1)) {
-        var kk = bucketKey(dt, x.g), b = idx[kk];
-        if (!b) { b = idx[kk] = { key: kk, first: dt, last: dt }; PG.forEach(function (s) { b[s.k] = 0; }); bk.push(b); }
-        b.last = dt;
-        PG.forEach(function (s) { b[s.k] += (by[dt] && by[dt][s.k]) || 0; });
-      }
-      var chart = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">monitoring</span>Visitas e leads por ' + x.gname + '</span>' +
-        '<div class="legend"><span><i class="dot"></i>Visitas</span><span><i class="ring"></i>Leads</span><div class="group">' +
-        GROUPS.map(function (g) { return '<button class="' + (g.k === x.g ? 'on' : '') + '" data-g="' + g.k + '">' + g.l + '</button>'; }).join('') +
-        '</div></div></div><div class="plot"><canvas id="c-pag"></canvas><div class="tip" id="tip-c-pag"></div></div></section>';
+          '<p class="cflow-note">Meta = chegou por anúncio do Facebook/Instagram (fbclid ou utm). Outros = quem veio pelo link do bot, digitou o endereço ou chegou sem identificação.</p>' }) : '';
 
       return {
-        html: summaryHtml(txt + ' <small style="display:inline">' + desde + '</small>', p ? x : { d: {} }) + '<section class="kpis">' + cards + '</section>' + funnel + chart + orgCard,
+        html: summaryHtml(txt, prv ? x : { d: {} }) + '<section class="kpis">' + cards + '</section>' + funilHist +
+          '<div style="margin-bottom:10px">' + funilNovo + '</div>' + chart + '<div style="margin-bottom:10px">' + mesCard + '</div>' + orgCard,
         draw: function () {
-          drawChart('c-pag', bk, {
-            bars: bk.map(function (b) { return b.visita; }), barColor: C.bar, hoverColor: C.ink, thick: 12,
-            line: bk.map(function (b) { return b.lead; }), lineColor: C.accent, spanGaps: true,
-            tip: function (b) { return PG.map(function (s) { return [s.t, int.format(b[s.k])]; }).concat([['Conversão', pctTxt(rate(b.lead, b.visita))]]); },
+          drawChart('c-pag', x.buckets, {
+            bars: x.buckets.map(function (b) { return b.lpv; }), barColor: C.bar, hoverColor: C.ink, thick: 12,
+            line: x.buckets.map(function (b) { return hb[b.key] || 0; }), lineColor: C.accent, spanGaps: true,
+            tip: function (b) { var l = hb[b.key] || 0; return [['Visitas pelo anúncio', int.format(b.lpv)], ['Leads do anúncio', int.format(l)], ['Conversão', pctTxt(rate(l, b.lpv))]]; },
           });
         },
       };
@@ -1269,6 +1278,65 @@
     { k: 'qualif_urg', l: 'Responderam a urgência', so: 'novo' },
     { k: 'qualif_fim', l: 'Concluíram a qualificação', so: 'novo' },
   ];
+  // soma o histórico por etapa; origem 'meta' ou todas
+  function somaHist(rows, o) {
+    var s = { rolou: 0, dados: 0, lead: 0 };
+    (rows || []).forEach(function (r) { if (!o || r.o === o) s[r.etapa] = (s[r.etapa] || 0) + r.n; });
+    return s;
+  }
+  // etapa com a menor passagem (onde mais se perde gente)
+  function pior(ST, o) {
+    var p = null;
+    ST.forEach(function (s, i) { if (i && o[ST[i - 1].k]) { var t = (o[s.k] || 0) / o[ST[i - 1].k] * 100; if (!p || t < p.t) p = { t: t, i: i }; } });
+    return p;
+  }
+  // funil em barras com a passagem entre etapas e a variação (p.p.) contra o período anterior
+  function funilHtml(titulo, legenda, ST, o, p, pr, base) {
+    var pass = function (z, i) { var a = z && z[ST[i - 1].k]; return a ? (z[ST[i].k] || 0) / a * 100 : null; };
+    return '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>' + titulo + '</span>' +
+      '<div class="legend"><span>' + esc(legenda) + '</span></div></div><div class="funnel">' +
+      ST.map(function (s, i) {
+        var n = o[s.k] || 0;
+        var bar = '<div class="fstage"><div class="fbar fs-' + i + '" style="width:' + s.w + '%;background:' + s.bg + ';color:' + s.fg + '"><span class="fl">' + s.l +
+          '<small>' + (i ? pctOf(n, o[base]) + ' das visitas' : (s.s || 'visitantes únicos')) + '</small></span><b>' + int.format(n) + '</b></div></div>';
+        if (i === ST.length - 1) return bar;
+        var t = pass(o, i + 1);
+        return bar + '<div class="frate"><span class="ms" aria-hidden="true">south</span>' + ST[i + 1].a + ' <b' + (pr && pr.i === i + 1 ? ' class="t-bad"' : '') + '>' + pctTxt(t) + '</b>' +
+          '<span class="plain">' + (t != null ? '≈ ' + Math.round(t) + ' de cada 100' : '') + '</span>' + ppHtml(t, pass(p, i + 1), false) + '</div>';
+      }).join('') + '</div></section>';
+  }
+  // tabela mês a mês desde jun/2026: visitas do Meta + histórico do site + medição nova quando houver
+  var mh = null, mhLoading = false;
+  async function loadMh() {
+    if (mhLoading) return;
+    mhLoading = true;
+    try { var r = await api('/api/meta-trafego?since=2026-06-01&until=' + today()); mh = r && r.ok ? r : { ok: false }; }
+    catch (e) { mh = { ok: false }; }
+    finally { mhLoading = false; }
+    if (state.view === 'pagina') render();
+  }
+  function mesAMes(fp, MED) {
+    if (!mh) loadMh();
+    var lpv = {};
+    if (mh && mh.ok) mh.daily.forEach(function (dd) { var m = dd.date.slice(0, 7); lpv[m] = (lpv[m] || 0) + dd.lpv; });
+    var hm = {};
+    (fp.histMes || []).forEach(function (r) { var z = hm[r.m] = hm[r.m] || { meta: {}, todos: {} }; z.todos[r.etapa] = (z.todos[r.etapa] || 0) + r.n; if (r.o === 'meta') z.meta[r.etapa] = r.n; });
+    var meses = [], m = '2026-06';
+    while (m <= today().slice(0, 7)) { meses.push(m); m = nextYm(m); }
+    var p1 = function (z) { return z == null ? '—' : dec1.format(z) + '%'; };
+    var rows = meses.reverse().map(function (m) {
+      var z = hm[m] || { meta: {}, todos: {} }, L = lpv[m];
+      return '<tr><td>' + MESES_L[+m.slice(5) - 1] + (m < '2026-07' ? ' <span class="muted fp-pv">(desde 17/06)</span>' : '') + '</td>' +
+        '<td>' + (L != null ? int.format(L) : (mh ? '—' : '…')) + '</td><td class="pg-hide">' + int.format(z.meta.rolou || 0) + '</td><td class="pg-hide">' + int.format(z.meta.dados || 0) + '</td>' +
+        '<td><b style="font-weight:600">' + int.format(z.meta.lead || 0) + '</b></td><td>' + p1(L ? (z.meta.lead || 0) / L * 100 : null) + '</td>' +
+        '<td class="pg-hide">' + int.format(z.todos.lead || 0) + '</td></tr>';
+    }).join('');
+    return chartCard({ icon: 'calendar_month', label: 'Mês a mês desde junho', legend: '<span>tráfego dos anúncios do Meta</span>',
+      body: '<div class="table-scroll"><table class="com-table fp-table"><thead><tr><th>Mês</th><th>Visitas pelo anúncio</th><th class="pg-hide">Rolaram a página</th><th class="pg-hide">WhatsApp e pet shop</th><th>Leads</th><th>Conversão</th><th class="pg-hide">Leads de todas as origens</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<p class="cflow-note">Visitas = visualizações da página contadas pelo Meta. As outras colunas são do próprio site, só de quem veio do anúncio (mesmo visitante conta uma vez por mês). ' +
+        '“Começaram o formulário” e “passaram do nome e e-mail” só existem a partir de ' + fmtShort(MED) + ' — estão no funil completo acima.</p>' });
+  }
+
   var PG = [
     { k: 'visita', l: 'Visitaram a página', t: 'Visitas', w: 100, bg: '#ECEDF0', fg: C.ink },
     { k: 'inicio', l: 'Começaram o formulário', t: 'Começaram', a: 'Começaram o formulário', w: 84, bg: '#D5D8DD', fg: C.ink },
@@ -1404,13 +1472,13 @@
       geral: 'conta inteira; tipos pelo objetivo da campanha (Leads = cadastro, Seguidores = visita ao perfil)',
       leads: 'só campanhas com objetivo de cadastro · leads = evento Lead atribuído pelo Meta',
       seguidores: 'só campanhas otimizadas para visita ao perfil · seguidores = ganho diário do Instagram (orgânico + pago)',
-      pagina: 'contagem do próprio site na página atual (/) · cada visitante conta 1× por etapa · robôs ficam de fora · origem pela sessão (fbclid/utm)',
+      pagina: 'visitas pelo anúncio = visualizações da página (Meta) · etapas = próprio site, página atual (/), histórico desde 17/06 · funil completo desde 27/10 · origem pela sessão (fbclid/utm)',
       funil: 'só campanhas com objetivo de cadastro · CTR = cliques no link ÷ impressões · connect rate = visualizações da página ÷ cliques · conversão = leads ÷ visualizações',
       comercial: state.ac && state.ac.ok
         ? 'investimento e leads = Meta (campanhas de cadastro) · reuniões, no-show, fechamentos e etapas = ActiveCampaign (atualiza a cada 10 min; ⟳ força)'
         : 'investimento e leads = Meta (campanhas de cadastro) · reuniões e fechamentos = planilha comercial (fechamentos por mês)',
     }[state.view];
-    $('foot').textContent = (state.view === 'pagina' ? 'Fonte: site · ' : 'Fonte: Meta Ads · ') + src + ' · comparação ' + (x.cmp || '—') +
+    $('foot').textContent = (state.view === 'pagina' ? 'Fonte: Meta Ads + site · ' : 'Fonte: Meta Ads · ') + src + ' · comparação ' + (x.cmp || '—') +
       ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 
@@ -1515,7 +1583,7 @@
     var b = e.target.closest('.group button'); if (!b) return;
     state.group = b.dataset.g; savePrefs(); render();
   });
-  $('refresh').addEventListener('click', function () { load(true); state.com = null; state.ac = undefined; state.fp = null; if (state.view === 'comercial') loadAc(true); });
+  $('refresh').addEventListener('click', function () { load(true); state.com = null; state.ac = undefined; state.fp = null; mh = null; if (state.view === 'comercial') loadAc(true); });
   // toque/clique no "i" mostra a explicação (no celular não existe "passar o mouse")
   var hintPop = null;
   function closeHint() { if (hintPop) { hintPop.remove(); hintPop = null; } }
