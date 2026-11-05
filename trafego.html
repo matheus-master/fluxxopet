@@ -273,6 +273,27 @@
     }
     @media (max-width:640px){ .ac-st{grid-template-columns:minmax(0,1fr) auto} .ac-st .tr{grid-column:1/-1;order:3} .ac-check{grid-template-columns:repeat(2,minmax(0,1fr))} .fs-4{width:68%!important} }
 
+    /* aba Saúde: respostas sim/não */
+    .hz-v{display:flex;align-items:center;gap:6px;margin-top:14px;font-weight:500;font-size:1.02rem;line-height:1.3}
+    .hz-v .ms{font-size:22px}
+    .hz-v.good{color:var(--good)} .hz-v.bad{color:var(--bad)} .hz-v.flat{color:var(--ink-2)}
+    .hz-n{font-size:1.5rem;letter-spacing:-.01em;font-variant-numeric:tabular-nums;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .hz-n small{font-size:.8rem;color:var(--ink-3);letter-spacing:0}
+    .hz-bar{position:relative;height:8px;border-radius:4px;background:var(--line);margin-top:12px}
+    .hz-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent)}
+    .hz-bar u{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:1px;background:var(--ink)}
+    .hz-d{font-size:.82rem;color:var(--ink-2);line-height:1.5;margin-top:10px}
+    .hz-d b,.hz-l b{font-weight:600;color:var(--ink)}
+    .hz-l{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:.82rem;line-height:1.45;color:var(--ink-2)}
+    .hz-l li{display:flex;gap:6px;align-items:flex-start}
+    .hz-l .ms{font-size:16px;margin-top:1px}
+    .hz-l .good .ms,.hz-ic.good{color:var(--good)} .hz-l .bad .ms,.hz-ic.bad{color:var(--bad)} .hz-l .flat .ms{color:var(--ink-3)}
+    .hz-ic{font-size:18px;vertical-align:-4px}
+    .hz-in{display:flex;flex-direction:column;gap:6px;font-size:.78rem;color:var(--ink-2)}
+    .hz-h{list-style:none;margin-top:18px;padding-top:14px;border-top:1px solid #2A2D32;display:flex;flex-direction:column;gap:8px;font-size:.8rem;color:#9AA0A8;line-height:1.4}
+    .hz-h b{color:#fff;font-weight:500}
+    @media (max-width:640px){ .hz-t td:not(:first-child){white-space:nowrap} }
+
     .foot{color:var(--ink-3);font-size:.76rem;margin-top:18px;line-height:1.5}
     .loading #content{opacity:.45;transition:opacity .2s}
 
@@ -319,6 +340,7 @@
     <div class="title">
       <h1>Tráfego</h1>
       <div class="views" id="views">
+        <button class="view" data-v="saude"><span class="ms">monitor_heart</span>Saúde</button>
         <button class="view" data-v="geral"><span class="ms">dashboard</span>Geral</button>
         <button class="view" data-v="leads"><span class="ms">person_add</span>Leads</button>
         <button class="view" data-v="seguidores"><span class="ms">favorite</span>Seguidores</button>
@@ -360,7 +382,7 @@
 
 <script>
   /* ── estado ───────────────────────────────────────── */
-  var VIEWS = ['geral', 'leads', 'seguidores', 'funil', 'pagina', 'comercial'];
+  var VIEWS = ['saude', 'geral', 'leads', 'seguidores', 'funil', 'pagina', 'comercial'];
   var state = { view: 'geral', period: 'mes', group: null, data: null, com: null };
   var charts = {};
   var C = { accent: '#FF5A1F', ink: '#0E0F11', ink2: '#5F656D', ink3: '#9AA0A8', bar: '#DADCE1', grid: '#ECEDF0' };
@@ -554,7 +576,7 @@
         backgroundColor: function (c) { return colorOf(s, c.dataIndex); },
         borderRadius: stacked ? 3 : 6, borderSkipped: false, maxBarThickness: opt.thick || 10, barPercentage: .5, categoryPercentage: .9 };
     });
-    if (opt.line) datasets.push({ type: 'line', data: opt.line, yAxisID: 'y1', order: 1,
+    if (opt.line) datasets.push({ type: 'line', data: opt.line, yAxisID: opt.lineAxis || 'y1', order: 1,
       // monotone: a curva passa pelos pontos sem "inventar" picos entre eles;
       // spanGaps falso: dia sem resultado (custo indefinido) interrompe a linha
       borderColor: opt.lineColor, borderWidth: 2.5, cubicInterpolationMode: 'monotone', fill: false, spanGaps: !!opt.spanGaps,
@@ -564,7 +586,7 @@
     var tip = $('tip-' + id);
 
     var chart = new Chart($(id), {
-      data: { labels: buckets.map(function (b) { return bucketLabel(b, state.group); }), datasets: datasets },
+      data: { labels: buckets.map(function (b) { return bucketLabel(b, opt.group || state.group); }), datasets: datasets },
       options: {
         maintainAspectRatio: false, animation: { duration: 350 },
         interaction: { mode: 'index', intersect: false },
@@ -573,7 +595,7 @@
           x: { stacked: true, grid: { display: false }, border: { display: false }, ticks: Object.assign({ maxRotation: 0, autoSkipPadding: 14 }, tick) },
           y: { stacked: true, beginAtZero: true, grid: { color: C.grid }, border: { display: false },
                ticks: Object.assign({ maxTicksLimit: 6, callback: function (v) { return opt.tickFmt ? opt.tickFmt(v) : compact(v, opt.money); } }, tick) },
-          y1: { display: !!opt.line, beginAtZero: true, position: 'right', grid: { display: false }, border: { display: false },
+          y1: { display: !!opt.line && !opt.lineAxis, beginAtZero: true, position: 'right', grid: { display: false }, border: { display: false },
                 ticks: Object.assign({ maxTicksLimit: 6, callback: function (v) { return compact(v, opt.lineMoney); } }, tick) },
         },
         plugins: {
@@ -582,7 +604,7 @@
             var t = ctx.tooltip;
             if (!t.opacity || !t.dataPoints || !t.dataPoints.length) { tip.style.opacity = 0; return; }
             var b = buckets[t.dataPoints[0].dataIndex];
-            tip.innerHTML = '<div class="t">' + bucketTitle(b, state.group) + '</div><div class="vals">' +
+            tip.innerHTML = '<div class="t">' + bucketTitle(b, opt.group || state.group) + '</div><div class="vals">' +
               opt.tip(b).map(function (p) { return '<div><div class="k">' + p[0] + '</div><div class="n">' + p[1] + '</div></div>'; }).join('') + '</div>';
             var w = tip.offsetWidth, box = ctx.chart.canvas.parentNode.clientWidth;
             var x = t.caretX + 16; if (x + w > box) x = t.caretX - w - 16;
@@ -650,6 +672,195 @@
   }
 
   var RENDER = {
+    // saúde do negócio, sempre de um mês (o atual ou o escolhido na lista): bate a meta? tem problema
+    // de ticket? de conteúdo? Faturamento = vendas novas (valor dos negócios fechados no ActiveCampaign).
+    // Conteúdo = demanda (leads do anúncio × leads que a meta pede) + criativos (CTR e custo por lead
+    // do mês × os 3 meses anteriores). Metas no banco (/api/metas); mês sem meta herda a anterior.
+    saude: function (x) {
+      var nada = function () {};
+      var vazio = function (icon, t, s) { return { html: '<div class="card empty-state"><span class="ms" aria-hidden="true">' + icon + '</span><b>' + t + '</b>' + (s ? '<span>' + s + '</span>' : '') + '</div>', draw: nada }; };
+      if (state.ac === undefined) loadAc();
+      if (!state.metas) loadMetas();
+      if (!mh) loadMh();
+      if (state.ac === undefined || !state.metas || !mh) return vazio('hourglass_empty', 'Carregando vendas, metas e anúncios…');
+      var ac = state.ac;
+      if (!ac.ok) return vazio('error', 'Não consegui ler as vendas no ActiveCampaign', esc(ac.error));
+
+      var hoje = today(), M = state.period === 'mesSel' && state.month ? state.month : hoje.slice(0, 7);
+      var nomeYm = function (ym) { return MESES_L[+ym.slice(5) - 1].toLowerCase(); };
+      var nomeM = MESES_L[+M.slice(5) - 1], acIni = ac.desde.slice(0, 7);
+      if (M < acIni) return vazio('event_busy', 'Sem vendas registradas em ' + nomeYm(M), 'O histórico do ActiveCampaign começa em ' + longDate(ac.desde) + '. Escolha um mês a partir daí.');
+      var atual = M === hoje.slice(0, 7), ndias = +lastDay(M).slice(8), passados = atual ? +hoje.slice(8) : ndias, f = passados / ndias;
+
+      var pl = function (n, um, varios) { return int.format(n) + ' ' + (n === 1 ? um : varios); };
+      var m0 = function (v) { return v == null ? '—' : 'R$ ' + int.format(Math.round(v)); };
+      var p0 = function (v) { return v == null ? '—' : int.format(Math.round(v)) + '%'; };
+      var sinal = function (v) { if (v == null) return '—'; var r = Math.round(v) || 0; return (r > 0 ? '+' : '') + int.format(r) + '%'; };
+      var ymAdd = function (ym, n) { var t = +ym.slice(0, 4) * 12 + +ym.slice(5, 7) - 1 + n; return Math.floor(t / 12) + '-' + String(t % 12 + 1).padStart(2, '0'); };
+      // vendas dos meses (até o dia "ate", para comparar trechos iguais) e anúncios de cadastro (Meta)
+      var vendas = function (yms, ate) {
+        var o = { fat: 0, cli: 0 };
+        ac.fechamentos.forEach(function (v) { if (yms.indexOf(v.data.slice(0, 7)) >= 0 && (!ate || +v.data.slice(8, 10) <= ate)) { o.cli++; o.fat += v.valor || 0; } });
+        return o;
+      };
+      var anuncios = function (yms) {
+        var o = { leads: 0, spend: 0, impr: 0, clicks: 0 };
+        (mh.ok ? mh.daily : []).forEach(function (d) { if (yms.indexOf(d.date.slice(0, 7)) >= 0) { o.leads += d.leads; o.spend += d.leadsSpend; o.impr += d.impr; o.clicks += d.clicks; } });
+        return o;
+      };
+      // meta do mês: a do próprio mês ou, sem ela, a do último mês anterior que tiver (lista em ordem)
+      var metaDo = function (ym) { var g = null; (state.metas.metas || []).forEach(function (r) { if (r.ym <= ym) g = r; }); return g; };
+
+      var A = vendas([M]), An = anuncios([M]), g = metaDo(M), G = g ? g.meta : null, T = g ? g.ticket : null;
+      // referência: os 3 meses anteriores que o ActiveCampaign cobre
+      var REF = [3, 2, 1].map(function (i) { return ymAdd(M, -i); }).filter(function (ym) { return ym >= acIni; });
+      var refTxt = REF.map(nomeYm).join(', ').replace(/, ([^,]*)$/, ' e $1');
+      var rA = vendas(REF), rN = anuncios(REF);
+
+      var tk = A.cli ? A.fat / A.cli : null, tkRef = rA.cli ? rA.fat / rA.cli : null;
+      var taxa = rN.leads && rA.cli ? rA.cli / rN.leads : null;   // clientes por lead do anúncio nos meses de referência
+      var cliNec = G && T ? Math.ceil(G / T) : null, cliEsp = cliNec != null ? Math.round(cliNec * f) : null;
+      var leadsNec = cliNec != null && taxa ? Math.ceil(cliNec / taxa) : null, leadsEsp = leadsNec != null ? Math.round(leadsNec * f) : null;
+      var proj = A.fat / f;
+
+      // respostas: good = sem problema, bad = problema, flat = sem como responder
+      var V = function (s, t) { return { s: s, t: t }; };
+      var vMeta = !G ? V('flat', 'Meta não definida')
+        : A.fat >= G ? V('good', 'Sim, bateu a meta')
+        : !atual ? V('bad', 'Não bateu a meta')
+        : A.fat >= G * f ? V('good', 'Sim, está no ritmo')
+        : V('bad', 'Não, está abaixo do ritmo');
+      var vTicket = !T ? V('flat', 'Ticket-alvo não definido')
+        : !A.cli ? V('flat', 'Sem vendas no mês ainda')
+        : tk >= T ? V('good', 'Não, ticket no alvo') : V('bad', 'Sim, ticket abaixo do alvo');
+      // conteúdo: demanda (true = ok) e criativos (CTR caiu 15%+ ou custo por lead subiu 20%+ = cansados)
+      var CTR_QUEDA = 15, CPL_ALTA = 20, MIN_IMPR = 3000;
+      var dem = leadsEsp == null ? null : An.leads >= leadsEsp;
+      var ctr = rate(An.clicks, An.impr), cpl = ratio(An.spend, An.leads);
+      var dCtr = change(ctr, rate(rN.clicks, rN.impr)), dCpl = change(cpl, ratio(rN.spend, rN.leads));
+      var cri = An.impr < MIN_IMPR || dCtr == null ? null : !(dCtr <= -CTR_QUEDA || (dCpl != null && dCpl >= CPL_ALTA));
+      var vCont = dem === false || cri === false ? V('bad', 'Sim, ' + (dem === false && cri === false ? 'pouca demanda e criativos cansados' : dem === false ? 'pouca demanda' : 'criativos cansados'))
+        : dem == null && cri == null ? V('flat', 'Sem dados para avaliar')
+        : V('good', 'Não, ' + (dem && cri ? 'demanda e criativos ok' : dem ? 'demanda ok' : 'criativos ok'));
+
+      // ── resumo ──
+      var txt = (atual ? nomeM + ' até hoje (dia ' + passados + ' de ' + ndias + ')' : nomeM + ' de ' + M.slice(0, 4)) + ': <b>' + m0(A.fat) + ' em vendas novas</b>, ' + pl(A.cli, 'cliente', 'clientes') + '.';
+      if (!G) txt += ' Defina a meta do mês para saber se está no caminho.';
+      else {
+        txt += ' <b class="t-' + vMeta.s + '">' + vMeta.t + '</b>: ' + p0(A.fat / G * 100) + ' da meta de ' + m0(G) + (atual && A.fat < G ? '; no ritmo de hoje, o mês fecha em ' + m0(proj) : '') + '.';
+        var causas = [];
+        if (vTicket.s === 'bad') causas.push('<b>ticket</b> (cada venda vale ' + m0(tk) + ', o alvo é ' + m0(T) + ')');
+        if (dem === false) causas.push('<b>demanda</b> (' + pl(An.leads, 'lead', 'leads') + ', ' + (atual ? 'o ritmo pedia ' : 'a meta pedia ') + int.format(leadsEsp) + ')');
+        if (cri === false) causas.push('<b>criativos</b> (CTR ' + sinal(dCtr) + ', custo por lead ' + sinal(dCpl) + ')');
+        // leads e ticket ok, mas fecharam menos clientes que o necessário: o gargalo é a venda
+        if (vMeta.s === 'bad' && !causas.length && cliEsp != null && A.cli < cliEsp) causas.push('<b>conversão no comercial</b> (os leads chegaram, mas ' + (A.cli === 1 ? 'fechou 1 cliente' : 'fecharam ' + pl(A.cli, 'cliente', 'clientes')) + ' e ' + (atual ? 'o ritmo pedia ' : 'a meta pedia ') + int.format(cliEsp) + ')');
+        if (causas.length) txt += (vMeta.s === 'bad' ? ' Onde está o problema: ' : ' Mesmo assim, atenção: ') + joinParts(causas) + '.';
+      }
+      var nota = state.period !== 'mes' && state.period !== 'mesSel' ? 'Esta aba mostra sempre um mês inteiro: o atual ou o escolhido em “Escolher mês”.' : '';
+      var resumo = '<section class="summary"><span class="ms" aria-hidden="true">lightbulb</span><div><p>' + txt + '</p>' + (nota ? '<small>' + nota + '</small>' : '') + '</div></section>';
+
+      // ── as 4 respostas ──
+      var IC = { good: 'check_circle', bad: 'cancel', flat: 'help' };
+      var resp = function (o) {
+        return '<div class="card kpi hz"><div class="row1"><span class="label"><span class="ms" aria-hidden="true">' + o.icon + '</span>' + o.q + '</span></div>' +
+          '<div class="hz-v ' + o.v.s + '"><span class="ms" aria-hidden="true">' + IC[o.v.s] + '</span>' + o.v.t + '</div>' +
+          (o.big ? '<div class="hz-n">' + o.big + '</div>' : '') + (o.extra || '') + (o.d ? '<p class="hz-d">' + o.d + '</p>' : '') + '</div>';
+      };
+      // faturamento: badge contra o mesmo trecho do mês anterior; embaixo, o mês anterior inteiro e a média
+      var pM = ymAdd(M, -1), temP = pM >= acIni, P = temP ? vendas([pM], atual ? passados : 0) : null, Pt = temP ? vendas([pM]) : null;
+      var info = 'Vendas novas: soma do valor dos negócios que chegaram a Boas-vindas (ou depois) no ActiveCampaign neste mês.';
+      var cFat = '<div class="card kpi hero"><div class="row1"><span class="label"><span class="ms" aria-hidden="true">payments</span>Faturamento do mês' +
+        ' <span class="hint" title="' + esc(info) + '" aria-label="' + esc(info) + '" tabindex="0">i</span></span>' +
+        (P ? badgeHtml(A.fat, P.fat, false, 'vs ' + nomeYm(pM) + (atual ? ' (dia 1 a ' + passados + ')' : '')) : '') + '</div>' +
+        '<div class="row2"><span class="big">' + m0(A.fat) + '</span><span class="unit">' + pl(A.cli, 'cliente fechado', 'clientes fechados') + '</span></div>' +
+        '<ul class="hz-h">' +
+        (P && atual ? '<li>Mesmo trecho de ' + nomeYm(pM) + ': <b>' + m0(P.fat) + '</b></li>' : '') +
+        (Pt ? '<li>' + MESES_L[+pM.slice(5) - 1] + ' inteiro: <b>' + m0(Pt.fat) + '</b> · ' + pl(Pt.cli, 'cliente', 'clientes') + '</li>' : '') +
+        (REF.length ? '<li>Média ' + (REF.length === 1 ? 'de ' : 'por mês em ') + refTxt + ': <b>' + m0(rA.fat / REF.length) + '</b></li>' : '') +
+        '</ul></div>';
+
+      var resta = ndias - passados;
+      var cMeta = resp({ icon: 'flag', q: 'Bato a meta?', v: vMeta,
+        big: G ? m0(A.fat) + ' <small>de ' + m0(G) + '</small>' : null,
+        extra: G ? '<div class="hz-bar" role="img" aria-label="' + p0(A.fat / G * 100) + ' da meta"><i style="width:' + Math.min(100, A.fat / G * 100) + '%"></i>' +
+          (atual ? '<u style="left:' + f * 100 + '%" title="Onde deveria estar hoje"></u>' : '') + '</div>' : '',
+        d: !G ? 'Defina a meta de faturamento do mês em “Metas”, no fim da página.'
+          : A.fat >= G ? 'Vendeu ' + p0(A.fat / G * 100) + ' da meta.'
+          : atual ? 'Faltam <b>' + m0(G - A.fat) + '</b> ' + (resta ? 'em ' + pl(resta, 'dia', 'dias') : 'hoje, último dia do mês') + '. Hoje deveria estar em ' + m0(G * f) + ' (a marca na barra); no ritmo atual, fecha em ' + m0(proj) + '.'
+          : 'Faltaram ' + m0(G - A.fat) + '.' });
+
+      var cTicket = resp({ icon: 'sell', q: 'Tenho problema de ticket?', v: vTicket,
+        big: tk != null ? m0(tk) + ' <small>por cliente</small>' : null,
+        d: (T ? 'Alvo: <b>' + m0(T) + '</b>. ' : 'Defina o ticket-alvo em “Metas”, no fim da página. ') +
+          (A.cli ? 'Ticket médio = ' + m0(A.fat) + ' ÷ ' + pl(A.cli, 'cliente', 'clientes') + '. ' : '') +
+          (tkRef != null ? 'Em ' + refTxt + ': ' + m0(tkRef) + ' por cliente.' : '') });
+
+      var item = function (ok, t) { var s = ok == null ? 'flat' : ok ? 'good' : 'bad'; return '<li class="' + s + '"><span class="ms" aria-hidden="true">' + { good: 'check', bad: 'close', flat: 'remove' }[s] + '</span><span>' + t + '</span></li>'; };
+      var tDem = leadsEsp != null ? '<b>Demanda:</b> ' + pl(An.leads, 'lead', 'leads') + (atual ? ', o ritmo pedia ' + int.format(leadsEsp) + ' (' + int.format(leadsNec) + ' no mês)' : ' de ' + int.format(leadsNec) + ' necessários') + '.'
+        : '<b>Demanda:</b> ' + (!G || !T ? 'defina meta e ticket-alvo para saber quantos leads o mês pede.' : 'sem vendas em meses anteriores para calcular a taxa de fechamento.');
+      var tCri = '<b>Criativos:</b> ' + (An.impr < MIN_IMPR ? 'pouca veiculação no mês para avaliar.'
+        : dCtr == null ? 'sem meses anteriores para comparar.'
+        : 'CTR ' + pctTxt(ctr) + ' (' + sinal(dCtr) + ') e ' + (cpl != null ? m0(cpl) + ' por lead (' + sinal(dCpl) + ')' : 'nenhum lead') + ' contra ' + refTxt + '.');
+      var cCont = resp({ icon: 'campaign', q: 'Tenho problema de conteúdo?', v: vCont,
+        big: int.format(An.leads) + ' <small>leads do anúncio</small>',
+        extra: '<ul class="hz-l">' + item(dem, tDem) + item(cri, tCri) + '</ul>',
+        d: 'Criativo cansado = CTR caindo ' + CTR_QUEDA + '% ou mais, ou custo por lead subindo ' + CPL_ALTA + '% ou mais.' });
+
+      // ── como a meta se desdobra: faturamento = clientes × ticket; clientes = leads × taxa ──
+      var st = function (v) { return v == null ? '<span class="muted">—</span>' : '<span class="ms hz-ic ' + (v ? 'good' : 'bad') + '" role="img" aria-label="' + (v ? 'ok' : 'abaixo') + '">' + (v ? 'check_circle' : 'cancel') + '</span>'; };
+      var linha = function (l, alvo, esp, real, ok) {
+        return '<tr><td>' + l + '</td><td>' + alvo + '</td>' + (atual ? '<td class="pg-hide">' + esp + '</td>' : '') + '<td><b style="font-weight:600">' + real + '</b></td><td>' + st(ok) + '</td></tr>';
+      };
+      var n0 = function (v) { return v == null ? '—' : int.format(v); };
+      var rows =
+        linha('Faturamento', m0(G), G ? m0(G * f) : '—', m0(A.fat), G ? A.fat >= G * f : null) +
+        linha('Clientes fechados', n0(cliNec), n0(cliEsp), int.format(A.cli), cliEsp != null ? A.cli >= cliEsp : null) +
+        linha('Ticket médio', m0(T), m0(T), m0(tk), T && tk != null ? tk >= T : null) +
+        linha('Leads do anúncio', n0(leadsNec), n0(leadsEsp), int.format(An.leads), dem) +
+        linha('Lead → cliente', taxa != null ? pctTxt(taxa * 100) : '—', '—', An.leads ? pctTxt(A.cli / An.leads * 100) : '—', null);
+      var tabela = chartCard({ icon: 'account_tree', label: 'Como a meta se desdobra', legend: '<span>' + nomeYm(M) + (atual ? ' · esperado = meta × ' + passados + '/' + ndias + ' dias' : '') + '</span>',
+        body: '<div class="table-scroll"><table class="com-table fp-table hz-t"><thead><tr><th></th><th>Meta do mês</th>' + (atual ? '<th class="pg-hide">Esperado até hoje</th>' : '') + '<th>Realizado</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+          '<p class="cflow-note">Clientes necessários = meta ÷ ticket-alvo. Leads necessários = clientes ÷ taxa de fechamento' +
+          (taxa != null ? ' de ' + refTxt + ' (' + pl(rA.cli, 'cliente', 'clientes') + ' para ' + pl(rN.leads, 'lead', 'leads') + ' do anúncio)' : '') +
+          '. A taxa compara todos os clientes fechados com os leads dos anúncios de cadastro do Meta, como na aba Comercial.</p>' });
+
+      // ── faturamento × meta, mês a mês desde o início do ActiveCampaign ──
+      var bk = [];
+      for (var ym = acIni; ym <= hoje.slice(0, 7); ym = ymAdd(ym, 1)) {
+        var v = vendas([ym]), gm = metaDo(ym);
+        bk.push({ key: ym, first: ym + '-01', last: lastDay(ym), fat: v.fat, cli: v.cli, meta: gm ? gm.meta : null });
+      }
+      var grafico = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">bar_chart</span>Faturamento × meta por mês</span>' +
+        '<div class="legend"><span><i class="dot"></i>Vendas novas</span><span><i class="org"></i>' + nomeM + '</span><span><i class="ring-g"></i>Meta</span></div></div>' +
+        '<div class="plot sm"><canvas id="c-saude"></canvas><div class="tip" id="tip-c-saude"></div></div></section>';
+
+      // ── metas do mês (editáveis) ──
+      var proprio = (state.metas.metas || []).some(function (r) { return r.ym === M; });
+      var fmtIn = function (v) { return v ? int.format(v) : ''; };
+      var editor = chartCard({ icon: 'target', label: 'Metas de ' + nomeYm(M), legend: '<span>valem para os meses seguintes até você mudar</span>',
+        body: '<form id="metaForm" class="com-form" data-ym="' + M + '" novalidate>' +
+          '<label class="hz-in">Meta de faturamento (R$)<input name="meta" inputmode="decimal" autocomplete="off" placeholder="ex.: 30.000" value="' + fmtIn(G) + '"></label>' +
+          '<label class="hz-in">Ticket-alvo (R$ por cliente)<input name="ticket" inputmode="decimal" autocomplete="off" placeholder="ex.: 2.500" value="' + fmtIn(T) + '"></label>' +
+          '<button type="submit">Salvar metas de ' + nomeYm(M) + '</button></form><div class="com-err" id="metaErr" role="alert"></div>' +
+          '<p class="cflow-note" style="margin-top:0">' + (proprio ? 'Metas definidas para ' + nomeYm(M) + '.' : g ? 'Valendo as metas de ' + nomeYm(g.ym) + '. Salvar cria metas próprias para ' + nomeYm(M) + '.' : 'Nenhuma meta definida ainda.') +
+          (cliNec != null ? ' Com essas metas, o mês pede ' + pl(cliNec, 'cliente', 'clientes') + (leadsNec != null ? ' e cerca de ' + int.format(leadsNec) + ' leads do anúncio' : '') + '.' : '') + '</p>' });
+      var semMeta = !G || !T;
+
+      return {
+        html: resumo + (semMeta ? '<div style="margin-top:10px">' + editor + '</div>' : '') +
+          '<section class="kpis">' + cFat + cMeta + cTicket + cCont + '</section>' +
+          '<div style="margin-bottom:10px">' + tabela + '</div>' + grafico + (semMeta ? '' : editor),
+        draw: function () {
+          drawChart('c-saude', bk, {
+            group: 'mes', thick: 28, money: true, lineAxis: 'y', lineColor: C.ink2, spanGaps: true, hoverColor: C.ink,
+            series: [{ data: bk.map(function (b) { return b.fat; }), color: function (i) { return bk[i].key === M ? C.accent : C.bar; } }],
+            line: bk.map(function (b) { return b.meta; }),
+            tip: function (b) { return [['Vendas novas', m0(b.fat)], ['Meta', m0(b.meta)], ['Clientes', int.format(b.cli)], ['Ticket médio', b.cli ? m0(b.fat / b.cli) : '—']]; },
+          });
+        },
+      };
+    },
+
     geral: function (x) {
       var t = x.tot, p = x.prev;
       var cards =
@@ -1251,7 +1462,34 @@
       state.ac = r && r.ok ? r : { ok: false, error: (r && r.error) || 'erro no servidor' };
     } catch (e) { state.ac = { ok: false, error: 'sem conexão' }; }
     finally { acLoading = false; }
-    if (state.view === 'comercial') render();
+    if (state.view === 'comercial' || state.view === 'saude') render();
+  }
+  /* ── saúde: metas mensais de faturamento e ticket (/api/metas) ── */
+  var metasLoading = false;
+  async function loadMetas() {
+    if (metasLoading) return;
+    metasLoading = true;
+    try {
+      var r = await api('/api/metas');
+      state.metas = r && r.ok ? r : { ok: false, metas: [], error: (r && r.error) || 'erro no servidor' };
+    } catch (e) { state.metas = { ok: false, metas: [], error: 'sem conexão' }; }
+    finally { metasLoading = false; }
+    if (state.view === 'saude') render();
+  }
+  async function saveMetas(form) {
+    // aceita "30.000", "30000", "R$ 2.500,50"
+    var reais = function (s) { s = String(s || '').replace(/[R$\s.]/g, '').replace(',', '.'); return s ? Number(s) : NaN; };
+    var meta = reais(form.elements.meta.value), ticket = reais(form.elements.ticket.value), err = $('metaErr'), bt = form.querySelector('button');
+    if (!(meta > 0) || !(ticket > 0)) { err.textContent = 'Preencha a meta e o ticket-alvo em reais (ex.: 30.000 e 2.500).'; return; }
+    bt.disabled = true; err.textContent = '';
+    try {
+      var r = await fetch('/api/metas', { method: 'PUT', headers: { Authorization: 'Bearer ' + getToken(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ym: form.dataset.ym, meta: meta, ticket: ticket }) });
+      if (r.status === 401) { location.href = '/login'; return; }
+      var j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'erro no servidor');
+      state.metas = null; loadMetas();
+    } catch (e) { err.textContent = 'Não consegui salvar: ' + e.message; bt.disabled = false; }
   }
   /* ── funil: etapas do cadastro nas páginas do quiz (/api/funil-pagina) ── */
   var fpLoading = null;
@@ -1313,7 +1551,7 @@
     try { var r = await api('/api/meta-trafego?since=2026-06-01&until=' + today()); mh = r && r.ok ? r : { ok: false }; }
     catch (e) { mh = { ok: false }; }
     finally { mhLoading = false; }
-    if (state.view === 'pagina') render();
+    if (state.view === 'pagina' || state.view === 'saude') render();
   }
   function mesAMes(fp, MED) {
     if (!mh) loadMh();
@@ -1489,6 +1727,8 @@
       if (!state.ac.ok) notes.push(['error', 'ActiveCampaign indisponível (' + state.ac.error + '). Mostrando reuniões e fechamentos da planilha.']);
       else (state.ac.avisos || []).forEach(function (a) { notes.push(['info', 'ActiveCampaign: ' + a]); });
     }
+    if (state.view === 'saude' && state.ac && state.ac.ok) (state.ac.avisos || []).forEach(function (a) { notes.push(['info', 'ActiveCampaign: ' + a]); });
+    if (state.view === 'saude' && state.metas && !state.metas.ok) notes.push(['error', 'Não consegui carregar as metas (' + state.metas.error + ').']);
     $('notice').innerHTML = notes.map(function (n) {
       return '<div class="notice ' + (n[0] === 'info' ? 'info' : '') + '"><span class="ms">' + (n[0] === 'info' ? 'info' : 'error') + '</span><span>' + esc(n[1]) + '</span></div>';
     }).join('');
@@ -1497,13 +1737,15 @@
       geral: 'conta inteira; tipos pelo objetivo da campanha (Leads = cadastro, Seguidores = visita ao perfil)',
       leads: 'só campanhas com objetivo de cadastro · leads = evento Lead atribuído pelo Meta',
       seguidores: 'só campanhas otimizadas para visita ao perfil · seguidores = ganho diário do Instagram (orgânico + pago)',
+      saude: 'faturamento = vendas novas: valor dos negócios que chegaram a Boas-vindas no ActiveCampaign, pela data · leads, CTR e custo por lead = Meta (campanhas de cadastro) · metas salvas no banco',
       pagina: 'visitas pelo anúncio = visualizações da página (Meta) · etapas = próprio site, página atual (/), histórico desde 17/06 · funil completo desde 27/10 · origem pela sessão (fbclid/utm)',
       funil: 'só campanhas com objetivo de cadastro · CTR = cliques no link ÷ impressões · connect rate = visualizações da página ÷ cliques · conversão = leads ÷ visualizações',
       comercial: state.ac && state.ac.ok
         ? 'investimento e leads = Meta (campanhas de cadastro) · reuniões, no-show, fechamentos e etapas = ActiveCampaign (atualiza a cada 10 min; ⟳ força)'
         : 'investimento e leads = Meta (campanhas de cadastro) · reuniões e fechamentos = planilha comercial (fechamentos por mês)',
     }[state.view];
-    $('foot').textContent = (state.view === 'pagina' ? 'Fonte: Meta Ads + site · ' : 'Fonte: Meta Ads · ') + src + ' · comparação ' + (x.cmp || '—') +
+    var fonte = { pagina: 'Fonte: Meta Ads + site · ', saude: 'Fonte: ActiveCampaign + Meta Ads · ' }[state.view] || 'Fonte: Meta Ads · ';
+    $('foot').textContent = fonte + src + (state.view === 'saude' ? '' : ' · comparação ' + (x.cmp || '—')) +
       ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 
@@ -1608,7 +1850,8 @@
     var b = e.target.closest('.group button'); if (!b) return;
     state.group = b.dataset.g; savePrefs(); render();
   });
-  $('refresh').addEventListener('click', function () { load(true); state.com = null; state.ac = undefined; state.fp = null; mh = null; if (state.view === 'comercial') loadAc(true); });
+  $('content').addEventListener('submit', function (e) { if (e.target.id === 'metaForm') { e.preventDefault(); saveMetas(e.target); } });
+  $('refresh').addEventListener('click', function () { load(true); state.com = null; state.ac = undefined; state.fp = null; mh = null; state.metas = null; if (state.view === 'comercial' || state.view === 'saude') loadAc(true); });
   // toque/clique no "i" mostra a explicação (no celular não existe "passar o mouse")
   var hintPop = null;
   function closeHint() { if (hintPop) { hintPop.remove(); hintPop = null; } }

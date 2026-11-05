@@ -91,7 +91,7 @@
   offline no Ads a partir disso.
 
 ## Dashboard de Tráfego (`/trafego` → `trafego.html`)
-- Painel com 6 abas (`#geral`, `#leads`, `#seguidores`, `#funil`, `#pagina`, `#comercial`). Períodos em
+- Painel com 7 abas (`#saude`, `#geral`, `#leads`, `#seguidores`, `#funil`, `#pagina`, `#comercial`). Períodos em
   **Mês = mês atual** (dia 1 até hoje, comparado com o mesmo trecho do mês anterior);
   o resto é **janela móvel** (Semana = 7 dias, Trimestre = 90, Semestre = 180, Ano = 365)
   + Personalizado, comparado com a janela anterior do mesmo tamanho. A lista "Escolher mês"
@@ -166,6 +166,28 @@
   `META_ADS_TOKEN` é de **usuário do sistema** ("Dashboardtoken", app "Analise de
   Dados Pactus Pet"), não expira. Ele também enxerga a página e o IG @fluxxopet
   (`17841468174480500`) — dá pra puxar seguidores.
+
+## Aba Saúde (`#saude`) — saúde do negócio no mês
+- Responde 4 perguntas para **um mês** (o atual ou o de "Escolher mês"; nos outros períodos mostra o
+  mês atual): faturamento do mês, bate a meta?, problema de ticket?, problema de conteúdo?
+- **Faturamento = vendas novas**: soma do `valor` dos fechamentos do `/api/ac-funil` (negócio em
+  Boas-vindas ou depois), pela data do fechamento. Não é a receita da carteira.
+- **Metas** (definição do dono, 2026-11-05): meta de faturamento em R$ e **ticket-alvo** por mês, editáveis
+  na própria aba. Tabela D1 `metas_mes` (migration 0014; `functions/api/metas.js`, GET/PUT, JWT, cria a
+  tabela se faltar). Mês sem linha usa a do último mês anterior que tiver.
+- Bate a meta: mês fechado = faturamento ≥ meta; mês atual = faturamento ≥ meta × dias passados ÷ dias do
+  mês ("no ritmo"); projeção linear mostrada como "no ritmo atual, fecha em".
+- Problema de ticket = ticket médio do mês (faturamento ÷ clientes) **abaixo do ticket-alvo**.
+- Problema de conteúdo = **pouca demanda OU criativos cansados**:
+  - demanda: leads do anúncio (Meta, campanhas de cadastro) abaixo do ritmo que a meta pede;
+    leads necessários = ⌈meta ÷ ticket-alvo⌉ ÷ taxa de fechamento (clientes ÷ leads do Meta nos 3 meses
+    anteriores cobertos pelo ActiveCampaign — mesma comparação da aba Comercial);
+  - criativos: CTR (cliques no link ÷ impressões) caiu 15%+ ou custo por lead subiu 20%+ contra os 3 meses
+    anteriores (`CTR_QUEDA`, `CPL_ALTA`; abaixo de 3.000 impressões no mês não avalia).
+- Se a meta não está no ritmo e ticket/demanda/criativos estão ok mas fecharam menos clientes que o
+  necessário, o resumo aponta **conversão no comercial**.
+- Dados: `state.ac` (ActiveCampaign), `mh` (Meta desde 2026-06-01, o mesmo da aba Página) e `state.metas`.
+  O gráfico usa `drawChart` com `group: 'mes'` e `lineAxis: 'y'` (meta no mesmo eixo do faturamento).
 
 ## Aba Comercial ← ActiveCampaign (`functions/api/ac-funil.js`)
 - `GET /api/ac-funil` (JWT): lê funis, etapas, negócios, contatos e tarefas do tipo "Reunião" desde
