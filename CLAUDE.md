@@ -186,8 +186,23 @@
     anteriores (`CTR_QUEDA`, `CPL_ALTA`; abaixo de 3.000 impressões no mês não avalia).
 - Se a meta não está no ritmo e ticket/demanda/criativos estão ok mas fecharam menos clientes que o
   necessário, o resumo aponta **conversão no comercial**.
-- Dados: `state.ac` (ActiveCampaign), `mh` (Meta desde 2026-06-01, o mesmo da aba Página) e `state.metas`.
-  O gráfico usa `drawChart` com `group: 'mes'` e `lineAxis: 'y'` (meta no mesmo eixo do faturamento).
+- **Meta anual** (pedido do dono, 2026-11-05: nov/26 a dez/27): um período de meses na tabela D1
+  `metas_periodo` (migration 0015; `inicio`/`fim` 'AAAA-MM', criada pela API se faltar). O total é a
+  **soma das metas mensais** (`metas_mes`) dos meses do período — não há um total guardado à parte, então
+  mudar a meta de um mês muda o total. `PUT /api/metas {periodo:{inicio,fim}, meses:[{ym,meta,ticket}]}`
+  grava o período e todos os meses de uma vez (`DB.batch`; exige um item por mês, máx. 36 meses) e troca
+  períodos que se sobrepõem.
+  - Editor (`#anoForm`): o total digitado se divide pelos meses (`distribuir`: crescimento opcional de
+    X% ao mês, arredonda a R$ 100 e acerta a sobra no último mês); editar um mês refaz o total; o
+    ticket-alvo digitado vale para todos os meses. Sem período valendo, aparece aberto no topo; com
+    ele, recolhido no fim da aba.
+  - Card "Bato a meta anual?" (só quando o mês mostrado está dentro do período): vendido no período até
+    o mês mostrado × total; "no ritmo" = vendido ≥ metas dos meses anteriores + meta do mês × dias
+    passados ÷ dias do mês; "faltam R$ X: R$ Y por mês daqui em diante" = falta ÷ meses restantes.
+    O gráfico de faturamento × meta se estende até o fim do período (meses futuros só com a meta).
+- Dados: `state.ac` (ActiveCampaign), `mh` (Meta desde 2026-06-01, o mesmo da aba Página) e `state.metas`
+  (`metas` e `periodos`). O gráfico usa `drawChart` com `group: 'mes'` e `lineAxis: 'y'` (meta no mesmo
+  eixo do faturamento).
 
 ## Aba Comercial ← ActiveCampaign (`functions/api/ac-funil.js`)
 - `GET /api/ac-funil` (JWT): lê funis, etapas, negócios, contatos e tarefas do tipo "Reunião" desde

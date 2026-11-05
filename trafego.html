@@ -293,6 +293,27 @@
     .hz-h{list-style:none;margin-top:18px;padding-top:14px;border-top:1px solid #2A2D32;display:flex;flex-direction:column;gap:8px;font-size:.8rem;color:#9AA0A8;line-height:1.4}
     .hz-h b{color:#fff;font-weight:500}
     @media (max-width:640px){ .hz-t td:not(:first-child){white-space:nowrap} }
+    /* meta anual: progresso + mês a mês; editor do período */
+    .hz-ano-g{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:8px 40px;align-items:start}
+    .hz-ano-g .hz-v{margin-top:4px}
+    .hz-yt td,.hz-yt th{padding-top:8px;padding-bottom:8px}
+    .hz-yt tr.hz-cur td{background:var(--accent-soft)}
+    .com-form.hz-pf{grid-template-columns:minmax(0,5fr) minmax(0,6fr);grid-template-rows:auto 1fr;grid-template-areas:'c t' 'a t';gap:16px 40px;align-items:start;margin-bottom:0}
+    .hz-pfg{grid-area:c;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:end}
+    .com-form select{height:44px;border-radius:8px;border:1px solid var(--line);background:#fff;padding:0 10px;font:inherit;font-size:.88rem;color:var(--ink);min-width:0;outline:none;cursor:pointer}
+    .com-form select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+    .hz-pt{grid-area:t}
+    .hz-pt td{padding:4px 6px}
+    .hz-pt td:first-child{padding-left:0}
+    .hz-pt input{height:36px;width:100%;min-width:96px;text-align:right}
+    .hz-pa{grid-area:a}
+    .hz-pa .cflow-note{margin:0 0 12px}
+    .hz-pa button{width:100%}
+    .hz-pa .com-err{margin:8px 0 0}
+    @media (max-width:900px){
+      .hz-ano-g{grid-template-columns:minmax(0,1fr)} .hz-ano-g .table-scroll{margin-top:10px}
+      .com-form.hz-pf{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;grid-template-areas:'c' 't' 'a'}
+    }
 
     .foot{color:var(--ink-3);font-size:.76rem;margin-top:18px;line-height:1.5}
     .loading #content{opacity:.45;transition:opacity .2s}
@@ -743,6 +764,28 @@
         : dem == null && cri == null ? V('flat', 'Sem dados para avaliar')
         : V('good', 'Não, ' + (dem && cri ? 'demanda e criativos ok' : dem ? 'demanda ok' : 'criativos ok'));
 
+      // ── meta anual: o período salvo que contém o mês; total = soma das metas mensais dos meses dele ──
+      var hojeYm = hoje.slice(0, 7), curto = function (ym) { return MESES[+ym.slice(5) - 1] + '/' + ym.slice(2, 4); };
+      var periodos = state.metas.periodos || [];
+      var per = periodos.filter(function (p) { return p.inicio <= M && M <= p.fim; })[0] || null, Y = null;
+      // o que o editor mostra: o período do mês ou o que ainda está valendo
+      var perEd = per || periodos.filter(function (p) { return p.fim >= hojeYm; })[0] || null;
+      if (per) {
+        Y = { nome: curto(per.inicio) + ' a ' + curto(per.fim), meses: [], total: 0, vend: 0, esp: 0, rest: 0 };
+        for (var ym = per.inicio; ym <= per.fim; ym = ymAdd(ym, 1)) {
+          var gy = metaDo(ym), vy = ym <= M ? vendas([ym]) : null, my = gy ? gy.meta : 0;
+          Y.meses.push({ ym: ym, meta: my, fat: vy ? vy.fat : null });
+          Y.total += my;
+          if (vy) Y.vend += vy.fat;
+          Y.esp += ym < M ? my : ym === M ? my * f : 0;   // onde deveria estar hoje (ou no fim do mês escolhido)
+          Y.rest += ym > M ? 1 : ym === M ? 1 - f : 0;    // meses que faltam
+        }
+        Y.acabou = M === per.fim && !atual;
+        Y.v = Y.vend >= Y.total ? V('good', Y.acabou ? 'Sim, bateu a meta anual' : 'Sim, já bateu a meta anual')
+          : Y.acabou ? V('bad', 'Não bateu a meta anual')
+          : Y.vend >= Y.esp ? V('good', 'Sim, está no ritmo') : V('bad', 'Não, está abaixo do ritmo');
+      }
+
       // ── resumo ──
       var txt = (atual ? nomeM + ' até hoje (dia ' + passados + ' de ' + ndias + ')' : nomeM + ' de ' + M.slice(0, 4)) + ': <b>' + m0(A.fat) + ' em vendas novas</b>, ' + pl(A.cli, 'cliente', 'clientes') + '.';
       if (!G) txt += ' Defina a meta do mês para saber se está no caminho.';
@@ -756,6 +799,9 @@
         if (vMeta.s === 'bad' && !causas.length && cliEsp != null && A.cli < cliEsp) causas.push('<b>conversão no comercial</b> (os leads chegaram, mas ' + (A.cli === 1 ? 'fechou 1 cliente' : 'fecharam ' + pl(A.cli, 'cliente', 'clientes')) + ' e ' + (atual ? 'o ritmo pedia ' : 'a meta pedia ') + int.format(cliEsp) + ')');
         if (causas.length) txt += (vMeta.s === 'bad' ? ' Onde está o problema: ' : ' Mesmo assim, atenção: ') + joinParts(causas) + '.';
       }
+      if (Y) txt += ' Meta anual (' + Y.nome + '): <b>' + m0(Y.vend) + ' de ' + m0(Y.total) + '</b>, ' +
+        (Y.vend >= Y.total ? '<b class="t-good">meta batida</b>' : Y.acabou ? '<b class="t-bad">não bateu</b>'
+          : Y.v.s === 'good' ? '<b class="t-good">no ritmo</b>' : '<b class="t-bad">abaixo do ritmo</b> (deveria estar em ' + m0(Y.esp) + ')') + '.';
       var nota = state.period !== 'mes' && state.period !== 'mesSel' ? 'Esta aba mostra sempre um mês inteiro: o atual ou o escolhido em “Escolher mês”.' : '';
       var resumo = '<section class="summary"><span class="ms" aria-hidden="true">lightbulb</span><div><p>' + txt + '</p>' + (nota ? '<small>' + nota + '</small>' : '') + '</div></section>';
 
@@ -784,14 +830,14 @@
         big: G ? m0(A.fat) + ' <small>de ' + m0(G) + '</small>' : null,
         extra: G ? '<div class="hz-bar" role="img" aria-label="' + p0(A.fat / G * 100) + ' da meta"><i style="width:' + Math.min(100, A.fat / G * 100) + '%"></i>' +
           (atual ? '<u style="left:' + f * 100 + '%" title="Onde deveria estar hoje"></u>' : '') + '</div>' : '',
-        d: !G ? 'Defina a meta de faturamento do mês em “Metas”, no fim da página.'
+        d: !G ? 'Defina a meta em “Meta anual” ou em “Metas de ' + nomeYm(M) + '”, nesta página.'
           : A.fat >= G ? 'Vendeu ' + p0(A.fat / G * 100) + ' da meta.'
           : atual ? 'Faltam <b>' + m0(G - A.fat) + '</b> ' + (resta ? 'em ' + pl(resta, 'dia', 'dias') : 'hoje, último dia do mês') + '. Hoje deveria estar em ' + m0(G * f) + ' (a marca na barra); no ritmo atual, fecha em ' + m0(proj) + '.'
           : 'Faltaram ' + m0(G - A.fat) + '.' });
 
       var cTicket = resp({ icon: 'sell', q: 'Tenho problema de ticket?', v: vTicket,
         big: tk != null ? m0(tk) + ' <small>por cliente</small>' : null,
-        d: (T ? 'Alvo: <b>' + m0(T) + '</b>. ' : 'Defina o ticket-alvo em “Metas”, no fim da página. ') +
+        d: (T ? 'Alvo: <b>' + m0(T) + '</b>. ' : 'Defina o ticket-alvo em “Meta anual” ou em “Metas de ' + nomeYm(M) + '”, nesta página. ') +
           (A.cli ? 'Ticket médio = ' + m0(A.fat) + ' ÷ ' + pl(A.cli, 'cliente', 'clientes') + '. ' : '') +
           (tkRef != null ? 'Em ' + refTxt + ': ' + m0(tkRef) + ' por cliente.' : '') });
 
@@ -824,11 +870,64 @@
           (taxa != null ? ' de ' + refTxt + ' (' + pl(rA.cli, 'cliente', 'clientes') + ' para ' + pl(rN.leads, 'lead', 'leads') + ' do anúncio)' : '') +
           '. A taxa compara todos os clientes fechados com os leads dos anúncios de cadastro do Meta, como na aba Comercial.</p>' });
 
-      // ── faturamento × meta, mês a mês desde o início do ActiveCampaign ──
-      var bk = [];
-      for (var ym = acIni; ym <= hoje.slice(0, 7); ym = ymAdd(ym, 1)) {
-        var v = vendas([ym]), gm = metaDo(ym);
-        bk.push({ key: ym, first: ym + '-01', last: lastDay(ym), fat: v.fat, cli: v.cli, meta: gm ? gm.meta : null });
+      // ── bato a meta anual? progresso no período e mês a mês ──
+      var cAno = '';
+      if (Y) {
+        var pA = Y.total ? Y.vend / Y.total * 100 : 0, falta = Y.total - Y.vend, lis = [];
+        if (falta > 0 && !Y.acabou) {
+          lis.push(['flag', (atual ? 'Hoje' : 'No fim de ' + nomeYm(M)) + ' deveria estar em <b>' + m0(Y.esp) + '</b> (a marca na barra): ' +
+            m0(Math.abs(Y.vend - Y.esp)) + (Y.vend >= Y.esp ? ' à frente' : ' atrás') + ' do plano.']);
+          lis.push(['event', 'Faltam <b>' + m0(falta) + '</b> até ' + curto(per.fim) + (Y.rest >= 1 ? ': <b>' + m0(falta / Y.rest) + ' por mês</b> daqui em diante.' : '.')]);
+        } else if (falta > 0) lis.push(['flag', 'Faltaram <b>' + m0(falta) + '</b>.']);
+        if (REF.length) lis.push(['history', 'Média ' + (REF.length === 1 ? 'de ' : 'por mês em ') + refTxt + ': ' + m0(rA.fat / REF.length) + '.']);
+        var rowsA = Y.meses.map(function (r) {
+          var parcial = r.ym === M && atual, ok = r.fat == null ? null : r.fat >= r.meta * (parcial ? f : 1);
+          return '<tr' + (r.ym === M ? ' class="hz-cur"' : '') + '><td>' + curto(r.ym) + (parcial ? ' <span class="muted">até hoje</span>' : '') + '</td><td>' + m0(r.meta) + '</td><td>' +
+            (r.fat == null ? '<span class="muted">—</span>' : '<b style="font-weight:600">' + m0(r.fat) + '</b>') + '</td><td>' + st(ok) + '</td></tr>';
+        }).join('');
+        cAno = '<section class="card"><div class="chart-head"><span class="label"><span class="ms" aria-hidden="true">emoji_events</span>Bato a meta anual?</span>' +
+          '<div class="legend"><span>' + Y.nome + ' · total = soma das metas dos meses</span></div></div>' +
+          '<div class="hz-ano-g"><div>' +
+          '<div class="hz-v ' + Y.v.s + '"><span class="ms" aria-hidden="true">' + IC[Y.v.s] + '</span>' + Y.v.t + '</div>' +
+          '<div class="hz-n">' + m0(Y.vend) + ' <small>de ' + m0(Y.total) + ' · ' + p0(pA) + '</small></div>' +
+          '<div class="hz-bar" role="img" aria-label="' + p0(pA) + ' da meta anual"><i style="width:' + Math.min(100, pA) + '%"></i>' +
+          (Y.acabou || !Y.total ? '' : '<u style="left:' + Math.min(100, Y.esp / Y.total * 100) + '%" title="Onde deveria estar"></u>') + '</div>' +
+          '<ul class="hz-l">' + lis.map(function (l) { return '<li class="flat"><span class="ms" aria-hidden="true">' + l[0] + '</span><span>' + l[1] + '</span></li>'; }).join('') + '</ul>' +
+          '</div><div class="table-scroll"><table class="com-table fp-table hz-t hz-yt"><thead><tr><th>Mês</th><th>Meta</th><th>Vendas novas</th><th></th></tr></thead>' +
+          '<tbody>' + rowsA + '</tbody><tfoot><tr><td>Total</td><td>' + m0(Y.total) + '</td><td>' + m0(Y.vend) + '</td><td></td></tr></tfoot></table></div></div></section>';
+      }
+
+      // ── meta anual (editável): período e meta de cada mês; o total digitado se divide pelos meses ──
+      var pIni = perEd ? perEd.inicio : hojeYm, pFim = perEd ? perEd.fim : (+hojeYm.slice(0, 4) + 1) + '-12';
+      var opFim = ymAdd(hojeYm, 36) > pFim ? ymAdd(hojeYm, 36) : pFim, ops = '';
+      for (ym = pIni < acIni ? pIni : acIni; ym <= opFim; ym = ymAdd(ym, 1)) ops += '<option value="' + ym + '">' + curto(ym) + '</option>';
+      var selM = function (nm, val) { return '<select name="' + nm + '">' + ops.replace('value="' + val + '"', 'value="' + val + '" selected') + '</select>'; };
+      var vals = {}, plMeses = [], totPlan = 0, gIni = metaDo(pIni);
+      for (ym = pIni; ym <= pFim; ym = ymAdd(ym, 1)) {
+        var gp = metaDo(ym);
+        plMeses.push(ym); totPlan += gp ? gp.meta : 0;
+        vals[ym] = { meta: gp ? brl2.format(gp.meta) : '', ticket: gp ? brl2.format(gp.ticket) : '' };
+      }
+      var plano = chartCard({ icon: 'emoji_events', label: perEd ? 'Meta anual · ' + curto(pIni) + ' a ' + curto(pFim) : 'Definir a meta anual',
+        legend: '<span>digite o total: ele se divide pelos meses, e cada mês pode ser ajustado</span>',
+        body: '<form id="anoForm" class="com-form hz-pf" novalidate><div class="hz-pfg">' +
+          '<label class="hz-in">Começa em' + selM('ini', pIni) + '</label>' +
+          '<label class="hz-in">Termina em' + selM('fim', pFim) + '</label>' +
+          '<label class="hz-in">Meta do período (R$)<input name="total" inputmode="decimal" autocomplete="off" placeholder="ex.: 500.000" value="' + (totPlan ? brl2.format(totPlan) : '') + '"></label>' +
+          '<label class="hz-in">Ticket-alvo (R$ por cliente)<input name="ticket" inputmode="decimal" autocomplete="off" placeholder="ex.: 2.500" value="' + (gIni ? brl2.format(gIni.ticket) : '') + '"></label>' +
+          '<label class="hz-in">Crescimento por mês (%)<input name="cresc" inputmode="decimal" autocomplete="off" placeholder="0 = igual todo mês"></label></div>' +
+          '<div class="table-scroll hz-pt"><table class="com-table"><thead><tr><th>Mês</th><th>Meta (R$)</th><th>Ticket-alvo (R$)</th></tr></thead><tbody>' + planoLinhas(plMeses, vals) + '</tbody></table></div>' +
+          '<div class="hz-pa"><p class="cflow-note" id="anoSoma"></p><button type="submit">Salvar meta anual</button><div class="com-err" id="anoErr" role="alert"></div></div></form>' });
+      // sem meta anual valendo: o editor aparece aberto no topo; com ela, fica recolhido no fim
+      var abrirPlano = !perEd;
+      var planoBox = abrirPlano ? '<div style="margin-top:10px">' + plano + '</div>'
+        : '<details class="com-more"><summary>Editar meta anual <span>' + curto(pIni) + ' a ' + curto(pFim) + ': total, período e meta de cada mês</span></summary>' + plano + '</details>';
+
+      // ── faturamento × meta, mês a mês desde o início do ActiveCampaign (e o plano até o fim da meta anual) ──
+      var bk = [], fimG = perEd && perEd.fim > hojeYm ? perEd.fim : hojeYm;
+      for (ym = acIni; ym <= fimG; ym = ymAdd(ym, 1)) {
+        var v = ym > hojeYm ? null : vendas([ym]), gm = metaDo(ym);
+        bk.push({ key: ym, first: ym + '-01', last: lastDay(ym), fat: v ? v.fat : null, cli: v ? v.cli : null, meta: gm ? gm.meta : null });
       }
       var grafico = '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">bar_chart</span>Faturamento × meta por mês</span>' +
         '<div class="legend"><span><i class="dot"></i>Vendas novas</span><span><i class="org"></i>' + nomeM + '</span><span><i class="ring-g"></i>Meta</span></div></div>' +
@@ -837,7 +936,7 @@
       // ── metas do mês (editáveis) ──
       var proprio = (state.metas.metas || []).some(function (r) { return r.ym === M; });
       var fmtIn = function (v) { return v ? int.format(v) : ''; };
-      var editor = chartCard({ icon: 'target', label: 'Metas de ' + nomeYm(M), legend: '<span>valem para os meses seguintes até você mudar</span>',
+      var editor = chartCard({ icon: 'target', label: 'Metas de ' + nomeYm(M), legend: '<span>' + (per ? 'mudar aqui muda o total da meta anual' : 'valem para os meses seguintes até você mudar') + '</span>',
         body: '<form id="metaForm" class="com-form" data-ym="' + M + '" novalidate>' +
           '<label class="hz-in">Meta de faturamento (R$)<input name="meta" inputmode="decimal" autocomplete="off" placeholder="ex.: 30.000" value="' + fmtIn(G) + '"></label>' +
           '<label class="hz-in">Ticket-alvo (R$ por cliente)<input name="ticket" inputmode="decimal" autocomplete="off" placeholder="ex.: 2.500" value="' + fmtIn(T) + '"></label>' +
@@ -846,17 +945,20 @@
           (cliNec != null ? ' Com essas metas, o mês pede ' + pl(cliNec, 'cliente', 'clientes') + (leadsNec != null ? ' e cerca de ' + int.format(leadsNec) + ' leads do anúncio' : '') + '.' : '') + '</p>' });
       var semMeta = !G || !T;
 
+      var editorNoTopo = semMeta && !abrirPlano;   // com o editor da meta anual aberto no topo, o do mês desce
       return {
-        html: resumo + (semMeta ? '<div style="margin-top:10px">' + editor + '</div>' : '') +
+        html: resumo + (abrirPlano ? planoBox : '') + (editorNoTopo ? '<div style="margin-top:10px">' + editor + '</div>' : '') +
           '<section class="kpis">' + cFat + cMeta + cTicket + cCont + '</section>' +
-          '<div style="margin-bottom:10px">' + tabela + '</div>' + grafico + (semMeta ? '' : editor),
+          (cAno ? '<div style="margin-bottom:10px">' + cAno + '</div>' : '') +
+          '<div style="margin-bottom:10px">' + tabela + '</div>' + grafico + (editorNoTopo ? '' : editor) + (abrirPlano ? '' : planoBox),
         draw: function () {
           drawChart('c-saude', bk, {
             group: 'mes', thick: 28, money: true, lineAxis: 'y', lineColor: C.ink2, spanGaps: true, hoverColor: C.ink,
             series: [{ data: bk.map(function (b) { return b.fat; }), color: function (i) { return bk[i].key === M ? C.accent : C.bar; } }],
             line: bk.map(function (b) { return b.meta; }),
-            tip: function (b) { return [['Vendas novas', m0(b.fat)], ['Meta', m0(b.meta)], ['Clientes', int.format(b.cli)], ['Ticket médio', b.cli ? m0(b.fat / b.cli) : '—']]; },
+            tip: function (b) { return [['Vendas novas', m0(b.fat)], ['Meta', m0(b.meta)], ['Clientes', b.cli == null ? '—' : int.format(b.cli)], ['Ticket médio', b.cli ? m0(b.fat / b.cli) : '—']]; },
           });
+          if ($('anoForm')) planoResumo($('anoForm'));
         },
       };
     },
@@ -1477,14 +1579,97 @@
     if (state.view === 'saude') render();
   }
   async function saveMetas(form) {
-    // aceita "30.000", "30000", "R$ 2.500,50"
-    var reais = function (s) { s = String(s || '').replace(/[R$\s.]/g, '').replace(',', '.'); return s ? Number(s) : NaN; };
+    var reais = reaisBR;
     var meta = reais(form.elements.meta.value), ticket = reais(form.elements.ticket.value), err = $('metaErr'), bt = form.querySelector('button');
     if (!(meta > 0) || !(ticket > 0)) { err.textContent = 'Preencha a meta e o ticket-alvo em reais (ex.: 30.000 e 2.500).'; return; }
     bt.disabled = true; err.textContent = '';
     try {
       var r = await fetch('/api/metas', { method: 'PUT', headers: { Authorization: 'Bearer ' + getToken(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ ym: form.dataset.ym, meta: meta, ticket: ticket }) });
+      if (r.status === 401) { location.href = '/login'; return; }
+      var j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'erro no servidor');
+      state.metas = null; loadMetas();
+    } catch (e) { err.textContent = 'Não consegui salvar: ' + e.message; bt.disabled = false; }
+  }
+  /* ── saúde: meta anual = um período com a meta de cada mês (o total é a soma) ── */
+  var brl2 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
+  // aceita "30.000", "30000", "R$ 2.500,50"
+  function reaisBR(s) { s = String(s || '').replace(/[R$\s.]/g, '').replace(',', '.'); return s ? Number(s) : NaN; }
+  function ymMais(ym, n) { var t = +ym.slice(0, 4) * 12 + +ym.slice(5, 7) - 1 + n; return Math.floor(t / 12) + '-' + String(t % 12 + 1).padStart(2, '0'); }
+  function ymCurto(ym) { return MESES[+ym.slice(5) - 1] + '/' + ym.slice(2, 4); }
+  function planoLinhas(yms, vals) {
+    return yms.map(function (ym) {
+      var v = vals[ym] || {}, n = ymCurto(ym);
+      return '<tr data-ym="' + ym + '"><td>' + n + '</td>' +
+        '<td><input name="m" inputmode="decimal" autocomplete="off" aria-label="Meta de ' + n + '" value="' + esc(v.meta || '') + '"></td>' +
+        '<td><input name="t" inputmode="decimal" autocomplete="off" aria-label="Ticket-alvo de ' + n + '" value="' + esc(v.ticket || '') + '"></td></tr>';
+    }).join('');
+  }
+  // divide o total pelos meses crescendo "cresc"% ao mês; arredonda a R$ 100 e acerta a sobra no último mês
+  function distribuir(total, cresc, n) {
+    var w = [], s = 0, out = [], soma = 0, i, passo = total / n >= 1000 ? 100 : 1;
+    for (i = 0; i < n; i++) { w.push(Math.pow(1 + cresc / 100, i)); s += w[i]; }
+    for (i = 0; i < n - 1; i++) { out.push(Math.round(total * w[i] / s / passo) * passo); soma += out[i]; }
+    out.push(Math.round((total - soma) * 100) / 100);
+    return out;
+  }
+  function planoValores(form) {
+    return [].map.call(form.querySelectorAll('tr[data-ym]'), function (tr) {
+      return { tr: tr, ym: tr.dataset.ym, m: tr.querySelector('[name=m]'), t: tr.querySelector('[name=t]') };
+    });
+  }
+  function planoResumo(form) {
+    var ls = planoValores(form), n = ls.length, vs = ls.map(function (l) { return reaisBR(l.m.value); }), s = 0;
+    vs.forEach(function (v) { if (v > 0) s += v; });
+    var t = n + (n === 1 ? ' mês' : ' meses');
+    if (!vs.every(function (v) { return v > 0; })) t += '. Digite a meta do período para dividir pelos meses, ou a meta de cada mês.';
+    else {
+      t += ' · média de R$ ' + int.format(Math.round(s / n)) + ' por mês';
+      if (Math.abs(vs[n - 1] - vs[0]) > s / n * 0.02) t += ' · de R$ ' + int.format(Math.round(vs[0])) + ' em ' + ymCurto(ls[0].ym) + ' a R$ ' + int.format(Math.round(vs[n - 1])) + ' em ' + ymCurto(ls[n - 1].ym);
+      t += '.';
+    }
+    $('anoSoma').textContent = t;
+  }
+  // o total e o crescimento redividem os meses; mudar um mês refaz o total; o ticket vale para todos
+  function planoInput(form, el) {
+    var nm = el.name, err = $('anoErr'), ls;
+    if (nm === 'ini' || nm === 'fim') {
+      var ini = form.elements.ini.value, fim = form.elements.fim.value, yms = [], vals = {}, tk = form.elements.ticket.value;
+      if (fim < ini) { err.textContent = 'O fim precisa ser depois do início.'; return; }
+      for (var ym = ini; ym <= fim; ym = ymMais(ym, 1)) yms.push(ym);
+      if (yms.length > 36) { err.textContent = 'O período pode ter no máximo 36 meses.'; return; }
+      err.textContent = '';
+      planoValores(form).forEach(function (l) { vals[l.ym] = { meta: l.m.value, ticket: l.t.value || tk }; });
+      yms.forEach(function (ym) { if (!vals[ym]) vals[ym] = { meta: '', ticket: tk }; });
+      form.querySelector('tbody').innerHTML = planoLinhas(yms, vals);
+      nm = 'total';   // período novo: redivide o total
+    }
+    ls = planoValores(form);
+    if (nm === 'total' || nm === 'cresc') {
+      var tot = reaisBR(form.elements.total.value), cr = Number(String(form.elements.cresc.value || '0').replace('%', '').replace(',', '.').trim() || 0);
+      if (!isFinite(cr) || cr <= -30 || cr > 100) { err.textContent = 'Crescimento por mês entre -30% e 100%.'; return; }
+      err.textContent = '';
+      if (tot > 0) distribuir(tot, cr, ls.length).forEach(function (v, i) { ls[i].m.value = brl2.format(v); });
+    } else if (nm === 'ticket') {
+      ls.forEach(function (l) { l.t.value = form.elements.ticket.value; });
+    } else if (nm === 'm') {
+      var s = 0; ls.forEach(function (l) { var v = reaisBR(l.m.value); if (v > 0) s += v; });
+      form.elements.total.value = s ? brl2.format(s) : '';
+    }
+    planoResumo(form);
+  }
+  async function saveAno(form) {
+    var err = $('anoErr'), bt = form.querySelector('button[type=submit]'), ls = planoValores(form);
+    var ini = form.elements.ini.value, fim = form.elements.fim.value;
+    if (fim < ini || !ls.length || ls[0].ym !== ini || ls[ls.length - 1].ym !== fim) { err.textContent = 'Confira o início e o fim do período.'; return; }
+    var meses = ls.map(function (l) { return { ym: l.ym, meta: reaisBR(l.m.value), ticket: reaisBR(l.t.value) }; });
+    var falta = meses.filter(function (m) { return !(m.meta > 0) || !(m.ticket > 0); });
+    if (falta.length) { err.textContent = 'Preencha a meta e o ticket-alvo em reais de todos os meses (faltam: ' + falta.map(function (m) { return ymCurto(m.ym); }).join(', ') + ').'; return; }
+    bt.disabled = true; err.textContent = '';
+    try {
+      var r = await fetch('/api/metas', { method: 'PUT', headers: { Authorization: 'Bearer ' + getToken(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ periodo: { inicio: ini, fim: fim }, meses: meses }) });
       if (r.status === 401) { location.href = '/login'; return; }
       var j = await r.json();
       if (!j.ok) throw new Error(j.error || 'erro no servidor');
@@ -1737,7 +1922,7 @@
       geral: 'conta inteira; tipos pelo objetivo da campanha (Leads = cadastro, Seguidores = visita ao perfil)',
       leads: 'só campanhas com objetivo de cadastro · leads = evento Lead atribuído pelo Meta',
       seguidores: 'só campanhas otimizadas para visita ao perfil · seguidores = ganho diário do Instagram (orgânico + pago)',
-      saude: 'faturamento = vendas novas: valor dos negócios que chegaram a Boas-vindas no ActiveCampaign, pela data · leads, CTR e custo por lead = Meta (campanhas de cadastro) · metas salvas no banco',
+      saude: 'faturamento = vendas novas: valor dos negócios que chegaram a Boas-vindas no ActiveCampaign, pela data · leads, CTR e custo por lead = Meta (campanhas de cadastro) · metas salvas no banco; meta anual = soma das metas dos meses do período',
       pagina: 'visitas pelo anúncio = visualizações da página (Meta) · etapas = próprio site, página atual (/), histórico desde 17/06 · funil completo desde 27/10 · origem pela sessão (fbclid/utm)',
       funil: 'só campanhas com objetivo de cadastro · CTR = cliques no link ÷ impressões · connect rate = visualizações da página ÷ cliques · conversão = leads ÷ visualizações',
       comercial: state.ac && state.ac.ok
@@ -1850,7 +2035,17 @@
     var b = e.target.closest('.group button'); if (!b) return;
     state.group = b.dataset.g; savePrefs(); render();
   });
-  $('content').addEventListener('submit', function (e) { if (e.target.id === 'metaForm') { e.preventDefault(); saveMetas(e.target); } });
+  $('content').addEventListener('submit', function (e) {
+    if (e.target.id === 'metaForm') { e.preventDefault(); saveMetas(e.target); }
+    else if (e.target.id === 'anoForm') { e.preventDefault(); saveAno(e.target); }
+  });
+  // editor da meta anual: input (campos) e change (selects de início/fim, para navegadores que não disparam input)
+  ['input', 'change'].forEach(function (ev) {
+    $('content').addEventListener(ev, function (e) {
+      var f = e.target.form;
+      if (f && f.id === 'anoForm' && (ev === 'input' || e.target.tagName === 'SELECT')) planoInput(f, e.target);
+    });
+  });
   $('refresh').addEventListener('click', function () { load(true); state.com = null; state.ac = undefined; state.fp = null; mh = null; state.metas = null; if (state.view === 'comercial' || state.view === 'saude') loadAc(true); });
   // toque/clique no "i" mostra a explicação (no celular não existe "passar o mouse")
   var hintPop = null;
