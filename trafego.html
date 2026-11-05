@@ -24,7 +24,7 @@
     .ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;font-size:20px;line-height:1;display:inline-block;font-variation-settings:'FILL' 1,'wght' 400}
     button,select,input{font:inherit;color:inherit}
 
-    .frame{margin:24px;background:var(--canvas);border:1px solid var(--line);border-radius:20px;padding:24px 28px 32px;min-height:calc(100vh - 48px)}
+    .frame{margin:24px;background:var(--canvas);border:1px solid var(--line);border-radius:20px;padding:24px 28px 112px;min-height:calc(100vh - 48px)}
 
     /* topo */
     .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -42,11 +42,14 @@
     .head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:30px 0 26px;flex-wrap:wrap}
     .title{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
     h1{font-weight:300;font-size:3rem;letter-spacing:-.02em;line-height:1}
-    .views{display:flex;gap:6px}
-    .view{height:44px;padding:0 18px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:.9rem;display:flex;align-items:center;gap:7px}
-    .view .ms{font-size:18px;font-variation-settings:'FILL' 0,'wght' 300}
-    .view:hover{background:#fff}
-    .view.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+    /* abas: menu flutuante fixo no rodapé da tela (o conteúdo ganha folga embaixo, no .frame) */
+    .views{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;display:flex;gap:4px;padding:6px;max-width:calc(100vw - 24px);
+      background:rgba(14,15,17,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-radius:16px;box-shadow:0 12px 32px rgba(14,15,17,.24),0 2px 6px rgba(14,15,17,.14)}
+    .view{height:44px;padding:0 16px;border-radius:11px;border:none;background:transparent;color:#C5C9CF;cursor:pointer;font-size:.88rem;display:flex;align-items:center;gap:7px;white-space:nowrap;transition:background .15s,color .15s}
+    .view .ms{font-size:19px;font-variation-settings:'FILL' 0,'wght' 300}
+    .view:hover{background:rgba(255,255,255,.09);color:#fff}
+    .view.on{background:#fff;color:var(--ink)}
+    .view.on .ms{font-variation-settings:'FILL' 1,'wght' 400}
     .filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     /* seletor de período: uma caixa só, opção escolhida destacada dentro dela */
     .tabs{display:inline-flex;gap:2px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto;max-width:100%;scrollbar-width:none}
@@ -154,10 +157,12 @@
       .fbar{min-width:0;padding:0 14px;height:56px} .fbar b{font-size:1.25rem} .fbar .fl{font-size:.64rem;white-space:normal;line-height:1.25;min-width:0}
       /* no celular o funil afunila menos, para os rótulos caberem */
       .fs-1{width:92%!important} .fs-2{width:84%!important} .fs-3{width:76%!important}
-      /* barra de ícones e abas cabendo em 390px */
+      /* barra de ícones cabendo em 390px; as abas viram a barra de baixo, ícone em cima do nome */
       .icons{gap:6px} .who{gap:6px} .ibtn{width:40px;height:40px} .avatar{display:none}
-      .views{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}
-      .view{flex:none;padding:0 14px;font-size:.84rem} .view .ms{display:none}
+      .views{left:8px;right:8px;transform:none;max-width:none;bottom:calc(8px + env(safe-area-inset-bottom));gap:2px;padding:5px;border-radius:18px}
+      .view{flex:1 1 0;min-width:0;height:54px;padding:0 1px;flex-direction:column;justify-content:center;gap:3px;font-size:.58rem;letter-spacing:-.01em;border-radius:13px}
+      .view .ms{font-size:21px}
+      .view .vt{max-width:100%;overflow:hidden;text-overflow:ellipsis}
     }
 
     /* ── experiência: foco, carregamento, vazio, ajuda ── */
@@ -364,10 +369,9 @@
     @media (max-width:1280px){ .head{align-items:flex-start;flex-direction:column} .filters{justify-content:flex-start;width:100%} }
     @media (max-width:1180px){ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .kpis-5 .kpi.hero{grid-column:1/-1} .duo{grid-template-columns:minmax(0,1fr)} }
     @media (max-width:640px){
-      .frame{margin:0;border:none;border-radius:0;padding:16px 16px 28px}
+      .frame{margin:0;border:none;border-radius:0;padding:16px 16px 104px}
       h1{font-size:2.3rem}
       .title{gap:14px;width:100%}
-      .views{width:100%} .view{flex:1;justify-content:center;padding:0 8px}
       .kpis{grid-template-columns:minmax(0,1fr)}
       .who div{display:none}
       .filters,.filters>*{width:100%}
@@ -403,15 +407,6 @@
   <div class="head">
     <div class="title">
       <h1>Tráfego</h1>
-      <div class="views" id="views">
-        <button class="view" data-v="saude"><span class="ms">monitor_heart</span>Saúde</button>
-        <button class="view" data-v="geral"><span class="ms">dashboard</span>Geral</button>
-        <button class="view" data-v="leads"><span class="ms">person_add</span>Leads</button>
-        <button class="view" data-v="seguidores"><span class="ms">favorite</span>Seguidores</button>
-        <button class="view" data-v="funil"><span class="ms">filter_alt</span>Funil</button>
-        <button class="view" data-v="pagina"><span class="ms">web</span>Página</button>
-        <button class="view" data-v="comercial"><span class="ms">handshake</span>Comercial</button>
-      </div>
     </div>
     <div class="filters">
       <div class="tabs" id="tabs">
@@ -443,6 +438,17 @@
   </div>
   <p class="foot" id="foot"></p>
 </div>
+
+<!-- abas do painel: menu flutuante fixo no rodapé da tela -->
+<nav class="views" id="views" aria-label="Abas do painel">
+  <button class="view" data-v="saude"><span class="ms" aria-hidden="true">monitor_heart</span><span class="vt">Saúde</span></button>
+  <button class="view" data-v="geral"><span class="ms" aria-hidden="true">dashboard</span><span class="vt">Geral</span></button>
+  <button class="view" data-v="leads"><span class="ms" aria-hidden="true">person_add</span><span class="vt">Leads</span></button>
+  <button class="view" data-v="seguidores"><span class="ms" aria-hidden="true">favorite</span><span class="vt">Seguidores</span></button>
+  <button class="view" data-v="funil"><span class="ms" aria-hidden="true">filter_alt</span><span class="vt">Funil</span></button>
+  <button class="view" data-v="pagina"><span class="ms" aria-hidden="true">web</span><span class="vt">Página</span></button>
+  <button class="view" data-v="comercial"><span class="ms" aria-hidden="true">handshake</span><span class="vt">Comercial</span></button>
+</nav>
 
 <script>
   /* ── estado ───────────────────────────────────────── */

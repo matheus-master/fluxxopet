@@ -91,6 +91,8 @@
   offline no Ads a partir disso.
 
 ## Dashboard de Tráfego (`/trafego` → `trafego.html`)
+- As abas ficam num **menu flutuante fixo no rodapé da tela** (`<nav class="views" id="views">`, fora do
+  `.frame`, que tem folga embaixo para ele; no celular vira barra de abas com ícone em cima do nome).
 - Painel com 7 abas (`#saude`, `#geral`, `#leads`, `#seguidores`, `#funil`, `#pagina`, `#comercial`). Períodos em
   **Mês = mês atual** (dia 1 até hoje, comparado com o mesmo trecho do mês anterior);
   o resto é **janela móvel** (Semana = 7 dias, Trimestre = 90, Semestre = 180, Ano = 365)
