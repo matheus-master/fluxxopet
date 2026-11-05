@@ -170,6 +170,16 @@
 ## Aba Saúde (`#saude`) — saúde do negócio no mês
 - Responde 4 perguntas para **um mês** (o atual ou o de "Escolher mês"; nos outros períodos mostra o
   mês atual): faturamento do mês, bate a meta?, problema de ticket?, problema de conteúdo?
+- **Feita para o CEO bater o olho** (pedido de 2026-11-05). Ordem da tela: navegação de mês (‹ mês ›,
+  "Ir para <mês atual>"; os filtros de período do topo ficam escondidos nesta aba, `.v-saude .filters`)
+  → card do mês (selo de status, faturamento grande, barra com a marca de onde deveria estar, 3 fatos:
+  falta, projeção, mesmo período do mês anterior) + card da meta anual (selo, barra, "precisa vender
+  por mês" × "vem vendendo por mês") → "Onde está o problema?" (frase + 4 sinais OK/Problema: leads,
+  criativos, conversão, ticket; faturamento = leads × conversão × ticket) → gráfico mensal → "Ver os
+  números" e "Editar metas" recolhidos (`<details>`; a edição abre sozinha quando não há meta nenhuma,
+  e os botões "Definir…" abrem e rolam até ela). Classes `sz-*`; textos curtos, sem parágrafo de resumo.
+  - Conversão = clientes do mês ÷ leads do anúncio do mês; OK se ≥ a taxa dos 3 meses anteriores (a
+    mesma usada para calcular os leads necessários).
 - **Faturamento = vendas novas**: soma do `valor` dos fechamentos do `/api/ac-funil` (negócio em
   Boas-vindas ou depois), pela data do fechamento. Não é a receita da carteira.
 - **Metas** (definição do dono, 2026-11-05): meta de faturamento em R$ e **ticket-alvo** por mês, editáveis
