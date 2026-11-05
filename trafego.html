@@ -317,6 +317,7 @@
 
     .foot{color:var(--ink-3);font-size:.76rem;margin-top:18px;line-height:1.5}
     .loading #content{opacity:.45;transition:opacity .2s}
+    .loading.v-saude #content{opacity:1}
 
     @media (max-width:1280px){ .head{align-items:flex-start;flex-direction:column} .filters{justify-content:flex-start;width:100%} }
     @media (max-width:1180px){ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .kpis-5 .kpi.hero{grid-column:1/-1} .duo{grid-template-columns:minmax(0,1fr)} }
@@ -703,7 +704,9 @@
       if (state.ac === undefined) loadAc();
       if (!state.metas) loadMetas();
       if (!mh) loadMh();
-      if (state.ac === undefined || !state.metas || !mh) return vazio('hourglass_empty', 'Carregando vendas, metas e anúncios…');
+      // vendas e metas bastam para abrir a aba; os anúncios (Meta) entram quando chegarem
+      if (state.ac === undefined || !state.metas) return vazio('hourglass_empty', 'Carregando vendas e metas…');
+      var semAds = !(mh && mh.ok), adsTxt = mh ? 'não consegui ler os anúncios do Meta.' : 'carregando os anúncios do Meta…';
       var ac = state.ac;
       if (!ac.ok) return vazio('error', 'Não consegui ler as vendas no ActiveCampaign', esc(ac.error));
 
@@ -726,7 +729,7 @@
       };
       var anuncios = function (yms) {
         var o = { leads: 0, spend: 0, impr: 0, clicks: 0 };
-        (mh.ok ? mh.daily : []).forEach(function (d) { if (yms.indexOf(d.date.slice(0, 7)) >= 0) { o.leads += d.leads; o.spend += d.leadsSpend; o.impr += d.impr; o.clicks += d.clicks; } });
+        (semAds ? [] : mh.daily).forEach(function (d) { if (yms.indexOf(d.date.slice(0, 7)) >= 0) { o.leads += d.leads; o.spend += d.leadsSpend; o.impr += d.impr; o.clicks += d.clicks; } });
         return o;
       };
       // meta do mês: a do próprio mês ou, sem ela, a do último mês anterior que tiver (lista em ordem)
@@ -739,7 +742,7 @@
       var rA = vendas(REF), rN = anuncios(REF);
 
       var tk = A.cli ? A.fat / A.cli : null, tkRef = rA.cli ? rA.fat / rA.cli : null;
-      var taxa = rN.leads && rA.cli ? rA.cli / rN.leads : null;   // clientes por lead do anúncio nos meses de referência
+      var taxa = !semAds && rN.leads && rA.cli ? rA.cli / rN.leads : null;   // clientes por lead do anúncio nos meses de referência
       var cliNec = G && T ? Math.ceil(G / T) : null, cliEsp = cliNec != null ? Math.round(cliNec * f) : null;
       var leadsNec = cliNec != null && taxa ? Math.ceil(cliNec / taxa) : null, leadsEsp = leadsNec != null ? Math.round(leadsNec * f) : null;
       var proj = A.fat / f;
@@ -759,8 +762,9 @@
       var dem = leadsEsp == null ? null : An.leads >= leadsEsp;
       var ctr = rate(An.clicks, An.impr), cpl = ratio(An.spend, An.leads);
       var dCtr = change(ctr, rate(rN.clicks, rN.impr)), dCpl = change(cpl, ratio(rN.spend, rN.leads));
-      var cri = An.impr < MIN_IMPR || dCtr == null ? null : !(dCtr <= -CTR_QUEDA || (dCpl != null && dCpl >= CPL_ALTA));
-      var vCont = dem === false || cri === false ? V('bad', 'Sim, ' + (dem === false && cri === false ? 'pouca demanda e criativos cansados' : dem === false ? 'pouca demanda' : 'criativos cansados'))
+      var cri = semAds || An.impr < MIN_IMPR || dCtr == null ? null : !(dCtr <= -CTR_QUEDA || (dCpl != null && dCpl >= CPL_ALTA));
+      var vCont = semAds ? V('flat', mh ? 'Sem dados do Meta' : 'Carregando anúncios…')
+        : dem === false || cri === false ? V('bad', 'Sim, ' + (dem === false && cri === false ? 'pouca demanda e criativos cansados' : dem === false ? 'pouca demanda' : 'criativos cansados'))
         : dem == null && cri == null ? V('flat', 'Sem dados para avaliar')
         : V('good', 'Não, ' + (dem && cri ? 'demanda e criativos ok' : dem ? 'demanda ok' : 'criativos ok'));
 
@@ -796,7 +800,7 @@
         if (dem === false) causas.push('<b>demanda</b> (' + pl(An.leads, 'lead', 'leads') + ', ' + (atual ? 'o ritmo pedia ' : 'a meta pedia ') + int.format(leadsEsp) + ')');
         if (cri === false) causas.push('<b>criativos</b> (CTR ' + sinal(dCtr) + ', custo por lead ' + sinal(dCpl) + ')');
         // leads e ticket ok, mas fecharam menos clientes que o necessário: o gargalo é a venda
-        if (vMeta.s === 'bad' && !causas.length && cliEsp != null && A.cli < cliEsp) causas.push('<b>conversão no comercial</b> (os leads chegaram, mas ' + (A.cli === 1 ? 'fechou 1 cliente' : 'fecharam ' + pl(A.cli, 'cliente', 'clientes')) + ' e ' + (atual ? 'o ritmo pedia ' : 'a meta pedia ') + int.format(cliEsp) + ')');
+        if (vMeta.s === 'bad' && !causas.length && !semAds && cliEsp != null && A.cli < cliEsp) causas.push('<b>conversão no comercial</b> (os leads chegaram, mas ' + (A.cli === 1 ? 'fechou 1 cliente' : 'fecharam ' + pl(A.cli, 'cliente', 'clientes')) + ' e ' + (atual ? 'o ritmo pedia ' : 'a meta pedia ') + int.format(cliEsp) + ')');
         if (causas.length) txt += (vMeta.s === 'bad' ? ' Onde está o problema: ' : ' Mesmo assim, atenção: ') + joinParts(causas) + '.';
       }
       if (Y) txt += ' Meta anual (' + Y.nome + '): <b>' + m0(Y.vend) + ' de ' + m0(Y.total) + '</b>, ' +
@@ -842,13 +846,14 @@
           (tkRef != null ? 'Em ' + refTxt + ': ' + m0(tkRef) + ' por cliente.' : '') });
 
       var item = function (ok, t) { var s = ok == null ? 'flat' : ok ? 'good' : 'bad'; return '<li class="' + s + '"><span class="ms" aria-hidden="true">' + { good: 'check', bad: 'close', flat: 'remove' }[s] + '</span><span>' + t + '</span></li>'; };
-      var tDem = leadsEsp != null ? '<b>Demanda:</b> ' + pl(An.leads, 'lead', 'leads') + (atual ? ', o ritmo pedia ' + int.format(leadsEsp) + ' (' + int.format(leadsNec) + ' no mês)' : ' de ' + int.format(leadsNec) + ' necessários') + '.'
+      var tDem = semAds ? '<b>Demanda:</b> ' + adsTxt
+        : leadsEsp != null ? '<b>Demanda:</b> ' + pl(An.leads, 'lead', 'leads') + (atual ? ', o ritmo pedia ' + int.format(leadsEsp) + ' (' + int.format(leadsNec) + ' no mês)' : ' de ' + int.format(leadsNec) + ' necessários') + '.'
         : '<b>Demanda:</b> ' + (!G || !T ? 'defina meta e ticket-alvo para saber quantos leads o mês pede.' : 'sem vendas em meses anteriores para calcular a taxa de fechamento.');
-      var tCri = '<b>Criativos:</b> ' + (An.impr < MIN_IMPR ? 'pouca veiculação no mês para avaliar.'
+      var tCri = '<b>Criativos:</b> ' + (semAds ? adsTxt : An.impr < MIN_IMPR ? 'pouca veiculação no mês para avaliar.'
         : dCtr == null ? 'sem meses anteriores para comparar.'
         : 'CTR ' + pctTxt(ctr) + ' (' + sinal(dCtr) + ') e ' + (cpl != null ? m0(cpl) + ' por lead (' + sinal(dCpl) + ')' : 'nenhum lead') + ' contra ' + refTxt + '.');
       var cCont = resp({ icon: 'campaign', q: 'Tenho problema de conteúdo?', v: vCont,
-        big: int.format(An.leads) + ' <small>leads do anúncio</small>',
+        big: semAds ? null : int.format(An.leads) + ' <small>leads do anúncio</small>',
         extra: '<ul class="hz-l">' + item(dem, tDem) + item(cri, tCri) + '</ul>',
         d: 'Criativo cansado = CTR caindo ' + CTR_QUEDA + '% ou mais, ou custo por lead subindo ' + CPL_ALTA + '% ou mais.' });
 
@@ -862,8 +867,8 @@
         linha('Faturamento', m0(G), G ? m0(G * f) : '—', m0(A.fat), G ? A.fat >= G * f : null) +
         linha('Clientes fechados', n0(cliNec), n0(cliEsp), int.format(A.cli), cliEsp != null ? A.cli >= cliEsp : null) +
         linha('Ticket médio', m0(T), m0(T), m0(tk), T && tk != null ? tk >= T : null) +
-        linha('Leads do anúncio', n0(leadsNec), n0(leadsEsp), int.format(An.leads), dem) +
-        linha('Lead → cliente', taxa != null ? pctTxt(taxa * 100) : '—', '—', An.leads ? pctTxt(A.cli / An.leads * 100) : '—', null);
+        linha('Leads do anúncio', n0(leadsNec), n0(leadsEsp), semAds ? (mh ? '—' : '…') : int.format(An.leads), dem) +
+        linha('Lead → cliente', taxa != null ? pctTxt(taxa * 100) : '—', '—', !semAds && An.leads ? pctTxt(A.cli / An.leads * 100) : '—', null);
       var tabela = chartCard({ icon: 'account_tree', label: 'Como a meta se desdobra', legend: '<span>' + nomeYm(M) + (atual ? ' · esperado = meta × ' + passados + '/' + ndias + ' dias' : '') + '</span>',
         body: '<div class="table-scroll"><table class="com-table fp-table hz-t"><thead><tr><th></th><th>Meta do mês</th>' + (atual ? '<th class="pg-hide">Esperado até hoje</th>' : '') + '<th>Realizado</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
           '<p class="cflow-note">Clientes necessários = meta ÷ ticket-alvo. Leads necessários = clientes ÷ taxa de fechamento' +
@@ -1555,20 +1560,35 @@
     finally { comLoading = false; }
   }
   /* ── comercial: ActiveCampaign (reuniões, no-show, fechamentos e etapas) ─── */
+  // O servidor entrega na hora a última leitura guardada e, se ela já passou do prazo, atualiza em
+  // segundo plano; a página percebe pelo "geradoEm" e busca de novo depois de alguns segundos.
+  function velho(r, min) { return !!(r && r.ok && r.geradoEm && Date.now() - Date.parse(r.geradoEm) > min * 60e3); }
+  // re-render por dado que chegou em segundo plano: não apaga o que a pessoa está digitando
+  var formSujo = false, renderPendente = false;
+  function digitando() { var a = document.activeElement; return !!(a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName) && $('content').contains(a)); }
+  function renderSeguro() {
+    if (formSujo || digitando()) { renderPendente = true; return; }
+    render();
+  }
   var acLoading = false;
-  async function loadAc(fresh) {
+  // tent: nova busca em segundo plano (a anterior veio do cache já vencido)
+  async function loadAc(fresh, tent) {
     if (acLoading) return;
     acLoading = true;
-    try {
-      var r = await api('/api/ac-funil' + (fresh ? '?fresh=1' : ''));
-      state.ac = r && r.ok ? r : { ok: false, error: (r && r.error) || 'erro no servidor' };
-    } catch (e) { state.ac = { ok: false, error: 'sem conexão' }; }
+    var r;
+    try { r = await api('/api/ac-funil' + (fresh ? '?fresh=1' : '')); }
+    catch (e) { r = { ok: false, error: 'sem conexão' }; }
     finally { acLoading = false; }
-    if (state.view === 'comercial' || state.view === 'saude') render();
+    var novo = r && r.ok ? r : { ok: false, error: (r && r.error) || 'erro no servidor' };
+    if (!novo.ok && tent && state.ac && state.ac.ok) return;   // a atualização falhou: fica o que já está na tela
+    var mudou = !state.ac || state.ac.ok !== novo.ok || state.ac.geradoEm !== novo.geradoEm;
+    state.ac = novo;
+    if (velho(novo, 10) && (tent || 0) < 3) setTimeout(function () { loadAc(false, (tent || 0) + 1); }, 5000 * ((tent || 0) + 1));
+    if (mudou && (state.view === 'comercial' || state.view === 'saude')) renderSeguro();
   }
   /* ── saúde: metas mensais de faturamento e ticket (/api/metas) ── */
   var metasLoading = false;
-  async function loadMetas() {
+  async function loadMetas(salvou) {
     if (metasLoading) return;
     metasLoading = true;
     try {
@@ -1576,7 +1596,7 @@
       state.metas = r && r.ok ? r : { ok: false, metas: [], error: (r && r.error) || 'erro no servidor' };
     } catch (e) { state.metas = { ok: false, metas: [], error: 'sem conexão' }; }
     finally { metasLoading = false; }
-    if (state.view === 'saude') render();
+    if (state.view === 'saude') (salvou ? render : renderSeguro)();
   }
   async function saveMetas(form) {
     var reais = reaisBR;
@@ -1589,7 +1609,7 @@
       if (r.status === 401) { location.href = '/login'; return; }
       var j = await r.json();
       if (!j.ok) throw new Error(j.error || 'erro no servidor');
-      state.metas = null; loadMetas();
+      state.metas = null; loadMetas(true);
     } catch (e) { err.textContent = 'Não consegui salvar: ' + e.message; bt.disabled = false; }
   }
   /* ── saúde: meta anual = um período com a meta de cada mês (o total é a soma) ── */
@@ -1673,7 +1693,7 @@
       if (r.status === 401) { location.href = '/login'; return; }
       var j = await r.json();
       if (!j.ok) throw new Error(j.error || 'erro no servidor');
-      state.metas = null; loadMetas();
+      state.metas = null; loadMetas(true);
     } catch (e) { err.textContent = 'Não consegui salvar: ' + e.message; bt.disabled = false; }
   }
   /* ── funil: etapas do cadastro nas páginas do quiz (/api/funil-pagina) ── */
@@ -1730,13 +1750,19 @@
   }
   // tabela mês a mês desde jun/2026: visitas do Meta + histórico do site + medição nova quando houver
   var mh = null, mhLoading = false;
-  async function loadMh() {
+  async function loadMh(fresh, tent) {
     if (mhLoading) return;
     mhLoading = true;
-    try { var r = await api('/api/meta-trafego?since=2026-06-01&until=' + today()); mh = r && r.ok ? r : { ok: false }; }
-    catch (e) { mh = { ok: false }; }
+    var r;
+    try { r = await api('/api/meta-trafego?since=2026-06-01&until=' + today() + '&swr=1' + (fresh ? '&fresh=1' : '')); }
+    catch (e) { r = null; }
     finally { mhLoading = false; }
-    if (state.view === 'pagina' || state.view === 'saude') render();
+    var novo = r && r.ok ? r : { ok: false };
+    if (!novo.ok && tent && mh && mh.ok) return;
+    var mudou = !mh || mh.ok !== novo.ok || mh.geradoEm !== novo.geradoEm;
+    mh = novo;
+    if (velho(novo, 5) && (tent || 0) < 3) setTimeout(function () { loadMh(false, (tent || 0) + 1); }, 5000 * ((tent || 0) + 1));
+    if (mudou && (state.view === 'pagina' || state.view === 'saude')) renderSeguro();
   }
   function mesAMes(fp, MED) {
     if (!mh) loadMh();
@@ -1878,9 +1904,11 @@
 
   /* ── render ───────────────────────────────────────── */
   function render() {
-    var d = state.data; if (!d) return;
+    // a aba Saúde não usa os dados do período (Meta): abre sem esperar por eles
+    var d = state.data; if (!d && state.view !== 'saude') return;
+    formSujo = false; renderPendente = false;
     Object.keys(charts).forEach(function (k) { charts[k].destroy(); delete charts[k]; });
-    var x = ctx();
+    var x = d ? ctx() : null;
 
     // período sem veiculação: mensagem clara em vez de cards e gráficos zerados
     var spendKey = { geral: 'spend', leads: 'leadsSpend', seguidores: 'segSpend', funil: 'leadsSpend' }[state.view];
@@ -1930,7 +1958,8 @@
         : 'investimento e leads = Meta (campanhas de cadastro) · reuniões e fechamentos = planilha comercial (fechamentos por mês)',
     }[state.view];
     var fonte = { pagina: 'Fonte: Meta Ads + site · ', saude: 'Fonte: ActiveCampaign + Meta Ads · ' }[state.view] || 'Fonte: Meta Ads · ';
-    $('foot').textContent = fonte + src + (state.view === 'saude' ? '' : ' · comparação ' + (x.cmp || '—')) +
+    var hm = function (iso) { return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); };
+    $('foot').textContent = fonte + src + (state.view === 'saude' ? (state.ac && state.ac.geradoEm ? ' · vendas lidas no ActiveCampaign às ' + hm(state.ac.geradoEm) : '') : ' · comparação ' + (x.cmp || '—')) +
       ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 
@@ -1982,7 +2011,7 @@
     state.data = data;
     if (data.account) $('acctName').textContent = 'Meta Ads · ' + data.account;
     if (!state.group) state.group = defaultGroup(since, until);
-    render();
+    if (state.view === 'saude') renderSeguro(); else render();
   }
 
   function markTabs() {
@@ -1991,11 +2020,12 @@
     $('mbox').classList.toggle('on', sel);
     $('monthSel').value = sel ? state.month : '';
   }
-  // lista dos meses de 2026, de janeiro até o mês atual (meses futuros ficam de fora)
+  // lista dos meses desde janeiro de 2026 até o mês atual (meses futuros ficam de fora)
   var ANO_LISTA = 2026;
   function fillMonths() {
-    var t = today(), ate = +t.slice(0, 4) > ANO_LISTA ? 12 : +t.slice(5, 7), html = '<option value="">Escolher mês</option>';
-    for (var m = 1; m <= ate; m++) html += '<option value="' + ANO_LISTA + '-' + String(m).padStart(2, '0') + '">' + MESES_L[m - 1] + ' ' + ANO_LISTA + '</option>';
+    var ate = today().slice(0, 7), html = '<option value="">Escolher mês</option>';
+    for (var y = ANO_LISTA, m = 1; y + '-' + String(m).padStart(2, '0') <= ate; m === 12 ? (y++, m = 1) : m++)
+      html += '<option value="' + y + '-' + String(m).padStart(2, '0') + '">' + MESES_L[m - 1] + ' ' + y + '</option>';
     $('monthSel').innerHTML = html;
   }
   function setPeriod(p, keepGroup) {
@@ -2006,10 +2036,12 @@
     $('since').value = r.since; $('until').value = r.until;
     if (!keepGroup) state.group = defaultGroup(r.since, r.until);
     load();
+    if (state.view === 'saude') render();   // não depende do Meta do período: troca de mês na hora
   }
 
   function setView(v) {
     state.view = VIEWS.indexOf(v) >= 0 ? v : 'geral';
+    $('app').classList.toggle('v-saude', state.view === 'saude');
     document.querySelectorAll('.view').forEach(function (b) { var on = b.dataset.v === state.view; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
     if (location.hash.slice(1) !== state.view) history.replaceState(null, '', '#' + state.view);
     render();
@@ -2043,10 +2075,21 @@
   ['input', 'change'].forEach(function (ev) {
     $('content').addEventListener(ev, function (e) {
       var f = e.target.form;
+      if (f && ev === 'input') formSujo = true;
       if (f && f.id === 'anoForm' && (ev === 'input' || e.target.tagName === 'SELECT')) planoInput(f, e.target);
     });
   });
-  $('refresh').addEventListener('click', function () { load(true); state.com = null; state.ac = undefined; state.fp = null; mh = null; state.metas = null; if (state.view === 'comercial' || state.view === 'saude') loadAc(true); });
+  // saiu do campo sem ter digitado nada: aplica o que chegou enquanto isso
+  $('content').addEventListener('focusout', function () {
+    setTimeout(function () { if (renderPendente && !formSujo && !digitando()) render(); }, 0);
+  });
+  $('refresh').addEventListener('click', function () {
+    load(true); state.com = null; state.fp = null;
+    // Saúde: mantém na tela o que já tem até chegar a leitura nova
+    if (state.view === 'saude') { loadAc(true); loadMh(true); loadMetas(); return; }
+    state.ac = undefined; mh = null; state.metas = null;
+    if (state.view === 'comercial') loadAc(true);
+  });
   // toque/clique no "i" mostra a explicação (no celular não existe "passar o mouse")
   var hintPop = null;
   function closeHint() { if (hintPop) { hintPop.remove(); hintPop = null; } }

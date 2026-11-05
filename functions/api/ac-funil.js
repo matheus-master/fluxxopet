@@ -17,11 +17,15 @@
 //   • cruzamento: contato do negócio × lead do site, por e-mail e, se não bater, WhatsApp.
 //
 // Pages Functions tem limite de subrequisições por chamada: as leituras ficam dentro
-// de ORCAMENTO e o resultado vai para o cache por 10 min.
+// de ORCAMENTO. A data de cada fechamento, depois de achada no histórico, fica no D1
+// (ac_fechamento_data, migration 0016): ela não muda, então o histórico só é lido uma vez.
+//
+// Cache na borda: até 10 min a resposta é servida direto; de 10 min a 24 h é servida na hora
+// e atualizada em segundo plano (a página busca de novo em alguns segundos). ?fresh=1 lê na hora.
 
 const DESDE = '2026-07-01';
 const ORCAMENTO = 45;
-const CACHE_S = 600;
+const FRESCO_S = 600, VELHO_S = 86400;
 const NOSHOW = /(nao|n)\s*compareceu|no[\s-]?show|nao apareceu|faltou/;
 const BOAS_VINDAS = /boas[\s-]*vindas/;
 const PRE_QUALIF = /pre[\s-]*qualifica/;
@@ -34,19 +38,30 @@ export async function onRequestGet({ request, env, waitUntil }) {
   if (!env.AC_API_URL || !env.AC_API_TOKEN) return json({ ok: false, error: 'ActiveCampaign não configurado (AC_API_URL / AC_API_TOKEN)' });
 
   // "v" muda quando a regra muda, para não servir resposta antiga do cache
-  const cacheKey = new Request(u.origin + '/__cache/ac-funil?v=4&desde=' + desde);
+  const cacheKey = new Request(u.origin + '/__cache/ac-funil?v=5&desde=' + desde);
+  const lockKey = new Request(u.origin + '/__cache/ac-funil-lock?desde=' + desde);
   const cache = caches.default;
+  const guardar = out => cache.put(cacheKey, new Response(JSON.stringify(out), {
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'max-age=' + VELHO_S, 'X-Gerado': String(Date.now()) } }));
+
   if (u.searchParams.get('fresh') !== '1') {
     const hit = await cache.match(cacheKey);
-    if (hit) return new Response(hit.body, hit);
+    const idade = hit ? (Date.now() - (+hit.headers.get('X-Gerado') || 0)) / 1000 : Infinity;
+    if (idade <= VELHO_S) {
+      // passou de 10 min: entrega o que tem e atualiza em segundo plano (uma atualização por vez)
+      if (idade > FRESCO_S && !(await cache.match(lockKey))) {
+        waitUntil(cache.put(lockKey, new Response('1', { headers: { 'Cache-Control': 'max-age=60' } }))
+          .then(() => montar(env, desde)).then(guardar)
+          .then(() => cache.delete(lockKey)).catch(() => {}));
+      }
+      return new Response(hit.body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Cache': idade > FRESCO_S ? 'STALE' : 'HIT' } });
+    }
   }
 
   try {
     const out = await montar(env, desde);
-    const res = json(out);
-    const toCache = new Response(JSON.stringify(out), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'max-age=' + CACHE_S } });
-    waitUntil(cache.put(cacheKey, toCache));
-    return res;
+    waitUntil(guardar(out));
+    return json(out);
   } catch (e) {
     return json({ ok: false, error: e.message || String(e) });
   }
@@ -193,14 +208,17 @@ async function montar(env, desde) {
   let aprox = 0, valorPadrao = 0;
   // o site cria todo negócio com AC_DEAL_VALUE; se o comercial não atualiza, o valor não é real
   const padrao = parseInt(env.AC_DEAL_VALUE || '0', 10) || 0;
+  // datas já achadas no histórico (não mudam): só os fechamentos novos gastam requisição
+  const datas = await datasSalvas(env.DB), novas = [];
   for (const d of fechDeals) {
-    let data = null;
-    if (usadas < ORCAMENTO) {
+    let data = datas[String(d.id)] || null;
+    if (!data && usadas < ORCAMENTO) {
       try {
         const a = await get('deals/' + d.id + '/dealActivities?limit=100');
         (a.dealActivities || []).forEach(x => {
           if (fechStage.has(String(x.d_stageid)) && x.cdate) { const ds = dia(x.cdate); if (!data || ds < data) data = ds; }
         });
+        if (data) novas.push([String(d.id), data]);
       } catch (e) { if (e.message !== 'LIMITE') throw e; }
     }
     const semHistorico = !data;
@@ -216,6 +234,7 @@ async function montar(env, desde) {
   if (aprox) avisos.push(aprox + ' fechamento' + (aprox > 1 ? 's estão' : ' está') + ' com data aproximada (última atualização do negócio), sem histórico de etapa disponível.');
   if (valorPadrao) avisos.push(valorPadrao + ' fechamento' + (valorPadrao > 1 ? 's estão' : ' está') + ' com o valor padrão do site (' + (padrao / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) + '): atualize o valor do negócio no ActiveCampaign para o total ficar certo.');
   fechamentos.sort((a, b) => b.data.localeCompare(a.data));
+  await salvarDatas(env.DB, novas);
 
   return {
     ok: true, desde, geradoEm: new Date().toISOString(),
@@ -228,6 +247,27 @@ async function montar(env, desde) {
     conferencia: { tipoReuniao: tipoReuniao.map(t => t.title), etapasFechamento: [...fechStage].map(id => stageById[id] && stageById[id].title), etapasOportunidade: [...opStage].map(id => stageById[id] && stageById[id].title), tarefasLidas: tarefas.length, notasNoShow: comNotaNoShow, requisicoes: usadas },
     avisos,
   };
+}
+
+// data de entrada na etapa de fechamento, por negócio (mesma estrutura de migrations/0016_ac_fechamento_data.sql).
+// Se o D1 falhar, segue sem ele: lê o histórico como antes.
+const TABELA_DATAS = "CREATE TABLE IF NOT EXISTS ac_fechamento_data (deal_id TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT DEFAULT (datetime('now')))";
+async function datasSalvas(db) {
+  const out = {};
+  if (!db) return out;
+  try {
+    await db.prepare(TABELA_DATAS).run();
+    ((await db.prepare('SELECT deal_id, data FROM ac_fechamento_data').all()).results || []).forEach(r => { out[r.deal_id] = r.data; });
+  } catch (e) { /* sem cache de datas */ }
+  return out;
+}
+async function salvarDatas(db, novas) {
+  if (!db || !novas.length) return;
+  try {
+    await db.batch(novas.map(([id, data]) => db.prepare(
+      "INSERT INTO ac_fechamento_data (deal_id, data) VALUES (?, ?) ON CONFLICT(deal_id) DO UPDATE SET data = excluded.data, updated_at = datetime('now')"
+    ).bind(id, data)));
+  } catch (e) { /* tenta de novo na próxima leitura */ }
 }
 
 function dia(s) { return String(s || '').slice(0, 10); }

@@ -203,11 +203,22 @@
 - Dados: `state.ac` (ActiveCampaign), `mh` (Meta desde 2026-06-01, o mesmo da aba Página) e `state.metas`
   (`metas` e `periodos`). O gráfico usa `drawChart` com `group: 'mes'` e `lineAxis: 'y'` (meta no mesmo
   eixo do faturamento).
+- **Velocidade** (2026-11-05, "está muito demorado"): a aba não espera `state.data` (Meta do período,
+  que ela não usa) — `render()` segue sem ele para `saude`, e as 3 leituras (`loadAc`, `loadMetas`,
+  `loadMh`) saem juntas na abertura. Abre com vendas + metas; os anúncios (`mh`) entram depois
+  ("Carregando anúncios…", `semAds`). As leituras usam cache stale-while-revalidate no servidor
+  (ac-funil sempre; meta-trafego só com `&swr=1`) e a página, vendo `geradoEm` vencido (`velho()`),
+  busca de novo em 5/10/15 s. Dado que chega em segundo plano usa `renderSeguro()`: não redesenha
+  com campo em foco ou formulário já digitado (`formSujo`), para não apagar o que está sendo digitado.
 
 ## Aba Comercial ← ActiveCampaign (`functions/api/ac-funil.js`)
 - `GET /api/ac-funil` (JWT): lê funis, etapas, negócios, contatos e tarefas do tipo "Reunião" desde
   2026-07-01 com `AC_API_URL`/`AC_API_TOKEN`; cruza o contato de cada negócio com `leads` por e-mail
-  e, se não bater, WhatsApp (DDD + 8 dígitos). Cache de 10 min; `?fresh=1` (botão ⟳) ignora.
+  e, se não bater, WhatsApp (DDD + 8 dígitos). Cache na borda: até 10 min serve direto; de 10 min a
+  24 h serve na hora e atualiza em segundo plano (`waitUntil`, trava de 60 s para uma atualização por
+  vez; `X-Gerado` no cache); `?fresh=1` (botão ⟳) lê na hora.
+- A data de cada fechamento achada no histórico (`dealActivities`) fica no D1 `ac_fechamento_data`
+  (migration 0016, criada pela função se faltar): só fechamentos novos gastam requisição de histórico.
 - Regras: nota "lead não compareceu" na tarefa = no-show; sem a nota e data passada = realizada;
   data futura = agendada. Fechamento = negócio em "Boas-vindas" ou etapa posterior do mesmo funil,
   datado pela entrada na etapa (`dealActivities`); sem histórico → `mdate`, marcado como aproximado.

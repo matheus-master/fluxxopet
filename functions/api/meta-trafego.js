@@ -19,6 +19,7 @@ const LEAD_OBJECTIVES = ['OUTCOME_LEADS', 'LEAD_GENERATION'];
 const LEAD_ACTIONS = ['lead', 'offsite_conversion.fb_pixel_lead'];
 const DAY_MS = 86400000;
 const YMD = /^\d{4}-\d{2}-\d{2}$/;
+const FRESCO_S = 300, VELHO_S = 86400;
 
 export async function onRequestGet(context) {
   const { env, request } = context;
@@ -33,17 +34,44 @@ export async function onRequestGet(context) {
   // cache de 5 min na borda do Cloudflare (o Meta leva 1–5 s por consulta);
   // ?fresh=1 (botão Atualizar) ignora o cache. A chave não inclui o token: o
   // middleware já barrou quem não está logado e todos os logados veem os mesmos dados.
-  const fresh = q.get('fresh') === '1';
-  q.delete('fresh');
+  // ?swr=1 (aba Saúde/Página): passou de 5 min, entrega o que tem (até 24 h) e atualiza em
+  // segundo plano; a página vê pelo "geradoEm" e busca de novo em alguns segundos.
+  const fresh = q.get('fresh') === '1', swr = q.get('swr') === '1';
+  q.delete('fresh'); q.delete('swr');
   const cache = typeof caches !== 'undefined' ? caches.default : null;
   const cacheKey = new Request(reqUrl.toString());
+  const guardar = body => cache.put(cacheKey, new Response(body, {
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=' + VELHO_S, 'X-Gerado': String(Date.now()) } }));
   if (cache && !fresh) {
     const hit = await cache.match(cacheKey);
-    if (hit) return new Response(hit.body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Cache': 'HIT' } });
+    const idade = hit ? (Date.now() - (+hit.headers.get('X-Gerado') || 0)) / 1000 : Infinity;
+    if (idade <= FRESCO_S || (swr && idade <= VELHO_S)) {
+      if (idade > FRESCO_S && context.waitUntil) {
+        const lockKey = new Request(reqUrl.toString() + '&__lock=1');
+        if (!(await cache.match(lockKey))) {
+          context.waitUntil(cache.put(lockKey, new Response('1', { headers: { 'Cache-Control': 'max-age=60' } }))
+            .then(() => montar(env, token, acct, q, since, until))
+            .then(r => r.body ? guardar(r.body) : null)
+            .then(() => cache.delete(lockKey)).catch(() => {}));
+        }
+      }
+      return new Response(hit.body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Cache': idade > FRESCO_S ? 'STALE' : 'HIT' } });
+    }
   }
   if (!YMD.test(since || '') || !YMD.test(until || '') || since > until)
     return json({ ok: false, error: 'Parâmetros since/until inválidos' }, 400);
 
+  const r = await montar(env, token, acct, q, since, until);
+  if (!r.body) return json({ ok: false, error: r.error }, 400);
+  if (cache) {
+    const put = guardar(r.body);
+    if (context.waitUntil) context.waitUntil(put); else await put;
+  }
+  return new Response(r.body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Cache': 'MISS' } });
+}
+
+// consulta o Meta e monta a resposta: { body } ou { error }
+async function montar(env, token, acct, q, since, until) {
   let prevSince = q.get('prevSince'), prevUntil = q.get('prevUntil');
   if (!YMD.test(prevSince || '') || !YMD.test(prevUntil || '')) {
     prevUntil = addDays(since, -1);
@@ -68,8 +96,8 @@ export async function onRequestGet(context) {
     fetchMeta(`${act}?fields=name&access_token=${token}`),
     instagram(env, token),
   ]);
-  if (daily.error) return json({ ok: false, error: daily.error.message }, 400);
-  if (segIds.error) return json({ ok: false, error: segIds.error.message }, 400);
+  if (daily.error) return { error: daily.error.message };
+  if (segIds.error) return { error: segIds.error.message };
 
   const typeOf = r => LEAD_OBJECTIVES.includes(r.objective) ? 'leads' : segIds.ids.has(r.campaign_id) ? 'seguidores' : 'outros';
 
@@ -98,7 +126,7 @@ export async function onRequestGet(context) {
 
   const body = JSON.stringify({
     ok: true,
-    since, until,
+    since, until, geradoEm: new Date().toISOString(),
     account: account.name || null,
     daily: series,
     prev:      total(prev, prevSince, prevUntil),
@@ -107,12 +135,7 @@ export async function onRequestGet(context) {
     campaigns: Object.values(camps).filter(c => c.spend > 0).sort((a, b) => b.spend - a.spend),
     ig: { username: ig.username || null, total: ig.total ?? null, firstDay: ig.firstDay || null, error: ig.error || null },
   });
-
-  if (cache) {
-    const put = cache.put(cacheKey, new Response(body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' } }));
-    if (context.waitUntil) context.waitUntil(put); else await put;
-  }
-  return new Response(body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Cache': 'MISS' } });
+  return { body };
 }
 
 // funil (só campanhas de leads): impressões → cliques no link → visualizações da página → leads
