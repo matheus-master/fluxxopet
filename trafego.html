@@ -743,13 +743,15 @@
     saude: function (x) {
       var nada = function () {};
       var vazio = function (icon, t, s) { return { html: '<div class="card empty-state"><span class="ms" aria-hidden="true">' + icon + '</span><b>' + t + '</b>' + (s ? '<span>' + s + '</span>' : '') + '</div>', draw: nada }; };
-      if (state.ac === undefined) loadAc();
+      if (state.vendas === undefined) loadVendas();
       if (!state.metas) loadMetas();
       if (!mh) loadMh();
+      // vendas: a leitura leve (/api/ac-vendas); se ela falhar, a completa da aba Comercial (/api/ac-funil)
+      var ac = state.vendas;
+      if (ac && !ac.ok) { if (state.ac === undefined) loadAc(); ac = state.ac; }
       // vendas e metas bastam para abrir a aba; os anúncios (Meta) entram quando chegarem
-      if (state.ac === undefined || !state.metas) return vazio('hourglass_empty', 'Carregando vendas e metas…');
+      if (!ac || !state.metas) return vazio('hourglass_empty', 'Carregando vendas e metas…', 'Lendo os negócios fechados no ActiveCampaign.');
       var semAds = !(mh && mh.ok), adsTxt = mh ? 'não consegui ler os anúncios do Meta.' : 'carregando os anúncios do Meta…';
-      var ac = state.ac;
       if (!ac.ok) return vazio('error', 'Não consegui ler as vendas no ActiveCampaign', esc(ac.error));
 
       var hoje = today(), M = state.period === 'mesSel' && state.month ? state.month : hoje.slice(0, 7);
@@ -1630,6 +1632,24 @@
     if (velho(novo, 10) && (tent || 0) < 3) setTimeout(function () { loadAc(false, (tent || 0) + 1); }, 5000 * ((tent || 0) + 1));
     if (mudou && (state.view === 'comercial' || state.view === 'saude')) renderSeguro();
   }
+  /* ── saúde: vendas novas do ActiveCampaign, leitura leve (/api/ac-vendas) ── */
+  var vendasLoading = false;
+  async function loadVendas(fresh, tent) {
+    if (vendasLoading) return;
+    vendasLoading = true;
+    var r;
+    try { r = await api('/api/ac-vendas' + (fresh ? '?fresh=1' : '')); }
+    catch (e) { r = { ok: false, error: 'sem conexão' }; }
+    finally { vendasLoading = false; }
+    var novo = r && r.ok ? r : { ok: false, error: (r && r.error) || 'erro no servidor' };
+    if (!novo.ok && state.vendas && state.vendas.ok) return;   // a atualização falhou: fica o que já está na tela
+    var mudou = !state.vendas || state.vendas.ok !== novo.ok || state.vendas.geradoEm !== novo.geradoEm;
+    state.vendas = novo;
+    if (velho(novo, 10) && (tent || 0) < 3) setTimeout(function () { loadVendas(false, (tent || 0) + 1); }, 4000 * ((tent || 0) + 1));
+    if (mudou && state.view === 'saude') renderSeguro();
+  }
+  // vendas que a aba Saúde está usando (a leitura leve ou, se ela falhou, a completa)
+  function vendasSaude() { return state.vendas && state.vendas.ok ? state.vendas : state.ac; }
   /* ── saúde: metas mensais de faturamento e ticket (/api/metas) ── */
   var metasLoading = false;
   async function loadMetas(salvou) {
@@ -1984,7 +2004,8 @@
       if (!state.ac.ok) notes.push(['error', 'ActiveCampaign indisponível (' + state.ac.error + '). Mostrando reuniões e fechamentos da planilha.']);
       else (state.ac.avisos || []).forEach(function (a) { notes.push(['info', 'ActiveCampaign: ' + a]); });
     }
-    if (state.view === 'saude' && state.ac && state.ac.ok) (state.ac.avisos || []).forEach(function (a) { notes.push(['info', 'ActiveCampaign: ' + a]); });
+    var vs = state.view === 'saude' ? vendasSaude() : null;
+    if (vs && vs.ok) (vs.avisos || []).forEach(function (a) { notes.push(['info', 'ActiveCampaign: ' + a]); });
     if (state.view === 'saude' && state.metas && !state.metas.ok) notes.push(['error', 'Não consegui carregar as metas (' + state.metas.error + ').']);
     $('notice').innerHTML = notes.map(function (n) {
       return '<div class="notice ' + (n[0] === 'info' ? 'info' : '') + '"><span class="ms">' + (n[0] === 'info' ? 'info' : 'error') + '</span><span>' + esc(n[1]) + '</span></div>';
@@ -2003,7 +2024,7 @@
     }[state.view];
     var fonte = { pagina: 'Fonte: Meta Ads + site · ', saude: 'Fonte: ActiveCampaign + Meta Ads · ' }[state.view] || 'Fonte: Meta Ads · ';
     var hm = function (iso) { return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); };
-    $('foot').textContent = fonte + src + (state.view === 'saude' ? (state.ac && state.ac.geradoEm ? ' · vendas lidas no ActiveCampaign às ' + hm(state.ac.geradoEm) : '') : ' · comparação ' + (x.cmp || '—')) +
+    $('foot').textContent = fonte + src + (state.view === 'saude' ? (vs && vs.geradoEm ? ' · vendas lidas no ActiveCampaign às ' + hm(vs.geradoEm) : '') : ' · comparação ' + (x.cmp || '—')) +
       ' · atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }
 
@@ -2142,7 +2163,7 @@
   $('refresh').addEventListener('click', function () {
     load(true); state.com = null; state.fp = null;
     // Saúde: mantém na tela o que já tem até chegar a leitura nova
-    if (state.view === 'saude') { loadAc(true); loadMh(true); loadMetas(); return; }
+    if (state.view === 'saude') { loadVendas(true); loadMh(true); loadMetas(); return; }
     state.ac = undefined; mh = null; state.metas = null;
     if (state.view === 'comercial') loadAc(true);
   });

@@ -180,8 +180,13 @@
   e os botões "Definir…" abrem e rolam até ela). Classes `sz-*`; textos curtos, sem parágrafo de resumo.
   - Conversão = clientes do mês ÷ leads do anúncio do mês; OK se ≥ a taxa dos 3 meses anteriores (a
     mesma usada para calcular os leads necessários).
-- **Faturamento = vendas novas**: soma do `valor` dos fechamentos do `/api/ac-funil` (negócio em
-  Boas-vindas ou depois), pela data do fechamento. Não é a receita da carteira.
+- **Faturamento = vendas novas**: soma do `valor` dos fechamentos (negócio em Boas-vindas ou depois),
+  pela data do fechamento. Não é a receita da carteira. Vêm do **`/api/ac-vendas`** (`state.vendas`,
+  `loadVendas`), leitura leve só com etapas + negócios das etapas de fechamento (`filters[stage]` na
+  API): a API do ActiveCampaign leva 1–3 s por chamada e o `/api/ac-funil` completo chegou a 2 min na
+  primeira leitura (2026-11-05: "não está puxando os dados"). Se o ac-vendas responder erro (ex.: a API
+  ignorar o filtro por etapa), a aba cai para o `/api/ac-funil` (`vendasSaude()`). A regra e o código dos
+  fechamentos são um só (`datarFechamentos` em ac-vendas.js, importado pelo ac-funil).
 - **Metas** (definição do dono, 2026-11-05): meta de faturamento em R$ e **ticket-alvo** por mês, editáveis
   na própria aba. Tabela D1 `metas_mes` (migration 0014; `functions/api/metas.js`, GET/PUT, JWT, cria a
   tabela se faltar). Mês sem linha usa a do último mês anterior que tiver.
@@ -210,7 +215,7 @@
     o mês mostrado × total; "no ritmo" = vendido ≥ metas dos meses anteriores + meta do mês × dias
     passados ÷ dias do mês; "faltam R$ X: R$ Y por mês daqui em diante" = falta ÷ meses restantes.
     O gráfico de faturamento × meta se estende até o fim do período (meses futuros só com a meta).
-- Dados: `state.ac` (ActiveCampaign), `mh` (Meta desde 2026-06-01, o mesmo da aba Página) e `state.metas`
+- Dados: `state.vendas` (ActiveCampaign), `mh` (Meta desde 2026-06-01, o mesmo da aba Página) e `state.metas`
   (`metas` e `periodos`). O gráfico usa `drawChart` com `group: 'mes'` e `lineAxis: 'y'` (meta no mesmo
   eixo do faturamento).
 - **Velocidade** (2026-11-05, "está muito demorado"): a aba não espera `state.data` (Meta do período,
@@ -224,11 +229,16 @@
 ## Aba Comercial ← ActiveCampaign (`functions/api/ac-funil.js`)
 - `GET /api/ac-funil` (JWT): lê funis, etapas, negócios, contatos e tarefas do tipo "Reunião" desde
   2026-07-01 com `AC_API_URL`/`AC_API_TOKEN`; cruza o contato de cada negócio com `leads` por e-mail
-  e, se não bater, WhatsApp (DDD + 8 dígitos). Cache na borda: até 10 min serve direto; de 10 min a
-  24 h serve na hora e atualiza em segundo plano (`waitUntil`, trava de 60 s para uma atualização por
-  vez; `X-Gerado` no cache); `?fresh=1` (botão ⟳) lê na hora.
+  e, se não bater, WhatsApp (DDD + 8 dígitos). Cache na borda (`comCache`, em ac-vendas.js, usado pelos
+  dois): até 10 min serve direto; de 10 min a 24 h serve na hora e atualiza em segundo plano
+  (`waitUntil`, trava de 90 s para uma atualização por vez; `X-Gerado` no cache); sem cache, lê na hora e,
+  se a página desistir de esperar, a leitura continua (`waitUntil`) e fica guardada. `?fresh=1` (⟳) lê na hora.
+- A API leva 1–3 s por chamada: `clienteAC` (ac-vendas.js) dá ritmo de no máx. ~4 chamadas começando por
+  segundo (limite do AC: 5/s) e o ac-funil lê negócios ‖ tarefas e contatos/históricos 3 por vez
+  (`emParalelo`). Mesma resposta da versão sequencial, ~2× mais rápido (teste com AC falso de 1,5 s/chamada).
 - A data de cada fechamento achada no histórico (`dealActivities`) fica no D1 `ac_fechamento_data`
   (migration 0016, criada pela função se faltar): só fechamentos novos gastam requisição de histórico.
+  Negócio cujo histórico não tem a entrada na etapa fica com `data = ''` e só é conferido de novo após 7 dias.
 - Regras: nota "lead não compareceu" na tarefa = no-show; sem a nota e data passada = realizada;
   data futura = agendada. Fechamento = negócio em "Boas-vindas" ou etapa posterior do mesmo funil,
   datado pela entrada na etapa (`dealActivities`); sem histórico → `mdate`, marcado como aproximado.
