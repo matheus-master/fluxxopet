@@ -459,6 +459,8 @@
     @media (max-width:1180px){ .gx-grid3,.gx-meta{grid-template-columns:minmax(0,1fr)} .gx-kpis.c5{grid-template-columns:repeat(2,minmax(0,1fr))} }
     @media (max-width:900px){ .gx-grid2{grid-template-columns:minmax(0,1fr)} }
     @media (max-width:640px){
+      /* o visual copiado esconde a marca no celular (lá ela divide espaço com os ícones); aqui ela fica */
+      .gx-marca .avatar{display:grid;width:40px;height:40px} .gx-marca div{display:block}
       .gx-ask{padding:16px}
       .gx-kpis.c5{grid-template-columns:minmax(0,1fr)}
       .gx-mini{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -469,20 +471,13 @@
 <body>
 <div class="frame" id="app">
   <div class="progress" aria-hidden="true"></div>
+  <!-- painel à parte: sem a barra de ícones do admin/tráfego e sem link para eles -->
   <div class="top">
-    <nav class="icons" aria-label="Seções do painel">
-      <a class="ibtn" href="/admin#leads" title="Leads" aria-label="Leads"><span class="ms" aria-hidden="true">groups</span></a>
-      <a class="ibtn" href="/admin#crm" title="CRM" aria-label="CRM"><span class="ms" aria-hidden="true">view_kanban</span></a>
-      <a class="ibtn" href="/admin#anuncios" title="Anúncios" aria-label="Anúncios"><span class="ms" aria-hidden="true">campaign</span></a>
-      <a class="ibtn" href="/trafego" title="Tráfego" aria-label="Tráfego"><span class="ms" aria-hidden="true">monitoring</span></a>
-      <a class="ibtn on" href="/gestao" title="Gestão" aria-label="Gestão" aria-current="page"><span class="ms" aria-hidden="true">insights</span></a>
-      <a class="ibtn" href="/admin#config" title="Configurações" aria-label="Configurações"><span class="ms" aria-hidden="true">settings</span></a>
-    </nav>
-    <div class="who">
-      <button class="ibtn" id="refresh" title="Atualizar agora" aria-label="Atualizar dados"><span class="ms" aria-hidden="true">refresh</span></button>
+    <div class="who gx-marca">
       <span class="avatar">F</span>
       <div><b>Fluxxo Pet</b><small>Painel de gestão</small></div>
     </div>
+    <button class="ibtn" id="refresh" title="Atualizar agora" aria-label="Atualizar dados"><span class="ms" aria-hidden="true">refresh</span></button>
   </div>
 
   <div class="head">
@@ -772,7 +767,7 @@
     var metaCard, txt;
     if (carregando) { metaCard = cartao('flag', 'Meta de faturamento', '', '<p class="gx-vazio">Carregando…</p>'); txt = 'Carregando vendas e metas…'; }
     else if (!M || !M.per) {
-      metaCard = cartao('flag', 'Meta de faturamento', '', '<p class="gx-vazio">Nenhuma meta anual valendo. Defina em <a href="/trafego#saude">Tráfego → Saúde → Editar metas</a>.</p>');
+      metaCard = cartao('flag', 'Meta de faturamento', '', '<p class="gx-vazio">Nenhuma meta anual valendo. Ela é definida no painel de Tráfego, aba Saúde, em "Editar metas".</p>');
       txt = 'Defina a meta anual para saber se o negócio está no caminho.';
     } else {
       var falta = Math.max(0, M.total - M.acum), pA = M.total ? M.acum / M.total * 100 : 0, faltaV = M.nec != null ? Math.max(0, M.nec - M.vendas) : null;

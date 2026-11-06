@@ -259,7 +259,9 @@
 ## Painel de Gestão (`/gestao` → `gestao.html`)
 - Pedido do dono (2026-11-06): a direção do protótipo `../dashboard-gestao` (5 telas, cada uma responde
   uma pergunta: Resumo, Tráfego, Conteúdo, Marketing, Comercial), com o **nosso visual** e **dados reais**.
-  Mesmo login do /trafego (`vt_token`); ícone "Gestão" (`insights`) na barra do topo do /trafego.
+  Mesmo login do /trafego (`vt_token`). **Painel à parte** (pedido de 2026-11-06: "separa a gestão… tirando
+  desse dash"): sem link no /trafego nem no /admin, e sem a barra de ícones deles — só a marca e o ⟳ no topo.
+  Acesso direto pelo endereço /gestao.
 - O `<style>` do /trafego vai **copiado** no começo do `gestao.html` (mesma cara: cards, KPIs, `.summary`,
   menu flutuante `.views`); o que é só do /gestao usa classes `gx-*`. Mudou o visual do /trafego? copie de novo.
 - Período: últimas 4, 8 ou 12 semanas (até hoje) contra o mesmo tanto antes; gráficos com semanas de 7 dias
