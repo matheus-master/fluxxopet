@@ -277,7 +277,17 @@
   ÷ marcadas; conversão = vendas ÷ realizadas; CAC = investimento ÷ vendas; ciclo = mediana de dias do negócio
   criado (`criado`, vindo de `datarFechamentos`) à venda. MQL por anúncio: UTM `utm_content`/`utm_term` = id
   do anúncio. Origem: `anuncio_ig`/`anuncio_fb` (utm_medium pago), `organico`, `google`, `meta` (fbclid sem UTM).
-- O funil do Resumo marca em vermelho a taxa que mais caiu (> 5%) contra o período anterior.
+- **Leitura de relance** (2026-11-06, "a experiência do usuário ainda está ruim"; o funil continua **por
+  período**, escolha do dono): cada tela = título + pergunta, um card-resposta (`hero`: selo verde/vermelho,
+  número grande, barra e 3 fatos — o padrão `sz-*` da aba Saúde) ao lado de um funil em barras (`funil()`:
+  frase da taxa entre as etapas, "44% viraram MQL"; a que mais caiu > 5%, com ≥ 10 na base, em vermelho);
+  depois gráficos semanais e listas (anúncios, campanhas, vendas) com miniatura e barra, posts em grade.
+  Sem tabelas largas. Variação: contagem pequena (< 20) em número ("+1"), o resto em % arredondado, abaixo
+  de 5% = "estável". Comercial: a meta do período soma só os dias que têm meta; se ela começa no meio do
+  período, o card compara a receita desde esse dia ("Receita desde 01/11, quando a meta começa").
+- Cuidado com nomes de classe: o visual copiado estiliza classes soltas do /trafego (ex.: `.top`, o
+  cabeçalho, que no celular ganha margem negativa). Use classes `gx-*` ou aninhadas; `colisao.cjs` (rascunho)
+  ajudou a conferir.
 - Ainda não medido (aparece como "não medido"): vendedor, motivos de perda/desqualificação, tempo até o 1º
   contato, nutrição.
 
