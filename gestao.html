@@ -503,6 +503,10 @@
         <button class="tab" data-s="8" title="Últimos 56 dias contra os 56 anteriores">8 semanas</button>
         <button class="tab" data-s="12" title="Últimos 84 dias contra os 84 anteriores">12 semanas</button>
       </div>
+      <label class="box mbox" id="mbox" title="Ver um mês, comparado com o mês anterior">
+        <span class="ms" aria-hidden="true">calendar_month</span>
+        <select id="mesSel" aria-label="Escolher mês"></select>
+      </label>
     </div>
   </div>
 
@@ -575,14 +579,34 @@
   var FAIXAS = ['Até R$30 mil', 'Até R$50 mil', 'R$50 mil', 'R$100 mil', 'R$200 mil', 'Mais de R$200 mil'];
   // começo de cada fonte: antes disso não há comparação justa
   var INICIO = { meta: '2026-06-01', leads: '2026-06-17' };
-  var HOJE = today(), HIST = addDays(HOJE, -24 * 7 + 1);   // 24 semanas: 12 + 12 de comparação
+  var HOJE = today(), HIST = [addDays(HOJE, -24 * 7 + 1), ymAdd(HOJE.slice(0, 7), -6) + '-01'].sort()[0];   // 12 + 12 semanas, ou 6 meses
+  var PRIMEIRO_MES = '2026-06';   // o Meta começa em junho/2026
+  var MESES_L = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  function nomeMes(ym) { return MESES_L[+ym.slice(5, 7) - 1]; }
 
-  var S = { tela: 'resumo', sem: 4, meta: null, leads: null, ac: null, metas: null, camp: {}, ads: {} };
-  try { var p0 = JSON.parse(localStorage.getItem('gestao_prefs') || 'null'); if (p0 && [4, 8, 12].indexOf(p0.sem) >= 0) S.sem = p0.sem; } catch (e) {}
+  // período: S.mes ('AAAA-MM') ou, sem ele, as últimas S.sem semanas
+  var S = { tela: 'resumo', sem: 4, mes: null, meta: null, leads: null, ac: null, metas: null, camp: {}, ads: {} };
+  try {
+    var p0 = JSON.parse(localStorage.getItem('gestao_prefs') || 'null');
+    if (p0 && [4, 8, 12].indexOf(p0.sem) >= 0) S.sem = p0.sem;
+    if (p0 && /^\d{4}-\d{2}$/.test(p0.mes || '') && p0.mes >= PRIMEIRO_MES && p0.mes <= HOJE.slice(0, 7)) S.mes = p0.mes;
+  } catch (e) {}
 
+  // c0..c1 = o período; p0..p1 = a comparação. Mês fechado × mês anterior inteiro; mês atual × o mesmo trecho do anterior
   function janelas() {
-    var n = S.sem * 7, c0 = addDays(HOJE, -(n - 1));
-    return { c0: c0, c1: HOJE, p0: addDays(c0, -n), p1: addDays(c0, -1) };
+    if (S.mes) {
+      var c0 = S.mes + '-01', c1 = [lastDay(S.mes), HOJE].sort()[0], pm = ymAdd(S.mes, -1), q0 = pm + '-01';
+      return { c0: c0, c1: c1, p0: q0, p1: [addDays(q0, diffDays(c0, c1)), lastDay(pm)].sort()[0] };
+    }
+    var n = S.sem * 7, i0 = addDays(HOJE, -(n - 1));
+    return { c0: i0, c1: HOJE, p0: addDays(i0, -n), p1: addDays(i0, -1) };
+  }
+  // como o período e a comparação aparecem nos textos
+  function P() {
+    if (!S.mes) return { per: 'últimas ' + S.sem + ' semanas', nas: 'nas últimas ' + S.sem + ' semanas', ant: 'as ' + S.sem + ' semanas anteriores', antCurto: S.sem + ' semanas anteriores', serie: 'semana' };
+    var atual = S.mes === HOJE.slice(0, 7), pm = ymAdd(S.mes, -1), J = janelas();
+    return { per: nomeMes(S.mes) + (atual ? ' até hoje' : ''), nas: 'em ' + nomeMes(S.mes) + (atual ? ' até hoje' : ''),
+      ant: atual ? 'o mesmo trecho de ' + nomeMes(pm) : nomeMes(pm), antCurto: atual ? nomeMes(pm) + ' até o dia ' + +J.p1.slice(8) : nomeMes(pm), serie: 'mês' };
   }
 
   function agrega(ini, fim) {
@@ -628,9 +652,14 @@
     o.temMeta = temMeta; o.temLeads = temLeads; o.temAc = temAc;
     return o;
   }
-  // semanas de 7 dias terminando hoje: as da comparação e as do período
+  // gráficos: semanas de 7 dias terminando hoje (período + comparação) ou, com um mês escolhido, os 6 meses até ele
   function semanas() {
     var J = janelas(), out = [];
+    if (S.mes) {
+      var ini = ymAdd(S.mes, -5); if (ini < PRIMEIRO_MES) ini = PRIMEIRO_MES;
+      for (var m = ini; m <= S.mes; m = ymAdd(m, 1)) { var wm = agrega(m + '-01', [lastDay(m), HOJE].sort()[0]); wm.atual = m === S.mes; wm.rot = curto(m); out.push(wm); }
+      return out;
+    }
     for (var k = 0; k < S.sem * 2; k++) {
       var a = addDays(J.p0, k * 7), b = addDays(a, 6), w = agrega(a, b);
       w.atual = a >= J.c0; w.rot = ddmm(a);
@@ -741,10 +770,10 @@
     }).join('') + '</div>';
     return { html: html, pior: pior };
   }
-  function vsTxt() { return 'vs ' + S.sem + ' semanas anteriores'; }
+  function vsTxt() { return 'vs ' + P().antCurto; }
 
   // gráficos semanais: o período em laranja, a comparação em cinza
-  function legSemanas() { return '<span><i class="org"></i>Últimas ' + S.sem + ' semanas</span><span><i class="dot"></i>' + S.sem + ' anteriores</span>'; }
+  function legSemanas() { return S.mes ? '<span><i class="org"></i>' + nomeMes(S.mes) + '</span><span><i class="dot"></i>meses anteriores</span>' : '<span><i class="org"></i>Últimas ' + S.sem + ' semanas</span><span><i class="dot"></i>' + S.sem + ' anteriores</span>'; }
   function eixo(fmt) {
     var t = { color: C.ink3, font: { family: 'Onest', size: 11 } };
     return {
@@ -754,7 +783,7 @@
   }
   function dica(fmt) {
     return { backgroundColor: C.ink, padding: 10, cornerRadius: 8, displayColors: false, titleFont: { family: 'Onest', size: 12, weight: '500' }, bodyFont: { family: 'Onest', size: 12 },
-      callbacks: { title: function (c) { return 'Semana de ' + c[0].label; }, label: function (c) { return fmt(c.parsed.y); } } };
+      callbacks: { title: function (c) { return S.mes ? c[0].label : 'Semana de ' + c[0].label; }, label: function (c) { return fmt(c.parsed.y); } } };
   }
   function barras(id, ws, campo, fmt, fmtEixo) {
     var el = $(id); if (!el) return;
@@ -802,7 +831,7 @@
   var SIT = { good: 'Melhorou', bad: 'Piorou', flat: 'Estável' };
 
   TELAS.resumo = function (o, p) {
-    var M = metaAnual(), nomeSem = S.sem + ' semanas';
+    var M = metaAnual(), PP = P();
     // 1. meta
     var cMeta;
     if (!S.ac || !S.metas) cMeta = hero({ k: 'Meta de faturamento', valor: '…', de: 'carregando vendas e metas' });
@@ -823,7 +852,7 @@
       { n: 'Reuniões realizadas', v: o.realiz, vazio: carregandoTxt(S.ac), taxa: { frase: 'compareceram', v: o.comp, p: p.comp, base: o.reun, ir: 'comercial', de: 'reunião marcada', para: 'realizada' } },
       { n: 'Vendas', v: o.vendas, vazio: carregandoTxt(S.ac), taxa: { frase: 'fecharam', v: o.conv, p: p.conv, base: o.realiz, ir: 'comercial', de: 'reunião', para: 'venda' } },
     ]);
-    var cFunil = cartao('filter_alt', 'Funil do período', '<span>últimas ' + nomeSem + ' · taxa entre as etapas e a variação contra as ' + nomeSem + ' anteriores</span>',
+    var cFunil = cartao('filter_alt', 'Funil do período', '<span>' + PP.per + ' · taxa entre as etapas e a variação contra ' + PP.ant + '</span>',
       '<div class="gx-fpe"><span>Investimento <b>' + m0(o.invest) + '</b> · CPL <b>' + money(o.cpl) + '</b></span></div>' + F.html +
       '<div class="gx-fpe"><span>Receita <b>' + m0(o.receita) + '</b> · ticket médio <b>' + m0(o.ticket) + '</b></span></div>');
     // 3. onde trava
@@ -835,11 +864,11 @@
     if (pr) {
       cTrava = '<section class="card gx-side"><div class="sz-row"><span class="sz-k">Onde o funil trava</span>' + pill('bad', 'Atenção') + '</div>' +
         '<div class="gx-big">' + pctL(pr.v) + '<small>' + pr.frase + '</small></div>' +
-        '<p class="gx-txt">De <b>' + pr.de + '</b> para <b>' + pr.para + '</b> foi a etapa que mais caiu: ' + cmp(pr.v, pr.p, false) + ' contra as ' + nomeSem + ' anteriores (antes, ' + pctL(pr.p) + ').</p>' + taxas +
+        '<p class="gx-txt">De <b>' + pr.de + '</b> para <b>' + pr.para + '</b> foi a etapa que mais caiu: ' + cmp(pr.v, pr.p, false) + ' contra ' + PP.ant + ' (antes, ' + pctL(pr.p) + ').</p>' + taxas +
         '<button type="button" class="gx-abrir" data-ir="' + pr.ir + '">Ver em ' + (pr.ir === 'marketing' ? 'Marketing' : 'Comercial') + '<span class="ms" aria-hidden="true">arrow_forward</span></button></section>';
     } else {
       cTrava = '<section class="card gx-side"><div class="sz-row"><span class="sz-k">Onde o funil trava</span>' + (comparou ? pill('good', 'Nada travando') : pill('flat', 'Sem comparação')) + '</div>' +
-        '<p class="gx-txt">' + (comparou ? 'Nenhuma etapa do funil caiu mais de 5% contra as ' + nomeSem + ' anteriores.' : 'Ainda não há dados do período anterior para comparar as etapas.') + '</p>' + taxas + '</section>';
+        '<p class="gx-txt">' + (comparou ? 'Nenhuma etapa do funil caiu mais de 5% contra ' + PP.ant + '.' : 'Ainda não há dados do período anterior para comparar as etapas.') + '</p>' + taxas + '</section>';
     }
     // 4. as quatro áreas
     var tile = function (k, n, v, s, d, ir) {
@@ -848,7 +877,7 @@
         '<div class="sz-tn">' + n + '</div><div class="sz-tv">' + v + '</div><div class="sz-td">' + d + '</div>' +
         '<button type="button" class="gx-abrir" data-ir="' + ir + '" style="margin-top:8px">Abrir<span class="ms" aria-hidden="true">arrow_forward</span></button></div>';
     };
-    var areas = '<section class="card sz-diag"><div class="chart-head"><span class="label"><span class="ms" aria-hidden="true">grid_view</span>As quatro áreas</span><div class="legend"><span>contra as ' + nomeSem + ' anteriores</span></div></div><div class="sz-tiles">' +
+    var areas = '<section class="card sz-diag"><div class="chart-head"><span class="label"><span class="ms" aria-hidden="true">grid_view</span>As quatro áreas</span><div class="legend"><span>contra ' + PP.ant + '</span></div></div><div class="sz-tiles">' +
       tile('Tráfego', 'Custo por lead', money(o.cpl), situacao(o.cpl, p.cpl, true), m0(o.invest) + ' para ' + n0(o.leads) + ' leads ' + cmp(o.cpl, p.cpl, true), 'trafego') +
       tile('Conteúdo', 'Leads de anúncio', n0(o.leadsMeta), situacao(o.leadsMeta, p.leadsMeta, false), pctL(div(o.leadsMeta, o.leads)) + ' dos leads ' + cmp(o.leadsMeta, p.leadsMeta, false, true), 'conteudo') +
       tile('Marketing', '% de qualificação', pctL(o.qual), situacao(o.qual, p.qual, false), n0(o.mql) + ' MQL de ' + n0(o.leads) + ' leads ' + cmp(o.qual, p.qual, false), 'marketing') +
@@ -874,7 +903,7 @@
     var cCpl = hero({ k: 'Custo por lead', info: 'Investimento total no Meta ÷ leads do site (todas as origens).',
       pill: [s, { good: 'CPL caiu', bad: 'CPL subiu', flat: variacao(o.cpl, p.cpl) == null ? 'Sem comparação' : 'CPL estável' }[s]],
       valor: o.cpl != null ? money(o.cpl) : carregandoTxt(S.meta && S.leads), de: p.cpl != null ? 'antes ' + money(p.cpl) : '',
-      fatos: [['Investimento', m0(o.invest) + ' ' + cmp(o.invest, p.invest, null), 'nas últimas ' + S.sem + ' semanas'],
+      fatos: [['Investimento', m0(o.invest) + ' ' + cmp(o.invest, p.invest, null), P().nas],
         ['Leads', n0(o.leads) + ' ' + cmp(o.leads, p.leads, false, true), 'cadastros no site'],
         ['Vieram de anúncio', pctL(div(o.leadsMeta, o.leads)), n0(o.leadsMeta) + ' leads pelo Meta']] });
     var FM = funil([
@@ -898,7 +927,7 @@
       barrasH(ordena(o.orig, ORIGEM).map(function (x) { var mq = o.origMql[x.k] || 0; return { nome: x.nome, v: x.v, txt: n0(x.v) + '<small>' + pctL(div(mq, x.v)) + ' MQL</small>' }; }), n0);
     return {
       html: titulo('Tráfego', 'Estamos comprando leads de forma eficiente?') + '<div class="sz-grid">' + cCpl + cMidia + '</div>' +
-        '<div class="gx-grid2">' + cartao('person_add', 'Leads por semana', legSemanas(), plot('g-leads')) + cartao('sell', 'Custo por lead por semana', '<span>investimento ÷ leads</span>', plot('g-cpl')) + '</div>' +
+        '<div class="gx-grid2">' + cartao('person_add', 'Leads por ' + P().serie, legSemanas(), plot('g-leads')) + cartao('sell', 'Custo por lead por ' + P().serie, '<span>investimento ÷ leads</span>', plot('g-cpl')) + '</div>' +
         '<div class="gx-grid2">' + cartao('campaign', 'Campanhas no Meta', '<span>por investimento</span>', lista) + cartao('alt_route', 'De onde vieram os leads', '<span>leads e % que é MQL</span>', orig) + '</div>',
       draw: function () { barras('g-leads', ws, 'leads', n0); linha('g-cpl', ws, 'cpl', money, function (v) { return 'R$ ' + int.format(v); }); },
     };
@@ -923,7 +952,7 @@
         '<div><dt>Prende no início' + hint('Hook rate: visualizações de 3 s ÷ impressões.') + '</dt><dd>' + (a.v3s ? pctL(a.hook) : '—') + '</dd></div>' +
         '<div><dt>Segura até o fim' + hint('Hold rate: ThruPlay ÷ visualizações de 3 s. Mostra onde o vídeo perde a pessoa.') + '</dt><dd>' + (a.v3s ? pctL(a.hold) : '—') + '</dd></div></dl></div></div></section>';
     };
-    var dest = !ads.length ? '<div class="card"><p class="gx-vazio">Nenhum anúncio com investimento nas últimas ' + S.sem + ' semanas.</p></div>'
+    var dest = !ads.length ? '<div class="card"><p class="gx-vazio">Nenhum anúncio com investimento ' + P().nas + '.</p></div>'
       : '<div class="gx-grid2">' + destaque(bom, 'good', 'Repetir', 'o lead mais barato do período') + (ruim ? destaque(ruim, 'bad', 'Cortar ou refazer', ruim.leads ? 'o lead mais caro do período' : 'investiu e não trouxe lead') : '') + '</div>';
     var maxL = Math.max.apply(null, ads.map(function (a) { return a.leads; }).concat([1]));
     var temSite = ads.some(function (a) { return a.site > 0; });
@@ -935,7 +964,7 @@
     var O = A.organicos || { ok: false, error: 'sem resposta' }, posts = O.ok ? O.itens.slice() : [];
     var nota = function (m) { return m.alcance != null ? m.alcance : m.curtidas; };
     posts.sort(function (a, b) { return nota(b) - nota(a); });
-    var grade = !O.ok ? '<p class="gx-vazio">Não consegui ler os posts do Instagram (' + esc(O.error) + ').</p>' : !posts.length ? '<p class="gx-vazio">Nenhum post no Instagram nas últimas ' + S.sem + ' semanas.</p>' :
+    var grade = !O.ok ? '<p class="gx-vazio">Não consegui ler os posts do Instagram (' + esc(O.error) + ').</p>' : !posts.length ? '<p class="gx-vazio">Nenhum post no Instagram ' + P().nas + '.</p>' :
       '<div class="gx-posts">' + posts.map(function (m, k) {
         return '<a class="gx-post' + (k === 0 ? ' dest' : '') + '"' + (m.link ? ' href="' + esc(m.link) + '" target="_blank" rel="noopener"' : '') + '><span class="tag">' + (k === 0 ? 'Mais ' + (O.semMetricas ? 'curtido' : 'alcance') : m.tipo) + '</span>' +
           '<div class="img"' + (m.img ? ' style="background-image:url(\'' + esc(m.img).replace(/'/g, '%27') + '\')"' : '') + '></div><div class="c">' +
@@ -943,7 +972,7 @@
           '<p>' + esc(m.legenda || 'Sem legenda') + '</p><small class="d">' + ddmm(m.data) + (O.semMetricas ? ' · ' + n0(m.comentarios) + ' coment.' : ' · ' + n0(m.salvos) + ' salv. · ' + n0(m.compart) + ' compart.') + '</small></div></a>';
       }).join('') + '</div>' + (O.semMetricas ? '<p class="gx-nota">O token do Meta não lê alcance, salvamentos e compartilhamentos dos posts; a grade usa curtidas.</p>' : '');
     return {
-      html: T + dest + cartao('ads_click', 'Todos os anúncios', '<span>por leads, últimas ' + S.sem + ' semanas</span>', lista + (temSite ? '' : '<p class="gx-nota">MQL por anúncio aparece quando a UTM do lead traz o id do anúncio.</p>')) +
+      html: T + dest + cartao('ads_click', 'Todos os anúncios', '<span>por leads, ' + P().per + '</span>', lista + (temSite ? '' : '<p class="gx-nota">MQL por anúncio aparece quando a UTM do lead traz o id do anúncio.</p>')) +
         '<h3 class="gx-h">Posts do Instagram</h3>' + cartao('photo_library', 'Publicados no período', '<span>' + (O.semMetricas ? 'por curtidas' : 'por alcance') + '</span>', grade),
       draw: function () {},
     };
@@ -956,7 +985,7 @@
       valor: o.qual != null ? pctL(o.qual) : carregandoTxt(S.leads), de: o.mql != null ? n0(o.mql) + ' MQL de ' + n0(o.leads) + ' leads' : '',
       fatos: [['Custo por MQL', money(o.cmql) + ' ' + cmp(o.cmql, p.cmql, true), 'investimento ÷ MQL'],
         ['Passagem para o comercial', pctL(o.pass) + ' ' + cmp(o.pass, p.pass, false), 'reuniões marcadas ÷ MQL'],
-        ['Antes', pctL(p.qual), 'nas ' + S.sem + ' semanas anteriores']] });
+        ['Antes', pctL(p.qual), P().antCurto]] });
     var F = funil([
       { n: 'Leads', v: o.leads, vazio: carregandoTxt(S.leads) },
       { n: 'MQL', v: o.mql, taxa: { frase: 'viraram MQL', v: o.qual, p: p.qual, base: o.leads } },
@@ -968,8 +997,8 @@
     var etapas = S.ac && S.ac.ok ? S.ac.etapas.filter(function (e) { return e.abertos > 0 && !e.fech; }).map(function (e) { return { nome: e.title, v: e.abertos }; }) : [];
     return {
       html: titulo('Marketing', 'Os leads que chegam são bons e estão avançando para o comercial?') + '<div class="sz-grid">' + cQual + cF + '</div>' +
-        '<div class="gx-grid2">' + cartao('percent', '% de qualificação por semana', '<span>MQL ÷ leads</span>', plot('g-qual')) +
-        cartao('alt_route', 'MQL por origem', '<span>últimas ' + S.sem + ' semanas</span>', o.temLeads ? barrasH(ordena(o.origMql, ORIGEM), n0) : '<p class="gx-vazio">Carregando…</p>') + '</div>' +
+        '<div class="gx-grid2">' + cartao('percent', '% de qualificação por ' + P().serie, '<span>MQL ÷ leads</span>', plot('g-qual')) +
+        cartao('alt_route', 'MQL por origem', '<span>' + P().per + '</span>', o.temLeads ? barrasH(ordena(o.origMql, ORIGEM), n0) : '<p class="gx-vazio">Carregando…</p>') + '</div>' +
         '<div class="gx-grid2">' + cartao('storefront', 'Leads por faixa de faturamento', '<span><i class="org"></i>MQL: acima de R$ 50 mil</span>', o.temLeads ? barrasH(faixas, n0, function (it) { return ehMql(it.nome); }) : '<p class="gx-vazio">Carregando…</p>') +
         cartao('view_kanban', 'Negócios abertos por etapa', '<span>agora, no ActiveCampaign</span>', S.ac ? barrasH(etapas, n0) : '<p class="gx-vazio">Carregando…</p>') + '</div>',
       draw: function () { linha('g-qual', ws, 'qual', pctL, pctEixo); },
@@ -988,7 +1017,7 @@
       pill: [s, t], valor: (parcial ? recMeta : o.receita) != null ? m0(parcial ? recMeta : o.receita) : carregandoTxt(S.ac),
       de: metaP ? 'de ' + m0(metaP) + ' · meta ' + (parcial ? 'desses dias' : 'do período') : (p.receita != null ? 'antes ' + m0(p.receita) : ''),
       meter: metaP && recMeta != null ? [s, recMeta, metaP, null, ''] : null,
-      fatos: [parcial ? ['Receita nas ' + S.sem + ' semanas', m0(o.receita) + ' ' + cmp(o.receita, p.receita, false), 'antes ' + m0(p.receita)] : ['Vendas', n0(o.vendas) + ' ' + cmp(o.vendas, p.vendas, false, true), 'negócios fechados'],
+      fatos: [parcial ? ['Receita ' + P().nas, m0(o.receita) + ' ' + cmp(o.receita, p.receita, false), 'antes ' + m0(p.receita)] : ['Vendas', n0(o.vendas) + ' ' + cmp(o.vendas, p.vendas, false, true), 'negócios fechados'],
         ['Ticket médio', m0(o.ticket), alvo ? 'alvo ' + m0(alvo) : ''],
         ['CAC', m0(o.cac), o.cac != null && o.ticket != null ? (o.cac < o.ticket ? 'abaixo do ticket' : 'acima do ticket') : 'investimento ÷ vendas']] });
     var F = funil([
@@ -1001,7 +1030,7 @@
       if (!S.ac) return '<p class="gx-vazio">Carregando…</p>';
       if (!S.ac.ok) return '<p class="gx-vazio">Não consegui ler as vendas no ActiveCampaign.</p>';
       var vs = S.ac.fechamentos.filter(function (f) { return f.data >= J.c0 && f.data <= J.c1; }).sort(function (a, b) { return b.data.localeCompare(a.data); });
-      if (!vs.length) return '<p class="gx-vazio">Nenhuma venda nas últimas ' + S.sem + ' semanas.</p>';
+      if (!vs.length) return '<p class="gx-vazio">Nenhuma venda ' + P().nas + '.</p>';
       var max = Math.max.apply(null, vs.map(function (f) { return f.valor || 0; }).concat([1]));
       return '<div class="gx-li">' + vs.slice(0, 6).map(function (f) {
         return '<div class="gx-lr"><span class="k">' + f.data.slice(8, 10) + '</span><div class="t"><b>' + esc(f.cliente || 'Negócio ' + f.deal) + '</b><small>' + ddmm(f.data) + ' · ' +
@@ -1014,7 +1043,7 @@
       '<div class="gx-fpe"><span>No-show <b>' + n0(o.noshow) + '</b></span><span>Ciclo de venda <b>' + (o.ciclo != null ? n0(Math.round(o.ciclo)) + ' dias' : '—') + '</b></span><span>Em aberto <b>' + (abertos == null ? carregandoTxt(S.ac) : n0(abertos)) + '</b></span></div></section>';
     return {
       html: titulo('Comercial', 'Estamos transformando reuniões em receita, no ritmo da meta?') + '<div class="sz-grid">' + cRec + cF + '</div>' +
-        '<div class="gx-grid2">' + cartao('payments', 'Receita por semana', legSemanas(), plot('g-rec')) +
+        '<div class="gx-grid2">' + cartao('payments', 'Receita por ' + P().serie, legSemanas(), plot('g-rec')) +
         cartao('receipt_long', 'Vendas do período', '<span>' + (o.temAc ? n0(o.vendasSite) + ' do site · ' + n0(o.vendas - o.vendasSite) + ' fora do site' : '') + '</span>', vendasLista()) + '</div>' +
         '<p class="gx-nota">Ciclo de venda = mediana de dias entre o negócio criado e a venda. Vendedor de cada venda e motivos de perda ainda não são lidos do ActiveCampaign.</p>',
       draw: function () { barras('g-rec', ws, 'receita', m0, kfmt); },
@@ -1033,7 +1062,7 @@
     [[S.meta, 'Meta Ads'], [S.leads, 'leads do site'], [S.ac, 'ActiveCampaign'], [S.metas, 'metas']].forEach(function (x) { if (x[0] && !x[0].ok) notas.push(['error', 'Não consegui ler ' + x[1] + ': ' + x[0].error]); });
     if (S.ac && S.ac.ok && J.p0 < S.ac.desde) notas.push(['info', 'O ActiveCampaign começa em ' + ddmm(S.ac.desde) + '/' + S.ac.desde.slice(0, 4) + ': as comparações de reuniões e vendas com o período anterior ficam de fora.']);
     $('notice').innerHTML = notas.map(function (n) { return '<div class="notice ' + (n[0] === 'info' ? 'info' : '') + '"><span class="ms" aria-hidden="true">' + (n[0] === 'info' ? 'info' : 'error') + '</span><span>' + esc(n[1]) + '</span></div>'; }).join('');
-    $('foot').textContent = 'Fontes: Meta Ads, site (leads) e ActiveCampaign · últimas ' + S.sem + ' semanas (' + ddmm(J.c0) + ' a ' + ddmm(J.c1) + ') contra as ' + S.sem + ' anteriores (' + ddmm(J.p0) + ' a ' + ddmm(J.p1) + ')' +
+    $('foot').textContent = 'Fontes: Meta Ads, site (leads) e ActiveCampaign · ' + P().per + ' (' + ddmm(J.c0) + ' a ' + ddmm(J.c1) + ') contra ' + P().ant + ' (' + ddmm(J.p0) + ' a ' + ddmm(J.p1) + ')' +
       (S.ac && S.ac.geradoEm ? ' · ActiveCampaign lido às ' + new Date(S.ac.geradoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '');
   }
 
@@ -1044,15 +1073,29 @@
     render();
     window.scrollTo(0, 0);
   }
-  function marcaPeriodo() { document.querySelectorAll('#periodo .tab').forEach(function (b) { var on = +b.dataset.s === S.sem; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
+  function marcaPeriodo() {
+    document.querySelectorAll('#periodo .tab').forEach(function (b) { var on = !S.mes && +b.dataset.s === S.sem; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+    $('mbox').classList.toggle('on', !!S.mes);
+    $('mesSel').value = S.mes || '';
+  }
+  // meses desde o começo dos dados, do mais recente ao mais antigo
+  function preencheMeses() {
+    var html = '<option value="">Escolher mês</option>', ym = HOJE.slice(0, 7);
+    for (var m = ym; m >= PRIMEIRO_MES; m = ymAdd(m, -1)) html += '<option value="' + m + '">' + nomeMes(m).charAt(0).toUpperCase() + nomeMes(m).slice(1) + ' de ' + m.slice(0, 4) + (m === ym ? ' (este mês)' : '') + '</option>';
+    $('mesSel').innerHTML = html;
+  }
+  function guardaPeriodo() { try { localStorage.setItem('gestao_prefs', JSON.stringify({ sem: S.sem, mes: S.mes })); } catch (x) {} }
 
   /* ── eventos ──────────────────────────────────────── */
   $('telas').addEventListener('click', function (e) { var b = e.target.closest('.view'); if (b) irPara(b.dataset.t); });
   $('content').addEventListener('click', function (e) { var b = e.target.closest('[data-ir]'); if (b) irPara(b.dataset.ir); });
   $('periodo').addEventListener('click', function (e) {
     var b = e.target.closest('.tab'); if (!b) return;
-    S.sem = +b.dataset.s; marcaPeriodo();
-    try { localStorage.setItem('gestao_prefs', JSON.stringify({ sem: S.sem })); } catch (x) {}
+    S.sem = +b.dataset.s; S.mes = null; marcaPeriodo(); guardaPeriodo();
+    carregarCamp(); render();
+  });
+  $('mesSel').addEventListener('change', function () {
+    S.mes = this.value || null; marcaPeriodo(); guardaPeriodo();
     carregarCamp(); render();
   });
   $('refresh').addEventListener('click', function () { carregar(true); });
@@ -1072,7 +1115,7 @@
   window.addEventListener('scroll', fechaPop, { passive: true });
 
   if (!getToken()) location.href = '/login';
-  else { marcaPeriodo(); irPara(location.hash.slice(1)); carregar(false); }
+  else { preencheMeses(); marcaPeriodo(); irPara(location.hash.slice(1)); carregar(false); }
 })();
 </script>
 </body>

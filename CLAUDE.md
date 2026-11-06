@@ -267,6 +267,10 @@
 - Período: últimas 4, 8 ou 12 semanas (até hoje) contra o mesmo tanto antes; gráficos com semanas de 7 dias
   terminando hoje (período em laranja, comparação em cinza). Sem comparação quando a fonte não cobre o período
   anterior (Meta desde 01/06, leads desde 17/06, ActiveCampaign desde 01/07).
+- **Filtro de mês** (`#mesSel`, pedido de 2026-11-06): mês fechado × mês anterior inteiro; mês atual × o mesmo
+  trecho do mês anterior (`janelas()`); os textos vêm de `P()` (ex.: "em outubro", "o mesmo trecho de outubro")
+  e os gráficos passam a ser por mês, os 6 meses até o escolhido (desde jun/26). Escolher semanas limpa o mês.
+  A escolha fica em `localStorage` (`gestao_prefs`: `sem`, `mes`).
 - Fontes: `/api/meta-trafego` (24 semanas, `swr=1`; e as campanhas do período), `/api/gestao-leads`
   (novo: leads do site agregados por dia × faixa × origem × UTM, **sem dados pessoais**), `/api/ac-funil`
   (reuniões, vendas, etapas), `/api/metas` (meta anual) e `/api/meta-anuncios` (novo, só na tela Conteúdo:
