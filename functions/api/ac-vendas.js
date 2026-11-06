@@ -135,7 +135,8 @@ export async function datarFechamentos({ env, get, deals, fechStage, desde, nome
     const centavos = +d.value || 0;
     if (padrao && centavos === padrao) valorPadrao++;
     // o ActiveCampaign guarda o valor em centavos
-    fechamentos.push(Object.assign({ data, valor: centavos / 100, aprox: semHistorico || undefined, cliente: d.title, deal: d.id, etapa: nomeEtapa[d.stage] || null }, extra ? extra(d) : {}));
+    // criado: data em que o negócio entrou no ActiveCampaign (o /gestao calcula o ciclo de venda com ela)
+    fechamentos.push(Object.assign({ data, valor: centavos / 100, aprox: semHistorico || undefined, cliente: d.title, deal: d.id, etapa: nomeEtapa[d.stage] || null, criado: dia(d.cdate) || null }, extra ? extra(d) : {}));
   }
   if (aprox) avisos.push(aprox + ' fechamento' + (aprox > 1 ? 's estão' : ' está') + ' com data aproximada (última atualização do negócio), sem histórico de etapa disponível.');
   if (valorPadrao) avisos.push(valorPadrao + ' fechamento' + (valorPadrao > 1 ? 's estão' : ' está') + ' com o valor padrão do site (' + (padrao / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) + '): atualize o valor do negócio no ActiveCampaign para o total ficar certo.');

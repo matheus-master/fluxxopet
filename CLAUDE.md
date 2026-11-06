@@ -256,6 +256,29 @@
   site (`AC_DEAL_VALUE`) gera aviso: o comercial precisa atualizar o valor no ActiveCampaign.
 - Se a rota falhar, a aba volta a usar a planilha (`/api/comercial`) e mostra o motivo.
 
+## Painel de Gestão (`/gestao` → `gestao.html`)
+- Pedido do dono (2026-11-06): a direção do protótipo `../dashboard-gestao` (5 telas, cada uma responde
+  uma pergunta: Resumo, Tráfego, Conteúdo, Marketing, Comercial), com o **nosso visual** e **dados reais**.
+  Mesmo login do /trafego (`vt_token`); ícone "Gestão" (`insights`) na barra do topo do /trafego.
+- O `<style>` do /trafego vai **copiado** no começo do `gestao.html` (mesma cara: cards, KPIs, `.summary`,
+  menu flutuante `.views`); o que é só do /gestao usa classes `gx-*`. Mudou o visual do /trafego? copie de novo.
+- Período: últimas 4, 8 ou 12 semanas (até hoje) contra o mesmo tanto antes; gráficos com semanas de 7 dias
+  terminando hoje (período em laranja, comparação em cinza). Sem comparação quando a fonte não cobre o período
+  anterior (Meta desde 01/06, leads desde 17/06, ActiveCampaign desde 01/07).
+- Fontes: `/api/meta-trafego` (24 semanas, `swr=1`; e as campanhas do período), `/api/gestao-leads`
+  (novo: leads do site agregados por dia × faixa × origem × UTM, **sem dados pessoais**), `/api/ac-funil`
+  (reuniões, vendas, etapas), `/api/metas` (meta anual) e `/api/meta-anuncios` (novo, só na tela Conteúdo:
+  insights por anúncio com vídeo de 3 s e ThruPlay, miniatura do criativo, e posts do Instagram com alcance,
+  salvamentos e compartilhamentos — se o token não ler essas métricas, cai para curtidas e comentários).
+- Definições: Leads = cadastros do site (todas as origens); **MQL = faturamento acima de R$ 50 mil** (regra do
+  Comercial); CPL = investimento total ÷ leads; passagem = reuniões marcadas ÷ MQL; comparecimento = realizadas
+  ÷ marcadas; conversão = vendas ÷ realizadas; CAC = investimento ÷ vendas; ciclo = mediana de dias do negócio
+  criado (`criado`, vindo de `datarFechamentos`) à venda. MQL por anúncio: UTM `utm_content`/`utm_term` = id
+  do anúncio. Origem: `anuncio_ig`/`anuncio_fb` (utm_medium pago), `organico`, `google`, `meta` (fbclid sem UTM).
+- O funil do Resumo marca em vermelho a taxa que mais caiu (> 5%) contra o período anterior.
+- Ainda não medido (aparece como "não medido"): vendedor, motivos de perda/desqualificação, tempo até o 1º
+  contato, nutrição.
+
 ## CRM do admin (`/admin#crm`)
 - Kanban com busca, filtros (faixa, tag, follow-up atrasado/hoje/sem próximo contato,
   salvos no `localStorage` como `crm_filters`), faixa do funil no topo, botão de
