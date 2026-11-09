@@ -6,6 +6,9 @@
   Cache-Control: no-store, no-cache, must-revalidate
   Pragma: no-cache
 
+/analise
+  Cache-Control: no-store, must-revalidate
+
 /trafego
   Cache-Control: no-store, no-cache, must-revalidate
   Pragma: no-cache
@@ -29,3 +32,7 @@
 # Fontes servidas daqui (Satoshi): o nome do arquivo nao muda, cache longo
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Imagens da página /analise (o nome muda quando a imagem muda)
+/img/analise/*
+  Cache-Control: public, max-age=2592000

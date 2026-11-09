@@ -4,7 +4,8 @@
 // aceita só as páginas e etapas abaixo e conta cada etapa uma vez por visitante.
 // A aba Funil do /trafego lê isso por /api/funil-pagina.
 
-const PAGINAS = { '/': 'atual', '/novo': 'novo' };
+// /analise: página nova (modelo fluxxo-pet-analise), quiz de 5 perguntas + contato + resultado na tela
+const PAGINAS = { '/': 'atual', '/novo': 'novo', '/analise': 'analise' };
 // simulador … wa_resultado vêm das telas depois do cadastro (/obrigado, /resultado), no funil da página de origem
 const ETAPAS = ['visita', 'inicio', 'etapa1', 'dados', 'lead', 'qualif_dif', 'qualif_urg', 'qualif_fim',
   'simulador', 'resultado', 'obrigado', 'wa_resultado', 'wa_obrigado'];

@@ -50,6 +50,21 @@ export async function onRequestPost(context) {
     'INSERT INTO leads (nome, petshop, whatsapp, email, faturamento, session_id) VALUES (?, ?, ?, ?, ?, ?)'
   ).bind(nome || '', petshop || '', whatsapp || '', email || '', faturamento || '', session_id).run();
 
+  // A página /analise já manda a dor (dificuldade) e o resumo das respostas junto do cadastro
+  // (ela não pergunta a urgência, que o modo qualificação exige). Opcional: os outros formulários não mandam.
+  const dif = DIFICULDADES.includes(body.dificuldade) ? body.dificuldade : null;
+  const sobre = String(body.sobre_negocio || '').trim().slice(0, 500);
+  const novoId = res.meta ? res.meta.last_row_id : null;
+  if (novoId && (dif || sobre)) {
+    const upd = () => env.DB.prepare('UPDATE leads SET dificuldade = COALESCE(?, dificuldade), sobre_negocio = ? WHERE id = ?').bind(dif, sobre, novoId).run();
+    try { await upd(); }
+    catch (e) {
+      if (!/no such column/i.test(e.message)) throw e;
+      await ensureQualColumns(env.DB);
+      await upd();
+    }
+  }
+
   // Envia o lead para o ActiveCampaign em segundo plano (não atrasa a resposta do formulário)
   if (email) {
     context.waitUntil(syncToAC(env, { nome, petshop, email, whatsapp }));
