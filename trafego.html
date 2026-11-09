@@ -1281,15 +1281,15 @@
 
       var cards =
         kpi({ hero: true, icon: 'web', label: 'Visitas pelo anúncio', value: int.format(t.lpv), info: 'Visualizações da página contadas pelo Meta (campanhas de cadastro): quem clicou no anúncio e a página abriu.', unit: 'visualizações da página (Meta)', badge: badgeHtml(t.lpv, prv && prv.lpv, false, cmp) }) +
-        kpi({ icon: 'person_add', label: 'Leads do anúncio', info: 'Quem veio do anúncio do Meta e terminou o cadastro.', value: int.format(H.lead), unit: 'leads salvos', badge: badgeHtml(H.lead, prv && prv.lead, false, cmp) }) +
+        kpi({ icon: 'person_add', label: 'Leads do anúncio', info: 'Quem veio do anúncio do Meta e terminou o cadastro (escolheu o faturamento).', value: int.format(H.lead), unit: 'leads salvos', badge: badgeHtml(H.lead, prv && prv.lead, false, cmp) }) +
         kpi({ icon: 'conversion_path', label: 'Conversão da página', info: 'Leads do anúncio ÷ visitas pelo anúncio.', value: pctTxt(conv), unit: 'das visitas viraram lead', badge: ppHtml(conv, pconv, true, cmp) }) +
         kpi({ icon: 'groups', label: 'Leads de outras origens', info: 'Cadastros na página de quem não veio de anúncio do Meta (link do bot, endereço digitado, orgânico).', value: int.format(HT.lead - H.lead), unit: 'fora dos anúncios', badge: '' });
 
       var HS = [
         { k: 'lpv', l: 'Visitas pelo anúncio', s: 'visualizações da página (Meta)', w: 100, bg: '#ECEDF0', fg: C.ink },
         { k: 'rolou', l: 'Rolaram a página', a: 'Rolaram pelo menos 1/4 da página', w: 80, bg: '#BCC0C7', fg: C.ink },
-        { k: 'dados', l: 'Mandaram os dados de contato', a: 'Mandaram os dados de contato', w: 60, bg: C.ink, fg: '#fff' },
-        { k: 'lead', l: 'Viraram lead', a: 'Concluíram o cadastro', w: 42, bg: C.accent, fg: '#fff' },
+        { k: 'dados', l: 'Preencheram WhatsApp e pet shop', a: 'Passaram pelo formulário até o WhatsApp e pet shop', w: 60, bg: C.ink, fg: '#fff' },
+        { k: 'lead', l: 'Viraram lead', a: 'Escolheram o faturamento', w: 42, bg: C.accent, fg: '#fff' },
       ];
       var hpior = pior(HS, cur);
       var funilHist = funilHtml('Funil dos anúncios', cmp ? 'variações comparadas a ' + cmp.replace(/^vs /, '') : 'só quem veio de anúncio do Meta', HS, cur, prv, hpior, 'lpv');
@@ -1299,19 +1299,19 @@
       var pn = fp.prev && d.prev && d.prev.since >= MED ? (fp.prev.atual || {}) : null;
       var npior = v ? pior(PG, e) : null;
       var funilNovo = v
-        ? funilHtml('Funil completo · medição nova', (d.since < MED ? 'só a partir de ' + fmtShort(MED) + ' · ' : '') + 'todas as origens, visitantes únicos', PG, e, pn, npior, 'visita', notaForm())
-        : chartCard({ icon: 'filter_alt', label: 'Funil completo · medição nova', legend: '', body: '<p class="cflow-note" style="margin:0">As etapas (incluindo quem começa o formulário e passa do 1º passo) são medidas desde ' + fmtShort(MED) + '. Escolha um período que inclua essa data.</p>' });
+        ? funilHtml('Funil completo · medição nova', (d.since < MED ? 'só a partir de ' + fmtShort(MED) + ' · ' : '') + 'todas as origens, visitantes únicos', PG, e, pn, npior, 'visita')
+        : chartCard({ icon: 'filter_alt', label: 'Funil completo · medição nova', legend: '', body: '<p class="cflow-note" style="margin:0">As etapas (incluindo quem começa o formulário e passa do nome e e-mail) são medidas desde ' + fmtShort(MED) + '. Escolha um período que inclua essa data.</p>' });
 
       // ── resumo ──
       var r100 = function (o, a, b) { var z = hr(o, a, b); return z == null ? 0 : Math.round(z); };
       var txt = cur.lpv
         ? periodPhrase() + ', <b>' + int.format(cur.lpv) + ' visitas</b> chegaram pelos anúncios. De cada 100, <b>' + r100(cur, 'lpv', 'rolou') + ' rolaram a página</b>, ' +
-          r100(cur, 'lpv', 'dados') + ' mandaram os dados de contato e <b>' + r100(cur, 'lpv', 'lead') + ' viraram lead</b>.'
+          r100(cur, 'lpv', 'dados') + ' preencheram WhatsApp e pet shop e <b>' + r100(cur, 'lpv', 'lead') + ' viraram lead</b>.'
         : periodPhrase() + ', não houve visitas pelos anúncios.';
       if (hpior && hpior.t < 100) txt += ' Onde mais se perde gente: entre “' + HS[hpior.i - 1].l.toLowerCase() + '” e “' + HS[hpior.i].l.toLowerCase() + '”, <b class="t-bad">' + Math.round(100 - hpior.t) + '% param ali</b>.';
       var mv = prv ? moveTxt(conv, pconv, 'subiu {n}%', 'caiu {n}%', true, 'ficou estável') : null;
       if (mv) txt += ' A conversão da página ' + mv + ' em relação ao período anterior.';
-      if (v) txt += ' Na medição nova (desde ' + fmtShort(MED) + '), de cada 100 visitas <b>' + Math.round(pv(e, 'inicio')) + ' começam o formulário</b> e ' + Math.round(pv(e, 'etapa1')) + ' passam do 1º passo.';
+      if (v) txt += ' Na medição nova (desde ' + fmtShort(MED) + '), de cada 100 visitas <b>' + Math.round(pv(e, 'inicio')) + ' começam o formulário</b> e ' + Math.round(pv(e, 'etapa1')) + ' passam do nome e e-mail.';
 
       // ── gráfico: visitas pelo anúncio (barras) × leads do anúncio (linha) ──
       var hb = {};
@@ -1784,8 +1784,8 @@
   var FP_ETAPAS = [
     { k: 'visita', l: 'Visitaram a página' },
     { k: 'inicio', l: 'Começaram o formulário' },
-    { k: 'etapa1', l: 'Passaram do 1º passo', so: 'atual' },
-    { k: 'dados', l: 'Chegaram ao último passo', so: 'atual' },
+    { k: 'etapa1', l: 'Passaram do nome e e-mail', so: 'atual' },
+    { k: 'dados', l: 'Preencheram WhatsApp e pet shop', so: 'atual' },
     { k: 'lead', l: 'Viraram lead', d: 'lead salvo no CRM' },
     { k: 'qualif_dif', l: 'Responderam a dificuldade', so: 'novo' },
     { k: 'qualif_urg', l: 'Responderam a urgência', so: 'novo' },
@@ -1804,7 +1804,7 @@
     return p;
   }
   // funil em barras com a passagem entre etapas e a variação (p.p.) contra o período anterior
-  function funilHtml(titulo, legenda, ST, o, p, pr, base, nota) {
+  function funilHtml(titulo, legenda, ST, o, p, pr, base) {
     var pass = function (z, i) { var a = z && z[ST[i - 1].k]; return a ? (z[ST[i].k] || 0) / a * 100 : null; };
     return '<section class="card main-chart"><div class="chart-head"><span class="label"><span class="ms">filter_alt</span>' + titulo + '</span>' +
       '<div class="legend"><span>' + esc(legenda) + '</span></div></div><div class="funnel">' +
@@ -1816,7 +1816,7 @@
         var t = pass(o, i + 1);
         return bar + '<div class="frate"><span class="ms" aria-hidden="true">south</span>' + ST[i + 1].a + ' <b' + (pr && pr.i === i + 1 ? ' class="t-bad"' : '') + '>' + pctTxt(t) + '</b>' +
           '<span class="plain">' + (t != null ? '≈ ' + Math.round(t) + ' de cada 100' : '') + '</span>' + ppHtml(t, pass(p, i + 1), false) + '</div>';
-      }).join('') + '</div>' + (nota ? '<p class="cflow-note">' + nota + '</p>' : '') + '</section>';
+      }).join('') + '</div></section>';
   }
   // tabela mês a mês desde jun/2026: visitas do Meta + histórico do site + medição nova quando houver
   var mh = null, mhLoading = false;
@@ -1851,59 +1851,43 @@
         '<td class="pg-hide">' + int.format(z.todos.lead || 0) + '</td></tr>';
     }).join('');
     return chartCard({ icon: 'calendar_month', label: 'Mês a mês desde junho', legend: '<span>tráfego dos anúncios do Meta</span>',
-      body: '<div class="table-scroll"><table class="com-table fp-table"><thead><tr><th>Mês</th><th>Visitas pelo anúncio</th><th class="pg-hide">Rolaram a página</th><th class="pg-hide">Dados de contato</th><th>Leads</th><th>Conversão</th><th class="pg-hide">Leads de todas as origens</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      body: '<div class="table-scroll"><table class="com-table fp-table"><thead><tr><th>Mês</th><th>Visitas pelo anúncio</th><th class="pg-hide">Rolaram a página</th><th class="pg-hide">WhatsApp e pet shop</th><th>Leads</th><th>Conversão</th><th class="pg-hide">Leads de todas as origens</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
         '<p class="cflow-note">Visitas = visualizações da página contadas pelo Meta. As outras colunas são do próprio site, só de quem veio do anúncio (mesmo visitante conta uma vez por mês). ' +
-        '“Começaram o formulário” e “passaram do 1º passo” só existem a partir de ' + fmtShort(MED) + ' — estão no funil completo acima.</p>' });
+        '“Começaram o formulário” e “passaram do nome e e-mail” só existem a partir de ' + fmtShort(MED) + ' — estão no funil completo acima.</p>' });
   }
 
   var PG = [
     { k: 'visita', l: 'Visitaram a página', t: 'Visitas', w: 100, bg: '#ECEDF0', fg: C.ink },
     { k: 'inicio', l: 'Começaram o formulário', t: 'Começaram', a: 'Começaram o formulário', w: 84, bg: '#D5D8DD', fg: C.ink },
-    { k: 'etapa1', l: 'Passaram do 1º passo', t: '1º passo', a: 'Passaram do 1º passo', w: 68, bg: '#BCC0C7', fg: C.ink },
-    { k: 'dados', l: 'Chegaram ao último passo', t: 'Último passo', a: 'Chegaram ao último passo', w: 54, bg: C.ink, fg: '#fff' },
-    { k: 'lead', l: 'Viraram lead', t: 'Leads', a: 'Concluíram o cadastro', w: 42, bg: C.accent, fg: '#fff' },
+    { k: 'etapa1', l: 'Passaram do nome e e-mail', t: 'Nome e e-mail', a: 'Passaram do nome e e-mail', w: 68, bg: '#BCC0C7', fg: C.ink },
+    { k: 'dados', l: 'Preencheram WhatsApp e pet shop', t: 'WhatsApp e pet shop', a: 'Preencheram WhatsApp e pet shop', w: 54, bg: C.ink, fg: '#fff' },
+    { k: 'lead', l: 'Viraram lead', t: 'Leads', a: 'Escolheram o faturamento', w: 42, bg: C.accent, fg: '#fff' },
   ];
-  // depois do cadastro: os caminhos até o WhatsApp. Até FORM_ANALISE a / tinha 2 formulários (topo → simulador;
-  // de baixo → obrigado); desde então é a análise, com o resultado e o botão do WhatsApp na própria tela.
+  // depois do cadastro: os dois caminhos até o WhatsApp (formulário do topo → simulador; de baixo → obrigado).
   // Só dias desde WA_DESDE (início da medição), para leads antigos não puxarem as taxas para baixo.
   function depoisCard(fp) {
-    var d = state.data, de = d.since > WA_DESDE ? d.since : WA_DESDE, e = {}, an = {}, t = {};
+    var d = state.data, de = d.since > WA_DESDE ? d.since : WA_DESDE, e = {};
     if (d.until < WA_DESDE) return '';
-    (fp.dias || []).forEach(function (r) {
-      if (r.pagina !== 'atual' || r.d < de) return;
-      [t, r.d >= FORM_ANALISE ? an : e].forEach(function (z) { z[r.etapa] = (z[r.etapa] || 0) + r.n; });
-    });
-    t.wa = (t.wa_obrigado || 0) + (t.wa_resultado || 0);
+    (fp.dias || []).forEach(function (r) { if (r.pagina === 'atual' && r.d >= de) e[r.etapa] = (e[r.etapa] || 0) + r.n; });
+    e.wa = (e.wa_obrigado || 0) + (e.wa_resultado || 0);
     var head = { icon: 'chat', label: 'Depois do cadastro · caminho até o WhatsApp', legend: '<span>visitantes únicos · desde ' + fmtShort(de) + '</span>' };
-    if (!t.lead) return chartCard(Object.assign(head, { body: '<p class="cflow-note" style="margin:0">Nenhum lead na página desde ' + fmtShort(de) + '. Os cliques no WhatsApp são medidos desde ' + fmtShort(WA_DESDE) + '.</p>' }));
+    if (!e.lead) return chartCard(Object.assign(head, { body: '<p class="cflow-note" style="margin:0">Nenhum lead na página desde ' + fmtShort(de) + '. Os cliques no WhatsApp são medidos desde ' + fmtShort(WA_DESDE) + '.</p>' }));
     var sub = function (n, b, de) { return '<td><b style="font-weight:600">' + int.format(n || 0) + '</b>' + (b != null ? '<br><small class="muted">' + pctOf(n || 0, b) + ' ' + de + '</small>' : '') + '</td>'; };
     var row = function (l, n, b, de, ind) { return '<tr><td' + (ind ? ' style="padding-left:26px"' : '') + '>' + l + '</td>' + sub(n, b, de) + '</tr>'; };
-    var grupo = function (l) { return '<tr><td colspan="2" class="muted" style="padding-top:14px;font-size:12px">' + l + '</td></tr>'; };
-    var rows = row('<b>Viraram lead</b>', t.lead);
-    if (e.lead) rows += (an.lead ? grupo('Formulário antigo · antes de ' + fmtShort(FORM_ANALISE)) : '') +
+    var rows =
+      row('<b>Viraram lead</b>', e.lead) +
       row('Formulário do topo: viram o simulador', e.simulador, e.lead, 'dos leads') +
       row('Fizeram a simulação', e.resultado, e.simulador, 'de quem viu o simulador', true) +
       row('Clicaram no WhatsApp', e.wa_resultado, e.resultado, 'de quem simulou', true) +
       row('Formulário de baixo: chegaram no obrigado', e.obrigado, e.lead, 'dos leads') +
-      row('Clicaram no WhatsApp', e.wa_obrigado, e.obrigado, 'de quem chegou', true);
-    if (an.lead) rows += (e.lead ? grupo('Análise na página · desde ' + fmtShort(FORM_ANALISE)) : '') +
-      row('Viram o resultado da análise', an.resultado, an.lead, 'dos leads') +
-      row('Clicaram no WhatsApp', an.wa_resultado, an.resultado, 'de quem viu o resultado', true);
-    rows += row('<b>Clicaram no WhatsApp (total)</b>', t.wa, t.lead, 'dos leads') +
-      row('<b>Deixaram o e-mail no bot</b>', t.bot, t.wa, 'de quem clicou');
+      row('Clicaram no WhatsApp', e.wa_obrigado, e.obrigado, 'de quem chegou', true) +
+      row('<b>Clicaram no WhatsApp (total)</b>', e.wa, e.lead, 'dos leads') +
+      row('<b>Deixaram o e-mail no bot</b>', e.bot, e.wa, 'de quem clicou');
     return chartCard(Object.assign(head, {
       body: '<div class="table-scroll"><table class="com-table fp-table"><thead><tr><th>Etapa</th><th>Visitantes</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-        '<p class="cflow-note">Cliques medidos desde ' + fmtShort(WA_DESDE) + '; leads de antes disso não têm essas etapas. “Deixaram o e-mail no bot” liga o e-mail do cadastro ao aviso do BotConversa — quem clicou mas não mandou a mensagem, ou não deixou o e-mail, não entra.' +
-        (an.lead ? ' Na análise, quem fatura até R$ 50 mil não vê o botão do WhatsApp.' : '') + '</p>' }));
+        '<p class="cflow-note">Cliques medidos desde ' + fmtShort(WA_DESDE) + '; leads de antes disso não têm essas etapas. “Deixaram o e-mail no bot” liga o e-mail do cadastro ao aviso do BotConversa — quem clicou mas não mandou a mensagem, ou não deixou o e-mail, não entra.</p>' }));
   }
   var WA_DESDE = '2026-10-28';
-  // dia em que a / trocou o formulário de 2 passos (nome e e-mail → WhatsApp e pet shop → faturamento)
-  // pela análise de 5 perguntas, a mesma da /analise
-  var FORM_ANALISE = '2026-11-09';
-  function notaForm() {
-    return 'Na página atual (/), desde ' + fmtShort(FORM_ANALISE) + ' o formulário é a análise de 5 perguntas (o mesmo da /analise): “1º passo” = respondeu a 1ª pergunta; ' +
-      '“último passo” = respondeu as 5 e chegou ao nome, e-mail e WhatsApp. Antes: nome e e-mail → WhatsApp e pet shop → faturamento.';
-  }
   var FP_PAG = { atual: 'Página atual (/)', novo: 'Layout novo (/novo)' };
   function etapasCard() {
     var d = state.data, k = d.since + '|' + d.until, fp = state.fp;
@@ -1943,7 +1927,7 @@
     return chartCard(Object.assign(head, {
       body: '<p class="cflow-note" style="margin:0 0 12px">' + frases.join('<br>') + '</p>' +
         '<div class="table-scroll"><table class="com-table fp-table"><thead><tr><th>Etapa</th>' + pags.map(function (p) { return '<th>' + FP_PAG[p] + '</th>'; }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-        '<p class="cflow-note">Contagem do próprio site (cada visitante conta uma vez por etapa; robôs ficam de fora). Visitas incluem quem chega fora dos anúncios, por isso não batem com as visualizações do Meta.' + desde + ' ' + notaForm() + '</p>',
+        '<p class="cflow-note">Contagem do próprio site (cada visitante conta uma vez por etapa; robôs ficam de fora). Visitas incluem quem chega fora dos anúncios, por isso não batem com as visualizações do Meta.' + desde + '</p>',
     }));
   }
 

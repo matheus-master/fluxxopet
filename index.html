@@ -210,6 +210,7 @@
     }
     .field input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(18,50,200,0.09); }
     .field input::placeholder { color: var(--sage); }
+    .hint { font-size: 0.69rem; color: var(--sage); margin-top: 4px; padding-left: 2px; }
 
     .btn-sub {
       width: 100%; background: var(--red); color: var(--white);
@@ -223,71 +224,31 @@
     .btn-sub:hover  { background: #c42020; transform: translateY(-2px); }
     .btn-sub:active { transform: translateY(0); }
 
-    /* ── ANÁLISE GRATUITA: o mesmo formulário da /analise (5 perguntas → contato → resultado
-       na tela), no visual desta página. O JS do fim da página redesenha #fp-body a cada passo. ── */
-    #diagnostico { scroll-margin-top: 90px; }
-    #fp-body.fp-in { animation: formIn 0.24s ease-out; }   /* só na troca de passo, não no carregamento */
-    @keyframes formIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @media (prefers-reduced-motion: reduce) { #fp-body.fp-in { animation: none; } }
-    .fp-head[hidden] { display: none; }
-    .fp-head { margin-bottom: 22px; }
-    .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .progress-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); }
-    .progress-pct { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 0.8rem; color: var(--blue); }
-    .progress-track { width: 100%; height: 4px; background: var(--light); border-radius: 99px; overflow: hidden; }
-    .progress-fill { height: 100%; width: 0; background: var(--blue); border-radius: 99px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
-    .fp-col { display: flex; flex-direction: column; }
-    .fp-qhead { gap: 6px; margin-bottom: 16px; }
-    .fp-stack { gap: 16px; }
-    .fp-gap10 { gap: 10px; }
-    .fp-q { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.3rem; line-height: 1.2; color: var(--dark); }
-    .fp-muted { font-size: 0.8rem; color: var(--sage); line-height: 1.5; }
-    .fp-txt { font-size: 0.88rem; color: rgba(9,16,64,0.72); line-height: 1.6; }
-    .fp-center { text-align: center; }
-    .options { display: flex; flex-direction: column; gap: 8px; }
-    .opt {
-      width: 100%; min-height: 50px; background: var(--light); border: 1px solid rgba(9,16,64,0.10); border-radius: 10px;
-      padding: 12px 16px; font-family: 'Satoshi', sans-serif; font-size: 0.92rem; font-weight: 500; line-height: 1.35;
-      color: rgba(9,16,64,0.78); text-align: left; cursor: pointer;
-      display: flex; align-items: center; gap: 12px;
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
-    }
-    .opt::before { content: ''; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--sage); flex-shrink: 0; transition: border-color 0.15s, background 0.15s; }
-    .opt:hover { border-color: rgba(18,50,200,0.35); background: rgba(18,50,200,0.05); color: var(--dark); }
-    .opt:hover::before { border-color: var(--blue); }
-    .opt.selected { border-color: var(--blue); background: rgba(18,50,200,0.08); color: var(--dark); }
-    .opt.selected::before { border-color: var(--blue); background: var(--blue); box-shadow: inset 0 0 0 3px var(--light); }
-    .opt:focus-visible, .btn-sub:focus-visible, .btn-back:focus-visible, .btn-dark:focus-visible, .fp-wa:focus-visible { outline: 3px solid rgba(18,50,200,0.35); outline-offset: 2px; }
-    .fp-lbl { display: block; font-size: 0.78rem; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
-    #fp-body .field input { font-size: 1rem; }   /* 16px: o iPhone não dá zoom ao focar */
-    .fp-pill { align-self: flex-start; padding: 5px 12px; border-radius: 99px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em; }
-    .fp-pill.verde { background: #E9F7EF; color: #146C43; }
-    .fp-pill.azul { background: rgba(18,50,200,0.08); color: var(--blue); }
-    .fp-pill.vermelho { background: #FDECEC; color: #B42318; }
-    .fp-box { display: flex; flex-direction: column; gap: 6px; padding: 20px; border-radius: 12px; background: var(--mid); color: var(--white); }
-    .fp-box-lbl { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.72); }
-    .fp-box-val { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.35rem; line-height: 1.2; }
-    .fp-box-val.grande { font-size: 1.8rem; }
-    .fp-box-txt { font-size: 0.86rem; line-height: 1.5; color: rgba(255,255,255,0.88); }
-    .fp-box-nota { font-size: 0.72rem; line-height: 1.5; color: rgba(255,255,255,0.72); margin-top: 6px; }
-    .fp-finds { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 12px; background: var(--light); }
-    .fp-finds-lbl { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sage); }
-    .fp-find { display: flex; gap: 10px; align-items: flex-start; font-size: 0.86rem; line-height: 1.5; color: var(--dark); }
-    .fp-find svg { flex: none; margin-top: 1px; }
-    .fp-wa { display: flex; align-items: center; justify-content: center; min-height: 54px; padding: 0 16px; border-radius: 10px; background: #128C4A; color: var(--white); font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 0.95rem; text-align: center; text-decoration: none; transition: background 0.2s, transform 0.15s; }
-    .fp-wa:hover { background: #0F7A40; transform: translateY(-2px); }
-    .fp-wa.azul { background: var(--blue); }
-    .ferr { display: none; font-size: 0.78rem; color: var(--red); margin: -4px 0 6px; line-height: 1.4; }
+    /* Formulario em 2 etapas: nome+email, depois whatsapp+petshop. */
+    .step-count { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--sage); margin-bottom: 12px; }
+    .step-count b { color: var(--blue); font-weight: 700; }
+    #fstep2[hidden], #fstep1[hidden] { display: none; }
+    #fstep1, #fstep2 { animation: formIn 0.24s ease-out; }
+    .ferr { display: none; font-size: 0.78rem; color: var(--red);
+      margin: -4px 0 10px; line-height: 1.4; }
     .ferr.show { display: block; }
     .field.bad input { border-color: var(--red); }
     .btn-back { width: 100%; background: none; border: none; cursor: pointer;
       font-family: 'Satoshi', sans-serif; font-size: 0.8rem; color: var(--sage);
       padding: 12px 0 2px; transition: color 0.2s; }
     .btn-back:hover { color: var(--dark); }
-    .btn-back.fp-refazer { text-decoration: underline; padding-top: 2px; }
+
+    /* O formulario do hero comeca fechado e abre no clique do #revealBtn.
+       [hidden] explicito porque o display:flex/grid de um reset venceria o
+       comportamento padrao do atributo. */
+    #leadFormWrap[hidden] { display: none; }
+    #leadFormWrap { animation: formIn 0.28s ease-out; }
+    @keyframes formIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) { #leadFormWrap { animation: none; } }
 
     .trust {
       display: flex; align-items: center; justify-content: center; gap: 5px;
@@ -470,8 +431,7 @@
     .cta-title { font-size: clamp(2.1rem, 4vw, 3.2rem); line-height: 1.12; color: var(--white); margin-bottom: 18px; }
     .cta-sub { font-size: 1.05rem; color: rgba(255,255,255,0.78); max-width: 460px; margin: 0 auto 44px; line-height: 1.65; }
     .cta-card { background: white; border-radius: 12px; padding: 36px 32px; box-shadow: 0 12px 32px rgba(0,0,0,0.14); text-align: left; }
-    .cta-card-title { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.25rem; color: var(--dark); margin-bottom: 6px; }
-    .cta-card-sub { font-size: 0.9rem; color: var(--sage); line-height: 1.55; margin-bottom: 12px; }
+    .cta-card-title { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.25rem; color: var(--dark); margin-bottom: 20px; }
     .btn-dark {
       width: 100%; background: var(--red); color: var(--white);
       font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.04em; border: none; border-radius: 10px; padding: 15px 20px;
@@ -480,6 +440,33 @@
       transition: background 0.2s, transform 0.15s;
     }
     .btn-dark:hover { background: #c42020; transform: translateY(-2px) scale(1.02); }
+
+    /* ── SIMULATOR / RESULT ── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .sim-panel, .result-panel { animation: fadeUp 0.35s ease; }
+    .sim-title { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.25rem; color:var(--dark); text-align:center; margin-bottom:4px; letter-spacing:0.02em; }
+    .sim-greeting { font-size:0.8rem; color:var(--sage); text-align:center; margin-bottom:20px; line-height:1.5; }
+    .sim-lbl { font-size:0.77rem; font-weight:600; color:var(--dark); margin-bottom:6px; display:flex; align-items:center; gap:5px; }
+    .diag-card { background:var(--mid); border-radius:12px; padding:22px 18px; margin-bottom:12px; }
+    .diag-title { font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.95rem; color:var(--white); margin-bottom:14px; display:flex; align-items:center; gap:8px; letter-spacing:0.03em; line-height:1.2; }
+    .diag-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.15); font-size:0.8rem; }
+    .diag-row:last-of-type { border-bottom:none; }
+    .dlbl { color:rgba(255,255,255,0.9); display:flex; align-items:center; gap:5px; }
+    .dval { font-weight:700; color:var(--white); white-space:nowrap; font-variant-numeric:tabular-nums; flex-shrink:0; }
+    .diag-total { display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.22); border-radius:8px; padding:11px 14px; margin-top:10px; gap:8px; }
+    .diag-total .dlbl { font-size:0.84rem; color:rgba(255,255,255,0.9); font-weight:600; }
+    .diag-total .dval { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.1rem; }
+    .diag-anual { display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.32); border:1.5px solid rgba(255,208,0,0.45); border-radius:9px; padding:12px 14px; margin-top:8px; gap:8px; }
+    .diag-anual .dlbl { font-size:0.84rem; color:rgba(255,255,255,0.95); font-weight:700; }
+    .diag-anual .dval { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1.3rem; color:#FFD000; }
+    .diag-msg { text-align:center; margin-top:14px; }
+    .diag-msg p { font-size:0.79rem; color:rgba(255,255,255,0.92); font-weight:600; line-height:1.55; }
+    .diag-msg .hl-gold { color:#FFD000; margin-top:3px; }
+    .wa-card { background:var(--light); border:1px solid rgba(9,16,64,0.08); border-radius:12px; padding:18px 16px; text-align:center; }
+    .wa-card-title { font-family:'Satoshi',sans-serif; font-weight:700; font-size:1rem; color:var(--dark); margin-bottom:5px; line-height:1.2; }
+    .wa-card-sub { font-size:0.76rem; color:var(--sage); margin-bottom:14px; line-height:1.5; }
+    .btn-wa { width:100%; background:#25D366; color:var(--white); font-family:'Satoshi',sans-serif; font-weight:700; font-size:0.88rem; letter-spacing:0.04em; border:none; border-radius:10px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.2s,transform 0.15s; text-decoration:none; }
+    .btn-wa:hover { background:#1ebe5c; transform:translateY(-2px); }
 
     /* ── FOOTER ── */
     .footer { background: var(--dark); padding: 26px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
@@ -559,6 +546,49 @@
       .footer { padding: 20px 18px; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
     }
 
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; z-index: 1000;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .overlay.active { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--white); border: 1px solid rgba(9,16,64,0.10);
+      border-radius: 12px; width: 100%; max-width: 460px; overflow: hidden auto; max-height: 92vh;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.28s cubic-bezier(.22,.68,0,1.2);
+    }
+    .overlay.active .modal { transform: translateY(0) scale(1); }
+    .modal-progress { padding: 20px 28px 0; }
+    .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .progress-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); }
+    .progress-pct { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 0.9rem; color: var(--blue); }
+    .progress-track { width: 100%; height: 4px; background: var(--light); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 90%; background: var(--blue); border-radius: 99px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+    .modal-body { padding: 22px 28px 28px; }
+    .modal-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); margin-bottom: 6px; }
+    .modal-question { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.45rem; line-height: 1.1; color: var(--dark); margin-bottom: 18px; }
+    .options { display: flex; flex-direction: column; gap: 8px; }
+    .opt {
+      background: var(--light); border: 1px solid rgba(9,16,64,0.10); border-radius: 10px;
+      padding: 12px 16px; font-family: 'Satoshi', sans-serif; font-size: 0.9rem; font-weight: 500;
+      color: rgba(9,16,64,0.68); text-align: left; cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+    .opt::before { content: ''; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--sage); flex-shrink: 0; transition: border-color 0.15s, background 0.15s; }
+    .opt:hover { border-color: rgba(18,50,200,0.35); background: rgba(18,50,200,0.05); color: var(--dark); }
+    .opt:hover::before { border-color: var(--blue); }
+    .opt.selected { border-color: var(--blue); background: rgba(18,50,200,0.08); color: var(--dark); }
+    .opt.selected::before { border-color: var(--blue); background: var(--blue); box-shadow: inset 0 0 0 3px var(--light); }
+    .modal-success { display: none; flex-direction: column; align-items: center; text-align: center; padding: 8px 0 4px; gap: 12px; }
+    .success-ico { width: 52px; height: 52px; border-radius: 50%; background: rgba(18,50,200,0.09); border: 1px solid rgba(18,50,200,0.2); display: flex; align-items: center; justify-content: center; }
+    .success-ico svg { width: 24px; height: 24px; stroke: var(--blue); }
+    .success-title { font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 1.45rem; color: var(--dark); }
+    .success-desc { color: var(--sage); font-size: 0.84rem; line-height: 1.6; max-width: 320px; }
   </style>
 
   <script>
@@ -596,11 +626,11 @@
       <ul class="nav-links">
         <li><a href="#how">Como Funciona</a></li>
         <li><a href="#benefits">Benefícios</a></li>
-        <li><a href="#diagnostico">Análise grátis</a></li>
+        <li><a href="#leadForm">Diagnóstico</a></li>
       </ul>
       <div class="nav-right">
         <a href="/admin" class="nav-login">Admin</a>
-        <a href="#diagnostico" class="nav-cta">Fazer análise grátis</a>
+        <a href="#leadForm" class="nav-cta">Fazer diagnóstico</a>
       </div>
     </div>
   </nav>
@@ -642,21 +672,47 @@
         <p class="stats-note">*Resultados médios com base em diagnósticos realizados.</p>
       </div>
 
-      <!-- ANÁLISE GRATUITA — o mesmo formulário da /analise. O JS do fim da página troca o #fp-body a cada passo. -->
-      <div class="card" id="diagnostico">
-        <div id="fp-head" class="fp-head" hidden>
-          <div class="progress-meta"><span class="progress-label">Análise gratuita</span><span class="progress-pct" id="fp-step"></span></div>
-          <div class="progress-track"><div class="progress-fill" id="fp-bar"></div></div>
+      <div class="card">
+        <h2 class="card-title">Diagnóstico <span class="red">Gratuito</span></h2>
+        <p class="card-sub">Leva menos de 30 segundos</p>
+
+        <!-- O formulário começa fechado; este botão o revela (ver revealLeadForm) -->
+        <button type="button" class="btn-sub" id="revealBtn" onclick="revealLeadForm()">
+          Quero meu diagnóstico &rarr;
+        </button>
+
+        <div id="leadFormWrap" hidden>
+        <p class="step-count"><b id="stepNum">1</b> de 2</p>
+        <form id="leadForm" onsubmit="handleSubmit(event)" novalidate>
+          <!-- ETAPA 1 -->
+          <div id="fstep1">
+            <div class="field"><input type="text" id="nome" placeholder="Seu nome completo" autocomplete="name" /></div>
+            <div class="field"><input type="email" id="email" placeholder="Seu melhor e-mail" autocomplete="email" /></div>
+            <p class="ferr" id="ferr1"></p>
+            <button type="button" class="btn-sub" onclick="formStep2()">Continuar &rarr;</button>
+          </div>
+
+          <!-- ETAPA 2 -->
+          <div id="fstep2" hidden>
+            <div class="field">
+              <input type="tel" id="whatsapp" placeholder="(11) 99999-9999" autocomplete="tel" inputmode="numeric" />
+              <p class="hint">Enviaremos o diagnóstico por lá</p>
+            </div>
+            <div class="field"><input type="text" id="petshop" placeholder="Nome do seu Pet Shop" autocomplete="organization" /></div>
+            <p class="ferr" id="ferr2"></p>
+            <button type="submit" class="btn-sub">Continuar para o diagnóstico →</button>
+            <button type="button" class="btn-back" onclick="formStep1()">&larr; Voltar</button>
+          </div>
+        </form>
         </div>
-        <div id="fp-body" aria-live="polite">
-          <h2 class="card-title">Análise <span class="red">Gratuita</span></h2>
-          <p class="card-sub">Leva menos de 1 minuto</p>
-          <button type="button" class="btn-sub" data-act="start">Quero minha análise &rarr;</button>
-          <p class="trust">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            100% gratuito &bull; Sem spam &bull; Dados protegidos
-          </p>
-        </div>
+        <p class="trust" id="heroTrust">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          100% gratuito &bull; Sem spam &bull; Dados protegidos
+        </p>
+
+        <!-- (simulador agora abre no modal — ver #modalSimulator) -->
+
+
       </div>
     </div>
   </div>
@@ -670,7 +726,7 @@
       <div class="pv"></div>
       <div class="proof-item"><strong>100%</strong><span>diagnóstico gratuito</span></div>
       <div class="pv"></div>
-      <div class="proof-item"><strong>1 min</strong><span>para descobrir</span></div>
+      <div class="proof-item"><strong>30s</strong><span>para descobrir</span></div>
     </div>
   </div>
 
@@ -753,7 +809,7 @@
       <div class="steps">
         <div class="step">
           <div class="step-n">01</div>
-          <div><p class="step-t">Faça a Análise</p><p class="step-d">Responda 5 perguntas rápidas sobre o seu pet shop, só clicando. Leva menos de 1 minuto e o resultado aparece na hora.</p></div>
+          <div><p class="step-t">Faça o Diagnóstico</p><p class="step-d">Preencha o formulário em 30 segundos com os dados básicos do seu pet shop. Sem burocracia.</p></div>
         </div>
         <div class="step">
           <div class="step-n">02</div>
@@ -796,11 +852,16 @@
     <div class="cta-deco b">PET</div>
     <div class="cta-in">
       <h2 class="cta-title">Descubra quanto você pode recuperar</h2>
-      <p class="cta-sub">É grátis. Leva menos de 1 minuto. Pode mudar o caixa do seu negócio para sempre.</p>
+      <p class="cta-sub">É grátis. Leva 30 segundos. Pode mudar o caixa do seu negócio para sempre.</p>
       <div class="cta-card">
-        <p class="cta-card-title">Análise gratuita</p>
-        <p class="cta-card-sub">5 perguntas, só clicar. O resultado aparece na hora, na própria tela.</p>
-        <button type="button" class="btn-dark" data-act="ir">Quero minha análise &rarr;</button>
+        <p class="cta-card-title">Fazer diagnóstico gratuito</p>
+        <form id="leadFormB" onsubmit="handleSubmitB(event)">
+          <div class="field"><input type="text" id="nomeB" placeholder="Seu nome completo" autocomplete="given-name" required /></div>
+          <div class="field"><input type="text" id="petshopB" placeholder="Nome do seu Pet Shop" required /></div>
+          <div class="field"><input type="tel" id="whatsappB" placeholder="WhatsApp com DDD" inputmode="numeric" required /></div>
+          <div class="field"><input type="email" id="emailB" placeholder="E-mail" required /></div>
+          <button type="submit" class="btn-dark">Continuar para o diagnóstico →</button>
+        </form>
       </div>
     </div>
   </div>
@@ -818,7 +879,58 @@
     <span class="footer-copy">© 2025 Fluxxo Pet — Contabilidade para pets</span>
   </div>
 
+  <!-- MODAL -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-progress">
+        <div class="progress-meta">
+          <span class="progress-label">Diagnóstico em andamento</span>
+          <span class="progress-pct" id="progressPct">90%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <div class="modal-body" id="modalQuestion">
+        <p class="modal-eyebrow">Para finalizar, responda</p>
+        <h3 class="modal-question">Qual o faturamento mensal do seu Pet Shop?</h3>
+        <div class="options">
+          <button class="opt" onclick="selectOption(this,'Até R$30 mil')">Até R$30 mil</button>
+          <button class="opt" onclick="selectOption(this,'R$50 mil')">R$50 mil</button>
+          <button class="opt" onclick="selectOption(this,'R$100 mil')">R$100 mil</button>
+          <button class="opt" onclick="selectOption(this,'R$200 mil')">R$200 mil</button>
+          <button class="opt" onclick="selectOption(this,'Mais de R$200 mil')">Mais de R$200 mil</button>
+        </div>
+      </div>
+      <div class="modal-body" id="modalSuccess" style="display:none;">
+        <div class="modal-success" style="display:flex;">
+          <div class="success-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p class="success-title">Diagnóstico Confirmado!</p>
+          <p class="success-desc">Recebemos suas informações, <strong id="successName"></strong>. Enviaremos o resultado pelo WhatsApp em instantes.</p>
+        </div>
+      </div>
+      <div class="modal-body" id="modalSimulator" style="display:none;">
+        <p class="sim-title" style="text-align:center;">Simulador de Impostos</p>
+        <p class="sim-greeting" id="simGreeting" style="text-align:center;">Preencha os dados — leva menos de 1 minuto</p>
+        <div class="field">
+          <p class="sim-lbl">💰 Faturamento Mensal Total (R$)</p>
+          <input type="tel" id="simFat" placeholder="Ex: 50000" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <p class="sim-lbl">🐾 Valor vendas de Ração (R$)</p>
+          <input type="tel" id="simRacao" placeholder="Ex: 20000" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <p class="sim-lbl">💊 Valor Medicamentos e Higiene (R$)</p>
+          <input type="tel" id="simMed" placeholder="Ex: 10000" inputmode="numeric" />
+        </div>
+        <button class="btn-sub" onclick="calcSimulator()">Calcular minha perda agora →</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    var leadData = {};
+    var REVENUE_EVENTS = { 'Até R$30 mil':'Lead30k','R$50 mil':'Lead50k','R$100 mil':'Lead100k','R$200 mil':'Lead200k','Mais de R$200 mil':'Lead200kMais' };
+
     function genEventId() { return Date.now().toString(36) + Math.random().toString(36).substr(2,9); }
     function getCookie(n) { var m=document.cookie.match(new RegExp('(?:^|;)\\s*'+n+'=([^;]*)')); return m?decodeURIComponent(m[1]):''; }
 
@@ -901,211 +1013,241 @@
       });
     })();
 
-    /* ── ANÁLISE GRATUITA — o mesmo formulário da /analise ───────────────────
-       5 perguntas → nome, empresa, e-mail e WhatsApp → resultado na própria tela.
-       O lead vai para a /api/submit (pagina '/'); Lead + faixa só disparam depois de salvar.
-       Perguntas, textos e CONFIG são os mesmos da analise.html: mudou aqui, mude lá também. */
-    var CONFIG = {
-      whatsapp: '5571982346881',            // o mesmo WhatsApp do /obrigado e da /analise
-      linkConteudoGratis: '',               // Instagram ou material gratuito para quem fatura até R$ 50 mil (vazio = sem botão)
-      estimativas: {                        // faixas reais da carteira (imposto pago a mais por mês). Vazio = o resultado não mostra valor
-        f2: '',                             // R$ 50 mil a R$ 100 mil  (ex.: 'R$ 1.500 a R$ 4.000')
-        f3: '',                             // R$ 100 mil a R$ 300 mil
-        f4: ''                              // acima de R$ 300 mil
-      }
-    };
-    // faturamento e dificuldade com os valores do CRM: MQL (acima de R$ 50 mil), eventos de faixa e painéis leem igual
-    var FAT_CRM = { f1: 'R$50 mil', f2: 'R$100 mil', f3: 'R$200 mil', f4: 'Mais de R$200 mil' };
-    var DOR_CRM = { imposto: 'Imposto alto', sobra: 'Falta de lucro', preco: 'Precificação', contador: 'Contador genérico' };
-    var REVENUE_EVENTS = { 'R$50 mil': 'Lead50k', 'R$100 mil': 'Lead100k', 'R$200 mil': 'Lead200k', 'Mais de R$200 mil': 'Lead200kMais' };
-    // GA4: andamento da análise (mesmos nomes de evento da /analise)
-    function ga(evento, extra) { try { if (window.gtag) gtag('event', evento, extra || {}); } catch (e) {} }
+    function openModal() {
+      document.getElementById('progressFill').style.width='90%';
+      document.getElementById('progressPct').textContent='90%';
+      document.getElementById('modalQuestion').style.display='block';
+      document.getElementById('modalSuccess').style.display='none';
+      document.querySelectorAll('.opt').forEach(function(b){b.classList.remove('selected');b.disabled=false;});
+      document.getElementById('overlay').classList.add('active');
+      document.body.style.overflow='hidden';
+    }
 
-    (function () {
-      var QS = [
-        { id: 'negocio', title: 'Qual é o seu negócio?', options: [
-          ['petshop', 'Pet shop'], ['clinica', 'Clínica veterinária'], ['ambos', 'Pet shop + clínica'], ['agro', 'Agropecuária / casa de ração']] },
-        { id: 'fat', title: 'Quanto a empresa fatura por mês, em média?', hint: 'Só para calibrar a análise. Ninguém vai pedir comprovante.', options: [
-          ['f1', 'Até R$ 50 mil'], ['f2', 'De R$ 50 mil a R$ 100 mil'], ['f3', 'De R$ 100 mil a R$ 300 mil'], ['f4', 'Acima de R$ 300 mil']] },
-        { id: 'dor', title: 'O que mais te incomoda hoje?', options: [
-          ['imposto', 'Sinto que pago imposto demais'], ['sobra', 'A loja vende, mas o dinheiro não sobra'], ['preco', 'Não sei se banho e tosa ou consultas dão lucro'], ['contador', 'Meu contador só manda guia e some']] },
-        { id: 'contador', title: 'Seu contador já revisou com você quais produtos do estoque têm imposto já recolhido (monofásico e ICMS-ST)?', options: [
-          ['sim', 'Sim, revisamos isso com frequência'], ['nao', 'Não, nunca falou disso comigo'], ['naosei', 'Não sei o que é isso']] },
-        { id: 'futuro', title: 'Se nada mudar nos próximos 12 meses, o que acontece?', options: [
-          ['estag', 'Continuo trabalhando muito e sem crescer'], ['aperto', 'O caixa aperta ainda mais'], ['expandir', 'Perco a chance de investir ou abrir outra unidade'], ['ok', 'Nada, está tudo bem']] }
-      ];
-      var LABELS = {}; QS.forEach(function (q) { q.options.forEach(function (o) { LABELS[q.id + ':' + o[0]] = o[1]; }); });
+    var TAX_RATES = [
+      {ate:180000,   pisCofins:0.0062, icms:0.0136},
+      {ate:360000,   pisCofins:0.0113, icms:0.0248},
+      {ate:720000,   pisCofins:0.0147, icms:0.0318},
+      {ate:1800000,  pisCofins:0.0166, icms:0.0358},
+      {ate:3600000,  pisCofins:0.0222, icms:0.0479},
+      {ate:Infinity, pisCofins:0.0654, icms:0.0479}
+    ];
 
-      var st = { step: -1, a: {}, nome: '', empresa: '', email: '', whats: '' };
-      var $ = function (id) { return document.getElementById(id); };
-      var esc = function (t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-      var WARN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E53030" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 8v5"/><path d="M12 16.5v.5"/><circle cx="12" cy="12" r="9.5"/></svg>';
+    function fmtBRL(v) {
+      return 'R$ ' + v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+    }
 
-      function analyze(a) {
-        var f = [];
-        if (a.contador === 'nao' || a.contador === 'naosei') f.push('Seu estoque provavelmente nunca foi revisado item a item. É aqui que mais aparece imposto pago em dobro no setor pet.');
-        if (a.dor === 'imposto') f.push('Você já sente que paga imposto demais. Em empresas pet, isso costuma ter causa técnica, e tem correção.');
-        if (a.dor === 'sobra') f.push('Vender bem e não ver dinheiro sobrar é sinal de vazamento: imposto, preço ou custo fora do lugar.');
-        if (a.dor === 'preco') f.push('Sem o custo real de cada serviço, é comum um serviço muito vendido estar dando prejuízo.');
-        if (a.dor === 'contador') f.push('Sem acompanhamento, ninguém está procurando economia para você. Ela só aparece quando alguém procura.');
-        if (a.futuro && a.futuro !== 'ok') f.push('Você mesmo projeta um próximo ano difícil se nada mudar. Quanto antes agir, menos dinheiro fica para trás.');
-        if (a.fat === 'f3' || a.fat === 'f4') f.push('Na sua faixa de faturamento, pequenos erros de apuração viram valores altos ao longo do ano.');
-        if (!f.length) f.push('Mesmo com tudo em dia, uma revisão por quem é do setor pet costuma encontrar ajustes de imposto e de preço.');
-        return f;
-      }
-      async function salvarLead() {
-        var a = st.a, faturamento = FAT_CRM[a.fat] || '', whats = st.whats.replace(/\D/g, ''), email = st.email.trim().toLowerCase();
-        // as respostas completas vão no "sobre o negócio" do lead (aparece no admin)
-        var resumo = 'Análise / · ' + ['Negócio: ' + (LABELS['negocio:' + a.negocio] || '—'), 'Faturamento: ' + (LABELS['fat:' + a.fat] || '—'),
-          'Mais incomoda: ' + (LABELS['dor:' + a.dor] || '—'), 'Contador revisou o estoque: ' + (LABELS['contador:' + a.contador] || '—'),
-          'Se nada mudar: ' + (LABELS['futuro:' + a.futuro] || '—')].join(' · ');
-        var res = null;
-        try {
-          var ctrl = new AbortController(), t = setTimeout(function () { ctrl.abort(); }, 10000);
-          var r = await fetch('/api/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
-            body: JSON.stringify({ nome: st.nome.trim(), petshop: st.empresa.trim(), whatsapp: whats, email: email, pagina: '/', faturamento: faturamento,
-              dificuldade: DOR_CRM[a.dor] || '', sobre_negocio: resumo }) });
-          clearTimeout(t);
-          res = await r.json();
-        } catch (e) { res = null; }
-        if (!res || !res.ok) { ga('form_api_error', { form_id: 'analise' }); return false; }
-        var ud = { em: email, ph: whats, fn: st.nome.trim() };
-        track('Lead', ud, { currency: 'BRL', faturamento: faturamento });
-        if (REVENUE_EVENTS[faturamento]) track(REVENUE_EVENTS[faturamento], ud, { faturamento: faturamento, currency: 'BRL' });
-        ga('generate_lead', { faturamento: faturamento, qualificado: a.fat !== 'f1' });
-        etapa('lead');
-        return true;
-      }
+    function showSimulator() {
+      etapa('simulador');
+      document.getElementById('progressFill').style.width = '95%';
+      document.getElementById('progressPct').textContent = '95%';
+      document.getElementById('modalQuestion').style.display = 'none';
+      document.getElementById('modalSuccess').style.display = 'none';
+      document.getElementById('modalSimulator').style.display = 'block';
+      document.getElementById('simGreeting').textContent = 'Olá, ' + leadData.nome + '! Preencha os dados — leva menos de 1 minuto';
+      document.getElementById('overlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
 
-      function render() {
-        var total = QS.length, step = st.step, body = $('fp-body');
-        body.classList.remove('fp-in'); void body.offsetWidth; body.classList.add('fp-in');   // reinicia a entrada do passo
-        $('fp-head').hidden = step < 0;
-        $('fp-step').textContent = step < total ? 'Pergunta ' + (step + 1) + ' de ' + total : step === total ? 'Último passo' : 'Resultado';
-        $('fp-bar').style.width = (step > total ? 100 : Math.round(((step + 1) / (total + 1)) * 100)) + '%';
+    function calcSimulator() {
+      var fat = parseFloat((document.getElementById('simFat').value||'').replace(/\D/g,''))||0;
+      var racao = parseFloat((document.getElementById('simRacao').value||'').replace(/\D/g,''))||0;
+      var med = parseFloat((document.getElementById('simMed').value||'').replace(/\D/g,''))||0;
+      if (!fat) { document.getElementById('simFat').focus(); return; }
+      var fatAnual = fat * 12;
+      var bracket = TAX_RATES.find(function(b){ return fatAnual <= b.ate; }) || TAX_RATES[TAX_RATES.length-1];
+      var perdaICMS = racao * bracket.icms;
+      var perdaPIS = med * bracket.pisCofins;
+      var mensal = perdaICMS + perdaPIS;
+      var anual = mensal * 12;
+      if (leadData.id) {
+        fetch('/api/submit',{ method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ id:leadData.id, sim_fat:fat, sim_racao:racao, sim_med:med, perda_icms:perdaICMS, perda_pis:perdaPIS, perda_mensal:mensal, perda_anual:anual })
+        }).catch(function(){});
+      }
+      sessionStorage.setItem('sim_result', JSON.stringify({
+        nome: leadData.nome, petshop: leadData.petshop,
+        email: leadData.email||'', whatsapp: leadData.whatsapp||'',
+        icms: perdaICMS, pis: perdaPIS, mensal: mensal, anual: anual
+      }));
+      window.location.href = '/resultado';
+    }
 
-        if (step < total) {
-          var q = QS[step], html = '<div class="fp-col fp-qhead"><h2 class="fp-q">' + esc(q.title) + '</h2>' +
-            (q.hint ? '<p class="fp-muted">' + esc(q.hint) + '</p>' : '') + '</div><div class="options">';
-          q.options.forEach(function (o) {
-            html += '<button type="button" class="opt' + (st.a[q.id] === o[0] ? ' selected' : '') + '" data-act="pick" data-q="' + q.id + '" data-v="' + o[0] + '">' + esc(o[1]) + '</button>';
-          });
-          html += '</div>' + (step > 0 ? '<button type="button" class="btn-back" data-act="back">&larr; Voltar</button>' : '');
-          body.innerHTML = html;
-          return;
-        }
-        if (step === total) {
-          body.innerHTML =
-            '<form class="fp-col" novalidate data-form="1">' +
-              '<div class="fp-col fp-qhead"><span class="fp-pill verde">Sua análise está pronta</span>' +
-              '<h2 class="fp-q">Para quem liberamos o resultado?</h2>' +
-              '<p class="fp-muted">Ele aparece aqui na tela assim que você clicar. Usamos seu e-mail e WhatsApp só para falar sobre a sua análise.</p></div>' +
-              field('fp-nome', 'Seu nome', 'text', 'name', 'Ex.: Mariana Souza', st.nome) +
-              field('fp-empresa', 'Nome da empresa', 'text', 'organization', 'Ex.: Pet Shop Amigo Fiel', st.empresa) +
-              field('fp-email', 'Seu melhor e-mail', 'email', 'email', 'Ex.: mariana@amigofiel.com.br', st.email) +
-              field('fp-whats', 'WhatsApp com DDD', 'tel', 'tel', '(71) 99999-9999', st.whats) +
-              '<p class="ferr" id="fp-err" role="alert"></p>' +
-              '<button type="submit" class="btn-sub">Ver meu resultado agora &rarr;</button>' +
-              '<p class="trust">Gratuito &bull; Sem spam &bull; Seus dados ficam protegidos</p>' +
-              '<button type="button" class="btn-back" data-act="back">&larr; Voltar</button>' +
-            '</form>';
-          return;
-        }
-        // resultado
-        var a = st.a, small = a.fat === 'f1', est = CONFIG.estimativas[a.fat] || '';
-        etapa('resultado'); ga('analise_resultado', { qualificado: !small });
-        var nome = (st.nome || '').trim().split(' ')[0];
-        var finds = analyze(a).map(function (t) { return '<div class="fp-find">' + WARN + '<span>' + esc(t) + '</span></div>'; }).join('');
-        var msg = 'Olá! Sou ' + st.nome.trim() + (st.empresa.trim() ? ' da ' + st.empresa.trim() : '') + '. Fiz a análise da Fluxxo Pet' + (est ? ' (resultado: ' + est + ' por mês)' : '') + ' e quero entender quanto do meu lucro dá para recuperar.';
-        var wa = 'https://wa.me/' + CONFIG.whatsapp.replace(/\D/g, '') + '?text=' + encodeURIComponent(msg);
-        var html = '<div class="fp-col fp-stack">';
-        if (small) {
-          html += '<div class="fp-col fp-gap10"><span class="fp-pill azul">Análise concluída</span>' +
-            '<h2 class="fp-q">' + (nome ? esc(nome) + ', o' : 'O') + 'brigado por responder!</h2>' +
-            '<p class="fp-txt">Hoje nosso acompanhamento completo é pensado para empresas pet que faturam acima de R$ 50 mil por mês. Mas os pontos abaixo já valem atenção, e vamos te mandar conteúdos práticos para corrigir isso por conta própria.</p></div>';
-        } else {
-          html += '<div class="fp-col fp-gap10"><span class="fp-pill vermelho">Alto potencial de economia</span>' +
-            '<h2 class="fp-q">' + (nome ? esc(nome) + ', pela' : 'Pela') + ' análise, seu negócio pode estar perdendo lucro em imposto todo mês.</h2>' +
-            '<p class="fp-txt">Um especialista no setor pet confirma com você, em uma conversa rápida, quanto disso dá para corrigir já no próximo mês e quanto dá para recuperar dos meses anteriores.</p></div>' +
-            (est ? '<div class="fp-box"><span class="fp-box-lbl">Sua análise: imposto pago a mais</span>' +
-              '<span class="fp-box-val grande">' + esc(est) + '</span>' +
-              '<span class="fp-box-txt">por mês, que poderiam ficar no seu caixa</span>' +
-              '<span class="fp-box-nota">Estimativa baseada em empresas pet da mesma faixa de faturamento atendidas pela Fluxxo Pet. O valor exato do seu negócio é confirmado pelo especialista.</span></div>'
-            : '<div class="fp-box"><span class="fp-box-lbl">Próximo passo</span>' +
-              '<span class="fp-box-val">Descobrir quanto volta para o seu caixa</span>' +
-              '<span class="fp-box-txt">Com as suas respostas, o especialista calcula o valor exato do seu negócio na conversa.</span></div>');
-        }
-        html += '<div class="fp-finds"><span class="fp-finds-lbl">O que encontramos nas suas respostas</span>' + finds + '</div>';
-        html += small
-          ? (CONFIG.linkConteudoGratis ? '<a class="fp-wa azul" href="' + esc(CONFIG.linkConteudoGratis) + '" target="_blank" rel="noopener">Quero receber os conteúdos gratuitos</a>' : '') + '<p class="fp-muted fp-center">Quando sua empresa crescer, estaremos aqui.</p>'
-          : '<a class="fp-wa" href="' + esc(wa) + '" target="_blank" rel="noopener" data-act="wa">Falar com um especialista no WhatsApp</a><p class="fp-muted fp-center">Resposta em horário comercial &middot; Sem compromisso</p>';
-        html += '<button type="button" class="btn-back fp-refazer" data-act="restart">Refazer a análise</button></div>';
-        body.innerHTML = html;
-      }
-      function field(id, label, type, ac, ph, val) {
-        return '<div class="field"><label class="fp-lbl" for="' + id + '">' + label + '</label>' +
-          '<input id="' + id + '" type="' + type + '" autocomplete="' + ac + '" placeholder="' + ph + '" value="' + esc(val || '') + '"' + (type === 'tel' ? ' inputmode="tel"' : '') + '></div>';
-      }
-      // mensagem de erro do contato; marca o campo e põe o foco nele
-      function erro(id, texto) {
-        var err = $('fp-err'); err.textContent = texto || ''; err.classList.toggle('show', !!texto);
-        document.querySelectorAll('#fp-body .field.bad').forEach(function (c) { c.classList.remove('bad'); });
-        if (id) { var el = $(id); el.closest('.field').classList.add('bad'); el.focus(); }
-      }
-      // mantém o card à vista (o menu do topo é fixo: 70px)
-      function scrollCard() {
-        var c = $('diagnostico'), r = c.getBoundingClientRect();
-        if (r.top < 70 || r.bottom > window.innerHeight - 8) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-      function comecar() { st.step = 0; ga('analise_inicio'); etapa('inicio'); render(); }
+    // O card do hero mostra so o botao; o formulario aparece no clique.
+    // Ocupa menos altura, principalmente no mobile, onde os 4 campos comiam
+    // quase uma tela inteira antes dos numeros de prova social.
+    function revealLeadForm() {
+      var wrap = document.getElementById('leadFormWrap');
+      if (!wrap || !wrap.hidden) return false;      // ja esta aberto
+      wrap.hidden = false;
 
-      document.addEventListener('click', function (e) {
-        var el = e.target.closest('[data-act]'); if (!el) return;
-        var act = el.getAttribute('data-act');
-        if (act === 'start') { comecar(); scrollCard(); }
-        // botão do fim da página: leva até a análise do topo e já começa (se ainda não começou)
-        else if (act === 'ir') { if (st.step < 0) comecar(); $('diagnostico').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-        else if (act === 'pick') {
-          st.a[el.getAttribute('data-q')] = el.getAttribute('data-v'); ga('analise_pergunta', { pergunta: st.step + 1 });
-          if (st.step === 0) etapa('etapa1');
-          st.step++; if (st.step === QS.length) { etapa('dados'); ga('form_start', { form_id: 'analise' }); }
-          render(); scrollCard();
-        }
-        else if (act === 'back') { st.step = Math.max(0, st.step - 1); render(); }
-        else if (act === 'restart') { st.step = 0; st.a = {}; render(); scrollCard(); }
-        else if (act === 'wa') { ga('clique_whatsapp'); etapa('wa_resultado'); }
-      });
-      document.addEventListener('input', function (e) {
-        var id = e.target.id;
-        if (id === 'fp-nome') st.nome = e.target.value;
-        else if (id === 'fp-empresa') st.empresa = e.target.value;
-        else if (id === 'fp-whats') st.whats = e.target.value;
-        else if (id === 'fp-email') st.email = e.target.value;
-        else return;
-        var c = e.target.closest('.field'); if (c) c.classList.remove('bad');
-      });
-      document.addEventListener('submit', function (e) {
-        if (!e.target.getAttribute('data-form')) return;
-        e.preventDefault();
-        var d = st.whats.replace(/\D/g, '');
-        if (!st.nome.trim()) return erro('fp-nome', 'Digite seu nome para liberar o resultado.');
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(st.email.trim())) return erro('fp-email', 'Confira o e-mail: por exemplo, nome@empresa.com.br.');
-        if (d.length < 10 || d.length > 13) return erro('fp-whats', 'Confira o WhatsApp: DDD + número, por exemplo (71) 99999-9999.');
-        var btn = e.target.querySelector('button[type=submit]'); if (btn.disabled) return;
-        var rotulo = btn.innerHTML; btn.disabled = true; btn.innerHTML = 'Enviando…'; erro('', '');
-        salvarLead().then(function (ok) {
-          btn.disabled = false; btn.innerHTML = rotulo;
-          if (!ok) { erro('', 'Não conseguimos enviar agora. Confira sua internet e toque em "Ver meu resultado" de novo. Seus dados continuam aqui.'); return; }
-          st.step = QS.length + 1; render(); scrollCard();
-        });
-      });
+      var btn = document.getElementById('revealBtn');
+      if (btn) btn.style.display = 'none';
+      etapa('inicio');
+
+      // Mede quantos abrem o formulario vs. quantos enviam. Sem isso nao da
+      // pra saber se o botao ajudou ou atrapalhou a conversao.
+      try {
+        gtag('event', 'form_reveal', { send_to: 'G-3L4M9LVX7W', form_id: 'hero_leadForm' });
+      } catch (e) {}
+
+      // Foco so no desktop: no celular o teclado subindo sozinho atrapalha.
+      if (window.innerWidth >= 900) {
+        var f = document.getElementById('nome');
+        if (f) f.focus({ preventScroll: true });
+      }
+      return true;
+    }
+
+    // ── Formulario do hero em 2 etapas ────────────────────────────────────────
+    // Etapa 1 pede nome e e-mail; etapa 2, WhatsApp e pet shop. Menos campos de
+    // cara reduz o atrito, e quem investe na 1a tende a terminar a 2a.
+    // O form tem novalidate: a validacao HTML nativa nao serve aqui, porque
+    // campo required escondido na outra etapa trava o submit sem dizer o porque.
+    function fmark(id, ok) {
+      var el = document.getElementById(id);
+      if (el && el.closest('.field')) el.closest('.field').classList.toggle('bad', !ok);
+      return ok;
+    }
+    function fmsg(boxId, texto) {
+      var b = document.getElementById(boxId);
+      if (!b) return;
+      b.textContent = texto || '';
+      b.classList.toggle('show', !!texto);
+    }
+    function fdigitos(v) {
+      var d = (v || '').replace(/\D/g, '');
+      // Quem digita "+55 11 99999-9999" seria barrado por ter 13 digitos.
+      // Tira o codigo do pais antes de contar.
+      if (d.length > 11 && d.slice(0, 2) === '55') d = d.slice(2);
+      return d;
+    }
+
+    // Mascara do telefone. Sem ela, quem colava "+55 (71) 98234-6881" ficava
+    // preso: o campo cortava no limite de caracteres, sobravam 9 digitos, a
+    // validacao recusava e nao dava pra digitar mais nada. A mascara descarta
+    // o que nao e digito e limita a 11, entao o campo nunca entra nesse estado.
+    function mascaraTelefone(v) {
+      var d = fdigitos(v).slice(0, 11);
+      if (d.length <= 2)  return d.length ? '(' + d : '';
+      if (d.length <= 6)  return '(' + d.slice(0,2) + ') ' + d.slice(2);
+      if (d.length <= 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+      return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
+    }
+    (function(){
+      var w = document.getElementById('whatsapp');
+      if (w) w.addEventListener('input', function(){ this.value = mascaraTelefone(this.value); });
     })();
 
+    function formStep2() {
+      var nome  = document.getElementById('nome').value.trim();
+      var email = document.getElementById('email').value.trim();
+      var okN = fmark('nome',  nome.length >= 3);
+      var okE = fmark('email', /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email));
+      if (!okN || !okE) {
+        fmsg('ferr1', !okN ? 'Digite seu nome completo.' : 'Digite um e-mail válido.');
+        document.getElementById(!okN ? 'nome' : 'email').focus();
+        return;
+      }
+      fmsg('ferr1', '');
+      etapa('etapa1');
+      document.getElementById('fstep1').hidden = true;
+      document.getElementById('fstep2').hidden = false;
+      document.getElementById('stepNum').textContent = '2';
+      // Mede a passagem de etapa: separa "nao comecou" de "parou no meio".
+      try { gtag('event','form_step_1',{ send_to:'G-3L4M9LVX7W', form_id:'hero_leadForm' }); } catch(e){}
+      if (window.innerWidth >= 900) document.getElementById('whatsapp').focus({ preventScroll: true });
+    }
+
+    ['leadForm', 'leadFormB'].forEach(function (id) {
+      var f = document.getElementById(id);
+      if (f) f.addEventListener('focusin', function () { etapa('inicio'); });
+    });
+
+    function formStep1() {
+      document.getElementById('fstep2').hidden = true;
+      document.getElementById('fstep1').hidden = false;
+      document.getElementById('stepNum').textContent = '1';
+      fmsg('ferr2', '');
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      var whats = document.getElementById('whatsapp').value.trim();
+      var pet   = document.getElementById('petshop').value.trim();
+      var nd    = fdigitos(whats).length;
+      var okW = fmark('whatsapp', nd === 10 || nd === 11);
+      var okP = fmark('petshop',  pet.length >= 2);
+      if (!okW || !okP) {
+        fmsg('ferr2', !okW ? 'Informe um WhatsApp válido com DDD.' : 'Informe o nome do seu pet shop.');
+        document.getElementById(!okW ? 'whatsapp' : 'petshop').focus();
+        return;
+      }
+      fmsg('ferr2', '');
+      leadData = { nome:document.getElementById('nome').value.trim(), petshop:pet, whatsapp:whats, email:document.getElementById('email').value.trim(), _formSource:'hero' };
+      track('Lead',{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{currency:'BRL'});
+      etapa('dados');
+      openModal();
+    }
+
+    // Tira a marca de erro assim que a pessoa corrige
+    ['nome','email','whatsapp','petshop'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', function(){
+        if (el.closest('.field')) el.closest('.field').classList.remove('bad');
+      });
+    });
+
+    function handleSubmitB(e) {
+      e.preventDefault();
+      leadData = { nome:document.getElementById('nomeB').value.trim(), petshop:document.getElementById('petshopB').value.trim(), whatsapp:document.getElementById('whatsappB').value.trim(), email:document.getElementById('emailB').value.trim(), _formSource:'cta' };
+      track('Lead',{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{currency:'BRL'});
+      etapa('dados');
+      openModal();
+    }
+
+    function selectOption(btn, value) {
+      document.querySelectorAll('.opt').forEach(function(b){b.classList.remove('selected');});
+      btn.classList.add('selected');
+      document.querySelectorAll('.opt').forEach(function(b){b.disabled=true;});
+      leadData.faturamento = value;
+      etapa('lead');
+      // /obrigado e /resultado contam as etapas seguintes no funil desta página
+      try { sessionStorage.setItem('fx_pag', location.pathname); } catch (x) {}
+      var rev = REVENUE_EVENTS[value];
+      if (rev) track(rev,{em:leadData.email,ph:leadData.whatsapp,fn:leadData.nome},{faturamento:value,currency:'BRL'});
+      fetch('/api/submit',{ method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({nome:leadData.nome,petshop:leadData.petshop,whatsapp:leadData.whatsapp,email:leadData.email||'',faturamento:value})
+      }).then(function(r){return r.json();}).then(function(res){ if(res&&res.id) leadData.id=res.id; }).catch(function(){});
+      setTimeout(function(){document.getElementById('progressFill').style.width='100%';document.getElementById('progressPct').textContent='100%';},120);
+      setTimeout(function(){document.getElementById('successName').textContent=leadData.nome;document.getElementById('modalQuestion').style.display='none';document.getElementById('modalSuccess').style.display='block';},700);
+      if (leadData._formSource === 'hero') {
+        setTimeout(function(){ showSimulator(); }, 2200);
+      } else {
+        sessionStorage.setItem('lead_data', JSON.stringify({
+          nome:leadData.nome, petshop:leadData.petshop,
+          whatsapp:leadData.whatsapp, email:leadData.email||'', faturamento:value
+        }));
+        setTimeout(function(){window.location.href='/obrigado';},3000);
+      }
+    }
+
+    function closeModal() { document.getElementById('overlay').classList.remove('active'); document.body.style.overflow=''; }
+    document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
     document.querySelectorAll('a[href^="#"]').forEach(function(a){
       a.addEventListener('click',function(e){
         var href = a.getAttribute('href');
         // href="#" puro (o logo) quebrava aqui: querySelector('#') lanca excecao
         if (!href || href === '#') return;
+
+        // Os links "Diagnostico" apontam pro formulario, que agora comeca
+        // fechado. Abre antes, senao rola ate um elemento invisivel.
+        if (href === '#leadForm') {
+          revealLeadForm();
+          var card = document.querySelector('.hero .card');
+          if (card) { e.preventDefault(); card.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+        }
+
         var el = document.querySelector(href);
         if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
       });
