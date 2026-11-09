@@ -386,7 +386,6 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;
       <p class="md-eyebrow">Para finalizar, responda</p>
       <h3 class="md-q">Qual o faturamento mensal do seu Pet Shop?</h3>
       <div class="md-opts">
-        <button type="button" class="fp-opt" data-fat="Até R$30 mil">Até R$30 mil</button>
         <button type="button" class="fp-opt" data-fat="R$50 mil">R$50 mil</button>
         <button type="button" class="fp-opt" data-fat="R$100 mil">R$100 mil</button>
         <button type="button" class="fp-opt" data-fat="R$200 mil">R$200 mil</button>
@@ -417,7 +416,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;
 // da raiz: Lead no passo do WhatsApp e pet shop, Lead<faixa> ao escolher o faturamento. "fx_pag" faz o
 // /resultado contar as etapas seguintes (simulador, resultado, wa_resultado) no funil desta página.
 (function () {
-  var REVENUE_EVENTS = { 'Até R$30 mil': 'Lead30k', 'R$50 mil': 'Lead50k', 'R$100 mil': 'Lead100k', 'R$200 mil': 'Lead200k', 'Mais de R$200 mil': 'Lead200kMais' };
+  var REVENUE_EVENTS = { 'R$50 mil': 'Lead50k', 'R$100 mil': 'Lead100k', 'R$200 mil': 'Lead200k', 'Mais de R$200 mil': 'Lead200kMais' };
   var leadData = {};
   var $ = function (id) { return document.getElementById(id); };
 

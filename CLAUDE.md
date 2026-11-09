@@ -42,12 +42,12 @@
   repetida é um arquivo só). Para mudar o visual, edite `analise.html` direto.
 - **Formulário = o antigo da raiz `/`** (pedido do dono em 2026-11-09; a análise de 5 perguntas do modelo saiu):
   card "Diagnóstico Gratuito" com o botão que abre o form em 2 passos (nome e e-mail → WhatsApp com máscara e
-  pet shop), janela do faturamento (Até R$30 mil … Mais de R$200 mil), confirmação e **simulador** → `/resultado`.
+  pet shop), janela do faturamento (R$50 mil … Mais de R$200 mil; **sem a faixa de 30 mil**, a pedido do dono), confirmação e **simulador** → `/resultado`.
   Mesma lógica e mesmos textos do `index.html`, no visual da `/analise` (classes `fp-*`, janela `.ov/.md`).
   Os links "Fazer análise grátis" (topo) e o CTA do fim (`#diagnostico`) já abrem o formulário. Os 2 itens do hero
   que falavam da análise viraram "Leva menos de 30 segundos…" e "Simulação do seu imposto na hora".
 - Funil do Meta: mesmo pixel `1338198531534558` + GA4 + `/tracker` (CAPI) do `/`. Mesmos eventos da raiz:
-  PageView; **Lead** ao passar do WhatsApp e pet shop; faixa (Lead30k…Lead200kMais) ao escolher o faturamento;
+  PageView; **Lead** ao passar do WhatsApp e pet shop; faixa (Lead50k…Lead200kMais) ao escolher o faturamento;
   ViewContent no `/resultado`. GA4: `form_reveal`, `form_step_1`.
 - Lead na `/api/submit` ao escolher o faturamento: nome, e-mail, WhatsApp, pet shop, faturamento e
   **`pagina: '/analise'`** (identificador no CRM); o simulador completa o lead pelo `id`. Com e-mail → ActiveCampaign.
