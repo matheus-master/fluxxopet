@@ -30,9 +30,9 @@
 
 | Rota | Arquivo | O que é |
 |---|---|---|
-| `/` | `index.html` | Quiz de diagnóstico — **é o link do bot e dos anúncios do Meta** |
-| `/obrigado` | `obrigado.html` | Obrigado do quiz |
-| `/resultado` | `resultado.html` | Resultado do simulador |
+| `/` | `index.html` | Landing com a **análise gratuita** — desde 2026-11-09 o mesmo formulário da `/analise` (ver "Formulário da /" abaixo) — **é o link do bot e dos anúncios do Meta** |
+| `/obrigado` | `obrigado.html` | Obrigado do quiz (usado pelo `/novo` e pela `/simulacao`; a `/` não manda mais para cá desde 2026-11-09) |
+| `/resultado` | `resultado.html` | Resultado do simulador (usado pelo `/novo` e pela `/simulacao`; a `/` não usa mais) |
 | `/novo` | `novo.html` | Quiz com o **layout novo** (escuro, qualificação em 3 passos), link alternativo para teste — `noindex`, mesmo pixel e mesma `/api/submit`; leads saem com `source_url` …/novo |
 | `/analise` | `analise.html` | **Página nova** (2026-11-09, modelo `../fluxxo-pet-analise.html`): landing "quanto do seu lucro vai embora em imposto" com a análise de 5 perguntas + contato + resultado na própria tela. Ver "Página /analise" abaixo |
 
@@ -57,6 +57,29 @@
   "R$ [X] a R$ [Y]": sem a faixa real, o resultado mostra "Próximo passo: descobrir quanto volta para o seu
   caixa", sem valor) e **`linkConteudoGratis` vazio** (sem botão para quem fatura até R$ 50 mil). Rodapé sem
   CNPJ/política (eram campos em branco do modelo). Preencher quando o dono passar os dados.
+- **O mesmo formulário está na `/`** (cópia no `index.html`): perguntas, textos, `CONFIG` e a lógica do resultado
+  ficam iguais nos dois arquivos — mudou num, mude no outro.
+
+### Formulário da `/` — a análise (desde 2026-11-09)
+- Pedido do dono: o formulário da `/` passou a ser o da página nova. O card do hero (`#diagnostico`) roda a
+  análise da `/analise` — 5 perguntas → nome, empresa, e-mail e WhatsApp → resultado na própria tela, com o
+  botão do WhatsApp para quem fatura acima de R$ 50 mil — mas **no visual da `/`** (Satoshi, azul `#1232C8`,
+  vermelho `#E53030`; reaproveita `.opt`, `.field`, `.btn-sub`, `.trust`, `.progress-*`). O JS no fim do
+  `index.html` redesenha `#fp-body` a cada passo; o início ("Análise Gratuita / Quero minha análise") já vem
+  no HTML.
+- Saíram: o formulário de 2 passos (nome e e-mail → WhatsApp e pet shop), o modal do faturamento (com a faixa
+  "Até R$30 mil"/`Lead30k`), o simulador do modal e o 2º formulário do fim da página. O CTA do fim agora é um
+  botão (`data-act="ir"`) que rola até o card e já começa a análise. A `/` não vai mais para `/obrigado` nem
+  `/resultado` (e não grava mais `fx_pag`).
+- Lead na `/api/submit` igual ao da `/analise`, com `pagina: '/'` e `sobre_negocio` "Análise / · Negócio: …".
+  **Lead + faixa (Lead50k…Lead200kMais) só disparam depois de salvar** — antes o `Lead` saía no passo do
+  WhatsApp e pet shop e a faixa ao escolher o faturamento. GA4: `analise_inicio`, `analise_pergunta`,
+  `form_start`, `generate_lead`, `analise_resultado`, `clique_whatsapp`, `form_api_error`. `PageView`,
+  `ScrollDepth*` e `VideoPlay` continuam.
+- Etapas (`/api/etapa`, página `atual`): visita, inicio (clicou "Quero minha análise"), etapa1 (1ª pergunta),
+  dados (respondeu as 5, chegou ao contato), lead, resultado, wa_resultado.
+- Textos da página ajustados ao formulário novo: menu "Análise grátis"/"Fazer análise grátis", "1 min para
+  descobrir" (era 30s), passo 01 "Faça a Análise" e o CTA do fim "Leva menos de 1 minuto".
 
 **Funil do GOOGLE** (gtag `AW-18311780308` + GA4, zero pixel do Meta):
 
@@ -139,10 +162,12 @@
   - As páginas chamam `etapa('...')` → `POST /api/etapa` (pública, no SKIP_AUTH; só grava
     na tabela `funil_etapas` do D1, **não** vai ao pixel nem ao GA4; robôs e
     `navigator.webdriver` ficam de fora; cada etapa 1× por visitante).
-  - Etapas: `visita`, `inicio` (abriu o form / focou campo), `etapa1` e `dados` (só `/`,
-    form em 2 passos), `lead` (lead salvo: faturamento escolhido em `/`, envio em `/novo`),
-    `qualif_dif`, `qualif_urg`, `qualif_fim` (só `/novo`). Lista fixa em `functions/api/etapa.js`.
-  - Depois do cadastro (desde 2026-10-28, só `/`): ao salvar o lead a `/` grava `fx_pag` no
+  - Etapas: `visita`, `inicio` (abriu o form / focou campo), `etapa1` e `dados` (só `/`),
+    `lead` (lead salvo), `qualif_dif`, `qualif_urg`, `qualif_fim` (só `/novo`). Lista fixa em
+    `functions/api/etapa.js`. Na `/`, `etapa1`/`dados` mudaram de sentido em 2026-11-09 (`FORM_ANALISE` no
+    trafego.html): antes = nome e e-mail / WhatsApp e pet shop; desde então = 1ª pergunta / chegou ao contato.
+    Por isso o painel chama de **"Passaram do 1º passo" / "Chegaram ao último passo"** e explica numa nota.
+  - Depois do cadastro (de 2026-10-28 a 2026-11-08, só `/`): ao salvar o lead a `/` gravava `fx_pag` no
     sessionStorage; `/obrigado` e `/resultado` usam isso (`fxEtapa`) para contar no funil da `/`:
     `simulador` (form do topo abriu o simulador), `resultado`, `wa_resultado` (clique em qualquer
     `.js-wa`), `obrigado`, `wa_obrigado`. Sem `fx_pag` (ex.: veio da `/simulacao`) não conta.
@@ -153,15 +178,17 @@
     facebook/fb/ig/instagram/meta; Google = gclid ou utm google*; resto = Outros). Medição começou em 2026-10-27.
   - Visitas incluem tráfego fora dos anúncios: não batem com `landing_page_view` do Meta.
 - **Aba Página** (`#pagina`): só a página atual (`/`), as 5 etapas (visita → começou →
-  nome e e-mail → WhatsApp e pet shop → lead). Resumo, 4 KPIs, funil com passagem entre
+  1º passo → último passo → lead). Resumo, 4 KPIs, funil com passagem entre
   etapas, visitas × leads por dia/semana e tabela de origem. Comparação com o período
   anterior só aparece se ele inteiro já estava sendo medido.
   - **Histórico (desde 17/06):** funil dos anúncios = visualizações da página (Meta, `lpv`) →
-    rolaram 1/4 (`ScrollDepth25`) → WhatsApp e pet shop (`Lead`) → lead (`Lead<faixa>`), eventos
+    rolaram 1/4 (`ScrollDepth25`) → dados de contato (`Lead`) → lead (`Lead<faixa>`), eventos
     da tabela `events` da raiz, só sessões do Meta (fbclid/utm). Tabela mês a mês desde junho
     (busca o Meta desde 2026-06-01). Começou o formulário / nome e e-mail só existem desde 27/10 (GA4 tem desde ago).
-  - **Depois do cadastro · caminho até o WhatsApp:** leads → simulador → simulação → clique, e
-    leads → obrigado → clique; total de cliques e quem deixou o e-mail no bot. Usa só dias desde
+    Desde 2026-11-09 a análise dispara `Lead` e `Lead<faixa>` juntos (ao salvar), então essa passagem fica ~100%.
+  - **Depois do cadastro · caminho até o WhatsApp:** formulário antigo (dias antes de `FORM_ANALISE`):
+    leads → simulador → simulação → clique, e leads → obrigado → clique; análise (desde `FORM_ANALISE`):
+    leads → viram o resultado → clique. Total de cliques e quem deixou o e-mail no bot. Usa só dias desde
     2026-10-28 (`WA_DESDE`), para leads antigos sem essas etapas não puxarem as taxas.
 - **Funil comercial** (`#comercial`): investimento → leads (Meta, campanhas de
   cadastro) → reuniões → fechamentos, com taxa de passagem e custo por etapa.
