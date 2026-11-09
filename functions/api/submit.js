@@ -46,9 +46,18 @@ export async function onRequestPost(context) {
   const sidMatch     = cookieHeader.match(/_krob_sid=([^;]+)/);
   const session_id   = sidMatch ? decodeURIComponent(sidMatch[1]) : '';
 
-  const res = await env.DB.prepare(
-    'INSERT INTO leads (nome, petshop, whatsapp, email, faturamento, session_id) VALUES (?, ?, ?, ?, ?, ?)'
-  ).bind(nome || '', petshop || '', whatsapp || '', email || '', faturamento || '', session_id).run();
+  // página de onde o lead veio (identificador no CRM): a que o formulário manda ou a do Referer
+  const pagina = paginaDoLead(body, request);
+  const inserir = () => env.DB.prepare(
+    'INSERT INTO leads (nome, petshop, whatsapp, email, faturamento, session_id, pagina) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).bind(nome || '', petshop || '', whatsapp || '', email || '', faturamento || '', session_id, pagina).run();
+  let res;
+  try { res = await inserir(); }
+  catch (e) {
+    if (!/no such column|has no column named/i.test(e.message)) throw e;
+    await ensurePaginaColumn(env.DB);   // banco ainda sem a migration 0017
+    res = await inserir();
+  }
 
   // A página /analise já manda a dor (dificuldade) e o resumo das respostas junto do cadastro
   // (ela não pergunta a urgência, que o modo qualificação exige). Opcional: os outros formulários não mandam.
@@ -151,6 +160,21 @@ function num(v) {
 const DIFICULDADES = ['Falta de lucro', 'Imposto alto', 'Contador genérico', 'Folha errada', 'Precificação'];
 
 // mesmas colunas de migrations/0012_qualificacao.sql (ignora as que já existem)
+// '/', '/novo', '/analise', '/lp'… — sem ".html" e sem barra no fim; vazio se não der para saber
+function paginaDoLead(body, request) {
+  let p = String(body.pagina || '');
+  if (!p) { try { p = new URL(request.headers.get('Referer') || '').pathname; } catch (e) { p = ''; } }
+  if (!p) return '';
+  p = p.toLowerCase().replace(/\.html$/, '').replace(/\/+$/, '') || '/';
+  return /^\/[a-z0-9\-/]{0,40}$/.test(p) ? p : '';
+}
+
+// mesma coluna de migrations/0017_leads_pagina.sql
+async function ensurePaginaColumn(db) {
+  try { await db.prepare("ALTER TABLE leads ADD COLUMN pagina TEXT DEFAULT ''").run(); }
+  catch (e) { if (!/duplicate column/i.test(e.message)) throw e; }
+}
+
 async function ensureQualColumns(db) {
   for (const sql of ['ALTER TABLE leads ADD COLUMN dificuldade TEXT', 'ALTER TABLE leads ADD COLUMN urgencia INTEGER', 'ALTER TABLE leads ADD COLUMN sobre_negocio TEXT']) {
     try { await db.prepare(sql).run(); } catch (e) { if (!/duplicate column/i.test(e.message)) throw e; }

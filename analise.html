@@ -347,7 +347,7 @@ var REVENUE_EVENTS = { 'R$50 mil': 'Lead50k', 'R$100 mil': 'Lead100k', 'R$200 mi
   ];
   var LABELS = {}; QS.forEach(function (q) { q.options.forEach(function (o) { LABELS[q.id + ':' + o[0]] = o[1]; }); });
 
-  var st = { step: -1, a: {}, nome: '', empresa: '', whats: '' };
+  var st = { step: -1, a: {}, nome: '', empresa: '', email: '', whats: '' };
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var ARROW = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0077D9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
@@ -399,13 +399,13 @@ var REVENUE_EVENTS = { 'R$50 mil': 'Lead50k', 'R$100 mil': 'Lead100k', 'R$200 mi
     try {
       var ctrl = new AbortController(), t = setTimeout(function () { ctrl.abort(); }, 10000);
       var r = await fetch('/api/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
-        body: JSON.stringify({ nome: st.nome.trim(), petshop: st.empresa.trim(), whatsapp: whats, email: '', faturamento: faturamento,
+        body: JSON.stringify({ nome: st.nome.trim(), petshop: st.empresa.trim(), whatsapp: whats, email: st.email.trim().toLowerCase(), pagina: '/analise', faturamento: faturamento,
           dificuldade: DOR_CRM[a.dor] || '', sobre_negocio: resumo }) });
       clearTimeout(t);
       res = await r.json();
     } catch (e) { res = null; }
     if (!res || !res.ok) { track('form_api_error', { form_id: 'analise' }); return false; }
-    var ud = { ph: whats, fn: st.nome.trim() };
+    var ud = { em: st.email.trim().toLowerCase(), ph: whats, fn: st.nome.trim() };
     px('Lead', ud, { currency: 'BRL', faturamento: faturamento });
     if (REVENUE_EVENTS[faturamento]) px(REVENUE_EVENTS[faturamento], ud, { faturamento: faturamento, currency: 'BRL' });
     track('generate_lead', { faturamento: faturamento, qualificado: a.fat !== 'f1' });
@@ -447,9 +447,10 @@ var REVENUE_EVENTS = { 'R$50 mil': 'Lead50k', 'R$100 mil': 'Lead100k', 'R$200 mi
         '<form class="fp-col" style="gap:16px" novalidate data-form="1">' +
           '<div class="fp-col" style="gap:8px"><span class="fp-pill">Sua análise está pronta</span>' +
           '<h2 class="fp-h2">Para quem liberamos o resultado?</h2>' +
-          '<p class="fp-muted" style="font-size:14px">Ele aparece aqui na tela assim que você clicar. Usamos seu WhatsApp só para falar sobre a sua análise.</p></div>' +
+          '<p class="fp-muted" style="font-size:14px">Ele aparece aqui na tela assim que você clicar. Usamos seu e-mail e WhatsApp só para falar sobre a sua análise.</p></div>' +
           field('fp-nome', 'Seu nome', 'text', 'name', 'Ex.: Mariana Souza', st.nome) +
           field('fp-empresa', 'Nome da empresa', 'text', 'organization', 'Ex.: Pet Shop Amigo Fiel', st.empresa) +
+          field('fp-email', 'Seu melhor e-mail', 'email', 'email', 'Ex.: mariana@amigofiel.com.br', st.email) +
           field('fp-whats', 'WhatsApp com DDD', 'tel', 'tel', '(71) 99999-9999', st.whats) +
           '<p id="fp-err" role="alert" style="margin:0;font-size:14px;font-weight:600;color:#B42318"></p>' +
           '<button type="submit" class="fp-cta">Ver meu resultado agora &#8594;</button>' +
@@ -518,12 +519,14 @@ var REVENUE_EVENTS = { 'R$50 mil': 'Lead50k', 'R$100 mil': 'Lead100k', 'R$200 mi
     if (e.target.id === 'fp-nome') st.nome = e.target.value;
     if (e.target.id === 'fp-empresa') st.empresa = e.target.value;
     if (e.target.id === 'fp-whats') st.whats = e.target.value;
+    if (e.target.id === 'fp-email') st.email = e.target.value;
   });
   document.addEventListener('submit', function (e) {
     if (!e.target.getAttribute('data-form')) return;
     e.preventDefault();
     var d = st.whats.replace(/\D/g, ''), err = $('fp-err');
     if (!st.nome.trim()) { err.textContent = 'Digite seu nome para liberar o resultado.'; $('fp-nome').focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(st.email.trim())) { err.textContent = 'Confira o e-mail: por exemplo, nome@empresa.com.br.'; $('fp-email').focus(); return; }
     if (d.length < 10 || d.length > 13) { err.textContent = 'Confira o WhatsApp: DDD + número, por exemplo (71) 99999-9999.'; $('fp-whats').focus(); return; }
     var btn = e.target.querySelector('button[type=submit]'); if (btn.disabled) return;
     var rotulo = btn.innerHTML; btn.disabled = true; btn.innerHTML = 'Enviando…'; err.textContent = '';

@@ -1756,7 +1756,7 @@
       #leadsTable td:nth-child(5) { grid-row: 4; grid-column: 1 / -1; font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* e-mail */
       #leadsTable td:nth-child(6) { grid-row: 5; grid-column: 1; }                           /* faturamento */
       #leadsTable td:nth-child(8) { grid-row: 5; grid-column: 2; text-align: right; }        /* etapa */
-      #leadsTable td:nth-child(7) { grid-row: 6; grid-column: 1; }                           /* origem */
+      #leadsTable td:nth-child(7) { grid-row: 6; grid-column: 1; }                           /* página */
       #leadsTable td:nth-child(10) { grid-row: 6; grid-column: 2; width: auto; text-align: right; } /* excluir */
       #leadsTable .btn-row-del { opacity: 1; }
       .filter-bar input { flex-basis: 100%; }
@@ -1785,6 +1785,12 @@
       .import-box { width: calc(100vw - 24px); }
       .content { padding: 0; }
     }
+    /* página de onde o lead veio (lista, CRM, gaveta) */
+    .pg-badge { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 2px 10px; border-radius: 99px; background: var(--gold-dim); color: var(--gold); white-space: nowrap; }
+    .pg-badge.nova { background: var(--green-bg); color: var(--green); }
+    .pg-badge.sem { background: transparent; color: var(--dim); font-weight: 500; padding-left: 0; }
+    .card-tag.pg { background: var(--raise); color: var(--mid); border-color: var(--border2); }
+    .card-tag.pg.nova { background: var(--green-bg); color: var(--green); border-color: transparent; }
   </style>
 </head>
 <body>
@@ -1905,9 +1911,8 @@
         <option value="R$200 mil">R$200 mil</option>
         <option value="Mais de R$200 mil">Mais de R$200 mil</option>
       </select>
-      <select id="filterOrigem" onchange="renderTable()">
-        <option value="">Todas as origens</option>
-        <option value="__landing__">Landing principal</option>
+      <select id="filterOrigem" aria-label="Filtrar por página" onchange="renderTable()">
+        <option value="">Todas as páginas</option>
       </select>
     </div>
 
@@ -1922,7 +1927,7 @@
             <th>WhatsApp</th>
             <th>E-mail</th>
             <th>Faturamento</th>
-            <th>Origem</th>
+            <th>Página</th>
             <th>Etapa CRM</th>
             <th>Data / Hora</th>
             <th class="td-actions"></th>
@@ -1971,6 +1976,7 @@
         </label>
         <select id="crmFat" aria-label="Filtrar por faixa de faturamento" onchange="crmSet('fat', this.value)"></select>
         <select id="crmTag" aria-label="Filtrar por tag" onchange="crmSet('tag', this.value)"></select>
+        <select id="crmPag" aria-label="Filtrar por página de origem" onchange="crmSet('pag', this.value)"></select>
         <button class="btn-outline" onclick="addStage()"><span class="material-symbols-outlined">view_week</span>Nova etapa</button>
         <button class="btn-primary" onclick="crmNewIn()"><span class="material-symbols-outlined">add</span>Novo contato</button>
       </div>
@@ -2389,6 +2395,7 @@
         email:       l.email       || '—',
         faturamento: l.faturamento || '',
         origem:      l.origem      || '',
+        pagina:      l.pagina_lead != null ? l.pagina_lead : (l.pagina || ''),
         respostas:   l.respostas   || '',
         simFat:      l.sim_fat,
         simRacao:    l.sim_racao,
@@ -2410,6 +2417,21 @@
         timestamp:   (l.created_at || '').replace(' ', 'T') + (l.created_at && !l.created_at.includes('Z') ? 'Z' : ''),
       };
     }
+
+    // página de onde o lead veio: identifica e separa os leads de cada página (medir conversão)
+    var PAGINAS_LEAD = { '/': 'Quiz (/)', '/novo': 'Quiz layout novo (/novo)', '/analise': 'Página nova (/analise)', '/lp': 'LP Google (/lp)', 'manual': 'Cadastro no admin' };
+    var PAGINAS_CURTO = { '/': 'Quiz', '/novo': 'Quiz novo', '/analise': 'Página nova', '/lp': 'LP Google', 'manual': 'Admin' };
+    function paginaNome(p) { return p ? (PAGINAS_LEAD[p] || p) : 'Antes do registro'; }
+    function paginaBadge(p) { return '<span class="pg-badge' + (p === '/analise' ? ' nova' : p ? '' : ' sem') + '" title="' + (p ? 'Página de onde o lead veio' : 'Lead de antes de 27/10, quando a página ainda não era registrada') + '">' + esc(paginaNome(p)) + '</span>'; }
+    // opções do filtro: as páginas que têm lead, na ordem de PAGINAS_LEAD
+    function paginaOpcoes(leads, primeira) {
+      var tem = {}; leads.forEach(function(l) { tem[l.pagina || '__sem__'] = (tem[l.pagina || '__sem__'] || 0) + 1; });
+      var ordem = Object.keys(PAGINAS_LEAD).concat(Object.keys(tem).filter(function(k) { return !PAGINAS_LEAD[k] && k !== '__sem__'; }));
+      return '<option value="">' + primeira + '</option>' + ordem.filter(function(k) { return tem[k]; }).map(function(k) {
+        return '<option value="' + esc(k) + '">' + esc(paginaNome(k)) + ' (' + tem[k] + ')</option>';
+      }).join('') + (tem.__sem__ ? '<option value="__sem__">Antes do registro (' + tem.__sem__ + ')</option>' : '');
+    }
+    function paginaFiltro(l, f) { return !f || (f === '__sem__' ? !l.pagina : l.pagina === f); }
 
     async function loadLeads() {
       var data = await api('GET', '/api/leads');
@@ -2679,7 +2701,9 @@
       var leads  = getLeads();
       var search = document.getElementById('searchInput').value.toLowerCase();
       var filter = document.getElementById('filterFat').value;
-      var filterOrig = document.getElementById('filterOrigem').value;
+      var selOrig = document.getElementById('filterOrigem'), filterOrig = selOrig.value;
+      selOrig.innerHTML = paginaOpcoes(leads, 'Todas as páginas'); selOrig.value = filterOrig;
+      if (selOrig.value !== filterOrig) filterOrig = '';
 
       var filtered = leads.filter(function(l, i) {
         l._idx = i + 1;
@@ -2689,8 +2713,7 @@
           (l.email && l.email.toLowerCase().includes(search));
         var matchFat = !filter ||
           (filter === '__sem__' ? !l.faturamento : l.faturamento === filter);
-        var matchOrig = !filterOrig ||
-          (filterOrig === '__landing__' ? !l.origem : l.origem === filterOrig);
+        var matchOrig = paginaFiltro(l, filterOrig);
         return matchSearch && matchFat && matchOrig;
       });
 
@@ -2716,7 +2739,7 @@
           '<td class="td-phone">' + esc(fmtPhone(l.whatsapp)) + '</td>' +
           '<td>' + esc(l.email) + '</td>' +
           '<td>' + (l.faturamento ? '<span class="badge-fat ' + FAT_CLASS[fi] + '">' + esc(l.faturamento) + '</span>' : '<span style="color:var(--dim)">—</span>') + '</td>' +
-          '<td>' + (l.origem ? '<span style="font-size:0.7rem;font-weight:600;padding:2px 10px;border-radius:99px;background:var(--gold-dim);color:var(--gold);white-space:nowrap">' + esc(l.origem) + '</span>' : '<span style="font-size:0.72rem;color:var(--dim)">Landing principal</span>') + '</td>' +
+          '<td>' + paginaBadge(l.pagina) + '</td>' +
           '<td><span style="font-size:0.72rem;color:var(--dim)">' + esc(l.etapa || 'Sem contato') + '</span></td>' +
           '<td class="td-time">' + fmtDate(l.timestamp) + '</td>' +
           '<td class="td-actions"><button class="btn-row-del" onclick="deleteLead(' + l.id + ',event)" title="Excluir lead">' + trashSvg + '</button></td>' +
@@ -2772,7 +2795,7 @@
         var primeiroNome = partes[0] || '';
         var fone         = (l.whatsapp || '').replace(/\D/g, '');
         if (fone && fone.length <= 11) fone = '55' + fone;
-        var etiqueta = [l.faturamento, l.origem].concat(l.tags || []).filter(Boolean).join(', ');
+        var etiqueta = [l.faturamento, l.pagina ? paginaNome(l.pagina) : ''].concat(l.tags || []).filter(Boolean).join(', ');
 
         var r = {}; try { r = JSON.parse(l.respostas || '{}') || {}; } catch (e) {}
         var quizMap = {}; (r.quiz || []).forEach(function(q) { quizMap[q.pergunta] = q.resposta; });
@@ -2780,7 +2803,7 @@
         var tierLabel = res.tier === 'red' ? 'Crítico' : res.tier === 'gold' ? 'Atenção' : res.tier === 'green' ? 'Saudável' : (res.tier || '');
 
         // 1.Primeiro nome  2.Sobrenome(=protocolo)  3.Telefone  4.Etiqueta  5.Email  6.Origem  7.Data/Hora
-        var row = [primeiroNome, protocolo(l.id), fone, etiqueta, l.email || '', l.origem || 'Landing principal', fmtDate(l.timestamp),
+        var row = [primeiroNome, protocolo(l.id), fone, etiqueta, l.email || '', paginaNome(l.pagina), fmtDate(l.timestamp),
           l.faturamento || '', l.etapa || '', l.ultContato || '', l.proxContato || '', l.comentarios || ''];
         quizQs.forEach(function(q) { row.push(quizMap[q] || ''); });
         row.push(
@@ -2834,14 +2857,14 @@
     var CRM_PAGE = 40;                       // cards por coluna antes do "mostrar mais"
     var _crmShow = {};                       // quantos cards cada coluna está mostrando
     var _crmF = (function() {
-      try { return Object.assign({ q: '', fu: 'all', fat: '', tag: '' }, JSON.parse(localStorage.getItem('crm_filters') || '{}'), { q: '' }); }
-      catch (e) { return { q: '', fu: 'all', fat: '', tag: '' }; }
+      try { return Object.assign({ q: '', fu: 'all', fat: '', tag: '', pag: '' }, JSON.parse(localStorage.getItem('crm_filters') || '{}'), { q: '' }); }
+      catch (e) { return { q: '', fu: 'all', fat: '', tag: '', pag: '' }; }
     })();
     var OTHER_STAGE = '__outras__';
 
     function crmSet(k, v) {
       _crmF[k] = v; _crmShow = {};
-      try { localStorage.setItem('crm_filters', JSON.stringify({ fu: _crmF.fu, fat: _crmF.fat, tag: _crmF.tag })); } catch (e) {}
+      try { localStorage.setItem('crm_filters', JSON.stringify({ fu: _crmF.fu, fat: _crmF.fat, tag: _crmF.tag, pag: _crmF.pag })); } catch (e) {}
       if (k === 'q') { clearTimeout(crmSet._t); crmSet._t = setTimeout(renderKanban, 120); } else renderKanban();
     }
 
@@ -2889,6 +2912,7 @@
       }
       if (_crmF.fat === '__sem__' ? !!l.faturamento : (_crmF.fat && l.faturamento !== _crmF.fat)) return false;
       if (_crmF.tag && (l.tags || []).indexOf(_crmF.tag) < 0) return false;
+      if (!paginaFiltro(l, _crmF.pag)) return false;
       return true;
     }
     function crmFuFilter(l) {
@@ -2994,7 +3018,7 @@
       if (stage) document.getElementById('nlEtapa').value = stage;
     }
     function crmClear() {
-      _crmF = { q: '', fu: 'all', fat: '', tag: '' }; _crmShow = {};
+      _crmF = { q: '', fu: 'all', fat: '', tag: '', pag: '' }; _crmShow = {};
       try { localStorage.removeItem('crm_filters'); } catch (e) {}
       renderKanban();
     }
@@ -3014,9 +3038,10 @@
       if (wa) h += '<a class="kc-btn wa" href="' + wa + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Conversar no WhatsApp" aria-label="Conversar com ' + esc(lead.nome) + ' no WhatsApp">' + WA_SVG + '</a>';
       h += '<button type="button" class="kc-btn" onclick="crmMoveMenu(event,' + lead.id + ')" title="Mover para outra etapa" aria-label="Mover ' + esc(lead.nome) + ' para outra etapa" aria-haspopup="menu"><span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span></button>';
       h += '</div></div>';
-      if (lead.faturamento || tags.length) {
+      if (lead.faturamento || tags.length || lead.pagina) {
         h += '<div class="kc-badges">';
         if (lead.faturamento) h += '<span class="badge-fat ' + FAT_CLASS[fi] + '">' + esc(lead.faturamento) + '</span>';
+        if (lead.pagina) h += '<span class="card-tag pg' + (lead.pagina === '/analise' ? ' nova' : '') + '" title="Veio de: ' + esc(paginaNome(lead.pagina)) + '">' + esc(PAGINAS_CURTO[lead.pagina] || lead.pagina) + '</span>';
         tags.slice(0, 3).forEach(function(t) { h += '<span class="card-tag">' + esc(t) + '</span>'; });
         if (tags.length > 3) h += '<span class="more">+' + (tags.length - 3) + '</span>';
         h += '</div>';
@@ -3043,7 +3068,9 @@
       var stages = getStages();
       var base = leads.filter(crmBaseFilter);
       var shown = base.filter(crmFuFilter);
-      var filtering = !!(_crmF.q || _crmF.fat || _crmF.tag || _crmF.fu !== 'all');
+      var filtering = !!(_crmF.q || _crmF.fat || _crmF.tag || _crmF.pag || _crmF.fu !== 'all');
+      var pagSel = document.getElementById('crmPag');
+      if (pagSel) { pagSel.innerHTML = paginaOpcoes(leads, 'Todas as páginas'); pagSel.value = _crmF.pag || ''; }
 
       // selects de faixa e tag (mantém a escolha)
       var fatSel = document.getElementById('crmFat'), tagSel = document.getElementById('crmTag');
@@ -3191,6 +3218,7 @@
             '<div class="dfield"><label>WhatsApp</label><span>'+esc(fmtPhone(lead.whatsapp))+'</span></div>' +
             '<div class="dfield"><label>E-mail</label><span>'+esc(lead.email)+'</span></div>' +
             (lead.petshop ? '<div class="dfield"><label>Pet Shop</label><span>'+esc(lead.petshop)+'</span></div>' : '') +
+            '<div class="dfield"><label>Página</label><span>'+paginaBadge(lead.pagina)+'</span></div>' +
             '<div class="dfield"><label>Cadastro</label><span>'+fmtDate(lead.timestamp)+'</span></div>' +
           '</div>' +
           buildQualifHTML(lead) +

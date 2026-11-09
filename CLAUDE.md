@@ -44,8 +44,9 @@
   carregamento; **Lead** + faixa (Lead50k…Lead200kMais) só **depois** de salvar na `/api/submit` — se o envio
   falhar, aparece o aviso, os dados ficam no formulário e nada é disparado. Etapas da análise só no GA4
   (`analise_inicio`, `analise_pergunta`, `form_start`, `generate_lead`, `analise_resultado`, `clique_whatsapp`).
-- Lead na `/api/submit`: nome, `petshop` = empresa, WhatsApp, **sem e-mail** (o modelo não pede) — por isso
-  **não sincroniza com o ActiveCampaign** (que exige e-mail); entra no CRM/admin e nos painéis. Faturamento
+- Lead na `/api/submit`: nome, `petshop` = empresa, WhatsApp, **e-mail** (campo obrigatório incluído em
+  2026-11-09 — o modelo não pedia; regra do dono: **toda página de captação pede e-mail**, sem ele o lead não
+  vai ao ActiveCampaign) e `pagina: '/analise'`. E-mail vai em minúsculas e no CAPI (`em`). Faturamento
   e dificuldade vão com os valores do CRM: até 50 mil → `R$50 mil`, 50–100 → `R$100 mil`, 100–300 →
   `R$200 mil`, acima de 300 → `Mais de R$200 mil` (MQL = acima de 50 mil, igual à regra da página); dor →
   `Imposto alto` / `Falta de lucro` / `Precificação` / `Contador genérico`. As 5 respostas completas vão em
@@ -338,6 +339,21 @@
   no código: usar `firstStage()`.
 - Ficam no navegador só preferências pessoais: tema (`vt_theme`) e filtros do CRM
   (`crm_filters`). Regra combinada: **dado compartilhado sempre no banco**.
+
+### Página de origem do lead (identificador por página — 2026-11-09)
+- Coluna `leads.pagina` (migration 0017; as funções criam a coluna se faltar). A `/api/submit` grava
+  `body.pagina` ou, se o formulário não mandar, o caminho do **Referer** normalizado (`/`, `/novo`,
+  `/analise`, `/lp` — sem `.html` e sem barra final; vazio se não der para saber). Cadastro/importação
+  no admin (`/api/leads/import`) grava `'manual'`.
+- `GET /api/leads` devolve `pagina_lead`: a coluna; se vazia (leads antigos), deduz pela etapa `lead` em
+  `funil_etapas` (`atual`→`/`, `novo`→`/novo`, `analise`→`/analise`, só existe desde 27/10) ou pelo clique
+  do Google na sessão (`gclid`/`utm_source=google*` → `/lp`). Sem nada disso = "Antes do registro"
+  (na base em 09/11: ~40 leads deduzidos como `/`, ~277 de antes de 27/10 sem página).
+- Admin: a coluna "Origem" da lista (sempre vazia) virou **"Página"**, com filtro só das páginas que têm
+  lead e a contagem; no CRM, filtro **"Todas as páginas"** (`#crmPag`, salvo em `crm_filters.pag`) — com
+  ele as colunas mostram o funil de cada página (conversão por página); etiqueta curta no card (verde =
+  página nova `/analise`) e campo "Página" na gaveta. Nomes em `PAGINAS_LEAD`/`PAGINAS_CURTO` no
+  admin.html — **página nova de captação: incluir lá e mandar `pagina` no payload da `/api/submit`**.
 
 ## Integração BotConversa → ActiveCampaign
 - Endpoint: `functions/api/botconversa.js` → rota `POST /api/botconversa?token=<BC_WEBHOOK_SECRET>`
