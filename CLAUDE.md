@@ -34,29 +34,26 @@
 | `/obrigado` | `obrigado.html` | Obrigado do quiz |
 | `/resultado` | `resultado.html` | Resultado do simulador |
 | `/novo` | `novo.html` | Quiz com o **layout novo** (escuro, qualificação em 3 passos), link alternativo para teste — `noindex`, mesmo pixel e mesma `/api/submit`; leads saem com `source_url` …/novo |
-| `/analise` | `analise.html` | **Página nova** (2026-11-09, modelo `../fluxxo-pet-analise.html`): landing "quanto do seu lucro vai embora em imposto" com a análise de 5 perguntas + contato + resultado na própria tela. Ver "Página /analise" abaixo |
+| `/analise` | `analise.html` | **Página nova** (2026-11-09, modelo `../fluxxo-pet-analise.html`): landing "quanto do seu lucro vai embora em imposto" com o **formulário antigo da raiz** (2 passos → faturamento → simulador → `/resultado`). Ver "Página /analise" abaixo |
 
 ### Página `/analise` (`analise.html`)
 - Gerada do modelo do dono por `build-analise.cjs` (rascunho da sessão): o visual e os textos são os do
   modelo; as 9 imagens que vinham em base64 viraram arquivos em `img/analise/` (HTML de 1,1 MB → 44 KB; a Lunna
   repetida é um arquivo só). Para mudar o visual, edite `analise.html` direto.
-- Funil do Meta: mesmo pixel `1338198531534558` + GA4 + `/tracker` (CAPI) do `/` e do `/novo`. PageView no
-  carregamento; **Lead** + faixa (Lead50k…Lead200kMais) só **depois** de salvar na `/api/submit` — se o envio
-  falhar, aparece o aviso, os dados ficam no formulário e nada é disparado. Etapas da análise só no GA4
-  (`analise_inicio`, `analise_pergunta`, `form_start`, `generate_lead`, `analise_resultado`, `clique_whatsapp`).
-- Lead na `/api/submit`: nome, `petshop` = empresa, WhatsApp, **e-mail** (campo obrigatório incluído em
-  2026-11-09 — o modelo não pedia; regra do dono: **toda página de captação pede e-mail**, sem ele o lead não
-  vai ao ActiveCampaign) e `pagina: '/analise'`. E-mail vai em minúsculas e no CAPI (`em`). Faturamento
-  e dificuldade vão com os valores do CRM: até 50 mil → `R$50 mil`, 50–100 → `R$100 mil`, 100–300 →
-  `R$200 mil`, acima de 300 → `Mais de R$200 mil` (MQL = acima de 50 mil, igual à regra da página); dor →
-  `Imposto alto` / `Falta de lucro` / `Precificação` / `Contador genérico`. As 5 respostas completas vão em
-  `sobre_negocio` ("Análise /analise · Negócio: … · Faturamento: …"). A `/api/submit` passou a aceitar
-  `dificuldade` e `sobre_negocio` opcionais no cadastro (o modo qualificação exige urgência, que aqui não há).
-- Etapas no D1 (`/api/etapa`, página `analise`): visita, inicio, etapa1, dados, lead, resultado, wa_resultado.
-- `CONFIG` no fim do HTML: WhatsApp `5571982346881` (o do /obrigado); **`estimativas` vazias** (o modelo tinha
-  "R$ [X] a R$ [Y]": sem a faixa real, o resultado mostra "Próximo passo: descobrir quanto volta para o seu
-  caixa", sem valor) e **`linkConteudoGratis` vazio** (sem botão para quem fatura até R$ 50 mil). Rodapé sem
-  CNPJ/política (eram campos em branco do modelo). Preencher quando o dono passar os dados.
+- **Formulário = o antigo da raiz `/`** (pedido do dono em 2026-11-09; a análise de 5 perguntas do modelo saiu):
+  card "Diagnóstico Gratuito" com o botão que abre o form em 2 passos (nome e e-mail → WhatsApp com máscara e
+  pet shop), janela do faturamento (Até R$30 mil … Mais de R$200 mil), confirmação e **simulador** → `/resultado`.
+  Mesma lógica e mesmos textos do `index.html`, no visual da `/analise` (classes `fp-*`, janela `.ov/.md`).
+  Os links "Fazer análise grátis" (topo) e o CTA do fim (`#diagnostico`) já abrem o formulário. Os 2 itens do hero
+  que falavam da análise viraram "Leva menos de 30 segundos…" e "Simulação do seu imposto na hora".
+- Funil do Meta: mesmo pixel `1338198531534558` + GA4 + `/tracker` (CAPI) do `/`. Mesmos eventos da raiz:
+  PageView; **Lead** ao passar do WhatsApp e pet shop; faixa (Lead30k…Lead200kMais) ao escolher o faturamento;
+  ViewContent no `/resultado`. GA4: `form_reveal`, `form_step_1`.
+- Lead na `/api/submit` ao escolher o faturamento: nome, e-mail, WhatsApp, pet shop, faturamento e
+  **`pagina: '/analise'`** (identificador no CRM); o simulador completa o lead pelo `id`. Com e-mail → ActiveCampaign.
+- Etapas no D1 (`/api/etapa`, página `analise`): visita, inicio, etapa1, dados, lead, simulador; ao salvar o
+  lead a página grava `fx_pag = '/analise'` e o `/resultado` conta resultado e wa_resultado no funil dela.
+- Rodapé sem CNPJ/política (eram campos em branco do modelo). Preencher quando o dono passar os dados.
 
 **Funil do GOOGLE** (gtag `AW-18311780308` + GA4, zero pixel do Meta):
 
